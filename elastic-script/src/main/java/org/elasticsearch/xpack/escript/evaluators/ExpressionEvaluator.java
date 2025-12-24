@@ -421,7 +421,7 @@ public class ExpressionEvaluator {
             executor.visitFunctionCallAsync(ctx.simplePrimaryExpression().function_call(), processResult);
         } else if (ctx.simplePrimaryExpression().INT() != null) {
             try {
-                processResult.onResponse(Integer.valueOf(ctx.simplePrimaryExpression().INT().getText()));
+                processResult.onResponse(Double.valueOf(ctx.simplePrimaryExpression().INT().getText()));
             } catch (NumberFormatException e) {
                 listener.onFailure(new RuntimeException("Invalid integer literal: " + ctx.simplePrimaryExpression().INT().getText()));
             }

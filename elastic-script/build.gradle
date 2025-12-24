@@ -11,9 +11,9 @@ apply plugin: 'elasticsearch.string-templates'
 apply plugin: 'elasticsearch.publish'
 
 esplugin {
-  name 'x-pack-escript'
-  description 'A plugin to handle elastic-script queries'
-  classname 'org.elasticsearch.xpack.escript.ElasticScriptPlugin'
+  name = 'x-pack-escript'
+  description = 'A plugin to handle elastic-script queries'
+  classname = 'org.elasticsearch.xpack.escript.ElasticScriptPlugin'
   extendedPlugins = ['x-pack-core']
 }
 

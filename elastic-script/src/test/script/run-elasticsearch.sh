@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Variables
-ES_VERSION="9.0.0-SNAPSHOT"
-TARBALL_DIR="distribution/archives/darwin-tar/build/distributions"
-TARBALL="elasticsearch-${ES_VERSION}-darwin-x86_64.tar.gz"
+ES_VERSION="9.0.1-SNAPSHOT"
+TARBALL_DIR="distribution/archives/darwin-aarch64-tar/build/distributions"
+TARBALL="elasticsearch-${ES_VERSION}-darwin-aarch64.tar.gz"
 ES_DIR="elasticsearch-${ES_VERSION}"
 NOTEBOOK_NAME="./x-pack/plugin/elastic-script/src/test/script/retro-arcade-data.ipynb"
 NEW_NOTEBOOK_NAME="./x-pack/plugin/elastic-script/src/test/script/video-games-platform.ipynb"
@@ -50,7 +50,7 @@ install_dependencies() {
 
 # Step 2: Build Elasticsearch tarball using Gradle
 echo "Building Elasticsearch tarball..."
-./gradlew -p distribution/archives/darwin-tar assemble
+./gradlew -p distribution/archives/darwin-aarch64-tar assemble
 
 if [ $? -ne 0 ]; then
   echo "Error: Failed to assemble the Elasticsearch tarball."

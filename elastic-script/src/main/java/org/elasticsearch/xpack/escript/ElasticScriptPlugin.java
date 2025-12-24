@@ -24,6 +24,7 @@ import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestHandler;
 import org.elasticsearch.threadpool.ThreadPool;
+import org.elasticsearch.xpack.escript.actions.RestCreateProcedureAction;
 import org.elasticsearch.xpack.escript.actions.RestGetProcedureAction;
 import org.elasticsearch.xpack.escript.actions.RestRunEScriptAction;
 import org.elasticsearch.xpack.escript.executors.ElasticScriptExecutor;
