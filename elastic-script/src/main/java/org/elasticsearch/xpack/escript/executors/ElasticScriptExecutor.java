@@ -35,6 +35,7 @@ import org.elasticsearch.xpack.escript.functions.builtin.datatypes.ArrayBuiltInF
 import org.elasticsearch.xpack.escript.functions.builtin.datatypes.DateBuiltInFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.datatypes.NumberBuiltInFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.datatypes.StringBuiltInFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.OpenAIFunctions;
 import org.elasticsearch.xpack.escript.procedure.ProcedureDefinition;
 import org.elasticsearch.xpack.escript.utils.ActionListenerUtils;
 import org.elasticsearch.xpack.escript.visitors.ProcedureDefinitionVisitor;
@@ -194,6 +195,7 @@ public class ElasticScriptExecutor {
                                 ArrayBuiltInFunctions.registerAll(executionContext);
                                 DateBuiltInFunctions.registerAll(executionContext);
                                 DocumentBuiltInFunctions.registerAll(executionContext);
+                                OpenAIFunctions.registerAll(executionContext);
 
                                 FunctionLoader.loadCommunityFunctions(executionContext);
 
