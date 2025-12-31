@@ -36,6 +36,7 @@ import org.elasticsearch.xpack.escript.functions.builtin.datatypes.DateBuiltInFu
 import org.elasticsearch.xpack.escript.functions.builtin.datatypes.NumberBuiltInFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.datatypes.StringBuiltInFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.OpenAIFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.SlackFunctions;
 import org.elasticsearch.xpack.escript.procedure.ProcedureDefinition;
 import org.elasticsearch.xpack.escript.utils.ActionListenerUtils;
 import org.elasticsearch.xpack.escript.visitors.ProcedureDefinitionVisitor;
@@ -196,6 +197,7 @@ public class ElasticScriptExecutor {
                                 DateBuiltInFunctions.registerAll(executionContext);
                                 DocumentBuiltInFunctions.registerAll(executionContext);
                                 OpenAIFunctions.registerAll(executionContext);
+                                SlackFunctions.registerAll(executionContext);
 
                                 FunctionLoader.loadCommunityFunctions(executionContext);
 
