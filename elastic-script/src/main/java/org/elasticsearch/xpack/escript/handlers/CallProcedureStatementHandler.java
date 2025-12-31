@@ -18,6 +18,7 @@ import org.elasticsearch.xpack.escript.functions.builtin.datatypes.DocumentBuilt
 import org.elasticsearch.xpack.escript.functions.builtin.datatypes.NumberBuiltInFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.datatypes.StringBuiltInFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.OpenAIFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.S3Functions;
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.SlackFunctions;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptParser;
 import org.elasticsearch.xpack.escript.primitives.ReturnValue;
@@ -74,6 +75,7 @@ public class CallProcedureStatementHandler {
                         DocumentBuiltInFunctions.registerAll(childContext);
                         OpenAIFunctions.registerAll(childContext);
                         SlackFunctions.registerAll(childContext);
+                        S3Functions.registerAll(childContext);
                         EsqlBuiltInFunctions.registerAll(childContext,executor,executor.getClient());
 
                         new ProcedureExecutor(childContext, executor.getThreadPool(), executor.getClient(), executor.getTokenStream())
