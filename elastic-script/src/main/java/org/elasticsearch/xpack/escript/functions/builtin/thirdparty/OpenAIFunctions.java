@@ -105,9 +105,7 @@ public class OpenAIFunctions {
     public static void registerLlmComplete(ExecutionContext context) {
         context.declareFunction("LLM_COMPLETE",
             List.of(
-                new Parameter("prompt", "STRING", ParameterMode.IN),
-                new Parameter("model", "STRING", ParameterMode.IN),
-                new Parameter("api_key", "STRING", ParameterMode.IN)
+                new Parameter("prompt", "STRING", ParameterMode.IN)
             ),
             new BuiltInFunctionDefinition("LLM_COMPLETE", (List<Object> args, ActionListener<Object> listener) -> {
                 try {
@@ -171,9 +169,7 @@ public class OpenAIFunctions {
     public static void registerLlmChat(ExecutionContext context) {
         context.declareFunction("LLM_CHAT",
             List.of(
-                new Parameter("messages", "ARRAY OF DOCUMENT", ParameterMode.IN),
-                new Parameter("model", "STRING", ParameterMode.IN),
-                new Parameter("api_key", "STRING", ParameterMode.IN)
+                new Parameter("messages", "ARRAY OF DOCUMENT", ParameterMode.IN)
             ),
             new BuiltInFunctionDefinition("LLM_CHAT", (List<Object> args, ActionListener<Object> listener) -> {
                 try {
@@ -241,9 +237,7 @@ public class OpenAIFunctions {
     public static void registerLlmEmbed(ExecutionContext context) {
         context.declareFunction("LLM_EMBED",
             List.of(
-                new Parameter("text", "STRING", ParameterMode.IN),
-                new Parameter("model", "STRING", ParameterMode.IN),
-                new Parameter("api_key", "STRING", ParameterMode.IN)
+                new Parameter("text", "STRING", ParameterMode.IN)
             ),
             new BuiltInFunctionDefinition("LLM_EMBED", (List<Object> args, ActionListener<Object> listener) -> {
                 try {
@@ -302,9 +296,7 @@ public class OpenAIFunctions {
     public static void registerLlmSummarize(ExecutionContext context) {
         context.declareFunction("LLM_SUMMARIZE",
             List.of(
-                new Parameter("text", "STRING", ParameterMode.IN),
-                new Parameter("max_words", "NUMBER", ParameterMode.IN),
-                new Parameter("api_key", "STRING", ParameterMode.IN)
+                new Parameter("text", "STRING", ParameterMode.IN)
             ),
             new BuiltInFunctionDefinition("LLM_SUMMARIZE", (List<Object> args, ActionListener<Object> listener) -> {
                 try {
@@ -374,8 +366,7 @@ public class OpenAIFunctions {
         context.declareFunction("LLM_CLASSIFY",
             List.of(
                 new Parameter("text", "STRING", ParameterMode.IN),
-                new Parameter("categories", "ARRAY OF STRING", ParameterMode.IN),
-                new Parameter("api_key", "STRING", ParameterMode.IN)
+                new Parameter("categories", "ARRAY OF STRING", ParameterMode.IN)
             ),
             new BuiltInFunctionDefinition("LLM_CLASSIFY", (List<Object> args, ActionListener<Object> listener) -> {
                 try {
@@ -450,8 +441,7 @@ public class OpenAIFunctions {
         context.declareFunction("LLM_EXTRACT",
             List.of(
                 new Parameter("text", "STRING", ParameterMode.IN),
-                new Parameter("fields", "ARRAY OF STRING", ParameterMode.IN),
-                new Parameter("api_key", "STRING", ParameterMode.IN)
+                new Parameter("fields", "ARRAY OF STRING", ParameterMode.IN)
             ),
             new BuiltInFunctionDefinition("LLM_EXTRACT", (List<Object> args, ActionListener<Object> listener) -> {
                 try {

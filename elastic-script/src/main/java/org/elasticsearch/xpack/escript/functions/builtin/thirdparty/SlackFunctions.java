@@ -105,9 +105,7 @@ public class SlackFunctions {
         context.declareFunction("SLACK_WEBHOOK",
             List.of(
                 new Parameter("webhook_url", "STRING", ParameterMode.IN),
-                new Parameter("message", "STRING", ParameterMode.IN),
-                new Parameter("username", "STRING", ParameterMode.IN),
-                new Parameter("icon_emoji", "STRING", ParameterMode.IN)
+                new Parameter("message", "STRING", ParameterMode.IN)
             ),
             new BuiltInFunctionDefinition("SLACK_WEBHOOK", (List<Object> args, ActionListener<Object> listener) -> {
                 try {
@@ -176,9 +174,7 @@ public class SlackFunctions {
         context.declareFunction("SLACK_SEND",
             List.of(
                 new Parameter("channel", "STRING", ParameterMode.IN),
-                new Parameter("message", "STRING", ParameterMode.IN),
-                new Parameter("thread_ts", "STRING", ParameterMode.IN),
-                new Parameter("token", "STRING", ParameterMode.IN)
+                new Parameter("message", "STRING", ParameterMode.IN)
             ),
             new BuiltInFunctionDefinition("SLACK_SEND", (List<Object> args, ActionListener<Object> listener) -> {
                 try {
@@ -244,8 +240,7 @@ public class SlackFunctions {
             List.of(
                 new Parameter("channel", "STRING", ParameterMode.IN),
                 new Parameter("blocks", "ARRAY OF DOCUMENT", ParameterMode.IN),
-                new Parameter("fallback_text", "STRING", ParameterMode.IN),
-                new Parameter("token", "STRING", ParameterMode.IN)
+                new Parameter("fallback_text", "STRING", ParameterMode.IN)
             ),
             new BuiltInFunctionDefinition("SLACK_SEND_BLOCKS", (List<Object> args, ActionListener<Object> listener) -> {
                 try {
@@ -313,8 +308,7 @@ public class SlackFunctions {
             List.of(
                 new Parameter("channel", "STRING", ParameterMode.IN),
                 new Parameter("timestamp", "STRING", ParameterMode.IN),
-                new Parameter("emoji", "STRING", ParameterMode.IN),
-                new Parameter("token", "STRING", ParameterMode.IN)
+                new Parameter("emoji", "STRING", ParameterMode.IN)
             ),
             new BuiltInFunctionDefinition("SLACK_REACT", (List<Object> args, ActionListener<Object> listener) -> {
                 try {
@@ -373,10 +367,7 @@ public class SlackFunctions {
     )
     public static void registerSlackListChannels(ExecutionContext context) {
         context.declareFunction("SLACK_LIST_CHANNELS",
-            List.of(
-                new Parameter("limit", "NUMBER", ParameterMode.IN),
-                new Parameter("token", "STRING", ParameterMode.IN)
-            ),
+            List.of(),
             new BuiltInFunctionDefinition("SLACK_LIST_CHANNELS", (List<Object> args, ActionListener<Object> listener) -> {
                 try {
                     int limit = args.size() > 0 && args.get(0) != null ? ((Number) args.get(0)).intValue() : 100;

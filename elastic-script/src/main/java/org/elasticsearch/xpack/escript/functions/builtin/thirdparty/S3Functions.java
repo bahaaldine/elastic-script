@@ -149,10 +149,7 @@ public class S3Functions {
         context.declareFunction("S3_GET",
             List.of(
                 new Parameter("bucket", "STRING", ParameterMode.IN),
-                new Parameter("key", "STRING", ParameterMode.IN),
-                new Parameter("access_key", "STRING", ParameterMode.IN),
-                new Parameter("secret_key", "STRING", ParameterMode.IN),
-                new Parameter("region", "STRING", ParameterMode.IN)
+                new Parameter("key", "STRING", ParameterMode.IN)
             ),
             new BuiltInFunctionDefinition("S3_GET", (List<Object> args, ActionListener<Object> listener) -> {
                 try {
@@ -199,11 +196,7 @@ public class S3Functions {
             List.of(
                 new Parameter("bucket", "STRING", ParameterMode.IN),
                 new Parameter("key", "STRING", ParameterMode.IN),
-                new Parameter("content", "STRING", ParameterMode.IN),
-                new Parameter("content_type", "STRING", ParameterMode.IN),
-                new Parameter("access_key", "STRING", ParameterMode.IN),
-                new Parameter("secret_key", "STRING", ParameterMode.IN),
-                new Parameter("region", "STRING", ParameterMode.IN)
+                new Parameter("content", "STRING", ParameterMode.IN)
             ),
             new BuiltInFunctionDefinition("S3_PUT", (List<Object> args, ActionListener<Object> listener) -> {
                 try {
@@ -247,10 +240,7 @@ public class S3Functions {
         context.declareFunction("S3_DELETE",
             List.of(
                 new Parameter("bucket", "STRING", ParameterMode.IN),
-                new Parameter("key", "STRING", ParameterMode.IN),
-                new Parameter("access_key", "STRING", ParameterMode.IN),
-                new Parameter("secret_key", "STRING", ParameterMode.IN),
-                new Parameter("region", "STRING", ParameterMode.IN)
+                new Parameter("key", "STRING", ParameterMode.IN)
             ),
             new BuiltInFunctionDefinition("S3_DELETE", (List<Object> args, ActionListener<Object> listener) -> {
                 try {
@@ -294,12 +284,7 @@ public class S3Functions {
     public static void registerS3List(ExecutionContext context) {
         context.declareFunction("S3_LIST",
             List.of(
-                new Parameter("bucket", "STRING", ParameterMode.IN),
-                new Parameter("prefix", "STRING", ParameterMode.IN),
-                new Parameter("max_keys", "NUMBER", ParameterMode.IN),
-                new Parameter("access_key", "STRING", ParameterMode.IN),
-                new Parameter("secret_key", "STRING", ParameterMode.IN),
-                new Parameter("region", "STRING", ParameterMode.IN)
+                new Parameter("bucket", "STRING", ParameterMode.IN)
             ),
             new BuiltInFunctionDefinition("S3_LIST", (List<Object> args, ActionListener<Object> listener) -> {
                 try {
@@ -342,10 +327,7 @@ public class S3Functions {
         context.declareFunction("S3_EXISTS",
             List.of(
                 new Parameter("bucket", "STRING", ParameterMode.IN),
-                new Parameter("key", "STRING", ParameterMode.IN),
-                new Parameter("access_key", "STRING", ParameterMode.IN),
-                new Parameter("secret_key", "STRING", ParameterMode.IN),
-                new Parameter("region", "STRING", ParameterMode.IN)
+                new Parameter("key", "STRING", ParameterMode.IN)
             ),
             new BuiltInFunctionDefinition("S3_EXISTS", (List<Object> args, ActionListener<Object> listener) -> {
                 try {
