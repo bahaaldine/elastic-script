@@ -19,27 +19,22 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Utility class for making HTTP requests to external services.
- * Uses a thread pool to perform async HTTP calls without blocking the main execution thread.
+ * HTTP calls are made synchronously but the caller handles async via ActionListener.
+ * The execution already happens on Elasticsearch's generic thread pool.
  */
 public class HttpClientUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(HttpClientUtil.class);
-    private static final ExecutorService HTTP_EXECUTOR = Executors.newCachedThreadPool(r -> {
-        Thread t = new Thread(r, "escript-http-client");
-        t.setDaemon(true);
-        return t;
-    });
 
     private static final int DEFAULT_CONNECT_TIMEOUT = 30000; // 30 seconds
     private static final int DEFAULT_READ_TIMEOUT = 120000;   // 120 seconds for LLM responses
 
     /**
-     * Performs an async HTTP POST request with JSON body.
+     * Performs an HTTP POST request with JSON body.
+     * The call is synchronous but wrapped in ActionListener for consistency.
      *
      * @param url      The URL to POST to
      * @param headers  Map of header name to header value
@@ -47,71 +42,68 @@ public class HttpClientUtil {
      * @param listener Callback for the response or error
      */
     public static void postJson(String url, Map<String, String> headers, String jsonBody, ActionListener<String> listener) {
-        HTTP_EXECUTOR.submit(() -> {
-            HttpURLConnection connection = null;
-            try {
-                connection = createConnection(url, "POST", headers);
-                
-                // Write request body
-                try (OutputStream os = connection.getOutputStream()) {
-                    byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
-                    os.write(input, 0, input.length);
-                }
-
-                // Read response
-                int responseCode = connection.getResponseCode();
-                String responseBody = readResponse(connection, responseCode);
-
-                if (responseCode >= 200 && responseCode < 300) {
-                    listener.onResponse(responseBody);
-                } else {
-                    listener.onFailure(new RuntimeException(
-                        "HTTP " + responseCode + ": " + responseBody
-                    ));
-                }
-            } catch (Exception e) {
-                LOGGER.error("HTTP request failed", e);
-                listener.onFailure(e);
-            } finally {
-                if (connection != null) {
-                    connection.disconnect();
-                }
+        HttpURLConnection connection = null;
+        try {
+            connection = createConnection(url, "POST", headers);
+            
+            // Write request body
+            try (OutputStream os = connection.getOutputStream()) {
+                byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
             }
-        });
+
+            // Read response
+            int responseCode = connection.getResponseCode();
+            String responseBody = readResponse(connection, responseCode);
+
+            if (responseCode >= 200 && responseCode < 300) {
+                listener.onResponse(responseBody);
+            } else {
+                listener.onFailure(new RuntimeException(
+                    "HTTP " + responseCode + ": " + responseBody
+                ));
+            }
+        } catch (Exception e) {
+            LOGGER.error("HTTP request failed", e);
+            listener.onFailure(e);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
     }
 
     /**
-     * Performs an async HTTP GET request.
+     * Performs an HTTP GET request.
+     * The call is synchronous but wrapped in ActionListener for consistency.
      *
      * @param url      The URL to GET
      * @param headers  Map of header name to header value
      * @param listener Callback for the response or error
      */
     public static void get(String url, Map<String, String> headers, ActionListener<String> listener) {
-        HTTP_EXECUTOR.submit(() -> {
-            HttpURLConnection connection = null;
-            try {
-                connection = createConnection(url, "GET", headers);
+        HttpURLConnection connection = null;
+        try {
+            connection = createConnection(url, "GET", headers);
 
-                int responseCode = connection.getResponseCode();
-                String responseBody = readResponse(connection, responseCode);
+            int responseCode = connection.getResponseCode();
+            String responseBody = readResponse(connection, responseCode);
 
-                if (responseCode >= 200 && responseCode < 300) {
-                    listener.onResponse(responseBody);
-                } else {
-                    listener.onFailure(new RuntimeException(
-                        "HTTP " + responseCode + ": " + responseBody
-                    ));
-                }
-            } catch (Exception e) {
-                LOGGER.error("HTTP request failed", e);
-                listener.onFailure(e);
-            } finally {
-                if (connection != null) {
-                    connection.disconnect();
-                }
+            if (responseCode >= 200 && responseCode < 300) {
+                listener.onResponse(responseBody);
+            } else {
+                listener.onFailure(new RuntimeException(
+                    "HTTP " + responseCode + ": " + responseBody
+                ));
             }
-        });
+        } catch (Exception e) {
+            LOGGER.error("HTTP request failed", e);
+            listener.onFailure(e);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
     }
 
     private static HttpURLConnection createConnection(String url, String method, Map<String, String> headers) throws IOException {
@@ -156,13 +148,4 @@ public class HttpClientUtil {
 
         return response.toString();
     }
-
-    /**
-     * Shuts down the HTTP executor service.
-     * Should be called when the plugin is unloaded.
-     */
-    public static void shutdown() {
-        HTTP_EXECUTOR.shutdown();
-    }
 }
-
