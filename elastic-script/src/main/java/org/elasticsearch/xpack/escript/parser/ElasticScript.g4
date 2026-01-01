@@ -86,6 +86,11 @@ RPAREN: ')';
 COMMA: ',';
 COLON: ':';
 SEMICOLON: ';';
+AT: '@';
+LBRACKET: '[';
+RBRACKET: ']';
+LBRACE: '{';
+RBRACE: '}';
 
 // Literals
 BOOLEAN: 'true' | 'false';

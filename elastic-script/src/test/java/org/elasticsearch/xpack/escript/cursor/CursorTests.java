@@ -193,5 +193,48 @@ public class CursorTests extends ESTestCase {
         assertFalse(procCtx.procedure().statement().isEmpty());
         assertEquals(2, procCtx.procedure().statement().size());
     }
+
+    /**
+     * Tests cursor query with @timestamp (ESQL-style field names).
+     * This verifies the lexer correctly handles @ symbol in queries.
+     */
+    public void testCursorWithAtTimestamp() {
+        String script = "DECLARE logs CURSOR FOR FROM application-logs | SORT @timestamp DESC | LIMIT 10;";
+        
+        ElasticScriptLexer lexer = new ElasticScriptLexer(CharStreams.fromString(script));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        ElasticScriptParser parser = new ElasticScriptParser(tokens);
+        
+        // Should parse without token recognition errors
+        ElasticScriptParser.Declare_statementContext declareCtx = parser.declare_statement();
+        
+        assertNotNull(declareCtx);
+        assertNotNull(declareCtx.CURSOR());
+        assertEquals("logs", declareCtx.ID().getText());
+        assertNotNull(declareCtx.cursor_query());
+        
+        // Verify the query content contains @timestamp
+        String queryText = declareCtx.cursor_query().cursor_query_content().getText();
+        assertTrue("Query should contain @timestamp", queryText.contains("@"));
+    }
+
+    /**
+     * Tests cursor query with complex ESQL including @timestamp and hyphenated index names.
+     */
+    public void testCursorWithComplexEsqlQuery() {
+        String script = "DECLARE error_logs CURSOR FOR FROM application-logs " +
+            "| WHERE log.level == \"ERROR\" OR log.level == \"FATAL\" " +
+            "| SORT @timestamp DESC | LIMIT 10;";
+
+        ElasticScriptLexer lexer = new ElasticScriptLexer(CharStreams.fromString(script));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        ElasticScriptParser parser = new ElasticScriptParser(tokens);
+
+        ElasticScriptParser.Declare_statementContext declareCtx = parser.declare_statement();
+
+        assertNotNull(declareCtx);
+        assertNotNull(declareCtx.CURSOR());
+        assertEquals("error_logs", declareCtx.ID().getText());
+    }
 }
 
