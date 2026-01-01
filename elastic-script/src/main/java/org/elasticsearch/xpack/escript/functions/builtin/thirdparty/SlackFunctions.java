@@ -10,6 +10,7 @@ package org.elasticsearch.xpack.escript.functions.builtin.thirdparty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.common.Strings;
 import org.elasticsearch.xcontent.XContentBuilder;
 import org.elasticsearch.xcontent.XContentFactory;
 import org.elasticsearch.xcontent.XContentParser;
@@ -137,7 +138,7 @@ public class SlackFunctions {
                     }
                     builder.endObject();
 
-                    String requestBody = builder.toString();
+                    String requestBody = Strings.toString(builder);
 
                     HttpClientUtil.postJson(webhookUrl, null, requestBody, ActionListener.wrap(
                         response -> {
@@ -198,7 +199,7 @@ public class SlackFunctions {
                     }
                     builder.endObject();
 
-                    String requestBody = builder.toString();
+                    String requestBody = Strings.toString(builder);
                     String url = SLACK_API_BASE + "/chat.postMessage";
 
                     HttpClientUtil.postJson(url, createSlackHeaders(token), requestBody, ActionListener.wrap(
@@ -267,7 +268,7 @@ public class SlackFunctions {
                     builder.endArray();
                     builder.endObject();
 
-                    String requestBody = builder.toString();
+                    String requestBody = Strings.toString(builder);
                     String url = SLACK_API_BASE + "/chat.postMessage";
 
                     HttpClientUtil.postJson(url, createSlackHeaders(token), requestBody, ActionListener.wrap(
@@ -330,7 +331,7 @@ public class SlackFunctions {
                     builder.field("name", emoji);
                     builder.endObject();
 
-                    String requestBody = builder.toString();
+                    String requestBody = Strings.toString(builder);
                     String url = SLACK_API_BASE + "/reactions.add";
 
                     HttpClientUtil.postJson(url, createSlackHeaders(token), requestBody, ActionListener.wrap(

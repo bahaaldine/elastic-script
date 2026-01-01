@@ -10,6 +10,7 @@ package org.elasticsearch.xpack.escript.functions.builtin.thirdparty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.common.Strings;
 import org.elasticsearch.xcontent.XContentBuilder;
 import org.elasticsearch.xcontent.XContentFactory;
 import org.elasticsearch.xcontent.XContentParser;
@@ -130,7 +131,7 @@ public class OpenAIFunctions {
                     builder.endArray();
                     builder.endObject();
 
-                    String requestBody = builder.toString();
+                    String requestBody = Strings.toString(builder);
                     String url = OPENAI_API_BASE + "/chat/completions";
 
                     HttpClientUtil.postJson(url, createHeaders(apiKey), requestBody, ActionListener.wrap(
@@ -197,7 +198,7 @@ public class OpenAIFunctions {
                     builder.endArray();
                     builder.endObject();
 
-                    String requestBody = builder.toString();
+                    String requestBody = Strings.toString(builder);
                     String url = OPENAI_API_BASE + "/chat/completions";
 
                     HttpClientUtil.postJson(url, createHeaders(apiKey), requestBody, ActionListener.wrap(
@@ -257,7 +258,7 @@ public class OpenAIFunctions {
                     builder.field("input", text);
                     builder.endObject();
 
-                    String requestBody = builder.toString();
+                    String requestBody = Strings.toString(builder);
                     String url = OPENAI_API_BASE + "/embeddings";
 
                     HttpClientUtil.postJson(url, createHeaders(apiKey), requestBody, ActionListener.wrap(
@@ -326,7 +327,7 @@ public class OpenAIFunctions {
                     builder.endArray();
                     builder.endObject();
 
-                    String requestBody = builder.toString();
+                    String requestBody = Strings.toString(builder);
                     String url = OPENAI_API_BASE + "/chat/completions";
 
                     HttpClientUtil.postJson(url, createHeaders(apiKey), requestBody, ActionListener.wrap(
@@ -400,7 +401,7 @@ public class OpenAIFunctions {
                     builder.endArray();
                     builder.endObject();
 
-                    String requestBody = builder.toString();
+                    String requestBody = Strings.toString(builder);
                     String url = OPENAI_API_BASE + "/chat/completions";
 
                     HttpClientUtil.postJson(url, createHeaders(apiKey), requestBody, ActionListener.wrap(
@@ -477,7 +478,7 @@ public class OpenAIFunctions {
                     builder.field("response_format", Map.of("type", "json_object"));
                     builder.endObject();
 
-                    String requestBody = builder.toString();
+                    String requestBody = Strings.toString(builder);
                     String url = OPENAI_API_BASE + "/chat/completions";
 
                     HttpClientUtil.postJson(url, createHeaders(apiKey), requestBody, ActionListener.wrap(
