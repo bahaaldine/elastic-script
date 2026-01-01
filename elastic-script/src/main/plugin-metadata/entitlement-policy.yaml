@@ -1,0 +1,5 @@
+# Entitlement policy for elastic-script plugin
+# Required for third-party integrations (OpenAI, Slack, S3, etc.)
+ALL-UNNAMED:
+  - outbound_network
+
