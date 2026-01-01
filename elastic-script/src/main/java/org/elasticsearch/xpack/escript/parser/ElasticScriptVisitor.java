@@ -101,6 +101,18 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDeclare_statement(ElasticScriptParser.Declare_statementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#cursor_query}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCursor_query(ElasticScriptParser.Cursor_queryContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#cursor_query_content}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCursor_query_content(ElasticScriptParser.Cursor_query_contentContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#variable_declaration_list}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -154,6 +166,12 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitFor_array_loop(ElasticScriptParser.For_array_loopContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#for_cursor_loop}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFor_cursor_loop(ElasticScriptParser.For_cursor_loopContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#while_loop}.
 	 * @param ctx the parse tree

@@ -40,7 +40,14 @@ import org.elasticsearch.xpack.escript.primitives.ReturnValue;
 import org.elasticsearch.xpack.escript.procedure.StoredProcedureDefinition;
 import org.elasticsearch.xpack.escript.utils.ActionListenerUtils;
 
+import org.elasticsearch.xpack.core.esql.action.ColumnInfo;
+import org.elasticsearch.xpack.core.esql.action.EsqlQueryRequest;
+import org.elasticsearch.xpack.core.esql.action.EsqlQueryRequestBuilder;
+import org.elasticsearch.xpack.core.esql.action.EsqlQueryResponse;
+import org.elasticsearch.action.ActionType;
+
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -517,5 +524,89 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
                 listener.onFailure(e);
             }
         });
+    }
+
+    /**
+     * Executes an ESQL query asynchronously and returns the results as a List of Maps.
+     * This is used by cursor iteration to execute the cursor's query.
+     *
+     * @param esqlQuery The ESQL query string to execute.
+     * @param listener  The ActionListener to receive the query results.
+     */
+    @SuppressWarnings("unchecked")
+    public void executeEsqlQueryAsync(String esqlQuery, ActionListener<Object> listener) {
+        try {
+            // Substitute variables in the query
+            String substitutedQuery = substituteVariables(esqlQuery);
+            
+            LOGGER.info("Executing ESQL query for cursor: {}", substitutedQuery);
+            
+            EsqlQueryRequestBuilder<? extends EsqlQueryRequest, ? extends EsqlQueryResponse> requestBuilder =
+                EsqlQueryRequestBuilder.newRequestBuilder(client);
+            requestBuilder.query(substitutedQuery);
+            
+            client.<EsqlQueryRequest, EsqlQueryResponse>execute(
+                (ActionType<EsqlQueryResponse>) requestBuilder.action(),
+                requestBuilder.request(),
+                new ActionListener<EsqlQueryResponse>() {
+                    @Override
+                    public void onResponse(EsqlQueryResponse esqlQueryResponse) {
+                        try {
+                            // Convert columns+rows to a List<Map<String,Object>>
+                            List<Map<String, Object>> rowMaps = rowsAsMaps(
+                                (List<ColumnInfo>) esqlQueryResponse.response().columns(),
+                                esqlQueryResponse.response().rows()
+                            );
+                            listener.onResponse(rowMaps);
+                        } catch (Exception e) {
+                            listener.onFailure(e);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        listener.onFailure(e);
+                    }
+                }
+            );
+        } catch (Exception e) {
+            listener.onFailure(e);
+        }
+    }
+
+    /**
+     * Substitutes placeholders like ":myVar" with actual values from the Executor's context.
+     */
+    private String substituteVariables(String original) {
+        for (String varName : context.getVariableNames()) {
+            Object val = context.getVariable(varName);
+            original = original.replace(":" + varName, String.valueOf(val));
+        }
+        return original;
+    }
+
+    /**
+     * Converts the given columns and row-iterator into a list of maps,
+     * each map representing one row with columnName -> value.
+     */
+    private static List<Map<String, Object>> rowsAsMaps(
+        List<ColumnInfo> columns,
+        Iterable<Iterable<Object>> rowIter
+    ) {
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (Iterable<Object> rowValues : rowIter) {
+            List<Object> rowList = new ArrayList<>();
+            rowValues.forEach(rowList::add);
+
+            Map<String, Object> rowMap = new LinkedHashMap<>();
+            for (int i = 0; i < columns.size(); i++) {
+                String colName = columns.get(i).name();
+                Object val = i < rowList.size() ? rowList.get(i) : null;
+                rowMap.put(colName, val);
+            }
+            result.add(rowMap);
+        }
+        return result;
     }
 }

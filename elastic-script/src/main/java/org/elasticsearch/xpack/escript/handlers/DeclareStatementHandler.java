@@ -72,9 +72,40 @@ public class DeclareStatementHandler {
     }
 
     public void handleAsync(ElasticScriptParser.Declare_statementContext ctx, ActionListener<Object> listener) {
+        // Check if this is a cursor declaration (DECLARE name CURSOR FOR query)
+        if (ctx.CURSOR() != null) {
+            handleCursorDeclaration(ctx, listener);
+            return;
+        }
+        
+        // Otherwise, it's a regular variable declaration
         List<ElasticScriptParser.Variable_declarationContext> varDecls =
             ctx.variable_declaration_list().variable_declaration();
         processVariableDeclarations(varDecls, 0, listener);
+    }
+
+    /**
+     * Handles cursor declaration: DECLARE name CURSOR FOR query;
+     */
+    private void handleCursorDeclaration(ElasticScriptParser.Declare_statementContext ctx, ActionListener<Object> listener) {
+        String cursorName = ctx.ID().getText();
+        
+        // Extract the ESQL query from the cursor_query context
+        ElasticScriptParser.Cursor_queryContext queryCtx = ctx.cursor_query();
+        if (queryCtx == null || queryCtx.cursor_query_content() == null) {
+            listener.onFailure(new RuntimeException("Cursor '" + cursorName + "' must have a query defined"));
+            return;
+        }
+        
+        // Get the query text from the cursor_query_content tokens
+        String esqlQuery = queryCtx.cursor_query_content().getText().trim();
+        
+        try {
+            executor.getContext().declareCursor(cursorName, esqlQuery);
+            listener.onResponse(null);
+        } catch (Exception e) {
+            listener.onFailure(e);
+        }
     }
 
     private void processVariableDeclarations(List<ElasticScriptParser.Variable_declarationContext> varDecls,

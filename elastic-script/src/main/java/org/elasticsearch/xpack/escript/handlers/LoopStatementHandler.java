@@ -12,10 +12,12 @@ import org.elasticsearch.xpack.escript.executors.ProcedureExecutor;
 import org.elasticsearch.xpack.escript.exceptions.BreakException;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptParser;
 import org.elasticsearch.xpack.escript.context.ExecutionContext;
+import org.elasticsearch.xpack.escript.primitives.CursorDefinition;
 import org.elasticsearch.xpack.escript.primitives.ReturnValue;
 import org.elasticsearch.xpack.escript.primitives.VariableDefinition;
 
 import java.util.List;
+import java.util.Map;
 
 public class LoopStatementHandler {
 
@@ -33,6 +35,8 @@ public class LoopStatementHandler {
             handleForRangeLoopAsync(ctx.for_range_loop(), listener);
         } else if (ctx.for_array_loop() != null) {
             handleForArrayLoopAsync(ctx.for_array_loop(), listener);
+        } else if (ctx.for_cursor_loop() != null) {
+            handleForCursorLoopAsync(ctx.for_cursor_loop(), listener);
         } else if (ctx.while_loop() != null) {
             handleWhileLoopAsync(ctx.while_loop(), listener);
         } else {
@@ -143,6 +147,114 @@ public class LoopStatementHandler {
             }
 
             executeArrayLoopIteration(loopVarName, items, 0, ctx.statement(), listener);
+        }, listener::onFailure));
+    }
+
+    /**
+     * Handles asynchronous processing of a FOR-cursor loop.
+     * 
+     * <p>This method looks up the cursor by name in the execution context. If the cursor's query
+     * has not yet been executed, it executes the ESQL query first. Then it iterates over the
+     * query results, setting the loop variable to each row (as a Map/Document).
+     * 
+     * <p>Example:
+     * <pre>
+     * DECLARE error_logs CURSOR FOR FROM application-logs | WHERE log.level == "ERROR";
+     * FOR log_entry IN error_logs LOOP
+     *     PRINT log_entry.message;
+     * END LOOP;
+     * </pre>
+     *
+     * @param ctx the parse tree context of the FOR-cursor loop
+     * @param listener an asynchronous callback that is invoked upon completion or failure
+     */
+    private void handleForCursorLoopAsync(ElasticScriptParser.For_cursor_loopContext ctx, ActionListener<Object> listener) {
+        String loopVarName = ctx.ID(0).getText();  // First ID is the loop variable
+        String cursorName = ctx.ID(1).getText();   // Second ID is the cursor name
+        
+        ExecutionContext context = executor.getContext();
+        CursorDefinition cursor = context.getCursor(cursorName);
+        
+        if (cursor == null) {
+            listener.onFailure(new RuntimeException("Cursor '" + cursorName + "' is not declared."));
+            return;
+        }
+        
+        // If cursor has not been executed yet, execute its query
+        if (cursor.isExecuted() == false) {
+            executeCursorQuery(cursor, ActionListener.wrap(results -> {
+                proceedWithCursorIteration(loopVarName, cursor, ctx.statement(), listener);
+            }, listener::onFailure));
+        } else {
+            proceedWithCursorIteration(loopVarName, cursor, ctx.statement(), listener);
+        }
+    }
+
+    /**
+     * Executes the ESQL query associated with a cursor and stores the results.
+     */
+    @SuppressWarnings("unchecked")
+    private void executeCursorQuery(CursorDefinition cursor, ActionListener<List<Map<String, Object>>> listener) {
+        String esqlQuery = cursor.getEsqlQuery();
+        
+        // Use the executor's ESQL execution capability
+        executor.executeEsqlQueryAsync(esqlQuery, ActionListener.wrap(result -> {
+            if (result instanceof List) {
+                List<Map<String, Object>> rows = (List<Map<String, Object>>) result;
+                cursor.setResults(rows);
+                listener.onResponse(rows);
+            } else {
+                listener.onFailure(new RuntimeException("Cursor query did not return a list of documents"));
+            }
+        }, listener::onFailure));
+    }
+
+    /**
+     * Proceeds with cursor iteration after the query has been executed.
+     */
+    private void proceedWithCursorIteration(String loopVarName, CursorDefinition cursor,
+                                            List<ElasticScriptParser.StatementContext> statements,
+                                            ActionListener<Object> listener) {
+        List<Map<String, Object>> results = cursor.getResults();
+        if (results == null || results.isEmpty()) {
+            listener.onResponse(null);
+            return;
+        }
+        
+        ExecutionContext context = executor.getContext();
+        
+        // Declare the loop variable as DOCUMENT if not already declared
+        if (context.getVariables().containsKey(loopVarName) == false) {
+            context.declareVariable(loopVarName, "DOCUMENT");
+        }
+        
+        executeCursorLoopIteration(loopVarName, results, 0, statements, listener);
+    }
+
+    /**
+     * Recursively iterates over the cursor results.
+     */
+    private void executeCursorLoopIteration(String loopVarName, List<Map<String, Object>> items, int currentIndex,
+                                            List<ElasticScriptParser.StatementContext> statements,
+                                            ActionListener<Object> listener) {
+        if (currentIndex >= items.size()) {
+            listener.onResponse(null);
+            return;
+        }
+        
+        // Set the loop variable to the current row
+        executor.getContext().setVariable(loopVarName, items.get(currentIndex));
+        
+        executeStatementsAsync(statements, 0, ActionListener.wrap(bodyResult -> {
+            if (bodyResult instanceof BreakException) {
+                listener.onResponse(null);
+            } else if (bodyResult instanceof ReturnValue) {
+                listener.onResponse(bodyResult);
+            } else {
+                executor.getThreadPool().generic().execute(() ->
+                    executeCursorLoopIteration(loopVarName, items, currentIndex + 1, statements, listener)
+                );
+            }
         }, listener::onFailure));
     }
 

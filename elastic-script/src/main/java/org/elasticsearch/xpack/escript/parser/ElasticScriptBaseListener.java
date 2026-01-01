@@ -191,6 +191,30 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterCursor_query(ElasticScriptParser.Cursor_queryContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCursor_query(ElasticScriptParser.Cursor_queryContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCursor_query_content(ElasticScriptParser.Cursor_query_contentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCursor_query_content(ElasticScriptParser.Cursor_query_contentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterVariable_declaration_list(ElasticScriptParser.Variable_declaration_listContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -294,6 +318,18 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitFor_array_loop(ElasticScriptParser.For_array_loopContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFor_cursor_loop(ElasticScriptParser.For_cursor_loopContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFor_cursor_loop(ElasticScriptParser.For_cursor_loopContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

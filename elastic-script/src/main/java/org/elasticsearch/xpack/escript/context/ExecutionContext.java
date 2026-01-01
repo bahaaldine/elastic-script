@@ -10,6 +10,7 @@ package org.elasticsearch.xpack.escript.context;
 import org.elasticsearch.xpack.escript.functions.FunctionDefinition;
 import org.elasticsearch.xpack.escript.functions.Parameter;
 import org.elasticsearch.xpack.escript.functions.builtin.BuiltInFunctionDefinition;
+import org.elasticsearch.xpack.escript.primitives.CursorDefinition;
 import org.elasticsearch.xpack.escript.primitives.VariableDefinition;
 
 import java.util.Collections;
@@ -26,6 +27,7 @@ import java.util.Set;
 public class ExecutionContext {
     private final Map<String, VariableDefinition> variables;
     private final Map<String, FunctionDefinition> functions;
+    private final Map<String, CursorDefinition> cursors;
     private final ExecutionContext parentContext;  // Reference to parent context
     private Map<String, Object> procedureArguments;
 
@@ -35,6 +37,7 @@ public class ExecutionContext {
     public ExecutionContext() {
         this.variables = new HashMap<>();
         this.functions = new HashMap<>();
+        this.cursors = new HashMap<>();
         this.parentContext = null;
         this.procedureArguments = new HashMap<>();
     }
@@ -47,6 +50,7 @@ public class ExecutionContext {
     public ExecutionContext(ExecutionContext parentContext) {
         this.variables = new HashMap<>();
         this.functions = new HashMap<>();
+        this.cursors = new HashMap<>();
         this.parentContext = parentContext;
         this.procedureArguments = new HashMap<>();
     }
@@ -174,6 +178,51 @@ public class ExecutionContext {
         } else {
             return null;
         }
+    }
+
+    // -------------------------
+    // Cursor Management
+    // -------------------------
+
+    /**
+     * Declares a new cursor with the specified name and ESQL query in the current context.
+     *
+     * @param name The name of the cursor.
+     * @param esqlQuery The ESQL query associated with the cursor.
+     * @throws RuntimeException If a cursor with this name is already declared.
+     */
+    public void declareCursor(String name, String esqlQuery) {
+        if (cursors.containsKey(name)) {
+            throw new RuntimeException("Cursor '" + name + "' is already declared in the current scope.");
+        }
+        cursors.put(name, new CursorDefinition(name, esqlQuery));
+    }
+
+    /**
+     * Retrieves the CursorDefinition for a given cursor name by searching the current
+     * and parent contexts recursively.
+     *
+     * @param name The name of the cursor.
+     * @return The CursorDefinition object if found; null otherwise.
+     */
+    public CursorDefinition getCursor(String name) {
+        if (cursors.containsKey(name)) {
+            return cursors.get(name);
+        } else if (parentContext != null) {
+            return parentContext.getCursor(name);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Checks if a cursor with the specified name exists in the current or any parent context.
+     *
+     * @param name The name of the cursor.
+     * @return true if the cursor exists; false otherwise.
+     */
+    public boolean hasCursor(String name) {
+        return getCursor(name) != null;
     }
 
     // -------------------------
@@ -333,12 +382,13 @@ public class ExecutionContext {
     }
 
     /**
-     * Clears all variables and functions from the current context.
+     * Clears all variables, functions, and cursors from the current context.
      * This does not affect any parent contexts.
      */
     public void clear() {
         variables.clear();
         functions.clear();
+        cursors.clear();
     }
 
     /**

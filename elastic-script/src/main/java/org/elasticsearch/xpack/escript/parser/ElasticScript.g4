@@ -48,6 +48,7 @@ RETURN: 'RETURN';
 BREAK: 'BREAK';
 PERSIST: 'PERSIST';
 INTO: 'INTO';
+CURSOR: 'CURSOR';
 
 // Data Types
 INT_TYPE: 'INT';
@@ -244,6 +245,15 @@ esql_query_content
 
 declare_statement
     : DECLARE variable_declaration_list SEMICOLON
+    | DECLARE ID CURSOR FOR cursor_query SEMICOLON
+    ;
+
+cursor_query
+    : cursor_query_content
+    ;
+
+cursor_query_content
+    : (~SEMICOLON)+  // Match everything until semicolon
     ;
 
 variable_declaration_list
@@ -276,6 +286,7 @@ condition
 loop_statement
     : for_range_loop
     | for_array_loop
+    | for_cursor_loop
     | while_loop
     ;
 
@@ -285,6 +296,10 @@ for_range_loop
 
 for_array_loop
     : FOR ID IN array_loop_expression LOOP statement+ ENDLOOP
+    ;
+
+for_cursor_loop
+    : FOR ID IN ID LOOP statement+ ENDLOOP
     ;
 
 while_loop
