@@ -135,8 +135,12 @@ public class VariableDefinition {
                 "for value of type: " + value.getClass());
         }
         if (value instanceof Number) {
-            // If value is a Number (Integer, Float, Double, etc.), convert directly
-            this.value = ((Number) value).doubleValue();
+            // Convert Number to the appropriate type based on declared type
+            if (type == ElasticScriptDataType.INT) {
+                this.value = ((Number) value).intValue();
+            } else {
+                this.value = ((Number) value).doubleValue();
+            }
         } else {
             this.value = value;
         }
@@ -154,8 +158,14 @@ public class VariableDefinition {
         }
 
         switch (type) {
+            case INT:
+                // INT is compatible with any Number (will be converted to int)
+                return value instanceof Number;
+            case FLOAT:
+                // FLOAT is compatible with any Number (will be converted to double)
+                return value instanceof Number;
             case NUMBER:
-                return value instanceof Double || value instanceof Integer;
+                return value instanceof Double || value instanceof Integer || value instanceof Number;
             case STRING:
                 return value instanceof String;
             case DATE:
