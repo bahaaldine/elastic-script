@@ -7,6 +7,7 @@ TARBALL="elasticsearch-${ES_VERSION}-darwin-aarch64.tar.gz"
 ES_DIR="elasticsearch-${ES_VERSION}"
 NOTEBOOK_NAME="./x-pack/plugin/elastic-script/src/test/script/retro-arcade-data.ipynb"
 NEW_NOTEBOOK_NAME="./x-pack/plugin/elastic-script/src/test/script/video-games-platform.ipynb"
+OBSERVABILITY_NOTEBOOK_NAME="./x-pack/plugin/elastic-script/src/test/script/observability-logs-data.ipynb"
 
 # Function to kill any running Elasticsearch processes
 kill_elasticsearch() {
@@ -136,6 +137,14 @@ papermill "${NEW_NOTEBOOK_NAME}" output_video_games_notebook.ipynb
 
 if [ $? -ne 0 ]; then
   echo "Error: Failed to execute video games notebook."
+  cleanup
+  exit 1
+fi
+
+papermill "${OBSERVABILITY_NOTEBOOK_NAME}" output_observability_logs_notebook.ipynb
+
+if [ $? -ne 0 ]; then
+  echo "Error: Failed to execute observability logs notebook."
   cleanup
   exit 1
 fi
