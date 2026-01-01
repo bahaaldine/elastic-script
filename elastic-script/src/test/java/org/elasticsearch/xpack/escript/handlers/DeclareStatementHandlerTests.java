@@ -49,12 +49,19 @@ public class DeclareStatementHandlerTests extends ESTestCase {
     }
 
     // Helper method to parse a declaration query
+    // Also updates the executor's token stream so getRawText works correctly
     private ElasticScriptParser.Declare_statementContext parseDeclaration(String query) {
         ElasticScriptLexer lexer = new ElasticScriptLexer(CharStreams.fromString(query));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         ElasticScriptParser parser = new ElasticScriptParser(tokens);
         parser.removeErrorListeners();  // Remove existing error listeners
         parser.addErrorListener(new ElasticScriptErrorListener());  // Add custom error listener
+        
+        // Update executor to use the new token stream for this test
+        Client mockClient = null;
+        executor = new ProcedureExecutor(context, threadPool, mockClient, tokens);
+        declareHandler = new DeclareStatementHandler(executor);
+        
         return parser.declare_statement();
     }
 
