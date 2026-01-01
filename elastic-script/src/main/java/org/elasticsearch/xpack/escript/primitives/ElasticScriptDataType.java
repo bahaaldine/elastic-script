@@ -9,6 +9,7 @@ package org.elasticsearch.xpack.escript.primitives;
 
 public enum ElasticScriptDataType {
     INT,
+    FLOAT,
     STRING,
     DATE,
     NUMBER,

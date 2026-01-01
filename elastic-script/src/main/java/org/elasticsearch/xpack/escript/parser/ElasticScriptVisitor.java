@@ -167,12 +167,6 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFor_array_loop(ElasticScriptParser.For_array_loopContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link ElasticScriptParser#for_cursor_loop}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFor_cursor_loop(ElasticScriptParser.For_cursor_loopContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#while_loop}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

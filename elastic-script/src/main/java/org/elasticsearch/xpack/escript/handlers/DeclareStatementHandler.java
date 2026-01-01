@@ -59,8 +59,10 @@ public class DeclareStatementHandler {
         } else {
             try {
                 ElasticScriptDataType type = ElasticScriptDataType.valueOf(normalizedType);
-                // For non-array types, allow NUMBER, STRING, and DATE.
-                return ( type == ElasticScriptDataType.NUMBER
+                // For non-array types, allow INT, FLOAT, NUMBER, STRING, DATE, BOOLEAN, and DOCUMENT.
+                return ( type == ElasticScriptDataType.INT
+                    || type == ElasticScriptDataType.FLOAT
+                    || type == ElasticScriptDataType.NUMBER
                     || type == ElasticScriptDataType.STRING
                     || type == ElasticScriptDataType.DATE
                     || type == ElasticScriptDataType.BOOLEAN

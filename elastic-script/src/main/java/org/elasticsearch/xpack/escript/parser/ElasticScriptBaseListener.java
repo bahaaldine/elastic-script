@@ -323,18 +323,6 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterFor_cursor_loop(ElasticScriptParser.For_cursor_loopContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitFor_cursor_loop(ElasticScriptParser.For_cursor_loopContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterWhile_loop(ElasticScriptParser.While_loopContext ctx) { }
 	/**
 	 * {@inheritDoc}

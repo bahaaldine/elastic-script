@@ -291,7 +291,6 @@ condition
 loop_statement
     : for_range_loop
     | for_array_loop
-    | for_cursor_loop
     | while_loop
     ;
 
@@ -301,10 +300,6 @@ for_range_loop
 
 for_array_loop
     : FOR ID IN array_loop_expression LOOP statement+ ENDLOOP
-    ;
-
-for_cursor_loop
-    : FOR ID IN ID LOOP statement+ ENDLOOP
     ;
 
 while_loop

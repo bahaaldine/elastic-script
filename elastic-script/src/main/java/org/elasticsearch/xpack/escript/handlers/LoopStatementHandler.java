@@ -29,14 +29,14 @@ public class LoopStatementHandler {
 
     /**
      * Dispatches loop handling based on the kind of loop parsed.
+     * Note: Cursor loops are handled at runtime in handleForArrayLoopAsync
+     * by checking if the identifier is a cursor.
      */
     public void handleAsync(ElasticScriptParser.Loop_statementContext ctx, ActionListener<Object> listener) {
         if (ctx.for_range_loop() != null) {
             handleForRangeLoopAsync(ctx.for_range_loop(), listener);
         } else if (ctx.for_array_loop() != null) {
             handleForArrayLoopAsync(ctx.for_array_loop(), listener);
-        } else if (ctx.for_cursor_loop() != null) {
-            handleForCursorLoopAsync(ctx.for_cursor_loop(), listener);
         } else if (ctx.while_loop() != null) {
             handleWhileLoopAsync(ctx.while_loop(), listener);
         } else {
@@ -116,14 +116,28 @@ public class LoopStatementHandler {
      */
     private void handleForArrayLoopAsync(ElasticScriptParser.For_array_loopContext ctx, ActionListener<Object> listener) {
         String loopVarName = ctx.ID().getText();
-        // Evaluate the array expression
+        ExecutionContext context = executor.getContext();
+        
+        // Check if the expression is a simple identifier that might be a cursor
+        if (ctx.array_loop_expression().expression().getChildCount() == 1) {
+            String identifierName = ctx.array_loop_expression().expression().getText();
+            
+            // Check if this identifier is a cursor
+            CursorDefinition cursor = context.getCursor(identifierName);
+            if (cursor != null) {
+                // Delegate to cursor loop handling
+                handleCursorLoopFromArrayContext(loopVarName, cursor, ctx.statement(), listener);
+                return;
+            }
+        }
+        
+        // Otherwise, evaluate as a normal array expression
         executor.evaluateExpressionAsync(ctx.array_loop_expression().expression(), ActionListener.wrap(arrayObj -> {
             if ( (arrayObj instanceof List) == false ) {
                 listener.onFailure(new RuntimeException("Array loop expression must evaluate to a list."));
                 return;
             }
             List<?> items = (List<?>) arrayObj;
-            ExecutionContext context = executor.getContext();
             String elementType = "ANY";
 
             // Attempt to fetch the declared element type if the array expression is a single identifier.
@@ -151,42 +165,19 @@ public class LoopStatementHandler {
     }
 
     /**
-     * Handles asynchronous processing of a FOR-cursor loop.
-     * 
-     * <p>This method looks up the cursor by name in the execution context. If the cursor's query
-     * has not yet been executed, it executes the ESQL query first. Then it iterates over the
-     * query results, setting the loop variable to each row (as a Map/Document).
-     * 
-     * <p>Example:
-     * <pre>
-     * DECLARE error_logs CURSOR FOR FROM application-logs | WHERE log.level == "ERROR";
-     * FOR log_entry IN error_logs LOOP
-     *     PRINT log_entry.message;
-     * END LOOP;
-     * </pre>
-     *
-     * @param ctx the parse tree context of the FOR-cursor loop
-     * @param listener an asynchronous callback that is invoked upon completion or failure
+     * Handles cursor iteration when detected from a for_array_loop context.
+     * This is called when the array expression is actually a cursor identifier.
      */
-    private void handleForCursorLoopAsync(ElasticScriptParser.For_cursor_loopContext ctx, ActionListener<Object> listener) {
-        String loopVarName = ctx.ID(0).getText();  // First ID is the loop variable
-        String cursorName = ctx.ID(1).getText();   // Second ID is the cursor name
-        
-        ExecutionContext context = executor.getContext();
-        CursorDefinition cursor = context.getCursor(cursorName);
-        
-        if (cursor == null) {
-            listener.onFailure(new RuntimeException("Cursor '" + cursorName + "' is not declared."));
-            return;
-        }
-        
+    private void handleCursorLoopFromArrayContext(String loopVarName, CursorDefinition cursor,
+                                                   List<ElasticScriptParser.StatementContext> statements,
+                                                   ActionListener<Object> listener) {
         // If cursor has not been executed yet, execute its query
         if (cursor.isExecuted() == false) {
             executeCursorQuery(cursor, ActionListener.wrap(results -> {
-                proceedWithCursorIteration(loopVarName, cursor, ctx.statement(), listener);
+                proceedWithCursorIteration(loopVarName, cursor, statements, listener);
             }, listener::onFailure));
         } else {
-            proceedWithCursorIteration(loopVarName, cursor, ctx.statement(), listener);
+            proceedWithCursorIteration(loopVarName, cursor, statements, listener);
         }
     }
 

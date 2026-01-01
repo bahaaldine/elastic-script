@@ -151,7 +151,8 @@ public class CursorTests extends ESTestCase {
     }
 
     /**
-     * Tests that the FOR cursor loop grammar is properly parsed.
+     * Tests that the FOR loop over a cursor is properly parsed via for_array_loop.
+     * Note: Cursor loops are now handled at runtime within the for_array_loop handler.
      */
     public void testForCursorLoopGrammarParsing() {
         String script = "FOR log_entry IN error_logs LOOP PRINT log_entry; END LOOP";
@@ -160,12 +161,13 @@ public class CursorTests extends ESTestCase {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         ElasticScriptParser parser = new ElasticScriptParser(tokens);
         
-        ElasticScriptParser.For_cursor_loopContext loopCtx = parser.for_cursor_loop();
+        // Cursor loops are now parsed as for_array_loop (distinction is made at runtime)
+        ElasticScriptParser.For_array_loopContext loopCtx = parser.for_array_loop();
         
         assertNotNull(loopCtx);
-        assertEquals(2, loopCtx.ID().size());
-        assertEquals("log_entry", loopCtx.ID(0).getText());
-        assertEquals("error_logs", loopCtx.ID(1).getText());
+        assertEquals("log_entry", loopCtx.ID().getText());
+        // The cursor name is in the array_loop_expression
+        assertEquals("error_logs", loopCtx.array_loop_expression().getText());
         assertFalse(loopCtx.statement().isEmpty());
     }
 

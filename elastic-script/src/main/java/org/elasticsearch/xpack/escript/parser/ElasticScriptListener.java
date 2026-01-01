@@ -264,16 +264,6 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitFor_array_loop(ElasticScriptParser.For_array_loopContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link ElasticScriptParser#for_cursor_loop}.
-	 * @param ctx the parse tree
-	 */
-	void enterFor_cursor_loop(ElasticScriptParser.For_cursor_loopContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link ElasticScriptParser#for_cursor_loop}.
-	 * @param ctx the parse tree
-	 */
-	void exitFor_cursor_loop(ElasticScriptParser.For_cursor_loopContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#while_loop}.
 	 * @param ctx the parse tree
 	 */
