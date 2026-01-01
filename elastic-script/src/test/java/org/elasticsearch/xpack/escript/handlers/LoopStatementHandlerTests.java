@@ -408,4 +408,103 @@ public class LoopStatementHandlerTests extends ESTestCase {
         });
         latch.await();
     }*/
+
+    // ==========================================
+    // CURSOR Loop Tests
+    // ==========================================
+
+    // Test 10: FOR-cursor loop grammar parsing (verifies parser accepts cursor loop syntax)
+    @Test
+    public void testForCursorLoopGrammarParsing() {
+        String blockQuery =
+            "PROCEDURE test_cursor_loop() " +
+            "BEGIN " +
+                "DECLARE error_logs CURSOR FOR FROM logs | WHERE level == \"ERROR\" | LIMIT 10; " +
+                "FOR log_entry IN error_logs LOOP " +
+                " PRINT log_entry; " +
+                "END LOOP " +
+            "END PROCEDURE";
+        
+        // Verify that the procedure parses correctly
+        ElasticScriptParser.ProcedureContext blockContext = TestUtils.parseBlock(blockQuery);
+        assertNotNull("Procedure context should not be null", blockContext);
+        assertEquals("Should have 2 statements (DECLARE CURSOR and FOR loop)", 
+            2, blockContext.statement().size());
+    }
+
+    // Test 11: Cursor declaration and loop structure are correctly parsed
+    @Test
+    public void testCursorDeclarationInLoop() throws InterruptedException {
+        String blockQuery =
+            "PROCEDURE test_cursor() " +
+            "BEGIN " +
+                "DECLARE my_cursor CURSOR FOR FROM test-index | LIMIT 5; " +
+            "END PROCEDURE";
+        
+        ElasticScriptParser.ProcedureContext blockContext = TestUtils.parseBlock(blockQuery);
+        CountDownLatch latch = new CountDownLatch(1);
+        
+        executor.visitProcedureAsync(blockContext, new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object result) {
+                // Verify cursor was declared
+                assertTrue("Cursor 'my_cursor' should be declared", context.hasCursor("my_cursor"));
+                var cursor = context.getCursor("my_cursor");
+                assertNotNull("Cursor should exist", cursor);
+                assertEquals("my_cursor", cursor.getName());
+                // Note: getText() concatenates tokens, verify query is captured
+                String query = cursor.getEsqlQuery();
+                assertNotNull("Query should not be null", query);
+                assertFalse("Query should not be empty", query.isEmpty());
+                assertTrue("Query should contain pipe", query.contains("|"));
+                assertFalse("Cursor should not be executed until iterated", cursor.isExecuted());
+                latch.countDown();
+            }
+            @Override
+            public void onFailure(Exception e) {
+                fail("Cursor declaration failed: " + e.getMessage());
+                latch.countDown();
+            }
+        });
+        latch.await();
+    }
+
+    // Test 12: FOR-cursor loop with undeclared cursor (should fail)
+    // This test verifies that iterating over an undeclared cursor/variable throws an exception.
+    @Test
+    public void testForCursorLoopWithUndeclaredCursor() {
+        String blockQuery =
+            "PROCEDURE test_undeclared_cursor() " +
+            "BEGIN " +
+                "FOR item IN non_existent_cursor LOOP " +
+                " PRINT item; " +
+                "END LOOP " +
+            "END PROCEDURE";
+        
+        ElasticScriptParser.ProcedureContext blockContext = TestUtils.parseBlock(blockQuery);
+        
+        // The exception should be thrown when trying to iterate over an undeclared identifier
+        RuntimeException exception = expectThrows(RuntimeException.class, () -> {
+            CountDownLatch latch = new CountDownLatch(1);
+            executor.visitProcedureAsync(blockContext, new ActionListener<Object>() {
+                @Override
+                public void onResponse(Object result) {
+                    latch.countDown();
+                }
+                @Override
+                public void onFailure(Exception e) {
+                    latch.countDown();
+                    throw new RuntimeException(e);
+                }
+            });
+            latch.await();
+        });
+        
+        assertTrue("Error should indicate undefined identifier: " + exception.getMessage(), 
+            exception.getMessage().contains("not declared") || exception.getMessage().contains("not defined"));
+    }
+
+    // Note: Full cursor execution tests require an Elasticsearch cluster with ESQL support.
+    // These tests verify that the grammar and handler infrastructure is correctly set up.
+    // Integration tests for actual cursor execution should be in integration test suites.
 }

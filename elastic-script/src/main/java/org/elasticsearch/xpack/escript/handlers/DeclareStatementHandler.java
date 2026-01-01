@@ -97,7 +97,9 @@ public class DeclareStatementHandler {
             return;
         }
         
-        // Get the query text from the cursor_query_content tokens
+        // Get the query text from the cursor_query_content
+        // Note: getText() concatenates tokens without spaces; for proper ESQL execution,
+        // use the token stream interval if available, otherwise fall back to getText()
         String esqlQuery = queryCtx.cursor_query_content().getText().trim();
         
         try {

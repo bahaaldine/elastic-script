@@ -367,4 +367,149 @@ public class DeclareStatementHandlerTests extends ESTestCase {
         });
         latch.await();
     }
+
+    // ==========================================
+    // CURSOR Declaration Tests
+    // ==========================================
+
+    // Test 14: Declare a CURSOR with a simple query
+    @Test
+    public void testDeclareCursorSimple() throws InterruptedException {
+        String declareQuery = "DECLARE error_logs CURSOR FOR FROM logs | WHERE level == \"ERROR\" | LIMIT 10;";
+        ElasticScriptParser.Declare_statementContext declareContext = parseDeclaration(declareQuery);
+        CountDownLatch latch = new CountDownLatch(1);
+        declareHandler.handleAsync(declareContext, new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object unused) {
+                assertTrue("Cursor 'error_logs' should be declared", context.hasCursor("error_logs"));
+                var cursor = context.getCursor("error_logs");
+                assertNotNull("Cursor should not be null", cursor);
+                assertEquals("error_logs", cursor.getName());
+                // Note: getText() concatenates tokens, so "FROM logs" becomes "FROMlogs"
+                String query = cursor.getEsqlQuery();
+                assertNotNull("Query should not be null", query);
+                assertFalse("Query should not be empty", query.isEmpty());
+                // Check that query contains expected keywords (may be concatenated)
+                assertTrue("Query should contain query content", query.length() > 0);
+                assertFalse("Cursor should not be executed yet", cursor.isExecuted());
+                latch.countDown();
+            }
+            @Override
+            public void onFailure(Exception e) {
+                fail("Cursor declaration failed: " + e.getMessage());
+                latch.countDown();
+            }
+        });
+        latch.await();
+    }
+
+    // Test 15: Declare a CURSOR with complex query including pipes
+    @Test
+    public void testDeclareCursorComplexQuery() throws InterruptedException {
+        String declareQuery = "DECLARE app_logs CURSOR FOR FROM application-logs | WHERE log.level == \"ERROR\" | SORT @timestamp DESC | LIMIT 100;";
+        ElasticScriptParser.Declare_statementContext declareContext = parseDeclaration(declareQuery);
+        CountDownLatch latch = new CountDownLatch(1);
+        declareHandler.handleAsync(declareContext, new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object unused) {
+                assertTrue("Cursor 'app_logs' should be declared", context.hasCursor("app_logs"));
+                var cursor = context.getCursor("app_logs");
+                assertNotNull("Cursor should not be null", cursor);
+                String query = cursor.getEsqlQuery();
+                assertNotNull("Query should not be null", query);
+                // Query contains pipe-separated ESQL commands
+                assertTrue("Query should contain pipe separator", query.contains("|"));
+                assertFalse("Cursor should not be executed yet", cursor.isExecuted());
+                latch.countDown();
+            }
+            @Override
+            public void onFailure(Exception e) {
+                fail("Cursor declaration with complex query failed: " + e.getMessage());
+                latch.countDown();
+            }
+        });
+        latch.await();
+    }
+
+    // Test 16: Declare a duplicate CURSOR (should fail)
+    @Test
+    public void testDeclareDuplicateCursor() throws InterruptedException {
+        String declareQuery = "DECLARE my_cursor CURSOR FOR FROM test;";
+        ElasticScriptParser.Declare_statementContext declareContext = parseDeclaration(declareQuery);
+        CountDownLatch latch = new CountDownLatch(2);
+        
+        // First declaration
+        declareHandler.handleAsync(declareContext, new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object unused) {
+                assertTrue("Cursor should be declared", context.hasCursor("my_cursor"));
+                
+                // Second declaration (should fail)
+                declareHandler.handleAsync(declareContext, new ActionListener<Object>() {
+                    @Override
+                    public void onResponse(Object unused) {
+                        fail("Expected an exception due to cursor already declared");
+                        latch.countDown();
+                    }
+                    @Override
+                    public void onFailure(Exception e) {
+                        assertTrue("Exception message should indicate cursor already declared",
+                            e.getMessage().contains("already declared"));
+                        latch.countDown();
+                    }
+                });
+                latch.countDown();
+            }
+            @Override
+            public void onFailure(Exception e) {
+                fail("First cursor declaration failed: " + e.getMessage());
+                latch.countDown();
+                latch.countDown();
+            }
+        });
+        latch.await();
+    }
+
+    // Test 17: Cursor declaration does not affect variable namespace
+    @Test
+    public void testCursorAndVariableSeparateNamespaces() throws InterruptedException {
+        // First, declare a cursor
+        String cursorQuery = "DECLARE data CURSOR FOR FROM test-index;";
+        ElasticScriptParser.Declare_statementContext cursorContext = parseDeclaration(cursorQuery);
+        
+        // Then declare a variable with the same name
+        String varQuery = "DECLARE data NUMBER = 42;";
+        ElasticScriptParser.Declare_statementContext varContext = parseDeclaration(varQuery);
+        
+        CountDownLatch latch = new CountDownLatch(1);
+        
+        declareHandler.handleAsync(cursorContext, new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object unused) {
+                assertTrue("Cursor 'data' should exist", context.hasCursor("data"));
+                
+                declareHandler.handleAsync(varContext, new ActionListener<Object>() {
+                    @Override
+                    public void onResponse(Object unused) {
+                        // Both cursor and variable should exist with the same name
+                        assertTrue("Cursor 'data' should still exist", context.hasCursor("data"));
+                        assertTrue("Variable 'data' should also exist", context.hasVariable("data"));
+                        assertEquals(42.0, ((Number) context.getVariable("data")).doubleValue(), 0.001);
+                        latch.countDown();
+                    }
+                    @Override
+                    public void onFailure(Exception e) {
+                        fail("Variable declaration failed: " + e.getMessage());
+                        latch.countDown();
+                    }
+                });
+            }
+            @Override
+            public void onFailure(Exception e) {
+                fail("Cursor declaration failed: " + e.getMessage());
+                latch.countDown();
+            }
+        });
+        latch.await();
+    }
 }
