@@ -14,7 +14,7 @@ esplugin {
   name = 'x-pack-escript'
   description = 'A plugin to handle elastic-script queries'
   classname = 'org.elasticsearch.xpack.escript.ElasticScriptPlugin'
-  extendedPlugins = ['x-pack-core', 'x-pack-esql']
+  extendedPlugins = ['x-pack-core', 'x-pack-esql', 'x-pack-inference']
 }
 
 base {
@@ -41,6 +41,7 @@ dependencies {
 
   compileOnly project(path: xpackModule('core'))
   compileOnly project(':x-pack:plugin:esql')
+  compileOnly project(':x-pack:plugin:inference')
 
   testImplementation project(':x-pack:plugin:esql-core')
   testImplementation project(':x-pack:plugin:esql')

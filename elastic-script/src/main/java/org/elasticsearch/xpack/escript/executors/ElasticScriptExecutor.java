@@ -35,6 +35,7 @@ import org.elasticsearch.xpack.escript.functions.builtin.datatypes.ArrayBuiltInF
 import org.elasticsearch.xpack.escript.functions.builtin.datatypes.DateBuiltInFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.datatypes.NumberBuiltInFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.datatypes.StringBuiltInFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.inference.InferenceFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.OpenAIFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.S3Functions;
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.SlackFunctions;
@@ -200,6 +201,7 @@ public class ElasticScriptExecutor {
                                 OpenAIFunctions.registerAll(executionContext);
                                 SlackFunctions.registerAll(executionContext);
                                 S3Functions.registerAll(executionContext);
+                                InferenceFunctions.registerAll(executionContext, client);
 
                                 FunctionLoader.loadCommunityFunctions(executionContext);
 
