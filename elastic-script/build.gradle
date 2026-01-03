@@ -14,7 +14,7 @@ esplugin {
   name = 'x-pack-escript'
   description = 'A plugin to handle elastic-script queries'
   classname = 'org.elasticsearch.xpack.escript.ElasticScriptPlugin'
-  extendedPlugins = ['x-pack-core']
+  extendedPlugins = ['x-pack-core', 'x-pack-esql']
 }
 
 base {
