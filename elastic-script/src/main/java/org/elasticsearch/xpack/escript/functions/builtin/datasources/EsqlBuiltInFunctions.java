@@ -19,9 +19,9 @@ import org.elasticsearch.client.internal.Client;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.xpack.core.esql.action.ColumnInfo;
-import org.elasticsearch.xpack.core.esql.action.EsqlQueryRequest;
-import org.elasticsearch.xpack.core.esql.action.EsqlQueryResponse;
-import org.elasticsearch.xpack.core.esql.action.EsqlQueryRequestBuilder;
+import org.elasticsearch.xpack.esql.action.EsqlQueryAction;
+import org.elasticsearch.xpack.esql.action.EsqlQueryRequest;
+import org.elasticsearch.xpack.esql.action.EsqlQueryResponse;
 import org.elasticsearch.xpack.escript.context.ExecutionContext;
 import org.elasticsearch.xpack.escript.executors.ProcedureExecutor;
 import org.elasticsearch.xpack.escript.functions.builtin.BuiltInFunctionDefinition;
@@ -137,10 +137,8 @@ public class EsqlBuiltInFunctions {
             SearchRequest searchRequest = buildSearchRequest(substitutedQuery);
             LOGGER.info("Search Request: {}", searchRequest);
 
-            // Build the EsqlQueryRequest using the client.
-            EsqlQueryRequestBuilder<? extends EsqlQueryRequest, ? extends EsqlQueryResponse> requestBuilder =
-                EsqlQueryRequestBuilder.newRequestBuilder(client);
-            requestBuilder.query(substitutedQuery);
+            // Build the EsqlQueryRequest
+            EsqlQueryRequest request = EsqlQueryRequest.syncEsqlQueryRequest(substitutedQuery);
 
             // Create the async listener for the ESQL query response.
             ActionListener<EsqlQueryResponse> asyncListener = new ActionListener<EsqlQueryResponse>() {
@@ -184,12 +182,12 @@ public class EsqlBuiltInFunctions {
             ActionListener<EsqlQueryResponse> loggedListener = ActionListenerUtils.withLogging(
                 asyncListener,
                 EsqlBuiltInFunctions.class.getName(),
-                "Execute-ESQL-QUERY: " + requestBuilder.request()
+                "Execute-ESQL-QUERY: " + request.query()
             );
 
-            client.<EsqlQueryRequest, EsqlQueryResponse>execute(
-                (ActionType<EsqlQueryResponse>) requestBuilder.action(),
-                requestBuilder.request(),
+            client.execute(
+                EsqlQueryAction.INSTANCE,
+                request,
                 loggedListener
             );
         } catch (Exception ex) {

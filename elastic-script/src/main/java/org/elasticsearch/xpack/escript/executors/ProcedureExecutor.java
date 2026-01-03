@@ -41,10 +41,9 @@ import org.elasticsearch.xpack.escript.procedure.StoredProcedureDefinition;
 import org.elasticsearch.xpack.escript.utils.ActionListenerUtils;
 
 import org.elasticsearch.xpack.core.esql.action.ColumnInfo;
-import org.elasticsearch.xpack.core.esql.action.EsqlQueryRequest;
-import org.elasticsearch.xpack.core.esql.action.EsqlQueryRequestBuilder;
-import org.elasticsearch.xpack.core.esql.action.EsqlQueryResponse;
-import org.elasticsearch.action.ActionType;
+import org.elasticsearch.xpack.esql.action.EsqlQueryAction;
+import org.elasticsearch.xpack.esql.action.EsqlQueryRequest;
+import org.elasticsearch.xpack.esql.action.EsqlQueryResponse;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -541,13 +540,11 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
             
             LOGGER.info("Executing ESQL query for cursor: {}", substitutedQuery);
             
-            EsqlQueryRequestBuilder<? extends EsqlQueryRequest, ? extends EsqlQueryResponse> requestBuilder =
-                EsqlQueryRequestBuilder.newRequestBuilder(client);
-            requestBuilder.query(substitutedQuery);
+            EsqlQueryRequest request = EsqlQueryRequest.syncEsqlQueryRequest(substitutedQuery);
             
-            client.<EsqlQueryRequest, EsqlQueryResponse>execute(
-                (ActionType<EsqlQueryResponse>) requestBuilder.action(),
-                requestBuilder.request(),
+            client.execute(
+                EsqlQueryAction.INSTANCE,
+                request,
                 new ActionListener<EsqlQueryResponse>() {
                     @Override
                     public void onResponse(EsqlQueryResponse esqlQueryResponse) {

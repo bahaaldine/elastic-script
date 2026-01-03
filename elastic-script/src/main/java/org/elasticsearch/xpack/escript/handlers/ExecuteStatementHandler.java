@@ -23,9 +23,9 @@ import org.elasticsearch.logging.Logger;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.xcontent.XContentBuilder;
 import org.elasticsearch.xcontent.XContentFactory;
-import org.elasticsearch.xpack.core.esql.action.EsqlQueryRequest;
-import org.elasticsearch.xpack.core.esql.action.EsqlQueryRequestBuilder;
-import org.elasticsearch.xpack.core.esql.action.EsqlQueryResponse;
+import org.elasticsearch.xpack.esql.action.EsqlQueryAction;
+import org.elasticsearch.xpack.esql.action.EsqlQueryRequest;
+import org.elasticsearch.xpack.esql.action.EsqlQueryResponse;
 import org.elasticsearch.xpack.escript.executors.ProcedureExecutor;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptParser;
 import org.elasticsearch.xpack.core.esql.action.ColumnInfo;
@@ -124,9 +124,7 @@ public class ExecuteStatementHandler {
                 SearchRequest searchRequest = buildSearchRequest(finalSubstitutedQuery);
                 LOGGER.info("Search Query: [{}]", searchRequest);
 
-                EsqlQueryRequestBuilder<? extends EsqlQueryRequest, ? extends EsqlQueryResponse> requestBuilder =
-                    EsqlQueryRequestBuilder.newRequestBuilder(client);
-                requestBuilder.query(finalSubstitutedQuery);
+                EsqlQueryRequest request = EsqlQueryRequest.syncEsqlQueryRequest(finalSubstitutedQuery);
 
                 String finalSubstitutedQuery1 = substitutedQuery;
                 ActionListener<EsqlQueryResponse> executeESQLStatementListener = new ActionListener<EsqlQueryResponse>() {
@@ -227,11 +225,11 @@ public class ExecuteStatementHandler {
 
                 ActionListener<EsqlQueryResponse> executeESQLStatementLogger = ActionListenerUtils.withLogging(executeESQLStatementListener,
                     this.getClass().getName(),
-                    "Execute-ESQL-Statement: " + requestBuilder.request());
+                    "Execute-ESQL-Statement: " + request.query());
 
-                client.<EsqlQueryRequest, EsqlQueryResponse>execute(
-                    (ActionType<EsqlQueryResponse>) requestBuilder.action(),
-                    requestBuilder.request(),
+                client.execute(
+                    EsqlQueryAction.INSTANCE,
+                    request,
                     executeESQLStatementLogger
                     );
             } catch (Exception ex) {
