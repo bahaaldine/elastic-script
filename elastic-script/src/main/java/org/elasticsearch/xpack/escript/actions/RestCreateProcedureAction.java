@@ -81,7 +81,21 @@ public class RestCreateProcedureAction extends BaseRestHandler {
 
             @Override
             public void onFailure(Exception e) {
-                channel.sendResponse(new RestResponse(RestStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
+                LOGGER.error("Failed to create procedure [{}]: {}", id, e.getMessage());
+                LOGGER.error("Stack trace:", e);
+                try {
+                    XContentBuilder errorBuilder = XContentFactory.jsonBuilder();
+                    errorBuilder.startObject();
+                    errorBuilder.field("error", e.getMessage());
+                    errorBuilder.field("type", e.getClass().getSimpleName());
+                    if (e.getCause() != null) {
+                        errorBuilder.field("cause", e.getCause().getMessage());
+                    }
+                    errorBuilder.endObject();
+                    channel.sendResponse(new RestResponse(RestStatus.INTERNAL_SERVER_ERROR, errorBuilder));
+                } catch (Exception jsonError) {
+                    channel.sendResponse(new RestResponse(RestStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
+                }
             }
         });
     }

@@ -139,8 +139,24 @@ public class RestRunEScriptAction extends BaseRestHandler {
 
                 @Override
                 public void onFailure(Exception e) {
-                    // onFailure => internal error or parse error
-                    channel.sendResponse(new RestResponse(RestStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
+                    // Log the full stack trace for debugging
+                    LOGGER.error("Elastic-script execution failed: {}", e.getMessage());
+                    LOGGER.error("Stack trace:", e);
+                    
+                    // Build a detailed error response
+                    try {
+                        XContentBuilder errorBuilder = XContentFactory.jsonBuilder();
+                        errorBuilder.startObject();
+                        errorBuilder.field("error", e.getMessage());
+                        errorBuilder.field("type", e.getClass().getSimpleName());
+                        if (e.getCause() != null) {
+                            errorBuilder.field("cause", e.getCause().getMessage());
+                        }
+                        errorBuilder.endObject();
+                        channel.sendResponse(new RestResponse(RestStatus.INTERNAL_SERVER_ERROR, errorBuilder));
+                    } catch (Exception jsonError) {
+                        channel.sendResponse(new RestResponse(RestStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
+                    }
                 }
             });
         };

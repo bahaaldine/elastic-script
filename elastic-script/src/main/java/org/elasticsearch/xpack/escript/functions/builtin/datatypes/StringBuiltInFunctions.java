@@ -54,6 +54,7 @@ public class StringBuiltInFunctions {
         registerRegexpSubstr(context);
         registerReverse(context);
         registerInitcap(context);
+        registerEnv(context);
     }
 
     @FunctionSpec(
@@ -581,6 +582,45 @@ public class StringBuiltInFunctions {
                         }
                     }
                     listener.onResponse(sb.toString().trim());
+                }
+            })
+        );
+    }
+
+    @FunctionSpec(
+        name = "ENV",
+        description = "Returns the value of an environment variable. Returns empty string if not set.",
+        parameters = {
+            @FunctionParam(name = "name", type = "STRING", description = "The name of the environment variable"),
+            @FunctionParam(name = "default_value", type = "STRING", description = "Default value if variable is not set (optional)")
+        },
+        returnType = @FunctionReturn(type = "STRING", description = "The environment variable value or default"),
+        examples = {
+            "ENV('OPENAI_API_KEY')",
+            "ENV('MY_VAR', 'default_value')"
+        },
+        category = FunctionCategory.STRING
+    )
+    public static void registerEnv(ExecutionContext context) {
+        context.declareFunction("ENV",
+            List.of(new Parameter("name", "STRING", ParameterMode.IN)),
+            new BuiltInFunctionDefinition("ENV", (List<Object> args, ActionListener<Object> listener) -> {
+                if (args.isEmpty()) {
+                    listener.onFailure(new RuntimeException("ENV requires at least one argument: the variable name"));
+                } else {
+                    String varName = args.get(0).toString();
+                    String value = System.getenv(varName);
+                    
+                    if (value == null || value.isEmpty()) {
+                        // Check for default value
+                        if (args.size() > 1 && args.get(1) != null) {
+                            value = args.get(1).toString();
+                        } else {
+                            value = "";
+                        }
+                    }
+                    
+                    listener.onResponse(value);
                 }
             })
         );
