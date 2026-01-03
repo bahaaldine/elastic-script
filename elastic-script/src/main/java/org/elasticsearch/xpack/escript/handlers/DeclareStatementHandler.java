@@ -181,21 +181,27 @@ public class DeclareStatementHandler {
         // Process the initializer expression (if any)
         if (varCtx.expression() != null) {
             if (varType.toUpperCase().contains("ARRAY")) {
-                // For ARRAY types, expect a JSON array literal.
+                // For ARRAY types, check if it's a JSON literal or a function call
                 String exprText = varCtx.expression().getText().trim();
-                try {
-                    ByteArrayInputStream inputStream = new ByteArrayInputStream(exprText.getBytes(StandardCharsets.UTF_8));
-                    try (XContentParser parser = XContentFactory.xContent(XContentType.JSON)
-                        .createParser(NamedXContentRegistry.EMPTY, DeprecationHandler.THROW_UNSUPPORTED_OPERATION, inputStream)) {
-                        if (parser.nextToken() != XContentParser.Token.START_ARRAY) {
-                            throw new RuntimeException("Expected a JSON array literal for ARRAY type");
+                
+                // If it starts with '[', try to parse as JSON array literal
+                if (exprText.startsWith("[")) {
+                    try {
+                        ByteArrayInputStream inputStream = new ByteArrayInputStream(exprText.getBytes(StandardCharsets.UTF_8));
+                        try (XContentParser parser = XContentFactory.xContent(XContentType.JSON)
+                            .createParser(NamedXContentRegistry.EMPTY, DeprecationHandler.THROW_UNSUPPORTED_OPERATION, inputStream)) {
+                            if (parser.nextToken() != XContentParser.Token.START_ARRAY) {
+                                throw new RuntimeException("Expected a JSON array literal for ARRAY type");
+                            }
+                            List<Object> arrayValue = parser.list();
+                            variableDeclarationLogger.onResponse(arrayValue);
                         }
-                        List<Object> arrayValue = parser.list();
-                        // (Optionally, you might want to coerce each element to the declared elementType here.)
-                        variableDeclarationLogger.onResponse(arrayValue);
+                    } catch (Exception e) {
+                        variableDeclarationLogger.onFailure(e);
                     }
-                } catch (Exception e) {
-                    variableDeclarationLogger.onFailure(e);
+                } else {
+                    // Not a JSON literal - evaluate as expression (could be a function call)
+                    executor.evaluateExpressionAsync(varCtx.expression(), variableDeclarationLogger);
                 }
             } else {
                 executor.evaluateExpressionAsync(varCtx.expression(), variableDeclarationLogger);
