@@ -43,8 +43,12 @@ public class DeclareStatementHandler {
         String normalizedType = varType.trim().toUpperCase();
         // If the type starts with "ARRAY", check for the "OF" clause.
         if (normalizedType.startsWith("ARRAY")) {
+            // Just "ARRAY" without element type is valid (untyped array)
+            if (normalizedType.equals("ARRAY")) {
+                return true;
+            }
             // If the token comes in as "ARRAYOF..." without a space, insert the space.
-            if ( normalizedType.startsWith("ARRAYOF") ) {
+            if (normalizedType.startsWith("ARRAYOF")) {
                 normalizedType = "ARRAY OF " + normalizedType.substring("ARRAYOF".length());
                 String elementType = normalizedType.substring("ARRAY OF ".length()).trim();
                 try {
@@ -55,7 +59,17 @@ public class DeclareStatementHandler {
                     return false;
                 }
             }
-            return false;
+            // Handle "ARRAY OF <type>" with space
+            if (normalizedType.contains(" OF ")) {
+                String elementType = normalizedType.substring(normalizedType.indexOf(" OF ") + 4).trim();
+                try {
+                    ElasticScriptDataType.valueOf(elementType);
+                    return true;
+                } catch (IllegalArgumentException e) {
+                    return false;
+                }
+            }
+            return true; // Default: accept ARRAY types
         } else {
             try {
                 ElasticScriptDataType type = ElasticScriptDataType.valueOf(normalizedType);
