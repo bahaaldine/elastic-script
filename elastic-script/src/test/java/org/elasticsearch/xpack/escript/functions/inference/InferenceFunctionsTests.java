@@ -50,6 +50,19 @@ public class InferenceFunctionsTests extends ESTestCase {
         // Check that INFERENCE_RERANK function is registered
         FunctionDefinition rerankFunc = context.getFunction("INFERENCE_RERANK");
         assertThat("INFERENCE_RERANK function should be registered", rerankFunc, notNullValue());
+        
+        // Check endpoint management functions
+        FunctionDefinition createFunc = context.getFunction("INFERENCE_CREATE_ENDPOINT");
+        assertThat("INFERENCE_CREATE_ENDPOINT function should be registered", createFunc, notNullValue());
+        
+        FunctionDefinition deleteFunc = context.getFunction("INFERENCE_DELETE_ENDPOINT");
+        assertThat("INFERENCE_DELETE_ENDPOINT function should be registered", deleteFunc, notNullValue());
+        
+        FunctionDefinition listFunc = context.getFunction("INFERENCE_LIST_ENDPOINTS");
+        assertThat("INFERENCE_LIST_ENDPOINTS function should be registered", listFunc, notNullValue());
+        
+        FunctionDefinition getFunc = context.getFunction("INFERENCE_GET_ENDPOINT");
+        assertThat("INFERENCE_GET_ENDPOINT function should be registered", getFunc, notNullValue());
     }
 
     public void testInferenceFunctionParameterCount() {

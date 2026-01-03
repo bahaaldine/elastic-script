@@ -11,11 +11,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.client.internal.Client;
+import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.inference.InferenceServiceResults;
 import org.elasticsearch.inference.TaskType;
 import org.elasticsearch.inference.UnifiedCompletionRequest;
+import org.elasticsearch.xcontent.XContentType;
+import org.elasticsearch.xpack.core.inference.action.DeleteInferenceEndpointAction;
+import org.elasticsearch.xpack.core.inference.action.GetInferenceModelAction;
 import org.elasticsearch.xpack.core.inference.action.InferenceAction;
+import org.elasticsearch.xpack.core.inference.action.PutInferenceModelAction;
 import org.elasticsearch.xpack.core.inference.action.UnifiedCompletionAction;
 import org.elasticsearch.xpack.escript.context.ExecutionContext;
 import org.elasticsearch.xpack.escript.functions.Parameter;
@@ -56,11 +61,320 @@ public class InferenceFunctions {
      */
     public static void registerAll(ExecutionContext context, Client client) {
         LOGGER.info("Registering Inference API built-in functions");
+        // Endpoint management
+        registerInferenceCreateEndpoint(context, client);
+        registerInferenceDeleteEndpoint(context, client);
+        registerInferenceListEndpoints(context, client);
+        registerInferenceGetEndpoint(context, client);
+        // Inference operations
         registerInference(context, client);
         registerInferenceChat(context, client);
         registerInferenceEmbed(context, client);
         registerInferenceRerank(context, client);
     }
+
+    // ========================================================================
+    // ENDPOINT MANAGEMENT FUNCTIONS
+    // ========================================================================
+
+    /**
+     * INFERENCE_CREATE_ENDPOINT - Creates a new inference endpoint.
+     */
+    @FunctionSpec(
+        name = "INFERENCE_CREATE_ENDPOINT",
+        description = "Creates a new inference endpoint with the specified configuration. " +
+            "The endpoint can then be used with INFERENCE, INFERENCE_CHAT, etc.",
+        parameters = {
+            @FunctionParam(name = "endpoint_id", type = "STRING", description = "Unique identifier for the endpoint"),
+            @FunctionParam(name = "task_type", type = "STRING", description = "Task type: completion, chat_completion, text_embedding, rerank, sparse_embedding"),
+            @FunctionParam(name = "config_json", type = "STRING", description = "JSON configuration including service and service_settings")
+        },
+        returnType = @FunctionReturn(type = "BOOLEAN", description = "true if endpoint was created successfully"),
+        examples = {
+            "INFERENCE_CREATE_ENDPOINT('my-openai', 'completion', '{\"service\":\"openai\",\"service_settings\":{\"api_key\":\"sk-...\",\"model_id\":\"gpt-4o-mini\"}}')",
+            "INFERENCE_CREATE_ENDPOINT('my-embeddings', 'text_embedding', '{\"service\":\"openai\",\"service_settings\":{\"api_key\":\"sk-...\",\"model_id\":\"text-embedding-3-small\"}}')"
+        },
+        category = FunctionCategory.DATASOURCE
+    )
+    public static void registerInferenceCreateEndpoint(ExecutionContext context, Client client) {
+        context.declareFunction("INFERENCE_CREATE_ENDPOINT",
+            List.of(
+                new Parameter("endpoint_id", "STRING", ParameterMode.IN),
+                new Parameter("task_type", "STRING", ParameterMode.IN),
+                new Parameter("config_json", "STRING", ParameterMode.IN)
+            ),
+            new BuiltInFunctionDefinition("INFERENCE_CREATE_ENDPOINT", (List<Object> args, ActionListener<Object> listener) -> {
+                try {
+                    if (args.size() < 3) {
+                        listener.onFailure(new RuntimeException(
+                            "INFERENCE_CREATE_ENDPOINT requires 3 arguments: endpoint_id, task_type, config_json"));
+                        return;
+                    }
+
+                    String endpointId = args.get(0).toString();
+                    String taskTypeStr = args.get(1).toString().toUpperCase();
+                    String configJson = args.get(2).toString();
+                    
+                    TaskType taskType = parseTaskType(taskTypeStr);
+                    
+                    LOGGER.info("Creating inference endpoint [{}] with task type [{}]", endpointId, taskType);
+
+                    PutInferenceModelAction.Request request = new PutInferenceModelAction.Request(
+                        taskType,
+                        endpointId,
+                        new BytesArray(configJson),
+                        XContentType.JSON,
+                        DEFAULT_TIMEOUT
+                    );
+
+                    client.execute(PutInferenceModelAction.INSTANCE, request, new ActionListener<PutInferenceModelAction.Response>() {
+                        @Override
+                        public void onResponse(PutInferenceModelAction.Response response) {
+                            LOGGER.info("Successfully created inference endpoint [{}]", endpointId);
+                            listener.onResponse(true);
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            LOGGER.error("Failed to create inference endpoint [{}]: {}", endpointId, e.getMessage());
+                            listener.onFailure(new RuntimeException(
+                                "Failed to create inference endpoint '" + endpointId + "': " + e.getMessage(), e));
+                        }
+                    });
+
+                } catch (Exception e) {
+                    listener.onFailure(e);
+                }
+            })
+        );
+    }
+
+    /**
+     * INFERENCE_DELETE_ENDPOINT - Deletes an inference endpoint.
+     */
+    @FunctionSpec(
+        name = "INFERENCE_DELETE_ENDPOINT",
+        description = "Deletes an existing inference endpoint.",
+        parameters = {
+            @FunctionParam(name = "endpoint_id", type = "STRING", description = "The endpoint ID to delete"),
+            @FunctionParam(name = "force", type = "BOOLEAN", description = "Force delete even if endpoint is in use. Optional, defaults to false")
+        },
+        returnType = @FunctionReturn(type = "BOOLEAN", description = "true if endpoint was deleted successfully"),
+        examples = {
+            "INFERENCE_DELETE_ENDPOINT('my-old-endpoint')",
+            "INFERENCE_DELETE_ENDPOINT('unused-endpoint', true)"
+        },
+        category = FunctionCategory.DATASOURCE
+    )
+    public static void registerInferenceDeleteEndpoint(ExecutionContext context, Client client) {
+        context.declareFunction("INFERENCE_DELETE_ENDPOINT",
+            List.of(
+                new Parameter("endpoint_id", "STRING", ParameterMode.IN)
+            ),
+            new BuiltInFunctionDefinition("INFERENCE_DELETE_ENDPOINT", (List<Object> args, ActionListener<Object> listener) -> {
+                try {
+                    if (args.isEmpty()) {
+                        listener.onFailure(new RuntimeException(
+                            "INFERENCE_DELETE_ENDPOINT requires at least 1 argument: endpoint_id"));
+                        return;
+                    }
+
+                    String endpointId = args.get(0).toString();
+                    boolean force = args.size() > 1 && Boolean.parseBoolean(args.get(1).toString());
+                    
+                    LOGGER.info("Deleting inference endpoint [{}], force=[{}]", endpointId, force);
+
+                    DeleteInferenceEndpointAction.Request request = new DeleteInferenceEndpointAction.Request(
+                        endpointId,
+                        TaskType.ANY,
+                        force,
+                        false  // dryRun
+                    );
+
+                    client.execute(DeleteInferenceEndpointAction.INSTANCE, request, new ActionListener<DeleteInferenceEndpointAction.Response>() {
+                        @Override
+                        public void onResponse(DeleteInferenceEndpointAction.Response response) {
+                            LOGGER.info("Successfully deleted inference endpoint [{}]", endpointId);
+                            listener.onResponse(true);
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            LOGGER.error("Failed to delete inference endpoint [{}]: {}", endpointId, e.getMessage());
+                            listener.onFailure(new RuntimeException(
+                                "Failed to delete inference endpoint '" + endpointId + "': " + e.getMessage(), e));
+                        }
+                    });
+
+                } catch (Exception e) {
+                    listener.onFailure(e);
+                }
+            })
+        );
+    }
+
+    /**
+     * INFERENCE_LIST_ENDPOINTS - Lists all inference endpoints.
+     */
+    @FunctionSpec(
+        name = "INFERENCE_LIST_ENDPOINTS",
+        description = "Lists all configured inference endpoints. Optionally filter by task type.",
+        parameters = {
+            @FunctionParam(name = "task_type", type = "STRING", description = "Filter by task type (optional). Use '_all' for all types.")
+        },
+        returnType = @FunctionReturn(type = "ARRAY", description = "Array of endpoint configurations"),
+        examples = {
+            "INFERENCE_LIST_ENDPOINTS()",
+            "INFERENCE_LIST_ENDPOINTS('completion')",
+            "INFERENCE_LIST_ENDPOINTS('text_embedding')"
+        },
+        category = FunctionCategory.DATASOURCE
+    )
+    public static void registerInferenceListEndpoints(ExecutionContext context, Client client) {
+        context.declareFunction("INFERENCE_LIST_ENDPOINTS",
+            List.of(),  // No required parameters
+            new BuiltInFunctionDefinition("INFERENCE_LIST_ENDPOINTS", (List<Object> args, ActionListener<Object> listener) -> {
+                try {
+                    TaskType taskType = TaskType.ANY;
+                    if (!args.isEmpty() && args.get(0) != null) {
+                        String taskTypeStr = args.get(0).toString().toUpperCase();
+                        if (!"_ALL".equals(taskTypeStr)) {
+                            taskType = parseTaskType(taskTypeStr);
+                        }
+                    }
+                    
+                    LOGGER.debug("Listing inference endpoints for task type [{}]", taskType);
+
+                    GetInferenceModelAction.Request request = new GetInferenceModelAction.Request("_all", taskType);
+
+                    client.execute(GetInferenceModelAction.INSTANCE, request, new ActionListener<GetInferenceModelAction.Response>() {
+                        @Override
+                        public void onResponse(GetInferenceModelAction.Response response) {
+                            try {
+                                List<Map<String, Object>> endpoints = new ArrayList<>();
+                                for (var model : response.getEndpoints()) {
+                                    Map<String, Object> endpoint = new java.util.HashMap<>();
+                                    endpoint.put("endpoint_id", model.getInferenceEntityId());
+                                    endpoint.put("task_type", model.getTaskType().name());
+                                    endpoint.put("service", model.getService());
+                                    endpoints.add(endpoint);
+                                }
+                                LOGGER.debug("Found [{}] inference endpoints", endpoints.size());
+                                listener.onResponse(endpoints);
+                            } catch (Exception e) {
+                                listener.onFailure(new RuntimeException(
+                                    "Failed to parse endpoint list: " + e.getMessage(), e));
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            LOGGER.error("Failed to list inference endpoints: {}", e.getMessage());
+                            listener.onFailure(new RuntimeException(
+                                "Failed to list inference endpoints: " + e.getMessage(), e));
+                        }
+                    });
+
+                } catch (Exception e) {
+                    listener.onFailure(e);
+                }
+            })
+        );
+    }
+
+    /**
+     * INFERENCE_GET_ENDPOINT - Gets details of a specific inference endpoint.
+     */
+    @FunctionSpec(
+        name = "INFERENCE_GET_ENDPOINT",
+        description = "Gets the configuration details of a specific inference endpoint.",
+        parameters = {
+            @FunctionParam(name = "endpoint_id", type = "STRING", description = "The endpoint ID to retrieve")
+        },
+        returnType = @FunctionReturn(type = "DOCUMENT", description = "The endpoint configuration as a document"),
+        examples = {
+            "INFERENCE_GET_ENDPOINT('my-openai-endpoint')"
+        },
+        category = FunctionCategory.DATASOURCE
+    )
+    public static void registerInferenceGetEndpoint(ExecutionContext context, Client client) {
+        context.declareFunction("INFERENCE_GET_ENDPOINT",
+            List.of(
+                new Parameter("endpoint_id", "STRING", ParameterMode.IN)
+            ),
+            new BuiltInFunctionDefinition("INFERENCE_GET_ENDPOINT", (List<Object> args, ActionListener<Object> listener) -> {
+                try {
+                    if (args.isEmpty()) {
+                        listener.onFailure(new RuntimeException(
+                            "INFERENCE_GET_ENDPOINT requires 1 argument: endpoint_id"));
+                        return;
+                    }
+
+                    String endpointId = args.get(0).toString();
+                    
+                    LOGGER.debug("Getting inference endpoint [{}]", endpointId);
+
+                    GetInferenceModelAction.Request request = new GetInferenceModelAction.Request(endpointId, TaskType.ANY);
+
+                    client.execute(GetInferenceModelAction.INSTANCE, request, new ActionListener<GetInferenceModelAction.Response>() {
+                        @Override
+                        public void onResponse(GetInferenceModelAction.Response response) {
+                            try {
+                                if (response.getEndpoints().isEmpty()) {
+                                    listener.onFailure(new RuntimeException(
+                                        "Inference endpoint '" + endpointId + "' not found"));
+                                    return;
+                                }
+                                
+                                var model = response.getEndpoints().getFirst();
+                                Map<String, Object> endpoint = new java.util.HashMap<>();
+                                endpoint.put("endpoint_id", model.getInferenceEntityId());
+                                endpoint.put("task_type", model.getTaskType().name());
+                                endpoint.put("service", model.getService());
+                                
+                                LOGGER.debug("Retrieved inference endpoint [{}]", endpointId);
+                                listener.onResponse(endpoint);
+                            } catch (Exception e) {
+                                listener.onFailure(new RuntimeException(
+                                    "Failed to parse endpoint: " + e.getMessage(), e));
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            LOGGER.error("Failed to get inference endpoint [{}]: {}", endpointId, e.getMessage());
+                            listener.onFailure(new RuntimeException(
+                                "Failed to get inference endpoint '" + endpointId + "': " + e.getMessage(), e));
+                        }
+                    });
+
+                } catch (Exception e) {
+                    listener.onFailure(e);
+                }
+            })
+        );
+    }
+
+    /**
+     * Parses a task type string into a TaskType enum.
+     */
+    private static TaskType parseTaskType(String taskTypeStr) {
+        return switch (taskTypeStr.toUpperCase()) {
+            case "COMPLETION" -> TaskType.COMPLETION;
+            case "CHAT_COMPLETION" -> TaskType.CHAT_COMPLETION;
+            case "TEXT_EMBEDDING", "EMBEDDING" -> TaskType.TEXT_EMBEDDING;
+            case "RERANK" -> TaskType.RERANK;
+            case "SPARSE_EMBEDDING" -> TaskType.SPARSE_EMBEDDING;
+            case "ANY", "_ALL" -> TaskType.ANY;
+            default -> throw new IllegalArgumentException(
+                "Unknown task type: " + taskTypeStr + 
+                ". Valid types: completion, chat_completion, text_embedding, rerank, sparse_embedding");
+        };
+    }
+
+    // ========================================================================
+    // INFERENCE OPERATION FUNCTIONS
+    // ========================================================================
 
     /**
      * INFERENCE - General inference function for text generation/completion.
