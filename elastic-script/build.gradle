@@ -14,7 +14,9 @@ esplugin {
   name = 'x-pack-escript'
   description = 'A plugin to handle elastic-script queries'
   classname = 'org.elasticsearch.xpack.escript.ElasticScriptPlugin'
-  extendedPlugins = ['x-pack-core', 'x-pack-esql', 'x-pack-inference']
+  extendedPlugins = ['x-pack-core', 'x-pack-esql']
+  // Note: We use inference API actions from x-pack-core, not x-pack-inference
+  // The inference plugin just needs to be loaded in the cluster for the transport actions to work
 }
 
 base {
