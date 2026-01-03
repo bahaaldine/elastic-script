@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Variables
-ES_VERSION="9.0.1-SNAPSHOT"
+ES_VERSION="9.4.0-SNAPSHOT"
 TARBALL_DIR="distribution/archives/darwin-aarch64-tar/build/distributions"
 TARBALL="elasticsearch-${ES_VERSION}-darwin-aarch64.tar.gz"
 ES_DIR="elasticsearch-${ES_VERSION}"
