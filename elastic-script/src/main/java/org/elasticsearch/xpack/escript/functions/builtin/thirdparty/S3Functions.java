@@ -69,6 +69,7 @@ public class S3Functions {
         registerS3Delete(context);
         registerS3List(context);
         registerS3Exists(context);
+        registerS3CreateBucket(context);
     }
 
     /**
@@ -349,6 +350,46 @@ public class S3Functions {
         );
     }
 
+    @FunctionSpec(
+        name = "S3_CREATE_BUCKET",
+        description = "Creates a new S3 bucket. Returns true if created successfully or if bucket already exists.",
+        parameters = {
+            @FunctionParam(name = "bucket", type = "STRING", description = "The S3 bucket name to create"),
+            @FunctionParam(name = "access_key", type = "STRING", description = "AWS access key ID (optional)"),
+            @FunctionParam(name = "secret_key", type = "STRING", description = "AWS secret access key (optional)"),
+            @FunctionParam(name = "region", type = "STRING", description = "AWS region (optional)")
+        },
+        returnType = @FunctionReturn(type = "BOOLEAN", description = "true if the bucket was created or already exists"),
+        examples = {
+            "S3_CREATE_BUCKET('my-new-bucket')",
+            "S3_CREATE_BUCKET('my-bucket', 'AKIAIOSFODNN7EXAMPLE', 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY', 'us-west-2')"
+        },
+        category = FunctionCategory.DATASOURCE
+    )
+    public static void registerS3CreateBucket(ExecutionContext context) {
+        context.declareFunction("S3_CREATE_BUCKET",
+            List.of(
+                new Parameter("bucket", "STRING", ParameterMode.IN)
+            ),
+            new BuiltInFunctionDefinition("S3_CREATE_BUCKET", (List<Object> args, ActionListener<Object> listener) -> {
+                try {
+                    if (args.isEmpty()) {
+                        listener.onFailure(new RuntimeException("S3_CREATE_BUCKET requires a bucket name argument"));
+                        return;
+                    }
+
+                    String bucket = args.get(0).toString();
+                    AwsCredentials creds = getCredentials(args, 1, 2, 3);
+
+                    boolean success = s3CreateBucket(bucket, creds);
+                    listener.onResponse(success);
+                } catch (Exception e) {
+                    listener.onFailure(e);
+                }
+            })
+        );
+    }
+
     // ========================
     // S3 API Implementation
     // ========================
@@ -443,6 +484,44 @@ public class S3Functions {
         
         int responseCode = conn.getResponseCode();
         return responseCode == 200;
+    }
+
+    private static boolean s3CreateBucket(String bucket, AwsCredentials creds) throws Exception {
+        // Use path-style URL for bucket creation
+        String host = "s3." + creds.region + ".amazonaws.com";
+        
+        // For regions other than us-east-1, we need to specify the location constraint
+        String payload = "";
+        if (!"us-east-1".equals(creds.region)) {
+            payload = "<CreateBucketConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">" +
+                      "<LocationConstraint>" + creds.region + "</LocationConstraint>" +
+                      "</CreateBucketConfiguration>";
+        }
+        
+        Map<String, String> additionalHeaders = new HashMap<>();
+        if (!payload.isEmpty()) {
+            additionalHeaders.put("content-type", "application/xml");
+        }
+        
+        HttpURLConnection conn = createSignedRequest("PUT", host, "/" + bucket, payload, creds, additionalHeaders);
+        
+        if (!payload.isEmpty()) {
+            conn.setDoOutput(true);
+            try (OutputStream os = conn.getOutputStream()) {
+                os.write(payload.getBytes(StandardCharsets.UTF_8));
+            }
+        }
+        
+        int responseCode = conn.getResponseCode();
+        
+        // 200 = created, 409 = bucket already exists (which is fine)
+        if (responseCode == 200 || responseCode == 409) {
+            LOGGER.info("S3 bucket '{}' created or already exists in region '{}'", bucket, creds.region);
+            return true;
+        } else {
+            String error = readErrorResponse(conn);
+            throw new RuntimeException("S3 CREATE_BUCKET failed (" + responseCode + "): " + error);
+        }
     }
 
     // ========================
