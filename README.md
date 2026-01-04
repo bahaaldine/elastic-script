@@ -62,6 +62,8 @@ elastic-script is designed for:
   - [🔴 Expert: Archive Reports to S3](#-expert-archive-reports-to-s3)
   - [🔴 Expert: Slack Alerting with AI Summary](#-expert-slack-alerting-with-ai-summary)
   - [🔴 Expert: Scheduled Health Check](#-expert-scheduled-health-check)
+- [Configuration](#configuration)
+- [Roadmap: INTENT Layer & Encoded Expertise](#roadmap-intent-layer--encoded-expertise)
 
 ---
 
@@ -1412,6 +1414,302 @@ Access environment variables in scripts:
 DECLARE api_key STRING = ENV('OPENAI_API_KEY');
 DECLARE region STRING = ENV('AWS_REGION', 'us-east-1');  -- with default
 ```
+
+---
+
+---
+
+## Roadmap: INTENT Layer & Encoded Expertise
+
+> **Note:** This section documents planned capabilities that are not yet implemented. It serves as a design vision for how elastic-script will evolve to better serve AI agents and encode SRE best practices.
+
+### The Problem: Knowledge Silos in SRE
+
+Today, SRE expertise lives in scattered places:
+
+| Location | Problem |
+|----------|---------|
+| Runbooks (Confluence, Notion) | Often outdated, rarely followed |
+| Tribal Knowledge | Leaves when people leave |
+| Post-mortem Docs | Rarely referenced again |
+| Slack Threads | Buried, unsearchable |
+| Senior Engineer's Head | Single point of failure |
+
+When an incident happens at 3 AM, the on-call engineer (or an AI agent) needs to:
+1. **Know** what to do
+2. **Know** what order to do it in
+3. **Know** what to check first
+4. **Know** what NOT to do
+5. **Know** when to escalate
+
+### The Solution: Encoded Expertise via INTENTs
+
+The INTENT layer transforms tacit SRE knowledge into **executable, versioned, testable code**.
+
+An INTENT is a goal-oriented abstraction that:
+- **Encapsulates domain expertise** - SRE best practices baked in
+- **Handles safety checks** - Pre/post conditions, automatic rollback
+- **Provides guardrails** - Limits what agents can do
+- **Is auditable** - Clear intent = clear audit trail
+
+### INTENT Syntax (Planned)
+
+```sql
+-- Defined by humans (SRE experts), used by agents
+DEFINE INTENT safe_restart(
+    service STRING,
+    namespace STRING DEFAULT 'production'
+)
+DESCRIPTION 'Restart a service following SRE best practices'
+REQUIRES
+    -- Pre-conditions that must be true before execution
+    NOT is_peak_traffic_window() 
+        OR HAS_APPROVAL('restart-during-peak', service),
+    K8S_GET('deployment', service, namespace).spec.replicas >= 2
+ACTIONS
+    -- Capture state before changes (expertise: always have rollback data)
+    DECLARE pre_restart_state DOCUMENT;
+    SET pre_restart_state = capture_service_state(service, namespace);
+    
+    -- Use rolling restart, not hard kill (expertise: minimize disruption)
+    K8S_ROLLOUT_RESTART(service, namespace);
+    
+    -- Wait for rollout with timeout (expertise: don't assume success)
+    DECLARE status STRING;
+    SET status = K8S_ROLLOUT_WAIT(service, namespace, timeout=300);
+    
+    IF status != 'success' THEN
+        -- Auto-rollback on failure (expertise: fail safe)
+        K8S_ROLLOUT_UNDO(service, namespace);
+        THROW 'Restart failed, rolled back automatically';
+    END IF
+    
+    -- Verify health after restart (expertise: trust but verify)
+    WAIT 30 SECONDS;
+    IF NOT health_check_passing(service, namespace) THEN
+        K8S_ROLLOUT_UNDO(service, namespace);
+        PAGERDUTY_TRIGGER('Unhealthy after restart: ' || service, 'high');
+    END IF
+ON_FAILURE
+    SLACK_SEND('#sre-incidents', 'safe_restart failed for ' || service);
+    PAGERDUTY_TRIGGER('Automated restart failed: ' || service, 'high');
+END INTENT;
+```
+
+### Expertise Encoding Examples
+
+Each line in an INTENT can encode hard-won SRE knowledge:
+
+| Code | Expertise Encoded |
+|------|-------------------|
+| `NOT is_peak_traffic_window()` | Don't restart during peak hours |
+| `replicas >= 2` | Never restart single-replica services |
+| `capture_service_state()` | Always capture state before changes |
+| `K8S_ROLLOUT_RESTART` | Use rolling restart, not kill-all |
+| `K8S_ROLLOUT_WAIT(timeout=300)` | Don't assume restart succeeded |
+| `K8S_ROLLOUT_UNDO` on failure | Auto-rollback on failure |
+| `WAIT 30 SECONDS` | Give service time to stabilize |
+| `health_check_passing()` | Verify service is actually healthy |
+| `ON_FAILURE` block | Always have a failure path |
+
+### More Expertise Examples
+
+**Scaling Expertise:**
+```sql
+DEFINE INTENT safe_scale(service STRING, target_replicas NUMBER)
+REQUIRES
+    -- Never scale to 0 in production
+    target_replicas > 0 OR namespace != 'production',
+    -- Cap maximum to prevent cost explosion
+    target_replicas <= get_max_replicas(service),
+    -- Don't scale during deployments
+    NOT K8S_ROLLOUT_IN_PROGRESS(service)
+ACTIONS
+    DECLARE current NUMBER;
+    SET current = K8S_GET('deployment', service).spec.replicas;
+    
+    -- Gradual scaling for large changes (expertise: avoid resource starvation)
+    IF ABS(target_replicas - current) > 10 THEN
+        WHILE current < target_replicas DO
+            SET current = LEAST(current + 5, target_replicas);
+            K8S_SCALE(service, current);
+            WAIT 60 SECONDS;
+        END WHILE;
+    ELSE
+        K8S_SCALE(service, target_replicas);
+    END IF
+END INTENT;
+```
+
+**Database Failover Expertise:**
+```sql
+DEFINE INTENT database_failover(cluster STRING)
+REQUIRES
+    -- Only failover if replica is in sync (expertise: prevent data loss)
+    get_replica_lag(cluster) < 100,
+    -- Verify replica is healthy (expertise: don't failover to broken replica)
+    health_check_replica(cluster) = 'healthy',
+    -- Require approval for production DBs (expertise: high-risk operations need human)
+    HAS_APPROVAL('db-failover', cluster) OR NOT is_production(cluster)
+ACTIONS
+    -- Drain connections before failover (expertise: graceful transition)
+    SET connection_drain_mode(cluster, true);
+    WAIT 30 SECONDS;
+    
+    -- Final sync check (expertise: last-second safety)
+    IF get_replica_lag(cluster) > 50 THEN
+        THROW 'Replica lag too high for safe failover';
+    END IF
+    
+    promote_replica_to_primary(cluster);
+    update_service_endpoint(cluster);
+    
+    -- Verify writes work (expertise: verify the critical path)
+    IF NOT test_write_operation(cluster) THEN
+        THROW 'New primary not accepting writes';
+    END IF
+    
+    SLACK_SEND('#database-ops', 'Failover complete for ' || cluster);
+END INTENT;
+```
+
+### Agent Invocation
+
+With INTENTs, an LLM agent generates minimal, semantic code:
+
+```sql
+-- Instead of 20+ lines of imperative code, agent generates:
+INTENT safe_restart FOR SERVICE 'api-server';
+
+-- Or with parameters:
+INTENT safe_scale(service='payment-api', target_replicas=10);
+```
+
+### Benefits for AI Agents
+
+| Without INTENT | With INTENT |
+|----------------|-------------|
+| Agent generates 20+ lines of code | Agent generates 1-3 lines |
+| Agent must know all API details | Agent just picks the right intent |
+| High chance of subtle bugs | Intent is pre-tested by humans |
+| Hard to audit what agent "tried" to do | Clear semantic meaning |
+| No guardrails | Built-in safety checks |
+
+### Introspection (Planned)
+
+Agents will be able to discover available intents using ESQL-style syntax:
+
+```sql
+-- List all available intents
+FROM escript_intents() 
+| WHERE category = 'remediation' 
+| KEEP name, description, parameters
+
+-- Returns:
+-- name                  | description                          | parameters
+-- mitigate_latency      | Reduce latency through remediation   | service, namespace, strategy
+-- safe_restart          | Restart following best practices     | service, namespace
+-- safe_scale            | Scale with guardrails                | service, target_replicas
+-- database_failover     | Safely failover database cluster     | cluster
+```
+
+```sql
+-- Get details about a specific intent
+FROM escript_intent_details('safe_restart')
+| KEEP parameter, type, default_value, description
+
+-- Returns:
+-- parameter  | type    | default_value | description
+-- service    | STRING  | null          | Name of the service to restart
+-- namespace  | STRING  | 'production'  | Kubernetes namespace
+```
+
+### The Expertise Lifecycle
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                  │
+│   1. INCIDENT OCCURS                                            │
+│      └─→ Post-mortem reveals: "We should have checked X"       │
+│                                                                  │
+│   2. EXPERTISE ENCODED                                          │
+│      └─→ Add REQUIRES X_is_safe() to relevant intent           │
+│                                                                  │
+│   3. EXPERTISE TESTED                                           │
+│      └─→ CI tests verify the new guard works                   │
+│                                                                  │
+│   4. EXPERTISE DEPLOYED                                         │
+│      └─→ All future invocations protected                      │
+│                                                                  │
+│   5. EXPERTISE USED                                             │
+│      └─→ Agents and humans benefit automatically               │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Composable Intents
+
+Intents can invoke other intents, enabling complex workflows:
+
+```sql
+DEFINE INTENT full_incident_response(service STRING, incident_id STRING)
+ACTIONS
+    -- Acknowledge the incident
+    PAGERDUTY_ACKNOWLEDGE(incident_id);
+    
+    -- Try automated remediation
+    INTENT mitigate_latency FOR SERVICE service WITH STRATEGY 'gradual';
+    
+    -- Update the incident
+    PAGERDUTY_ADD_NOTE(incident_id, 'Automated remediation attempted', 'sre-bot@company.com');
+    
+    -- Notify team
+    SLACK_SEND('#incidents', 'Automated response initiated for ' || service);
+END INTENT;
+```
+
+### The Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      AI Agent                                    │
+│    "Handle the latency issue on api-server"                     │
+└───────────────────────┬─────────────────────────────────────────┘
+                        │ generates
+                        ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   INTENT Layer                                   │
+│    INTENT mitigate_latency FOR SERVICE 'api-server'             │
+│                                                                  │
+│    • Semantic, goal-oriented                                    │
+│    • Safe, pre-tested                                           │
+│    • Auditable                                                  │
+└───────────────────────┬─────────────────────────────────────────┘
+                        │ expands to
+                        ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              elastic-script Procedures                           │
+│    K8S_RESTART('api-server', 'production');                     │
+│    K8S_SCALE('api-server', 10, 'production');                   │
+│    PAGERDUTY_ADD_NOTE(...);                                     │
+└───────────────────────┬─────────────────────────────────────────┘
+                        │ executes
+                        ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              External Systems                                    │
+│    Kubernetes, PagerDuty, Slack, AWS, Terraform, etc.           │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Key Takeaways
+
+1. **Knowledge Becomes Versionable** - INTENTs live in git, with full history
+2. **Knowledge Becomes Testable** - Unit tests verify safety guards work
+3. **Knowledge Becomes Discoverable** - Agents query available intents
+4. **Knowledge Accumulates** - Each incident improves the intents
+5. **Junior Engineers Get Senior-Level Safety** - Guardrails apply to everyone
+
+The INTENT layer transforms elastic-script from a procedural language into a **living repository of institutional knowledge** that outlives any individual engineer.
 
 ---
 
