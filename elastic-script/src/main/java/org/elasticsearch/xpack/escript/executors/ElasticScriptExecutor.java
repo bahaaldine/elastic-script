@@ -45,6 +45,7 @@ import org.elasticsearch.xpack.escript.functions.builtin.runbooks.TerraformFunct
 import org.elasticsearch.xpack.escript.functions.builtin.runbooks.CICDFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.runbooks.AWSFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.runbooks.GenericFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.introspection.IntrospectionFunctions;
 import org.elasticsearch.xpack.escript.procedure.ProcedureDefinition;
 import org.elasticsearch.xpack.escript.utils.ActionListenerUtils;
 import org.elasticsearch.xpack.escript.visitors.ProcedureDefinitionVisitor;
@@ -216,6 +217,9 @@ public class ElasticScriptExecutor {
                                 CICDFunctions.registerAll(executionContext);
                                 AWSFunctions.registerAll(executionContext);
                                 GenericFunctions.registerAll(executionContext);
+                                
+                                // Introspection functions (must be registered last to see all other functions)
+                                IntrospectionFunctions.registerAll(executionContext);
 
                                 FunctionLoader.loadCommunityFunctions(executionContext);
 

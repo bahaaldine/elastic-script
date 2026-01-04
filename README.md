@@ -47,6 +47,7 @@ elastic-script is designed for:
   - [CI/CD Functions](#cicd-functions)
   - [AWS Functions](#aws-functions)
   - [Generic HTTP Functions](#generic-http-functions)
+- [Introspection Functions](#introspection-functions)
 - [Types & Type System](#types--type-system)
 - [REST API](#rest-api)
 - [Scenarios & Examples](#scenarios--examples)
@@ -815,6 +816,131 @@ SET response = WEBHOOK('https://api.example.com/notify', 'POST',
 IF response.success THEN
     PRINT 'Notification sent successfully';
 END IF;
+```
+
+---
+
+## Introspection Functions
+
+Introspection functions allow agents and users to discover what capabilities are available in the current execution context. This is essential for AI agents that need to understand what tools they can use.
+
+### Available Functions
+
+| Function | Description |
+|----------|-------------|
+| `ESCRIPT_FUNCTIONS()` | Returns an array of all registered functions with metadata |
+| `ESCRIPT_FUNCTION(name)` | Returns detailed information about a specific function |
+| `ESCRIPT_VARIABLES()` | Returns an array of all declared variables in scope |
+
+### ESCRIPT_FUNCTIONS()
+
+Returns an array of all registered functions. Each element is a DOCUMENT containing:
+- `name` - The function name
+- `is_builtin` - Whether this is a built-in function
+- `parameter_count` - Number of parameters
+- `parameters` - Array of parameter definitions (name, type, mode)
+
+**Example:**
+```sql
+-- List all available functions
+DECLARE all_functions ARRAY;
+SET all_functions = ESCRIPT_FUNCTIONS();
+
+-- Print function names
+FOR func IN all_functions LOOP
+    PRINT func['name'] || ' (' || func['parameter_count'] || ' params)';
+END LOOP
+```
+
+### ESCRIPT_FUNCTION(name)
+
+Returns detailed information about a specific function.
+
+**Returns a DOCUMENT with:**
+- `name` - The function name
+- `exists` - Whether the function exists (true/false)
+- `is_builtin` - Whether this is a built-in function
+- `parameter_count` - Number of parameters
+- `parameters` - Array of parameter definitions
+- `signature` - Human-readable signature string
+
+**Example:**
+```sql
+-- Get details about K8S_SCALE
+DECLARE func_info DOCUMENT;
+SET func_info = ESCRIPT_FUNCTION('K8S_SCALE');
+
+IF func_info['exists'] THEN
+    PRINT 'Signature: ' || func_info['signature'];
+    
+    -- Print each parameter
+    FOR param IN func_info['parameters'] LOOP
+        PRINT '  - ' || param['name'] || ': ' || param['type'];
+    END LOOP
+ELSE
+    PRINT 'Function not found';
+END IF
+```
+
+**Output:**
+```
+Signature: K8S_SCALE(deployment STRING, replicas NUMBER, namespace STRING)
+  - deployment: STRING
+  - replicas: NUMBER
+  - namespace: STRING
+```
+
+### ESCRIPT_VARIABLES()
+
+Returns an array of all declared variables in the current scope, including parent scopes.
+
+**Each element contains:**
+- `name` - The variable name
+- `type` - The variable type
+- `value` - The current value (summarized for large arrays/documents)
+
+**Example:**
+```sql
+DECLARE service STRING = 'api-server';
+DECLARE replicas NUMBER = 5;
+DECLARE items ARRAY = [1, 2, 3, 4, 5];
+
+-- Inspect all variables
+DECLARE vars ARRAY;
+SET vars = ESCRIPT_VARIABLES();
+
+FOR v IN vars LOOP
+    PRINT v['name'] || ' (' || v['type'] || ') = ' || v['value'];
+END LOOP
+```
+
+**Output:**
+```
+items (ARRAY) = [1, 2, 3, 4, 5]
+replicas (NUMBER) = 5
+service (STRING) = api-server
+```
+
+### Use Case: AI Agent Discovery
+
+Introspection enables AI agents to discover available capabilities:
+
+```sql
+-- Agent wants to find Kubernetes-related functions
+DECLARE funcs ARRAY = ESCRIPT_FUNCTIONS();
+DECLARE k8s_funcs ARRAY = [];
+
+FOR func IN funcs LOOP
+    IF INSTR(func['name'], 'K8S_') = 0 THEN
+        SET k8s_funcs = ARRAY_APPEND(k8s_funcs, func);
+    END IF
+END LOOP
+
+PRINT 'Found ' || ARRAY_LENGTH(k8s_funcs) || ' Kubernetes functions:';
+FOR f IN k8s_funcs LOOP
+    DECLARE info DOCUMENT = ESCRIPT_FUNCTION(f['name']);
+    PRINT '  ' || info['signature'];
+END LOOP
 ```
 
 ---
