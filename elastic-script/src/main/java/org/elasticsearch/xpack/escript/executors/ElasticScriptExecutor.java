@@ -39,6 +39,12 @@ import org.elasticsearch.xpack.escript.functions.builtin.inference.InferenceFunc
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.OpenAIFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.S3Functions;
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.SlackFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.runbooks.KubernetesFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.runbooks.PagerDutyFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.runbooks.TerraformFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.runbooks.CICDFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.runbooks.AWSFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.runbooks.GenericFunctions;
 import org.elasticsearch.xpack.escript.procedure.ProcedureDefinition;
 import org.elasticsearch.xpack.escript.utils.ActionListenerUtils;
 import org.elasticsearch.xpack.escript.visitors.ProcedureDefinitionVisitor;
@@ -202,6 +208,14 @@ public class ElasticScriptExecutor {
                                 SlackFunctions.registerAll(executionContext);
                                 S3Functions.registerAll(executionContext);
                                 InferenceFunctions.registerAll(executionContext, client);
+                                
+                                // Runbook integrations
+                                KubernetesFunctions.registerAll(executionContext);
+                                PagerDutyFunctions.registerAll(executionContext);
+                                TerraformFunctions.registerAll(executionContext);
+                                CICDFunctions.registerAll(executionContext);
+                                AWSFunctions.registerAll(executionContext);
+                                GenericFunctions.registerAll(executionContext);
 
                                 FunctionLoader.loadCommunityFunctions(executionContext);
 

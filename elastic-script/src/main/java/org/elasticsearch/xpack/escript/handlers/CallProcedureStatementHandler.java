@@ -21,6 +21,12 @@ import org.elasticsearch.xpack.escript.functions.builtin.inference.InferenceFunc
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.OpenAIFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.S3Functions;
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.SlackFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.runbooks.KubernetesFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.runbooks.PagerDutyFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.runbooks.TerraformFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.runbooks.CICDFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.runbooks.AWSFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.runbooks.GenericFunctions;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptParser;
 import org.elasticsearch.xpack.escript.primitives.ReturnValue;
 import org.elasticsearch.xpack.escript.utils.ActionListenerUtils;
@@ -78,6 +84,14 @@ public class CallProcedureStatementHandler {
                         SlackFunctions.registerAll(childContext);
                         S3Functions.registerAll(childContext);
                         InferenceFunctions.registerAll(childContext, executor.getClient());
+                        
+                        // Runbook integrations
+                        KubernetesFunctions.registerAll(childContext);
+                        PagerDutyFunctions.registerAll(childContext);
+                        TerraformFunctions.registerAll(childContext);
+                        CICDFunctions.registerAll(childContext);
+                        AWSFunctions.registerAll(childContext);
+                        GenericFunctions.registerAll(childContext);
                         EsqlBuiltInFunctions.registerAll(childContext,executor,executor.getClient());
 
                         new ProcedureExecutor(childContext, executor.getThreadPool(), executor.getClient(), executor.getTokenStream())

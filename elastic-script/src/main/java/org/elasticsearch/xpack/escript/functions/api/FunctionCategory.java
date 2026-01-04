@@ -19,5 +19,6 @@ public enum FunctionCategory {
     SECURITY,
     NETWORK,
     STATS,
-    UTILITY
+    UTILITY,
+    RUNBOOK
 }
