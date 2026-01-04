@@ -40,6 +40,13 @@ elastic-script is designed for:
 - [Third-Party Integrations](#third-party-integrations)
   - [Slack Functions](#slack-functions)
   - [S3 Functions](#s3-functions)
+- [Runbook Integrations](#runbook-integrations)
+  - [Kubernetes Functions](#kubernetes-functions)
+  - [PagerDuty Functions](#pagerduty-functions)
+  - [Terraform Cloud Functions](#terraform-cloud-functions)
+  - [CI/CD Functions](#cicd-functions)
+  - [AWS Functions](#aws-functions)
+  - [Generic HTTP Functions](#generic-http-functions)
 - [Types & Type System](#types--type-system)
 - [REST API](#rest-api)
 - [Scenarios & Examples](#scenarios--examples)
@@ -606,6 +613,206 @@ Interact with AWS S3. Requires `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and
 -- Archive daily report to S3
 DECLARE report STRING = generate_report();
 S3_PUT('my-reports-bucket', 'reports/daily-' || CURRENT_DATE() || '.txt', report);
+```
+
+---
+
+## Runbook Integrations
+
+Runbook integrations enable elastic-script to orchestrate existing automation infrastructure, making it an ideal "AI SRE" that can investigate issues and take remediation actions.
+
+### Kubernetes Functions
+
+Manage Kubernetes resources. Requires `K8S_API_SERVER` and `K8S_TOKEN` environment variables, or pass them as parameters.
+
+| Function | Description |
+|----------|-------------|
+| `K8S_SCALE(deployment, replicas, namespace?, api_server?, token?)` | Scale a deployment |
+| `K8S_RESTART(deployment, namespace?, api_server?, token?)` | Trigger rolling restart |
+| `K8S_GET(resource_type, name, namespace?, api_server?, token?)` | Get resource details |
+| `K8S_GET_PODS(label_selector?, namespace?, api_server?, token?)` | List pods |
+| `K8S_DELETE(resource_type, name, namespace?, api_server?, token?)` | Delete a resource |
+| `K8S_LOGS(pod, container?, tail_lines?, namespace?, api_server?, token?)` | Get pod logs |
+| `K8S_DESCRIBE(resource_type, name, namespace?, api_server?, token?)` | Describe a resource |
+
+**Example:**
+```sql
+-- Scale up during high traffic, then scale back down
+K8S_SCALE('api-server', 10, 'production');
+PRINT 'Scaled api-server to 10 replicas';
+
+-- After traffic subsides
+K8S_SCALE('api-server', 3, 'production');
+```
+
+---
+
+### PagerDuty Functions
+
+Manage incidents in PagerDuty. Requires `PAGERDUTY_ROUTING_KEY` for events and `PAGERDUTY_API_KEY` for REST API.
+
+| Function | Description |
+|----------|-------------|
+| `PAGERDUTY_TRIGGER(summary, severity?, dedup_key?, routing_key?)` | Create incident, returns dedup_key |
+| `PAGERDUTY_RESOLVE(dedup_key, routing_key?)` | Resolve incident |
+| `PAGERDUTY_ACKNOWLEDGE(dedup_key, routing_key?)` | Acknowledge incident |
+| `PAGERDUTY_ADD_NOTE(incident_id, content, user_email, api_key?)` | Add note to incident |
+| `PAGERDUTY_GET_INCIDENT(incident_id, api_key?)` | Get incident details |
+| `PAGERDUTY_LIST_INCIDENTS(statuses?, limit?, api_key?)` | List incidents |
+
+**Example:**
+```sql
+-- Trigger an incident and store the dedup key
+DECLARE incident_key STRING;
+SET incident_key = PAGERDUTY_TRIGGER('Database connection pool exhausted', 'critical');
+
+-- Later, when resolved
+PAGERDUTY_RESOLVE(incident_key);
+```
+
+---
+
+### Terraform Cloud Functions
+
+Manage Terraform Cloud workspaces and runs. Requires `TFC_TOKEN` and `TFC_ORG` environment variables.
+
+| Function | Description |
+|----------|-------------|
+| `TF_CLOUD_RUN(workspace, message?, auto_apply?, token?, org?)` | Trigger a run, returns run_id |
+| `TF_CLOUD_STATUS(run_id, token?)` | Get run status |
+| `TF_CLOUD_WAIT(run_id, timeout?, token?)` | Wait for run completion |
+| `TF_CLOUD_CANCEL(run_id, token?)` | Cancel a run |
+| `TF_CLOUD_OUTPUTS(workspace, token?, org?)` | Get workspace outputs |
+| `TF_CLOUD_LIST_WORKSPACES(search?, token?, org?)` | List workspaces |
+
+**Example:**
+```sql
+-- Trigger infrastructure scaling via Terraform
+DECLARE run_id STRING;
+SET run_id = TF_CLOUD_RUN('production-scaling', 'Auto-scale triggered by elastic-script', true);
+
+-- Wait for completion
+DECLARE result DOCUMENT;
+SET result = TF_CLOUD_WAIT(run_id);
+PRINT 'Terraform run completed with status: ' || result.status;
+```
+
+---
+
+### CI/CD Functions
+
+Trigger and monitor CI/CD pipelines across Jenkins, GitHub Actions, GitLab CI, and ArgoCD.
+
+#### Jenkins
+Requires `JENKINS_URL`, `JENKINS_USER`, and `JENKINS_TOKEN` environment variables.
+
+| Function | Description |
+|----------|-------------|
+| `JENKINS_BUILD(job)` | Trigger a build |
+| `JENKINS_STATUS(job)` | Get last build status |
+
+#### GitHub Actions
+Requires `GITHUB_TOKEN` environment variable.
+
+| Function | Description |
+|----------|-------------|
+| `GITHUB_WORKFLOW(repo, workflow, ref?, inputs_json?)` | Trigger workflow |
+| `GITHUB_WORKFLOW_STATUS(repo, run_id)` | Get run status |
+
+#### GitLab CI
+Requires `GITLAB_TOKEN` environment variable. Optionally set `GITLAB_URL` (defaults to gitlab.com).
+
+| Function | Description |
+|----------|-------------|
+| `GITLAB_PIPELINE(project, ref)` | Trigger pipeline |
+| `GITLAB_PIPELINE_STATUS(project, pipeline_id)` | Get pipeline status |
+
+#### ArgoCD
+Requires `ARGOCD_URL` and `ARGOCD_TOKEN` environment variables.
+
+| Function | Description |
+|----------|-------------|
+| `ARGOCD_SYNC(app, prune?)` | Sync application |
+| `ARGOCD_GET_APP(app)` | Get application details |
+
+**Example:**
+```sql
+-- Trigger deployment via GitHub Actions
+GITHUB_WORKFLOW('myorg/myrepo', 'deploy.yml', 'main', '{"environment": "production"}');
+
+-- Or sync via ArgoCD
+ARGOCD_SYNC('production-app', true);
+```
+
+---
+
+### AWS Functions
+
+Interact with AWS services. Requires `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and optionally `AWS_REGION`.
+
+#### SSM (Systems Manager)
+
+| Function | Description |
+|----------|-------------|
+| `AWS_SSM_RUN(instance_ids, command, access_key?, secret_key?, region?)` | Run command, returns command_id |
+| `AWS_SSM_STATUS(command_id, instance_id, access_key?, secret_key?, region?)` | Get command status |
+
+#### Lambda
+
+| Function | Description |
+|----------|-------------|
+| `AWS_LAMBDA_INVOKE(function_name, payload?, access_key?, secret_key?, region?)` | Invoke Lambda function |
+
+#### EC2
+
+| Function | Description |
+|----------|-------------|
+| `AWS_EC2_REBOOT(instance_ids, access_key?, secret_key?, region?)` | Reboot instances |
+| `AWS_EC2_START(instance_ids, access_key?, secret_key?, region?)` | Start instances |
+| `AWS_EC2_STOP(instance_ids, force?, access_key?, secret_key?, region?)` | Stop instances |
+
+#### Auto Scaling
+
+| Function | Description |
+|----------|-------------|
+| `AWS_ASG_SET_CAPACITY(asg_name, desired_capacity, access_key?, secret_key?, region?)` | Set desired capacity |
+| `AWS_ASG_DESCRIBE(asg_name, access_key?, secret_key?, region?)` | Describe ASG |
+
+**Example:**
+```sql
+-- Run a diagnostic command on multiple instances
+DECLARE cmd_id STRING;
+SET cmd_id = AWS_SSM_RUN('i-1234567890,i-0987654321', 'df -h && free -m');
+
+-- Check the result
+DECLARE result DOCUMENT;
+SET result = AWS_SSM_STATUS(cmd_id, 'i-1234567890');
+PRINT 'Command output: ' || result.StandardOutputContent;
+```
+
+---
+
+### Generic HTTP Functions
+
+Make arbitrary HTTP requests to any endpoint.
+
+| Function | Description |
+|----------|-------------|
+| `WEBHOOK(url, method?, headers_json?, body?, timeout?)` | Generic webhook call, returns full response |
+| `HTTP_GET(url, headers_json?)` | Simple GET request, returns body |
+| `HTTP_POST(url, body, headers_json?)` | Simple POST request, returns body |
+
+**Example:**
+```sql
+-- Send to a custom webhook
+DECLARE response DOCUMENT;
+SET response = WEBHOOK('https://api.example.com/notify', 'POST', 
+    '{"Authorization": "Bearer token123"}',
+    '{"event": "incident", "severity": "high"}');
+
+IF response.success THEN
+    PRINT 'Notification sent successfully';
+END IF;
 ```
 
 ---
