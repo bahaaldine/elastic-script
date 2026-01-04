@@ -758,23 +758,85 @@ public class InferenceFunctions {
         List<Object> embedding = new ArrayList<>();
         
         if (results == null) {
+            LOGGER.debug("extractEmbedding: results is null");
             return embedding;
         }
 
+        LOGGER.debug("extractEmbedding: results class = {}", results.getClass().getName());
+        LOGGER.debug("extractEmbedding: results.toString() = {}", results.toString());
+
+        // Try to extract from asMap first - this often has the structured embedding
         try {
-            var resultsList = results.transformToCoordinationFormat();
-            if (resultsList != null && !resultsList.isEmpty()) {
-                var firstResult = resultsList.iterator().next();
-                if (firstResult instanceof List) {
+            var asMap = results.asMap();
+            LOGGER.debug("extractEmbedding: asMap = {}", asMap);
+            
+            // Look for common embedding keys
+            for (String key : new String[]{"embedding", "embeddings", "text_embedding", "values"}) {
+                if (asMap.containsKey(key)) {
+                    Object embeddingObj = asMap.get(key);
+                    LOGGER.debug("extractEmbedding: found key '{}' with type {}", key, 
+                        embeddingObj != null ? embeddingObj.getClass().getName() : "null");
+                    if (embeddingObj instanceof List) {
+                        @SuppressWarnings("unchecked")
+                        List<Object> embList = (List<Object>) embeddingObj;
+                        LOGGER.debug("extractEmbedding: returning {} dimensions from '{}'", embList.size(), key);
+                        return embList;
+                    }
+                }
+            }
+            
+            // Check if the map itself contains numeric values (the embedding)
+            if (!asMap.isEmpty()) {
+                // Some implementations put embeddings directly in map with numeric keys or as array elements
+                Object firstValue = asMap.values().iterator().next();
+                if (firstValue instanceof List) {
                     @SuppressWarnings("unchecked")
-                    List<Object> embeddingList = (List<Object>) firstResult;
-                    return embeddingList;
+                    List<Object> embList = (List<Object>) firstValue;
+                    if (!embList.isEmpty() && embList.get(0) instanceof Number) {
+                        LOGGER.debug("extractEmbedding: returning {} dimensions from first map value", embList.size());
+                        return embList;
+                    }
                 }
             }
         } catch (Exception e) {
-            LOGGER.debug("Could not extract embedding via coordinationFormat: {}", e.getMessage());
+            LOGGER.debug("Could not extract embedding via asMap: {}", e.getMessage());
+        }
+
+        try {
+            // Try transformToCoordinationFormat
+            var resultsList = results.transformToCoordinationFormat();
+            LOGGER.debug("extractEmbedding: coordinationFormat has results: {}", resultsList != null);
+            
+            if (resultsList != null) {
+                for (var result : resultsList) {
+                    LOGGER.debug("extractEmbedding: result class = {}", 
+                        result != null ? result.getClass().getName() : "null");
+                    
+                    // InferenceResults might have asMap method too
+                    try {
+                        var resultAsMap = result.asMap();
+                        LOGGER.debug("extractEmbedding: result.asMap = {}", resultAsMap);
+                        for (String key : new String[]{"embedding", "embeddings", "values", "text_embedding"}) {
+                            if (resultAsMap.containsKey(key)) {
+                                Object embObj = resultAsMap.get(key);
+                                if (embObj instanceof List) {
+                                    @SuppressWarnings("unchecked")
+                                    List<Object> embList = (List<Object>) embObj;
+                                    LOGGER.debug("extractEmbedding: returning {} dimensions from result.asMap.{}", embList.size(), key);
+                                    return embList;
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        LOGGER.debug("Could not get asMap from result: {}", e.getMessage());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Could not extract embedding via coordinationFormat: {}", e.getMessage());
         }
         
+        LOGGER.warn("extractEmbedding: returning empty list, could not extract from results");
         return embedding;
     }
 
@@ -785,25 +847,92 @@ public class InferenceFunctions {
         List<Map<String, Object>> reranked = new ArrayList<>();
         
         if (results == null) {
+            LOGGER.debug("extractRerankResults: results is null");
             return reranked;
+        }
+
+        LOGGER.debug("extractRerankResults: results class = {}", results.getClass().getName());
+        LOGGER.debug("extractRerankResults: results.toString() = {}", results.toString());
+
+        try {
+            // First, try asMap which often has the structured result
+            var asMap = results.asMap();
+            LOGGER.debug("extractRerankResults: asMap = {}", asMap);
+            
+            if (asMap != null && !asMap.isEmpty()) {
+                // Check for common result structures - rerank results
+                for (String key : new String[]{"rerank", "results", "documents", "ranked_results"}) {
+                    if (asMap.containsKey(key)) {
+                        Object rerankObj = asMap.get(key);
+                        if (rerankObj instanceof List) {
+                            @SuppressWarnings("unchecked")
+                            List<?> rerankList = (List<?>) rerankObj;
+                            for (int i = 0; i < rerankList.size(); i++) {
+                                Object item = rerankList.get(i);
+                                Map<String, Object> doc = new java.util.HashMap<>();
+                                doc.put("index", i);
+                                if (item instanceof Map) {
+                                    @SuppressWarnings("unchecked")
+                                    Map<String, Object> itemMap = (Map<String, Object>) item;
+                                    doc.putAll(itemMap);
+                                } else {
+                                    doc.put("value", item != null ? item.toString() : null);
+                                }
+                                reranked.add(doc);
+                            }
+                            if (!reranked.isEmpty()) {
+                                LOGGER.debug("extractRerankResults: found {} results in '{}' key", reranked.size(), key);
+                                return reranked;
+                            }
+                        }
+                    }
+                }
+                
+                // Return the whole map as a single result if it has score/relevance info
+                if (asMap.containsKey("score") || asMap.containsKey("relevance_score")) {
+                    reranked.add(new java.util.HashMap<>(asMap));
+                    LOGGER.debug("extractRerankResults: returning single result with score");
+                    return reranked;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.debug("Could not extract rerank results via asMap: {}", e.getMessage());
         }
 
         try {
             var resultsList = results.transformToCoordinationFormat();
+            LOGGER.debug("extractRerankResults: coordinationFormat has results: {}", resultsList != null);
+            
             if (resultsList != null) {
                 int index = 0;
                 for (var result : resultsList) {
                     Map<String, Object> doc = new java.util.HashMap<>();
                     doc.put("index", index);
-                    doc.put("result", result);
+                    
+                    // Try to get structured data from the result
+                    try {
+                        var resultAsMap = result.asMap();
+                        doc.putAll(resultAsMap);
+                        LOGGER.debug("extractRerankResults: added result {} from asMap", index);
+                    } catch (Exception e) {
+                        doc.put("result", result.toString());
+                        LOGGER.debug("extractRerankResults: added result {} as string", index);
+                    }
+                    
                     reranked.add(doc);
                     index++;
                 }
+                if (!reranked.isEmpty()) {
+                    LOGGER.debug("extractRerankResults: returning {} results from coordinationFormat", reranked.size());
+                }
             }
         } catch (Exception e) {
-            LOGGER.debug("Could not extract rerank results: {}", e.getMessage());
+            LOGGER.debug("Could not extract rerank results via coordinationFormat: {}", e.getMessage());
         }
         
+        if (reranked.isEmpty()) {
+            LOGGER.warn("extractRerankResults: returning empty list, could not extract from results");
+        }
         return reranked;
     }
 
