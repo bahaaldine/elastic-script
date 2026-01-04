@@ -42,7 +42,19 @@ elastic-script is designed for:
   - [S3 Functions](#s3-functions)
 - [Types & Type System](#types--type-system)
 - [REST API](#rest-api)
-- [Examples](#examples)
+- [Scenarios & Examples](#scenarios--examples)
+  - [🟢 Beginner: Hello World](#-beginner-hello-world)
+  - [🟢 Beginner: Simple Query Loop](#-beginner-simple-query-loop)
+  - [🟢 Beginner: Variables and Conditionals](#-beginner-variables-and-conditionals)
+  - [🟡 Intermediate: Parameterized Queries](#-intermediate-parameterized-queries)
+  - [🟡 Intermediate: Cross-Index Correlation](#-intermediate-cross-index-correlation)
+  - [🟡 Intermediate: Error Handling](#-intermediate-error-handling)
+  - [🟠 Advanced: AI-Powered Semantic Search](#-advanced-ai-powered-semantic-search)
+  - [🟠 Advanced: LLM-Powered Error Analysis](#-advanced-llm-powered-error-analysis)
+  - [🔴 Expert: Full Incident Investigation](#-expert-full-incident-investigation)
+  - [🔴 Expert: Archive Reports to S3](#-expert-archive-reports-to-s3)
+  - [🔴 Expert: Slack Alerting with AI Summary](#-expert-slack-alerting-with-ai-summary)
+  - [🔴 Expert: Scheduled Health Check](#-expert-scheduled-health-check)
 
 ---
 
@@ -659,26 +671,234 @@ GET /_query/escript/procedures
 
 ---
 
-## Examples
+## Scenarios & Examples
 
-### Log Analysis with Reranking
+This section provides scenarios from **beginner to advanced**, demonstrating elastic-script's capabilities for observability, AI integration, and automation.
+
+### 🟢 Beginner: Hello World
+
+Your first elastic-script procedure:
 
 ```sql
-CREATE PROCEDURE smart_log_search(IN query STRING)
+CREATE PROCEDURE hello_world()
 BEGIN
-    -- Fetch error logs using CURSOR
+    PRINT 'Hello from elastic-script!';
+    RETURN 'Hello, World!';
+END PROCEDURE
+```
+
+Execute it:
+```bash
+POST /_escript
+{"procedure": "hello_world"}
+```
+
+---
+
+### 🟢 Beginner: Simple Query Loop
+
+Iterate over ESQL query results:
+
+```sql
+CREATE PROCEDURE list_error_services()
+BEGIN
+    DECLARE error_logs CURSOR FOR 
+        FROM application-logs 
+        | WHERE log.level == "ERROR" 
+        | STATS count = COUNT(*) BY service.name 
+        | SORT count DESC 
+        | LIMIT 5;
+    
+    DECLARE result STRING = 'Top 5 services with errors:\n';
+    
+    FOR row IN error_logs LOOP
+        SET result = result || row['service.name'] || ': ' || row['count'] || ' errors\n';
+    END LOOP
+    
+    PRINT result;
+    RETURN result;
+END PROCEDURE
+```
+
+---
+
+### 🟢 Beginner: Variables and Conditionals
+
+Working with variables and IF statements:
+
+```sql
+CREATE PROCEDURE check_error_threshold(threshold INT)
+BEGIN
+    DECLARE error_logs CURSOR FOR 
+        FROM application-logs 
+        | WHERE log.level == "ERROR" 
+        | STATS error_count = COUNT(*);
+    
+    DECLARE count INT = 0;
+    FOR row IN error_logs LOOP
+        SET count = row['error_count'];
+    END LOOP
+    
+    IF count > threshold THEN
+        PRINT 'ALERT: ' || count || ' errors exceed threshold of ' || threshold;
+        RETURN 'CRITICAL';
+    ELSEIF count > 0 THEN
+        PRINT 'OK: ' || count || ' errors (below threshold)';
+        RETURN 'WARNING';
+    ELSE
+        PRINT 'OK: No errors found';
+        RETURN 'OK';
+    END IF
+END PROCEDURE
+```
+
+Call with parameter:
+```bash
+POST /_escript
+{"procedure": "check_error_threshold", "arguments": {"threshold": 100}}
+```
+
+---
+
+### 🟡 Intermediate: Parameterized Queries
+
+Use `:variable` syntax to pass parameters into CURSOR queries:
+
+```sql
+CREATE PROCEDURE get_service_errors(service_name STRING, max_results INT)
+BEGIN
+    -- :service_name is substituted before ESQL execution
+    DECLARE errors CURSOR FOR 
+        FROM application-logs 
+        | WHERE kubernetes.deployment.name == :service_name
+        | WHERE log.level == "ERROR"
+        | SORT @timestamp DESC 
+        | LIMIT :max_results;
+    
+    DECLARE messages ARRAY = [];
+    FOR err IN errors LOOP
+        SET messages = ARRAY_APPEND(messages, err['message']);
+    END LOOP
+    
+    PRINT 'Found ' || LENGTH(messages) || ' errors for ' || service_name;
+    RETURN messages;
+END PROCEDURE
+```
+
+---
+
+### 🟡 Intermediate: Cross-Index Correlation
+
+Query multiple indices and correlate data:
+
+```sql
+CREATE PROCEDURE correlate_pod_issues(pod_name STRING)
+BEGIN
+    -- Get logs for this pod
+    DECLARE logs CURSOR FOR 
+        FROM application-logs 
+        | WHERE kubernetes.pod.name == :pod_name
+        | WHERE log.level IN ("ERROR", "WARN")
+        | LIMIT 10;
+    
+    -- Get K8s events for this pod  
+    DECLARE events CURSOR FOR 
+        FROM kubernetes-events 
+        | WHERE kubernetes.pod.name == :pod_name
+        | SORT @timestamp DESC 
+        | LIMIT 5;
+    
+    -- Get metrics for this pod
+    DECLARE metrics CURSOR FOR 
+        FROM system-metrics 
+        | WHERE kubernetes.pod.name == :pod_name
+        | SORT @timestamp DESC 
+        | LIMIT 5;
+    
+    DECLARE report STRING = 'Pod: ' || pod_name || '\n\n';
+    
+    SET report = report || '=== LOGS ===\n';
+    FOR log IN logs LOOP
+        SET report = report || '[' || log['log.level'] || '] ' || log['message'] || '\n';
+    END LOOP
+    
+    SET report = report || '\n=== K8S EVENTS ===\n';
+    FOR event IN events LOOP
+        SET report = report || '[' || event['kubernetes.event.reason'] || '] ' || event['kubernetes.event.message'] || '\n';
+    END LOOP
+    
+    SET report = report || '\n=== METRICS ===\n';
+    FOR metric IN metrics LOOP
+        SET report = report || 'CPU: ' || ROUND(metric['system.cpu.total.pct'] * 100) || '%, '
+                    || 'Memory: ' || ROUND(metric['system.memory.used.pct'] * 100) || '%\n';
+    END LOOP
+    
+    PRINT report;
+    RETURN report;
+END PROCEDURE
+```
+
+---
+
+### 🟡 Intermediate: Error Handling
+
+Use TRY/CATCH for robust procedures:
+
+```sql
+CREATE PROCEDURE safe_analysis(service_name STRING)
+BEGIN
+    DECLARE result STRING = '';
+    
+    TRY
+        DECLARE logs CURSOR FOR 
+            FROM application-logs 
+            | WHERE kubernetes.deployment.name == :service_name
+            | WHERE log.level == "ERROR"
+            | LIMIT 5;
+        
+        DECLARE log_text STRING = '';
+        FOR log IN logs LOOP
+            SET log_text = log_text || log['message'] || '\n';
+        END LOOP
+        
+        IF LENGTH(log_text) > 0 THEN
+            -- This might fail if LLM is unavailable
+            SET result = LLM_COMPLETE('Summarize: ' || log_text);
+        ELSE
+            SET result = 'No errors found for ' || service_name;
+        END IF
+        
+    CATCH
+        SET result = 'Analysis failed - falling back to raw data';
+        PRINT 'Error during analysis, returning fallback response';
+    END TRY
+    
+    RETURN result;
+END PROCEDURE
+```
+
+---
+
+### 🟠 Advanced: AI-Powered Semantic Search
+
+Use embeddings and reranking for intelligent log search:
+
+```sql
+CREATE PROCEDURE smart_log_search(query STRING)
+BEGIN
+    -- Fetch error logs
     DECLARE error_logs CURSOR FOR 
         FROM application-logs 
         | WHERE log.level == "ERROR" 
         | LIMIT 20;
     
-    -- Collect error messages
+    -- Collect messages into array
     DECLARE messages ARRAY = [];
     FOR log IN error_logs LOOP
         SET messages = ARRAY_APPEND(messages, log['message']);
     END LOOP
     
-    -- Rerank by relevance to query
+    -- Use ML reranking to find most relevant
     IF LENGTH(messages) > 0 THEN
         DECLARE ranked ARRAY = INFERENCE_RERANK('.rerank-v1-elasticsearch', query, messages);
         PRINT 'Top matches for: ' || query;
@@ -689,36 +909,147 @@ BEGIN
 END PROCEDURE
 ```
 
-### AI-Powered Error Analysis
+Call it:
+```bash
+POST /_escript
+{"procedure": "smart_log_search", "arguments": {"query": "authentication failure"}}
+```
+
+---
+
+### 🟠 Advanced: LLM-Powered Error Analysis
+
+Generate AI summaries of error patterns:
 
 ```sql
-CREATE PROCEDURE analyze_errors()
+CREATE PROCEDURE analyze_errors_with_ai(service_name STRING)
 BEGIN
     DECLARE error_logs CURSOR FOR 
         FROM application-logs 
-        | WHERE log.level == "ERROR" 
-        | LIMIT 10;
+        | WHERE kubernetes.deployment.name == :service_name
+        | WHERE log.level IN ("ERROR", "FATAL")
+        | SORT @timestamp DESC
+        | LIMIT 15;
     
     DECLARE error_summary STRING = '';
     DECLARE count INT = 0;
     
     FOR log IN error_logs LOOP
-        SET error_summary = error_summary || log['message'] || '\n';
+        SET error_summary = error_summary || '[' || log['log.level'] || '] ' || log['message'] || '\n';
         SET count = count + 1;
     END LOOP
     
     IF count > 0 THEN
-        DECLARE prompt STRING = 'Summarize these ' || count || ' errors:\n' || error_summary;
+        DECLARE prompt STRING = 'Analyze these ' || count || ' errors from ' || service_name || 
+                               ' and provide: 1) Root cause 2) Impact 3) Fix:\n\n' || error_summary;
         DECLARE analysis STRING = LLM_COMPLETE(prompt);
-        PRINT 'Analysis: ' || analysis;
+        PRINT 'Analysis for ' || service_name || ':';
+        PRINT analysis;
         RETURN analysis;
     ELSE
-        RETURN 'No errors found';
+        RETURN 'No errors found for ' || service_name;
     END IF
 END PROCEDURE
 ```
 
-### Archive Reports to S3
+---
+
+### 🔴 Expert: Full Incident Investigation
+
+Comprehensive incident analysis correlating logs, metrics, K8s events, and traces:
+
+```sql
+CREATE PROCEDURE investigate_service(target_service STRING)
+BEGIN
+    PRINT 'Investigating service: ' || target_service;
+    
+    -- Step 1: Get K8s events for this service
+    DECLARE k8s_events CURSOR FOR 
+        FROM kubernetes-events 
+        | WHERE kubernetes.deployment.name == :target_service
+        | SORT @timestamp DESC 
+        | LIMIT 10;
+    
+    DECLARE event_summary STRING = '';
+    DECLARE event_count INT = 0;
+    
+    FOR event IN k8s_events LOOP
+        SET event_summary = event_summary || '[' || event['kubernetes.event.reason'] || '] ' 
+                           || event['kubernetes.event.message'] || '\n';
+        SET event_count = event_count + 1;
+    END LOOP
+    
+    PRINT 'Found ' || event_count || ' K8s events';
+    
+    -- Step 2: Get error logs for this service
+    DECLARE error_logs CURSOR FOR
+        FROM application-logs
+        | WHERE kubernetes.deployment.name == :target_service
+        | WHERE log.level IN ("ERROR", "FATAL")
+        | SORT @timestamp DESC
+        | LIMIT 15;
+    
+    DECLARE log_summary STRING = '';
+    DECLARE error_count INT = 0;
+    
+    FOR log_entry IN error_logs LOOP
+        SET log_summary = log_summary || '[' || log_entry['log.level'] || '] ' 
+                         || log_entry['message'] || '\n';
+        SET error_count = error_count + 1;
+    END LOOP
+    
+    PRINT 'Found ' || error_count || ' errors';
+    
+    -- Step 3: Get memory metrics
+    DECLARE high_mem CURSOR FOR
+        FROM system-metrics
+        | WHERE kubernetes.deployment.name == :target_service
+        | WHERE system.memory.used.pct > 0.6
+        | SORT system.memory.used.pct DESC
+        | LIMIT 5;
+    
+    DECLARE metric_summary STRING = '';
+    FOR metric IN high_mem LOOP
+        SET metric_summary = metric_summary || 'Memory: ' || ROUND(metric['system.memory.used.pct'] * 100) || '%, '
+                            || 'CPU: ' || ROUND(metric['system.cpu.total.pct'] * 100) || '%\n';
+    END LOOP
+    
+    -- Step 4: Generate AI analysis
+    DECLARE prompt STRING = 'Analyze this incident for service ' || target_service || ':
+
+K8s Events (' || event_count || '):
+' || event_summary || '
+
+Error Logs (' || error_count || '):
+' || log_summary || '
+
+High Resource Usage:
+' || metric_summary || '
+
+Provide: 1) Root cause 2) Impact 3) Recommended fix';
+
+    DECLARE analysis STRING = LLM_COMPLETE(prompt);
+    
+    PRINT '========================================';
+    PRINT 'ANALYSIS FOR: ' || target_service;
+    PRINT '========================================';
+    PRINT analysis;
+    
+    RETURN analysis;
+END PROCEDURE
+```
+
+Call it:
+```bash
+POST /_escript
+{"procedure": "investigate_service", "arguments": {"target_service": "recommendation-engine"}}
+```
+
+---
+
+### 🔴 Expert: Archive Reports to S3
+
+Generate reports and archive them to cloud storage:
 
 ```sql
 CREATE PROCEDURE archive_daily_report()
@@ -737,7 +1068,7 @@ BEGIN
     END LOOP
     
     -- Add AI summary
-    DECLARE summary STRING = LLM_COMPLETE('Summarize in 3 bullets:\n' || report);
+    DECLARE summary STRING = LLM_COMPLETE('Summarize in 3 bullet points:\n' || report);
     SET report = report || '\n\nAI Summary:\n' || summary;
     
     -- Archive to S3
@@ -749,19 +1080,108 @@ BEGIN
 END PROCEDURE
 ```
 
-### Semantic Search with Embeddings
+---
+
+### 🔴 Expert: Slack Alerting with AI Summary
+
+Send intelligent alerts to Slack:
 
 ```sql
-CREATE PROCEDURE semantic_search(IN search_query STRING)
+CREATE PROCEDURE alert_critical_errors()
 BEGIN
-    -- Generate embedding for the query
-    DECLARE query_embedding ARRAY = INFERENCE_EMBED('.multilingual-e5-small-elasticsearch', search_query);
+    DECLARE critical_logs CURSOR FOR 
+        FROM application-logs 
+        | WHERE log.level == "FATAL"
+        | SORT @timestamp DESC
+        | LIMIT 5;
     
-    PRINT 'Query: ' || search_query;
-    PRINT 'Embedding dimensions: ' || LENGTH(query_embedding);
+    DECLARE messages STRING = '';
+    DECLARE count INT = 0;
     
-    -- Return embedding for use in kNN search
-    RETURN query_embedding;
+    FOR log IN critical_logs LOOP
+        SET messages = messages || '• ' || log['service.name'] || ': ' || log['message'] || '\n';
+        SET count = count + 1;
+    END LOOP
+    
+    IF count > 0 THEN
+        -- Generate AI summary
+        DECLARE summary STRING = LLM_COMPLETE('Summarize these critical errors in 2 sentences:\n' || messages);
+        
+        -- Send to Slack
+        DECLARE slack_message STRING = ':rotating_light: *' || count || ' CRITICAL ERRORS*\n\n' 
+                                      || summary || '\n\n```' || messages || '```';
+        SLACK_SEND('#alerts', slack_message);
+        
+        PRINT 'Sent alert to Slack for ' || count || ' critical errors';
+        RETURN 'Alert sent';
+    ELSE
+        RETURN 'No critical errors';
+    END IF
+END PROCEDURE
+```
+
+---
+
+### 🔴 Expert: Scheduled Health Check
+
+A reusable health check procedure:
+
+```sql
+CREATE PROCEDURE health_check_all_services()
+BEGIN
+    DECLARE services ARRAY = ['api-gateway', 'user-service', 'order-service', 
+                              'payment-service', 'inventory-service', 'recommendation-engine'];
+    DECLARE report STRING = 'Health Check Report\n===================\n';
+    DECLARE unhealthy_count INT = 0;
+    
+    FOR i IN 1..LENGTH(services) LOOP
+        DECLARE svc STRING = services[i];
+        
+        -- Check error rate
+        DECLARE errors CURSOR FOR 
+            FROM application-logs 
+            | WHERE kubernetes.deployment.name == svc
+            | WHERE log.level == "ERROR"
+            | STATS error_count = COUNT(*);
+        
+        DECLARE error_count INT = 0;
+        FOR row IN errors LOOP
+            SET error_count = row['error_count'];
+        END LOOP
+        
+        -- Check K8s events
+        DECLARE events CURSOR FOR 
+            FROM kubernetes-events 
+            | WHERE kubernetes.deployment.name == svc
+            | WHERE kubernetes.event.type == "Warning"
+            | STATS warning_count = COUNT(*);
+        
+        DECLARE warning_count INT = 0;
+        FOR row IN events LOOP
+            SET warning_count = row['warning_count'];
+        END LOOP
+        
+        -- Determine status
+        DECLARE status STRING = 'OK';
+        IF error_count > 50 OR warning_count > 10 THEN
+            SET status = 'CRITICAL';
+            SET unhealthy_count = unhealthy_count + 1;
+        ELSEIF error_count > 10 OR warning_count > 3 THEN
+            SET status = 'WARNING';
+        END IF
+        
+        SET report = report || svc || ': ' || status 
+                    || ' (errors: ' || error_count || ', warnings: ' || warning_count || ')\n';
+    END LOOP
+    
+    SET report = report || '\n' || unhealthy_count || ' unhealthy services';
+    
+    IF unhealthy_count > 0 THEN
+        SLACK_SEND('#ops-alerts', ':warning: ' || report);
+    END IF
+    
+    PRINT report;
+    RETURN report;
 END PROCEDURE
 ```
 
