@@ -31,4 +31,18 @@ public class ReturnValue extends RuntimeException {
     public Object getValue() {
         return value;
     }
+
+    /**
+     * Returns a string representation of the return value.
+     * This makes PRINT statements and logs more readable.
+     *
+     * @return String representation of the wrapped value.
+     */
+    @Override
+    public String toString() {
+        if (value == null) {
+            return "null";
+        }
+        return value.toString();
+    }
 }
