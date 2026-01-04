@@ -121,6 +121,33 @@ END LOOP
 - Lazy execution: Query runs only when cursor is used in FOR loop
 - Supports all ESQL query syntax including pipes
 - Results are available as DOCUMENT objects in the loop variable
+- **Variable substitution**: Use `:variableName` to reference elastic-script variables in ESQL queries
+
+**Variable Substitution:**
+
+Use the `:variableName` syntax to dynamically inject elastic-script variable values into cursor queries:
+
+```sql
+-- Parameterized cursor using :variable syntax
+CREATE PROCEDURE investigate_service(target_service STRING)
+BEGIN
+    -- :target_service will be replaced with the actual value
+    DECLARE events CURSOR FOR 
+        FROM kubernetes-events 
+        | WHERE kubernetes.deployment.name == :target_service
+        | SORT @timestamp DESC 
+        | LIMIT 10;
+    
+    FOR event IN events LOOP
+        PRINT event['kubernetes.event.reason'] || ': ' || event['kubernetes.event.message'];
+    END LOOP
+END PROCEDURE
+
+-- Call with specific service
+CALL investigate_service('recommendation-engine');
+```
+
+String variables are automatically quoted when substituted. This allows building dynamic, reusable procedures that can query different data based on parameters.
 
 ---
 

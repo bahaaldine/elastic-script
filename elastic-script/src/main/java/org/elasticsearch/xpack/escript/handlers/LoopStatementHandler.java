@@ -183,13 +183,17 @@ public class LoopStatementHandler {
 
     /**
      * Executes the ESQL query associated with a cursor and stores the results.
+     * Variable substitution is performed using :varName syntax before execution.
      */
     @SuppressWarnings("unchecked")
     private void executeCursorQuery(CursorDefinition cursor, ActionListener<List<Map<String, Object>>> listener) {
         String esqlQuery = cursor.getEsqlQuery();
         
+        // Perform variable substitution for :varName placeholders
+        String substitutedQuery = substituteVariables(esqlQuery);
+        
         // Use the executor's ESQL execution capability
-        executor.executeEsqlQueryAsync(esqlQuery, ActionListener.wrap(result -> {
+        executor.executeEsqlQueryAsync(substitutedQuery, ActionListener.wrap(result -> {
             if (result instanceof List) {
                 List<Map<String, Object>> rows = (List<Map<String, Object>>) result;
                 cursor.setResults(rows);
@@ -375,5 +379,30 @@ public class LoopStatementHandler {
                 executeStatementsAsync(stmtCtxList, index + 1, listener);
             }
         }, listener::onFailure));
+    }
+
+    /**
+     * Substitutes placeholders like :varName with actual values from the execution context.
+     * This allows cursor queries to reference elastic-script variables.
+     * 
+     * Example: FROM logs | WHERE service.name == :my_service
+     *          becomes: FROM logs | WHERE service.name == "order-service"
+     */
+    private String substituteVariables(String original) {
+        ExecutionContext context = executor.getContext();
+        for (String varName : context.getVariableNames()) {
+            Object val = context.getVariable(varName);
+            String replacement;
+            if (val instanceof String) {
+                // Quote string values for ESQL
+                replacement = "\"" + val.toString().replace("\"", "\\\"") + "\"";
+            } else if (val == null) {
+                replacement = "null";
+            } else {
+                replacement = String.valueOf(val);
+            }
+            original = original.replace(":" + varName, replacement);
+        }
+        return original;
     }
 }
