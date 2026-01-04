@@ -86,7 +86,10 @@ if [ -f "${ES_CONFIG_FILE}" ]; then
   echo "xpack.security.transport.ssl.enabled: false" >> "${ES_CONFIG_FILE}"
   echo "xpack.security.http.ssl.enabled: false" >> "${ES_CONFIG_FILE}"
   echo "xpack.security.enabled: false" >> "${ES_CONFIG_FILE}"
-  echo "xpack.ml.enabled: false" >> "${ES_CONFIG_FILE}"
+  # Enable ML for Inference API (embeddings, reranking, etc.)
+  echo "xpack.ml.enabled: true" >> "${ES_CONFIG_FILE}"
+  # Allow ML to run on this node
+  echo "node.roles: [master, data, ingest, ml, remote_cluster_client]" >> "${ES_CONFIG_FILE}"
 else
   echo "Error: elasticsearch.yml file not found!"
   cleanup
