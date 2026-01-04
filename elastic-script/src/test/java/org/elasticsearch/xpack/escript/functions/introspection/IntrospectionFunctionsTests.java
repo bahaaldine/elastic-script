@@ -56,6 +56,17 @@ public class IntrospectionFunctionsTests extends ESTestCase {
         assertTrue("ESCRIPT_VARIABLES should be registered", context.hasFunction("ESCRIPT_VARIABLES"));
     }
 
+    public void testProcedureFunctionsNotRegisteredWithoutClient() {
+        // When registered without client, procedure introspection is not available
+        assertFalse("ESCRIPT_PROCEDURES should NOT be registered without client", 
+            context.hasFunction("ESCRIPT_PROCEDURES"));
+        assertFalse("ESCRIPT_PROCEDURE should NOT be registered without client", 
+            context.hasFunction("ESCRIPT_PROCEDURE"));
+    }
+
+    // Note: Tests for ESCRIPT_PROCEDURES() and ESCRIPT_PROCEDURE(name) require
+    // an Elasticsearch client and are covered by integration tests.
+
     public void testEscriptFunctionsReturnsAllFunctions() throws Exception {
         FunctionDefinition func = context.getFunction("ESCRIPT_FUNCTIONS");
         assertNotNull(func);

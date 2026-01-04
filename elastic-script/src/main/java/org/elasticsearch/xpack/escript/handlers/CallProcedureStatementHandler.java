@@ -93,7 +93,7 @@ public class CallProcedureStatementHandler {
                         CICDFunctions.registerAll(childContext);
                         AWSFunctions.registerAll(childContext);
                         GenericFunctions.registerAll(childContext);
-                        IntrospectionFunctions.registerAll(childContext);
+                        IntrospectionFunctions.registerAll(childContext, executor.getClient());
                         EsqlBuiltInFunctions.registerAll(childContext,executor,executor.getClient());
 
                         new ProcedureExecutor(childContext, executor.getThreadPool(), executor.getClient(), executor.getTokenStream())

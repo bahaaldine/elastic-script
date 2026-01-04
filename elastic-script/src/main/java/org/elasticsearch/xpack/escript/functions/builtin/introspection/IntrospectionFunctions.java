@@ -7,6 +7,12 @@
 
 package org.elasticsearch.xpack.escript.functions.builtin.introspection;
 
+import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.client.internal.Client;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.xpack.escript.context.ExecutionContext;
 import org.elasticsearch.xpack.escript.functions.FunctionDefinition;
 import org.elasticsearch.xpack.escript.functions.Parameter;
@@ -29,6 +35,7 @@ import java.util.Map;
  * - ESCRIPT_FUNCTION(name) - Get details about a specific function
  * - ESCRIPT_PROCEDURES() - List all stored procedures
  * - ESCRIPT_PROCEDURE(name) - Get details about a specific procedure
+ * - ESCRIPT_VARIABLES() - List all declared variables in scope
  */
 @FunctionCollectionSpec(
     category = FunctionCategory.UTILITY,
@@ -36,8 +43,11 @@ import java.util.Map;
 )
 public class IntrospectionFunctions {
 
+    private static final String PROCEDURES_INDEX = ".elastic_script_procedures";
+
     /**
      * Registers all introspection functions in the given ExecutionContext.
+     * This version does not register procedure introspection (requires ES client).
      *
      * @param context the ExecutionContext to register functions in
      */
@@ -45,6 +55,18 @@ public class IntrospectionFunctions {
         registerEscriptFunctions(context);
         registerEscriptFunction(context);
         registerEscriptVariables(context);
+    }
+
+    /**
+     * Registers all introspection functions including procedure introspection.
+     *
+     * @param context the ExecutionContext to register functions in
+     * @param client the Elasticsearch client for procedure access
+     */
+    public static void registerAll(ExecutionContext context, Client client) {
+        registerAll(context);
+        registerEscriptProcedures(context, client);
+        registerEscriptProcedure(context, client);
     }
 
     /**
@@ -59,7 +81,7 @@ public class IntrospectionFunctions {
     public static void registerEscriptFunctions(ExecutionContext context) {
         context.declareFunction("ESCRIPT_FUNCTIONS",
             List.of(), // No parameters
-            new BuiltInFunctionDefinition("ESCRIPT_FUNCTIONS", (List<Object> args, org.elasticsearch.action.ActionListener<Object> listener) -> {
+            new BuiltInFunctionDefinition("ESCRIPT_FUNCTIONS", (List<Object> args, ActionListener<Object> listener) -> {
                 try {
                     List<Map<String, Object>> result = new ArrayList<>();
                     
@@ -123,7 +145,7 @@ public class IntrospectionFunctions {
     public static void registerEscriptFunction(ExecutionContext context) {
         context.declareFunction("ESCRIPT_FUNCTION",
             List.of(new Parameter("name", "STRING", ParameterMode.IN)),
-            new BuiltInFunctionDefinition("ESCRIPT_FUNCTION", (List<Object> args, org.elasticsearch.action.ActionListener<Object> listener) -> {
+            new BuiltInFunctionDefinition("ESCRIPT_FUNCTION", (List<Object> args, ActionListener<Object> listener) -> {
                 try {
                     if (args.isEmpty() || args.get(0) == null) {
                         listener.onFailure(new IllegalArgumentException("ESCRIPT_FUNCTION requires a function name"));
@@ -199,7 +221,7 @@ public class IntrospectionFunctions {
     public static void registerEscriptVariables(ExecutionContext context) {
         context.declareFunction("ESCRIPT_VARIABLES",
             List.of(), // No parameters
-            new BuiltInFunctionDefinition("ESCRIPT_VARIABLES", (List<Object> args, org.elasticsearch.action.ActionListener<Object> listener) -> {
+            new BuiltInFunctionDefinition("ESCRIPT_VARIABLES", (List<Object> args, ActionListener<Object> listener) -> {
                 try {
                     List<Map<String, Object>> result = new ArrayList<>();
                     
@@ -232,5 +254,166 @@ public class IntrospectionFunctions {
             })
         );
     }
-}
 
+    /**
+     * ESCRIPT_PROCEDURES() - Returns an array of all stored procedures.
+     * 
+     * Each element in the returned array is a DOCUMENT with:
+     * - name: The procedure name (document ID)
+     * - parameter_count: Number of parameters
+     * - parameters: Array of parameter definitions (name, type)
+     */
+    public static void registerEscriptProcedures(ExecutionContext context, Client client) {
+        context.declareFunction("ESCRIPT_PROCEDURES",
+            List.of(), // No parameters
+            new BuiltInFunctionDefinition("ESCRIPT_PROCEDURES", (List<Object> args, ActionListener<Object> listener) -> {
+                try {
+                    SearchRequest searchRequest = new SearchRequest(PROCEDURES_INDEX);
+                    SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+                    sourceBuilder.query(QueryBuilders.matchAllQuery());
+                    sourceBuilder.size(1000); // Reasonable limit
+                    sourceBuilder.fetchSource(new String[]{"parameters"}, null); // Only fetch parameters
+                    searchRequest.source(sourceBuilder);
+                    
+                    client.search(searchRequest, new ActionListener<>() {
+                        @Override
+                        public void onResponse(org.elasticsearch.action.search.SearchResponse response) {
+                            try {
+                                List<Map<String, Object>> result = new ArrayList<>();
+                                
+                                for (SearchHit hit : response.getHits().getHits()) {
+                                    Map<String, Object> procInfo = new HashMap<>();
+                                    procInfo.put("name", hit.getId());
+                                    
+                                    Map<String, Object> source = hit.getSourceAsMap();
+                                    @SuppressWarnings("unchecked")
+                                    List<Map<String, Object>> params = (List<Map<String, Object>>) source.get("parameters");
+                                    
+                                    procInfo.put("parameter_count", params != null ? params.size() : 0);
+                                    procInfo.put("parameters", params != null ? params : List.of());
+                                    
+                                    // Build signature
+                                    StringBuilder sig = new StringBuilder();
+                                    sig.append(hit.getId()).append("(");
+                                    if (params != null && !params.isEmpty()) {
+                                        for (int i = 0; i < params.size(); i++) {
+                                            if (i > 0) sig.append(", ");
+                                            Map<String, Object> p = params.get(i);
+                                            sig.append(p.get("name")).append(" ").append(p.get("type"));
+                                        }
+                                    }
+                                    sig.append(")");
+                                    procInfo.put("signature", sig.toString());
+                                    
+                                    result.add(procInfo);
+                                }
+                                
+                                // Sort by name
+                                result.sort((a, b) -> ((String) a.get("name")).compareTo((String) b.get("name")));
+                                
+                                listener.onResponse(result);
+                            } catch (Exception e) {
+                                listener.onFailure(e);
+                            }
+                        }
+                        
+                        @Override
+                        public void onFailure(Exception e) {
+                            // If index doesn't exist, return empty array
+                            if (e.getMessage() != null && e.getMessage().contains("index_not_found")) {
+                                listener.onResponse(List.of());
+                            } else {
+                                listener.onFailure(e);
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    listener.onFailure(e);
+                }
+            })
+        );
+    }
+
+    /**
+     * ESCRIPT_PROCEDURE(name) - Returns detailed information about a specific stored procedure.
+     * 
+     * Returns a DOCUMENT with:
+     * - name: The procedure name
+     * - exists: Whether the procedure exists
+     * - parameters: Array of parameter definitions
+     * - signature: Human-readable signature string
+     * - source: The procedure source code (if exists)
+     */
+    public static void registerEscriptProcedure(ExecutionContext context, Client client) {
+        context.declareFunction("ESCRIPT_PROCEDURE",
+            List.of(new Parameter("name", "STRING", ParameterMode.IN)),
+            new BuiltInFunctionDefinition("ESCRIPT_PROCEDURE", (List<Object> args, ActionListener<Object> listener) -> {
+                try {
+                    if (args.isEmpty() || args.get(0) == null) {
+                        listener.onFailure(new IllegalArgumentException("ESCRIPT_PROCEDURE requires a procedure name"));
+                        return;
+                    }
+                    
+                    String procName = args.get(0).toString();
+                    
+                    client.prepareGet(PROCEDURES_INDEX, procName)
+                        .execute(new ActionListener<>() {
+                            @Override
+                            public void onResponse(org.elasticsearch.action.get.GetResponse response) {
+                                Map<String, Object> result = new HashMap<>();
+                                result.put("name", procName);
+                                
+                                if (!response.isExists()) {
+                                    result.put("exists", false);
+                                    listener.onResponse(result);
+                                    return;
+                                }
+                                
+                                result.put("exists", true);
+                                
+                                Map<String, Object> source = response.getSourceAsMap();
+                                
+                                @SuppressWarnings("unchecked")
+                                List<Map<String, Object>> params = (List<Map<String, Object>>) source.get("parameters");
+                                result.put("parameter_count", params != null ? params.size() : 0);
+                                result.put("parameters", params != null ? params : List.of());
+                                
+                                // Include the procedure source
+                                result.put("source", source.get("procedure"));
+                                
+                                // Build signature
+                                StringBuilder sig = new StringBuilder();
+                                sig.append(procName).append("(");
+                                if (params != null && !params.isEmpty()) {
+                                    for (int i = 0; i < params.size(); i++) {
+                                        if (i > 0) sig.append(", ");
+                                        Map<String, Object> p = params.get(i);
+                                        sig.append(p.get("name")).append(" ").append(p.get("type"));
+                                    }
+                                }
+                                sig.append(")");
+                                result.put("signature", sig.toString());
+                                
+                                listener.onResponse(result);
+                            }
+                            
+                            @Override
+                            public void onFailure(Exception e) {
+                                // If index doesn't exist, procedure doesn't exist
+                                if (e.getMessage() != null && e.getMessage().contains("index_not_found")) {
+                                    Map<String, Object> result = new HashMap<>();
+                                    result.put("name", procName);
+                                    result.put("exists", false);
+                                    listener.onResponse(result);
+                                } else {
+                                    listener.onFailure(e);
+                                }
+                            }
+                        });
+                } catch (Exception e) {
+                    listener.onFailure(e);
+                }
+            })
+        );
+    }
+}

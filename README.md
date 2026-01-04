@@ -830,6 +830,8 @@ Introspection functions allow agents and users to discover what capabilities are
 |----------|-------------|
 | `ESCRIPT_FUNCTIONS()` | Returns an array of all registered functions with metadata |
 | `ESCRIPT_FUNCTION(name)` | Returns detailed information about a specific function |
+| `ESCRIPT_PROCEDURES()` | Returns an array of all stored procedures |
+| `ESCRIPT_PROCEDURE(name)` | Returns detailed information about a specific procedure |
 | `ESCRIPT_VARIABLES()` | Returns an array of all declared variables in scope |
 
 ### ESCRIPT_FUNCTIONS()
@@ -890,6 +892,65 @@ Signature: K8S_SCALE(deployment STRING, replicas NUMBER, namespace STRING)
   - namespace: STRING
 ```
 
+### ESCRIPT_PROCEDURES()
+
+Returns an array of all stored procedures in Elasticsearch.
+
+**Each element contains:**
+- `name` - The procedure name (document ID)
+- `parameter_count` - Number of parameters
+- `parameters` - Array of parameter definitions (name, type)
+- `signature` - Human-readable signature string
+
+**Example:**
+```sql
+-- List all stored procedures
+DECLARE procs ARRAY;
+SET procs = ESCRIPT_PROCEDURES();
+
+PRINT 'Available procedures:';
+FOR proc IN procs LOOP
+    PRINT '  ' || proc['signature'];
+END LOOP
+```
+
+**Output:**
+```
+Available procedures:
+  investigate_service(target_service STRING)
+  health_check_all_services()
+  archive_daily_report()
+```
+
+### ESCRIPT_PROCEDURE(name)
+
+Returns detailed information about a specific stored procedure.
+
+**Returns a DOCUMENT with:**
+- `name` - The procedure name
+- `exists` - Whether the procedure exists (true/false)
+- `parameter_count` - Number of parameters
+- `parameters` - Array of parameter definitions
+- `signature` - Human-readable signature string
+- `source` - The full procedure source code
+
+**Example:**
+```sql
+-- Get details about a specific procedure
+DECLARE proc_info DOCUMENT;
+SET proc_info = ESCRIPT_PROCEDURE('investigate_service');
+
+IF proc_info['exists'] THEN
+    PRINT 'Signature: ' || proc_info['signature'];
+    PRINT 'Parameters:';
+    FOR param IN proc_info['parameters'] LOOP
+        PRINT '  - ' || param['name'] || ': ' || param['type'];
+    END LOOP
+ELSE
+    PRINT 'Procedure not found';
+END IF
+```
+
 ### ESCRIPT_VARIABLES()
 
 Returns an array of all declared variables in the current scope, including parent scopes.
@@ -941,6 +1002,46 @@ FOR f IN k8s_funcs LOOP
     DECLARE info DOCUMENT = ESCRIPT_FUNCTION(f['name']);
     PRINT '  ' || info['signature'];
 END LOOP
+```
+
+### Use Case: Comprehensive Capability Report
+
+Generate a full report of all available capabilities:
+
+```sql
+CREATE PROCEDURE capability_report()
+BEGIN
+    PRINT '=== ELASTIC-SCRIPT CAPABILITY REPORT ===';
+    PRINT '';
+    
+    -- List all built-in functions
+    DECLARE funcs ARRAY = ESCRIPT_FUNCTIONS();
+    PRINT 'Built-in Functions: ' || ARRAY_LENGTH(funcs);
+    
+    -- List all stored procedures
+    DECLARE procs ARRAY = ESCRIPT_PROCEDURES();
+    PRINT 'Stored Procedures: ' || ARRAY_LENGTH(procs);
+    
+    PRINT '';
+    PRINT '--- Stored Procedures ---';
+    FOR proc IN procs LOOP
+        PRINT proc['signature'];
+    END LOOP
+    
+    PRINT '';
+    PRINT '--- Runbook Functions ---';
+    FOR func IN funcs LOOP
+        -- Filter for runbook-related functions
+        IF INSTR(func['name'], 'K8S_') = 0 
+           OR INSTR(func['name'], 'AWS_') = 0 
+           OR INSTR(func['name'], 'PAGERDUTY_') = 0 THEN
+            DECLARE info DOCUMENT = ESCRIPT_FUNCTION(func['name']);
+            PRINT info['signature'];
+        END IF
+    END LOOP
+    
+    RETURN 'Report complete';
+END PROCEDURE
 ```
 
 ---

@@ -219,7 +219,7 @@ public class ElasticScriptExecutor {
                                 GenericFunctions.registerAll(executionContext);
                                 
                                 // Introspection functions (must be registered last to see all other functions)
-                                IntrospectionFunctions.registerAll(executionContext);
+                                IntrospectionFunctions.registerAll(executionContext, client);
 
                                 FunctionLoader.loadCommunityFunctions(executionContext);
 
