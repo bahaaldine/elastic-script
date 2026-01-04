@@ -386,4 +386,112 @@ public class StringBuiltInFunctionsTests extends ESTestCase {
         });
         latch.await();
     }
+
+    @Test
+    public void testLengthWithString() throws Exception {
+        BuiltInFunctionDefinition lengthFn = context.getBuiltInFunction("LENGTH");
+        CountDownLatch latch = new CountDownLatch(1);
+        lengthFn.execute(Arrays.asList("Elasticsearch"), new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object result) {
+                assertEquals(13, result);
+                latch.countDown();
+            }
+            @Override
+            public void onFailure(Exception e) {
+                fail(e.getMessage());
+                latch.countDown();
+            }
+        });
+        latch.await();
+    }
+
+    @Test
+    public void testLengthWithArray() throws Exception {
+        BuiltInFunctionDefinition lengthFn = context.getBuiltInFunction("LENGTH");
+        CountDownLatch latch = new CountDownLatch(1);
+        java.util.List<String> testArray = Arrays.asList("a", "b", "c", "d", "e");
+        lengthFn.execute(Arrays.asList(testArray), new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object result) {
+                assertEquals(5, result);
+                latch.countDown();
+            }
+            @Override
+            public void onFailure(Exception e) {
+                fail(e.getMessage());
+                latch.countDown();
+            }
+        });
+        latch.await();
+    }
+
+    @Test
+    public void testLengthWithEmptyArray() throws Exception {
+        BuiltInFunctionDefinition lengthFn = context.getBuiltInFunction("LENGTH");
+        CountDownLatch latch = new CountDownLatch(1);
+        java.util.List<String> emptyArray = java.util.Collections.emptyList();
+        lengthFn.execute(Arrays.asList(emptyArray), new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object result) {
+                assertEquals(0, result);
+                latch.countDown();
+            }
+            @Override
+            public void onFailure(Exception e) {
+                fail(e.getMessage());
+                latch.countDown();
+            }
+        });
+        latch.await();
+    }
+
+    @Test
+    public void testEnvFunctionRegistered() {
+        FunctionDefinition envFn = context.getFunction("ENV");
+        assertNotNull("ENV function should be registered", envFn);
+        assertEquals("ENV should have 1 required parameter", 1, envFn.getParameters().size());
+        assertEquals("Parameter should be of type STRING", "STRING", envFn.getParameters().get(0).getType());
+    }
+
+    @Test
+    public void testEnvWithDefaultValue() throws Exception {
+        BuiltInFunctionDefinition envFn = context.getBuiltInFunction("ENV");
+        CountDownLatch latch = new CountDownLatch(1);
+        // Test with a non-existent env var and a default value
+        envFn.execute(Arrays.asList("NONEXISTENT_VAR_12345", "default_value"), new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object result) {
+                assertEquals("default_value", result);
+                latch.countDown();
+            }
+            @Override
+            public void onFailure(Exception e) {
+                fail(e.getMessage());
+                latch.countDown();
+            }
+        });
+        latch.await();
+    }
+
+    @Test
+    public void testEnvWithExistingVar() throws Exception {
+        BuiltInFunctionDefinition envFn = context.getBuiltInFunction("ENV");
+        CountDownLatch latch = new CountDownLatch(1);
+        // PATH should exist on most systems
+        envFn.execute(Arrays.asList("PATH"), new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object result) {
+                assertNotNull("PATH env var should not be null", result);
+                assertTrue("PATH should contain something", result.toString().length() > 0);
+                latch.countDown();
+            }
+            @Override
+            public void onFailure(Exception e) {
+                fail(e.getMessage());
+                latch.countDown();
+            }
+        });
+        latch.await();
+    }
 }

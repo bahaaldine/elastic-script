@@ -519,4 +519,105 @@ public class DeclareStatementHandlerTests extends ESTestCase {
         });
         latch.await();
     }
+
+    // ===== ARRAY Declaration Tests =====
+
+    @Test
+    public void testDeclareUntypedArray() throws Exception {
+        // Note: JSON arrays require double quotes for strings
+        String input = "DECLARE items ARRAY = [\"a\", \"b\", \"c\"];";
+        ElasticScriptLexer lexer = new ElasticScriptLexer(CharStreams.fromString(input));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        ElasticScriptParser parser = new ElasticScriptParser(tokens);
+        
+        // Re-create executor with new tokens
+        executor = new ProcedureExecutor(context, threadPool, null, tokens);
+        declareHandler = new DeclareStatementHandler(executor);
+        
+        ElasticScriptParser.Declare_statementContext declareCtx = parser.declare_statement();
+        
+        CountDownLatch latch = new CountDownLatch(1);
+        declareHandler.handleAsync(declareCtx, new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object unused) {
+                assertTrue("Variable 'items' should be declared", context.hasVariable("items"));
+                Object value = context.getVariable("items");
+                assertNotNull("Variable value should not be null", value);
+                assertTrue("Value should be a List", value instanceof List);
+                List<?> list = (List<?>) value;
+                assertEquals("Array should have 3 elements", 3, list.size());
+                latch.countDown();
+            }
+            @Override
+            public void onFailure(Exception e) {
+                fail("Declaration failed: " + e.getMessage());
+                latch.countDown();
+            }
+        });
+        latch.await();
+    }
+
+    @Test
+    public void testDeclareTypedArrayOfString() throws Exception {
+        // Note: JSON arrays require double quotes for strings
+        String input = "DECLARE names ARRAY OF STRING = [\"Alice\", \"Bob\"];";
+        ElasticScriptLexer lexer = new ElasticScriptLexer(CharStreams.fromString(input));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        ElasticScriptParser parser = new ElasticScriptParser(tokens);
+        
+        executor = new ProcedureExecutor(context, threadPool, null, tokens);
+        declareHandler = new DeclareStatementHandler(executor);
+        
+        ElasticScriptParser.Declare_statementContext declareCtx = parser.declare_statement();
+        
+        CountDownLatch latch = new CountDownLatch(1);
+        declareHandler.handleAsync(declareCtx, new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object unused) {
+                assertTrue("Variable 'names' should be declared", context.hasVariable("names"));
+                Object value = context.getVariable("names");
+                assertTrue("Value should be a List", value instanceof List);
+                List<?> list = (List<?>) value;
+                assertEquals("Array should have 2 elements", 2, list.size());
+                latch.countDown();
+            }
+            @Override
+            public void onFailure(Exception e) {
+                fail("Declaration failed: " + e.getMessage());
+                latch.countDown();
+            }
+        });
+        latch.await();
+    }
+
+    @Test
+    public void testIsSupportedDataTypeForArray() {
+        // Test that ARRAY type is supported
+        String input = "DECLARE x ARRAY = [1];";
+        ElasticScriptLexer lexer = new ElasticScriptLexer(CharStreams.fromString(input));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        ElasticScriptParser parser = new ElasticScriptParser(tokens);
+        
+        ElasticScriptParser.Declare_statementContext declareCtx = parser.declare_statement();
+        assertNotNull("Should parse ARRAY declaration", declareCtx);
+        
+        // Verify the datatype is ARRAY
+        String datatype = declareCtx.variable_declaration_list().variable_declaration(0).datatype().getText();
+        assertEquals("Datatype should be ARRAY", "ARRAY", datatype);
+    }
+
+    @Test
+    public void testIsSupportedDataTypeForArrayOfNumber() {
+        String input = "DECLARE nums ARRAY OF NUMBER = [1, 2, 3];";
+        ElasticScriptLexer lexer = new ElasticScriptLexer(CharStreams.fromString(input));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        ElasticScriptParser parser = new ElasticScriptParser(tokens);
+        
+        ElasticScriptParser.Declare_statementContext declareCtx = parser.declare_statement();
+        assertNotNull("Should parse ARRAY OF NUMBER declaration", declareCtx);
+        
+        String datatype = declareCtx.variable_declaration_list().variable_declaration(0).datatype().getText();
+        assertTrue("Datatype should start with ARRAY", datatype.toUpperCase().contains("ARRAY"));
+        assertTrue("Datatype should contain NUMBER", datatype.toUpperCase().contains("NUMBER"));
+    }
 }

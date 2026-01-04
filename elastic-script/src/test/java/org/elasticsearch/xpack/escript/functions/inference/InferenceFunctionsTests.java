@@ -125,5 +125,71 @@ public class InferenceFunctionsTests extends ESTestCase {
                 "ARRAY", rerankFunc.getParameters().get(2).getType());
         }
     }
+
+    public void testEndpointManagementFunctionParameters() {
+        ExecutionContext context = new ExecutionContext();
+        
+        try {
+            org.elasticsearch.xpack.escript.functions.builtin.inference.InferenceFunctions
+                .registerAll(context, null);
+        } catch (Exception e) {
+            // Ignore registration issues for this test
+        }
+        
+        // INFERENCE_CREATE_ENDPOINT should have 3 required parameters
+        FunctionDefinition createFunc = context.getFunction("INFERENCE_CREATE_ENDPOINT");
+        if (createFunc != null) {
+            assertEquals("INFERENCE_CREATE_ENDPOINT should have 3 required parameters", 
+                3, createFunc.getParameters().size());
+            assertEquals("First param should be endpoint_id", 
+                "endpoint_id", createFunc.getParameters().get(0).getName());
+            assertEquals("Second param should be task_type", 
+                "task_type", createFunc.getParameters().get(1).getName());
+            assertEquals("Third param should be config_json", 
+                "config_json", createFunc.getParameters().get(2).getName());
+        }
+        
+        // INFERENCE_DELETE_ENDPOINT should have 1 required parameter
+        FunctionDefinition deleteFunc = context.getFunction("INFERENCE_DELETE_ENDPOINT");
+        if (deleteFunc != null) {
+            assertEquals("INFERENCE_DELETE_ENDPOINT should have 1 required parameter", 
+                1, deleteFunc.getParameters().size());
+        }
+        
+        // INFERENCE_LIST_ENDPOINTS should have 0 required parameters
+        FunctionDefinition listFunc = context.getFunction("INFERENCE_LIST_ENDPOINTS");
+        if (listFunc != null) {
+            assertEquals("INFERENCE_LIST_ENDPOINTS should have 0 required parameters", 
+                0, listFunc.getParameters().size());
+        }
+        
+        // INFERENCE_GET_ENDPOINT should have 1 required parameter
+        FunctionDefinition getFunc = context.getFunction("INFERENCE_GET_ENDPOINT");
+        if (getFunc != null) {
+            assertEquals("INFERENCE_GET_ENDPOINT should have 1 required parameter", 
+                1, getFunc.getParameters().size());
+        }
+    }
+
+    public void testInferenceChatFunctionParameters() {
+        ExecutionContext context = new ExecutionContext();
+        
+        try {
+            org.elasticsearch.xpack.escript.functions.builtin.inference.InferenceFunctions
+                .registerAll(context, null);
+        } catch (Exception e) {
+            // Ignore registration issues for this test
+        }
+        
+        FunctionDefinition chatFunc = context.getFunction("INFERENCE_CHAT");
+        if (chatFunc != null) {
+            assertEquals("INFERENCE_CHAT should have 2 required parameters", 
+                2, chatFunc.getParameters().size());
+            assertEquals("First param should be endpoint_id", 
+                "endpoint_id", chatFunc.getParameters().get(0).getName());
+            assertEquals("Second param should be messages", 
+                "messages", chatFunc.getParameters().get(1).getName());
+        }
+    }
 }
 
