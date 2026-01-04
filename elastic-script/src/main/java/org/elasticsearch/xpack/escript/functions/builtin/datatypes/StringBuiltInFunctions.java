@@ -59,24 +59,30 @@ public class StringBuiltInFunctions {
 
     @FunctionSpec(
         name = "LENGTH",
-        description = "Returns the length of a string.",
+        description = "Returns the length of a string or the number of elements in an array.",
         parameters = {
-            @FunctionParam(name = "input", type = "STRING", description = "The string to measure")
+            @FunctionParam(name = "input", type = "ANY", description = "The string or array to measure")
         },
-        returnType = @FunctionReturn(type = "INTEGER", description = "The number of characters in the string"),
+        returnType = @FunctionReturn(type = "INTEGER", description = "The number of characters (string) or elements (array)"),
         examples = {
-            "LENGTH('Elastic') -> 7"
+            "LENGTH('Elastic') -> 7",
+            "LENGTH([1, 2, 3]) -> 3"
         },
         category = FunctionCategory.STRING
     )
     public static void registerLength(ExecutionContext context) {
         context.declareFunction("LENGTH",
-            Collections.singletonList(new Parameter("input", "STRING", ParameterMode.IN)),
+            Collections.singletonList(new Parameter("input", "ANY", ParameterMode.IN)),
             new BuiltInFunctionDefinition("LENGTH", (List<Object> args, ActionListener<Object> listener) -> {
                 if (args.size() != 1) {
                     listener.onFailure(new RuntimeException("LENGTH expects one argument"));
                 } else {
-                    listener.onResponse(args.get(0).toString().length());
+                    Object input = args.get(0);
+                    if (input instanceof List) {
+                        listener.onResponse(((List<?>) input).size());
+                    } else {
+                        listener.onResponse(input.toString().length());
+                    }
                 }
             })
         );
