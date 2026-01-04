@@ -441,10 +441,16 @@ public class LoopStatementHandlerTests extends ESTestCase {
                 "DECLARE my_cursor CURSOR FOR FROM test-index | LIMIT 5; " +
             "END PROCEDURE";
         
-        ElasticScriptParser.ProcedureContext blockContext = TestUtils.parseBlock(blockQuery);
+        // Create executor with proper token stream for getRawText() to work
+        ElasticScriptLexer lexer = new ElasticScriptLexer(CharStreams.fromString(blockQuery));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        ElasticScriptParser parser = new ElasticScriptParser(tokens);
+        ElasticScriptParser.ProcedureContext blockContext = parser.procedure();
+        ProcedureExecutor cursorExecutor = new ProcedureExecutor(context, threadPool, null, tokens);
+        
         CountDownLatch latch = new CountDownLatch(1);
         
-        executor.visitProcedureAsync(blockContext, new ActionListener<Object>() {
+        cursorExecutor.visitProcedureAsync(blockContext, new ActionListener<Object>() {
             @Override
             public void onResponse(Object result) {
                 // Verify cursor was declared
