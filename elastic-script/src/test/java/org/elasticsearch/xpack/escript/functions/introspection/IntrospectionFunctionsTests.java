@@ -54,6 +54,7 @@ public class IntrospectionFunctionsTests extends ESTestCase {
         assertTrue("ESCRIPT_FUNCTIONS should be registered", context.hasFunction("ESCRIPT_FUNCTIONS"));
         assertTrue("ESCRIPT_FUNCTION should be registered", context.hasFunction("ESCRIPT_FUNCTION"));
         assertTrue("ESCRIPT_VARIABLES should be registered", context.hasFunction("ESCRIPT_VARIABLES"));
+        assertTrue("ESCRIPT_CAPABILITIES should be registered", context.hasFunction("ESCRIPT_CAPABILITIES"));
     }
 
     public void testProcedureFunctionsNotRegisteredWithoutClient() {
@@ -66,6 +67,101 @@ public class IntrospectionFunctionsTests extends ESTestCase {
 
     // Note: Tests for ESCRIPT_PROCEDURES() and ESCRIPT_PROCEDURE(name) require
     // an Elasticsearch client and are covered by integration tests.
+
+    public void testEscriptCapabilitiesReturnsTableFormat() throws Exception {
+        // Register a K8S function for testing
+        context.declareFunction("K8S_TEST",
+            List.of(new Parameter("deployment", "STRING", ParameterMode.IN)),
+            new BuiltInFunctionDefinition("K8S_TEST", (args, listener) -> listener.onResponse(null))
+        );
+        
+        FunctionDefinition func = context.getFunction("ESCRIPT_CAPABILITIES");
+        assertNotNull(func);
+        
+        AtomicReference<Object> resultRef = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
+        
+        // Call with null to get all capabilities
+        List<Object> args = new ArrayList<>();
+        args.add(null);
+        
+        func.execute(args, new ActionListener<>() {
+            @Override
+            public void onResponse(Object result) {
+                resultRef.set(result);
+                latch.countDown();
+            }
+            
+            @Override
+            public void onFailure(Exception e) {
+                latch.countDown();
+            }
+        });
+        
+        assertTrue("Should complete within timeout", latch.await(5, TimeUnit.SECONDS));
+        
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> capabilities = (List<Map<String, Object>>) resultRef.get();
+        assertNotNull("Should have results", capabilities);
+        
+        // Find K8S_TEST in results
+        Map<String, Object> k8sTest = capabilities.stream()
+            .filter(c -> "K8S_TEST".equals(c.get("name")))
+            .findFirst()
+            .orElse(null);
+        
+        assertNotNull("K8S_TEST should be in capabilities", k8sTest);
+        assertEquals("Type should be FUNCTION", "FUNCTION", k8sTest.get("type"));
+        assertEquals("Category should be KUBERNETES", "KUBERNETES", k8sTest.get("category"));
+        assertEquals("Signature should match", "K8S_TEST(deployment STRING)", k8sTest.get("signature"));
+        assertEquals("Parameter count should be 1", 1, k8sTest.get("parameter_count"));
+    }
+
+    public void testEscriptCapabilitiesFiltersByCategory() throws Exception {
+        // Register functions with different prefixes
+        context.declareFunction("K8S_FILTER_TEST",
+            List.of(),
+            new BuiltInFunctionDefinition("K8S_FILTER_TEST", (args, listener) -> listener.onResponse(null))
+        );
+        context.declareFunction("AWS_FILTER_TEST",
+            List.of(),
+            new BuiltInFunctionDefinition("AWS_FILTER_TEST", (args, listener) -> listener.onResponse(null))
+        );
+        
+        FunctionDefinition func = context.getFunction("ESCRIPT_CAPABILITIES");
+        
+        AtomicReference<Object> resultRef = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
+        
+        // Filter by K8S
+        func.execute(List.of("K8S"), new ActionListener<>() {
+            @Override
+            public void onResponse(Object result) {
+                resultRef.set(result);
+                latch.countDown();
+            }
+            
+            @Override
+            public void onFailure(Exception e) {
+                latch.countDown();
+            }
+        });
+        
+        assertTrue("Should complete within timeout", latch.await(5, TimeUnit.SECONDS));
+        
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> capabilities = (List<Map<String, Object>>) resultRef.get();
+        
+        // All results should start with K8S_
+        for (Map<String, Object> cap : capabilities) {
+            String name = (String) cap.get("name");
+            assertTrue("All results should start with K8S_: " + name, name.startsWith("K8S_"));
+        }
+        
+        // Should not contain AWS function
+        boolean hasAws = capabilities.stream().anyMatch(c -> "AWS_FILTER_TEST".equals(c.get("name")));
+        assertFalse("Should not contain AWS function when filtering by K8S", hasAws);
+    }
 
     public void testEscriptFunctionsReturnsAllFunctions() throws Exception {
         FunctionDefinition func = context.getFunction("ESCRIPT_FUNCTIONS");

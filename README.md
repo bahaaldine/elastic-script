@@ -833,6 +833,7 @@ Introspection functions allow agents and users to discover what capabilities are
 | `ESCRIPT_PROCEDURES()` | Returns an array of all stored procedures |
 | `ESCRIPT_PROCEDURE(name)` | Returns detailed information about a specific procedure |
 | `ESCRIPT_VARIABLES()` | Returns an array of all declared variables in scope |
+| `ESCRIPT_CAPABILITIES(category?)` | Returns all capabilities in a table-friendly format |
 
 ### ESCRIPT_FUNCTIONS()
 
@@ -982,6 +983,45 @@ replicas (NUMBER) = 5
 service (STRING) = api-server
 ```
 
+### ESCRIPT_CAPABILITIES(category?)
+
+Returns all capabilities (functions and procedures) in a unified, table-friendly format. Results are sorted by category, then by name.
+
+**Optional category parameter** filters by function name prefix: `"K8S"`, `"AWS"`, `"PAGERDUTY"`, etc.
+
+**Each element contains:**
+- `type` - "FUNCTION" or "PROCEDURE"
+- `name` - The name
+- `signature` - Human-readable signature
+- `parameter_count` - Number of parameters
+- `category` - Detected category (KUBERNETES, AWS, PAGERDUTY, CICD, AI, STRING, NUMBER, etc.)
+
+**Example - List all capabilities:**
+```sql
+DECLARE caps ARRAY = ESCRIPT_CAPABILITIES(null);
+-- Returns all functions and procedures sorted by category
+```
+
+**Example - Filter by category:**
+```sql
+-- Get only Kubernetes functions
+DECLARE k8s_caps ARRAY = ESCRIPT_CAPABILITIES('K8S');
+
+-- Get only AWS functions  
+DECLARE aws_caps ARRAY = ESCRIPT_CAPABILITIES('AWS');
+```
+
+**Example output (as displayed in a notebook):**
+
+| type | category | name | signature | parameter_count |
+|------|----------|------|-----------|-----------------|
+| FUNCTION | AWS | AWS_EC2_REBOOT | AWS_EC2_REBOOT(instance_ids STRING) | 1 |
+| FUNCTION | AWS | AWS_LAMBDA_INVOKE | AWS_LAMBDA_INVOKE(function_name STRING, payload STRING) | 2 |
+| FUNCTION | KUBERNETES | K8S_SCALE | K8S_SCALE(deployment STRING, replicas NUMBER) | 2 |
+| PROCEDURE | STORED_PROCEDURE | investigate_service | investigate_service(target_service STRING) | 1 |
+
+---
+
 ### Use Case: AI Agent Discovery
 
 Introspection enables AI agents to discover available capabilities:
@@ -1030,12 +1070,13 @@ BEGIN
     
     PRINT '';
     PRINT '--- Runbook Functions ---';
+    DECLARE info DOCUMENT;
     FOR func IN funcs LOOP
         -- Filter for runbook-related functions
-        IF INSTR(func['name'], 'K8S_') = 0 
-           OR INSTR(func['name'], 'AWS_') = 0 
-           OR INSTR(func['name'], 'PAGERDUTY_') = 0 THEN
-            DECLARE info DOCUMENT = ESCRIPT_FUNCTION(func['name']);
+        IF INSTR(func['name'], 'K8S_') == 0 
+           OR INSTR(func['name'], 'AWS_') == 0 
+           OR INSTR(func['name'], 'PAGERDUTY_') == 0 THEN
+            SET info = ESCRIPT_FUNCTION(func['name']);
             PRINT info['signature'];
         END IF
     END LOOP

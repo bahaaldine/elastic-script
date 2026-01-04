@@ -55,6 +55,7 @@ public class IntrospectionFunctions {
         registerEscriptFunctions(context);
         registerEscriptFunction(context);
         registerEscriptVariables(context);
+        registerEscriptCapabilities(context, null);
     }
 
     /**
@@ -64,9 +65,12 @@ public class IntrospectionFunctions {
      * @param client the Elasticsearch client for procedure access
      */
     public static void registerAll(ExecutionContext context, Client client) {
-        registerAll(context);
+        registerEscriptFunctions(context);
+        registerEscriptFunction(context);
+        registerEscriptVariables(context);
         registerEscriptProcedures(context, client);
         registerEscriptProcedure(context, client);
+        registerEscriptCapabilities(context, client);
     }
 
     /**
@@ -410,6 +414,173 @@ public class IntrospectionFunctions {
                                 }
                             }
                         });
+                } catch (Exception e) {
+                    listener.onFailure(e);
+                }
+            })
+        );
+    }
+
+    /**
+     * ESCRIPT_CAPABILITIES(category?) - Returns all capabilities in a table-friendly format.
+     * 
+     * Each element in the returned array is a DOCUMENT with:
+     * - type: "FUNCTION" or "PROCEDURE"
+     * - name: The name
+     * - signature: Human-readable signature
+     * - parameter_count: Number of parameters
+     * - category: Category filter used (if any)
+     * 
+     * Optional parameter allows filtering by category prefix (e.g., "K8S", "AWS", "PAGERDUTY")
+     */
+    public static void registerEscriptCapabilities(ExecutionContext context, Client client) {
+        context.declareFunction("ESCRIPT_CAPABILITIES",
+            List.of(new Parameter("category", "STRING", ParameterMode.IN)),
+            new BuiltInFunctionDefinition("ESCRIPT_CAPABILITIES", (List<Object> args, ActionListener<Object> listener) -> {
+                try {
+                    String categoryFilter = null;
+                    if (!args.isEmpty() && args.get(0) != null) {
+                        categoryFilter = args.get(0).toString().toUpperCase();
+                    }
+                    final String filter = categoryFilter;
+                    
+                    List<Map<String, Object>> results = new ArrayList<>();
+                    
+                    // Add all functions
+                    Map<String, FunctionDefinition> functions = context.getFunctions();
+                    for (Map.Entry<String, FunctionDefinition> entry : functions.entrySet()) {
+                        String name = entry.getKey();
+                        
+                        // Skip introspection functions themselves for cleaner output
+                        if (name.startsWith("ESCRIPT_")) continue;
+                        
+                        // Apply category filter if specified
+                        if (filter != null && !name.startsWith(filter)) continue;
+                        
+                        FunctionDefinition funcDef = entry.getValue();
+                        Map<String, Object> row = new HashMap<>();
+                        row.put("type", "FUNCTION");
+                        row.put("name", name);
+                        
+                        // Get parameters
+                        List<Parameter> params;
+                        if (funcDef instanceof BuiltInFunctionDefinition) {
+                            params = ((BuiltInFunctionDefinition) funcDef).getParameters();
+                        } else {
+                            params = funcDef.getParameters();
+                        }
+                        
+                        row.put("parameter_count", params != null ? params.size() : 0);
+                        
+                        // Build signature
+                        StringBuilder sig = new StringBuilder();
+                        sig.append(name).append("(");
+                        if (params != null && !params.isEmpty()) {
+                            for (int i = 0; i < params.size(); i++) {
+                                if (i > 0) sig.append(", ");
+                                Parameter p = params.get(i);
+                                sig.append(p.getName()).append(" ").append(p.getType());
+                            }
+                        }
+                        sig.append(")");
+                        row.put("signature", sig.toString());
+                        
+                        // Determine category from name prefix
+                        String category = "OTHER";
+                        if (name.startsWith("K8S_")) category = "KUBERNETES";
+                        else if (name.startsWith("AWS_")) category = "AWS";
+                        else if (name.startsWith("PAGERDUTY_")) category = "PAGERDUTY";
+                        else if (name.startsWith("TF_")) category = "TERRAFORM";
+                        else if (name.startsWith("SLACK_")) category = "SLACK";
+                        else if (name.startsWith("S3_")) category = "S3";
+                        else if (name.startsWith("JENKINS_") || name.startsWith("GITHUB_") 
+                                || name.startsWith("GITLAB_") || name.startsWith("ARGOCD_")) category = "CICD";
+                        else if (name.startsWith("LLM_") || name.startsWith("INFERENCE_")) category = "AI";
+                        else if (name.startsWith("ARRAY_")) category = "ARRAY";
+                        else if (name.startsWith("DOC_") || name.startsWith("FROM_JSON") || name.startsWith("TO_JSON")) category = "DOCUMENT";
+                        else if (name.startsWith("DATE_") || name.equals("NOW") || name.equals("CURRENT_DATE")) category = "DATE";
+                        else if (name.startsWith("HTTP_") || name.equals("WEBHOOK")) category = "HTTP";
+                        else if (name.matches("^(LENGTH|UPPER|LOWER|TRIM|SUBSTR|REPLACE|CONCAT|INSTR|LPAD|RPAD|INITCAP|REVERSE|LTRIM|RTRIM)$")) category = "STRING";
+                        else if (name.matches("^(ABS|CEIL|FLOOR|ROUND|TRUNC|MOD|POWER|SQRT|SIGN|GREATEST|LEAST|RANDOM)$")) category = "NUMBER";
+                        row.put("category", category);
+                        
+                        results.add(row);
+                    }
+                    
+                    // If we have a client, also fetch procedures
+                    if (client != null && (filter == null || "PROCEDURE".startsWith(filter))) {
+                        SearchRequest searchRequest = new SearchRequest(PROCEDURES_INDEX);
+                        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+                        sourceBuilder.query(QueryBuilders.matchAllQuery());
+                        sourceBuilder.size(1000);
+                        sourceBuilder.fetchSource(new String[]{"parameters"}, null);
+                        searchRequest.source(sourceBuilder);
+                        
+                        client.search(searchRequest, new ActionListener<>() {
+                            @Override
+                            public void onResponse(org.elasticsearch.action.search.SearchResponse response) {
+                                try {
+                                    for (SearchHit hit : response.getHits().getHits()) {
+                                        Map<String, Object> row = new HashMap<>();
+                                        row.put("type", "PROCEDURE");
+                                        row.put("name", hit.getId());
+                                        row.put("category", "STORED_PROCEDURE");
+                                        
+                                        Map<String, Object> source = hit.getSourceAsMap();
+                                        @SuppressWarnings("unchecked")
+                                        List<Map<String, Object>> params = (List<Map<String, Object>>) source.get("parameters");
+                                        
+                                        row.put("parameter_count", params != null ? params.size() : 0);
+                                        
+                                        // Build signature
+                                        StringBuilder sig = new StringBuilder();
+                                        sig.append(hit.getId()).append("(");
+                                        if (params != null && !params.isEmpty()) {
+                                            for (int i = 0; i < params.size(); i++) {
+                                                if (i > 0) sig.append(", ");
+                                                Map<String, Object> p = params.get(i);
+                                                sig.append(p.get("name")).append(" ").append(p.get("type"));
+                                            }
+                                        }
+                                        sig.append(")");
+                                        row.put("signature", sig.toString());
+                                        
+                                        results.add(row);
+                                    }
+                                    
+                                    // Sort by category, then name
+                                    results.sort((a, b) -> {
+                                        int catCmp = ((String) a.get("category")).compareTo((String) b.get("category"));
+                                        if (catCmp != 0) return catCmp;
+                                        return ((String) a.get("name")).compareTo((String) b.get("name"));
+                                    });
+                                    
+                                    listener.onResponse(results);
+                                } catch (Exception e) {
+                                    listener.onFailure(e);
+                                }
+                            }
+                            
+                            @Override
+                            public void onFailure(Exception e) {
+                                // If index doesn't exist, just return functions
+                                results.sort((a, b) -> {
+                                    int catCmp = ((String) a.get("category")).compareTo((String) b.get("category"));
+                                    if (catCmp != 0) return catCmp;
+                                    return ((String) a.get("name")).compareTo((String) b.get("name"));
+                                });
+                                listener.onResponse(results);
+                            }
+                        });
+                    } else {
+                        // No client, just return functions
+                        results.sort((a, b) -> {
+                            int catCmp = ((String) a.get("category")).compareTo((String) b.get("category"));
+                            if (catCmp != 0) return catCmp;
+                            return ((String) a.get("name")).compareTo((String) b.get("name"));
+                        });
+                        listener.onResponse(results);
+                    }
                 } catch (Exception e) {
                     listener.onFailure(e);
                 }
