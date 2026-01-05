@@ -28,6 +28,7 @@ import org.elasticsearch.xpack.escript.handlers.DeclareStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.ExecuteStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.FunctionDefinitionHandler;
 import org.elasticsearch.xpack.escript.handlers.IfStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.SwitchStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.LoopStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.PrintStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.ThrowStatementHandler;
@@ -70,6 +71,7 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
     private final AssignmentStatementHandler assignmentHandler;
     private final DeclareStatementHandler declareHandler;
     private final IfStatementHandler ifHandler;
+    private final SwitchStatementHandler switchHandler;
     private final LoopStatementHandler loopHandler;
     private final FunctionDefinitionHandler functionDefHandler;
     private final TryCatchStatementHandler tryCatchHandler;
@@ -103,6 +105,7 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
         this.assignmentHandler = new AssignmentStatementHandler(this);
         this.declareHandler = new DeclareStatementHandler(this);
         this.ifHandler = new IfStatementHandler(this);
+        this.switchHandler = new SwitchStatementHandler(this);
         this.loopHandler = new LoopStatementHandler(this);
         this.functionDefHandler = new FunctionDefinitionHandler(this);
         this.tryCatchHandler = new TryCatchStatementHandler(this);
@@ -228,6 +231,8 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
             assignmentHandler.handleAsync(ctx.assignment_statement(), listener);
         } else if (ctx.if_statement() != null) {
             ifHandler.handleAsync(ctx.if_statement(), listener);
+        } else if (ctx.switch_statement() != null) {
+            switchHandler.handleAsync(ctx.switch_statement(), listener);
         } else if (ctx.loop_statement() != null) {
             loopHandler.handleAsync(ctx.loop_statement(), listener);
         } else if (ctx.function_definition() != null) {

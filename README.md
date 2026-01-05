@@ -220,6 +220,56 @@ END IF
 
 ---
 
+### SWITCH / CASE
+
+**Purpose:** Multi-branch selection based on matching a value against multiple cases.
+
+**Syntax:**
+```sql
+SWITCH <expression>
+    CASE <value1>:
+        <statements>
+    CASE <value2>:
+        <statements>
+    [DEFAULT:
+        <statements>]
+END SWITCH
+```
+
+**Examples:**
+```sql
+-- Numeric switch
+SWITCH day_of_week
+    CASE 1:
+        RETURN 'Monday';
+    CASE 2:
+        RETURN 'Tuesday';
+    CASE 3:
+        RETURN 'Wednesday';
+    DEFAULT:
+        RETURN 'Other day';
+END SWITCH
+
+-- String switch
+SWITCH log_level
+    CASE 'ERROR':
+        SET color = 'red';
+    CASE 'WARNING':
+        SET color = 'yellow';
+    CASE 'INFO':
+        SET color = 'blue';
+    DEFAULT:
+        SET color = 'gray';
+END SWITCH
+```
+
+**Notes:**
+- Only the first matching case is executed (no fall-through)
+- BREAK can be used to exit the switch early
+- DEFAULT is optional; if no case matches and no default, execution continues after END SWITCH
+
+---
+
 ### FOR Loop
 
 **Purpose:** Iterate over a numeric range, array, or cursor.
@@ -2115,33 +2165,45 @@ END LOOP
 
 ---
 
-### Phase 2: Expression Operators ⏳ Priority: High | Effort: Medium
+### Phase 2: Expression Operators ✅ Priority: High | Effort: Medium
 
 | Feature | Description | Status |
 |---------|-------------|--------|
-| `%` modulo operator | Inline modulo: `IF i % 2 == 0 THEN` | 🔲 Planned |
-| `IN` operator | Collection membership: `IF status IN ('active', 'pending') THEN` | 🔲 Planned |
-| `SWITCH/CASE` statement | Multi-branch selection | 🔲 Planned |
+| `%` modulo operator | Inline modulo: `IF i % 2 == 0 THEN` | ✅ Implemented |
+| `IN` operator | Collection membership: `IF status IN ('active', 'pending') THEN` | ✅ Implemented |
+| `NOT IN` operator | Negated collection membership: `IF x NOT IN blocked THEN` | ✅ Implemented |
+| `SWITCH/CASE` statement | Multi-branch selection | ✅ Implemented |
 
-**Example usage after implementation:**
+**Example usage:**
 ```sql
 -- Modulo operator
 IF i % 2 == 0 THEN
     PRINT 'Even';
 END IF
 
--- IN operator
+-- IN operator with list
 IF status IN ('active', 'pending', 'processing') THEN
     PRINT 'Valid status';
 END IF
 
+-- IN operator with array variable
+DECLARE allowed ARRAY = ["admin", "user", "guest"];
+IF role IN allowed THEN
+    PRINT 'Allowed';
+END IF
+
+-- NOT IN operator
+IF user NOT IN blocked THEN
+    PRINT 'Access granted';
+END IF
+
 -- SWITCH/CASE statement
 SWITCH severity
-    CASE 'critical' THEN
-        PAGERDUTY_TRIGGER(message, 'high');
-    CASE 'warning' THEN
-        SLACK_SEND('#alerts', message);
-    DEFAULT
+    CASE 'critical':
+        PRINT 'Page immediately!';
+    CASE 'warning':
+        PRINT 'Send to #alerts';
+    DEFAULT:
         PRINT message;
 END SWITCH
 ```

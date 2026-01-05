@@ -1,4 +1,10 @@
-// Generated from ElasticScript.g4 by ANTLR 4.13.1
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 package org.elasticsearch.xpack.escript.parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -97,6 +103,36 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitContinue_statement(ElasticScriptParser.Continue_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#switch_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterSwitch_statement(ElasticScriptParser.Switch_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#switch_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitSwitch_statement(ElasticScriptParser.Switch_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#case_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterCase_clause(ElasticScriptParser.Case_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#case_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitCase_clause(ElasticScriptParser.Case_clauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#default_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterDefault_clause(ElasticScriptParser.Default_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#default_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitDefault_clause(ElasticScriptParser.Default_clauseContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#return_statement}.
 	 * @param ctx the parse tree
@@ -453,6 +489,54 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitIsNotNullExpr(ElasticScriptParser.IsNotNullExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code inListExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterInListExpr(ElasticScriptParser.InListExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code inListExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitInListExpr(ElasticScriptParser.InListExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code notInListExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterNotInListExpr(ElasticScriptParser.NotInListExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code notInListExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitNotInListExpr(ElasticScriptParser.NotInListExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code inArrayExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterInArrayExpr(ElasticScriptParser.InArrayExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code inArrayExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitInArrayExpr(ElasticScriptParser.InArrayExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code notInArrayExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterNotInArrayExpr(ElasticScriptParser.NotInArrayExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code notInArrayExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitNotInArrayExpr(ElasticScriptParser.NotInArrayExprContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#additiveExpression}.
 	 * @param ctx the parse tree

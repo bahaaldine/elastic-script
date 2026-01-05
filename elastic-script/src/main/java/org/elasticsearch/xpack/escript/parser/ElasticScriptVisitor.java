@@ -1,4 +1,10 @@
-// Generated from ElasticScript.g4 by ANTLR 4.13.1
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 package org.elasticsearch.xpack.escript.parser;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -64,6 +70,24 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitContinue_statement(ElasticScriptParser.Continue_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#switch_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSwitch_statement(ElasticScriptParser.Switch_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#case_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCase_clause(ElasticScriptParser.Case_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#default_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDefault_clause(ElasticScriptParser.Default_clauseContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#return_statement}.
 	 * @param ctx the parse tree
@@ -277,6 +301,34 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitIsNotNullExpr(ElasticScriptParser.IsNotNullExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code inListExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInListExpr(ElasticScriptParser.InListExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code notInListExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNotInListExpr(ElasticScriptParser.NotInListExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code inArrayExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInArrayExpr(ElasticScriptParser.InArrayExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code notInArrayExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNotInArrayExpr(ElasticScriptParser.NotInArrayExprContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#additiveExpression}.
 	 * @param ctx the parse tree

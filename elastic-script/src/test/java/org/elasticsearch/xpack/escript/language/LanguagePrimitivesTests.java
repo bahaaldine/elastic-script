@@ -264,5 +264,220 @@ public class LanguagePrimitivesTests extends ESTestCase {
         Object result = executeScript(script);
         assertEquals(12.0, result);
     }
+
+    // ========== Phase 2: Modulo, IN, SWITCH/CASE ==========
+
+    public void testModuloOperator() throws Exception {
+        String script = """
+            PROCEDURE test_modulo()
+            BEGIN
+                DECLARE a NUMBER = 17;
+                DECLARE b NUMBER = 5;
+                RETURN a % b;
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals(2.0, result);
+    }
+
+    public void testModuloForEvenOdd() throws Exception {
+        String script = """
+            PROCEDURE test_even_odd()
+            BEGIN
+                DECLARE num NUMBER = 10;
+                IF num % 2 == 0 THEN
+                    RETURN 'even';
+                ELSE
+                    RETURN 'odd';
+                END IF
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("even", result);
+    }
+
+    public void testInListWithNumbers() throws Exception {
+        String script = """
+            PROCEDURE test_in_list()
+            BEGIN
+                DECLARE x NUMBER = 5;
+                IF x IN (1, 3, 5, 7, 9) THEN
+                    RETURN 'odd digit';
+                ELSE
+                    RETURN 'not odd digit';
+                END IF
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("odd digit", result);
+    }
+
+    public void testInListNotFound() throws Exception {
+        String script = """
+            PROCEDURE test_in_list_not_found()
+            BEGIN
+                DECLARE x NUMBER = 6;
+                IF x IN (1, 3, 5, 7, 9) THEN
+                    RETURN 'found';
+                ELSE
+                    RETURN 'not found';
+                END IF
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("not found", result);
+    }
+
+    public void testNotInList() throws Exception {
+        String script = """
+            PROCEDURE test_not_in_list()
+            BEGIN
+                DECLARE status STRING = 'active';
+                IF status NOT IN ('deleted', 'archived', 'suspended') THEN
+                    RETURN 'valid';
+                ELSE
+                    RETURN 'invalid';
+                END IF
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("valid", result);
+    }
+
+    public void testInArray() throws Exception {
+        String script = """
+            PROCEDURE test_in_array()
+            BEGIN
+                DECLARE allowed ARRAY = ["admin", "user", "guest"];
+                DECLARE role STRING = "user";
+                IF role IN allowed THEN
+                    RETURN 'allowed';
+                ELSE
+                    RETURN 'denied';
+                END IF
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("allowed", result);
+    }
+
+    public void testNotInArray() throws Exception {
+        String script = """
+            PROCEDURE test_not_in_array()
+            BEGIN
+                DECLARE blocked ARRAY = ["banned", "spam"];
+                DECLARE user STRING = "normal";
+                IF user NOT IN blocked THEN
+                    RETURN 'ok';
+                ELSE
+                    RETURN 'blocked';
+                END IF
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("ok", result);
+    }
+
+    public void testSwitchCaseNumber() throws Exception {
+        String script = """
+            PROCEDURE test_switch_number()
+            BEGIN
+                DECLARE day NUMBER = 3;
+                SWITCH day
+                    CASE 1:
+                        RETURN 'Monday';
+                    CASE 2:
+                        RETURN 'Tuesday';
+                    CASE 3:
+                        RETURN 'Wednesday';
+                    CASE 4:
+                        RETURN 'Thursday';
+                    CASE 5:
+                        RETURN 'Friday';
+                    DEFAULT:
+                        RETURN 'Weekend';
+                END SWITCH
+                RETURN 'Unknown';
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("Wednesday", result);
+    }
+
+    public void testSwitchCaseDefault() throws Exception {
+        String script = """
+            PROCEDURE test_switch_default()
+            BEGIN
+                DECLARE day NUMBER = 7;
+                SWITCH day
+                    CASE 1:
+                        RETURN 'Monday';
+                    CASE 2:
+                        RETURN 'Tuesday';
+                    DEFAULT:
+                        RETURN 'Other day';
+                END SWITCH
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("Other day", result);
+    }
+
+    public void testSwitchCaseString() throws Exception {
+        String script = """
+            PROCEDURE test_switch_string()
+            BEGIN
+                DECLARE status STRING = 'warning';
+                SWITCH status
+                    CASE 'info':
+                        RETURN 0;
+                    CASE 'warning':
+                        RETURN 1;
+                    CASE 'error':
+                        RETURN 2;
+                    DEFAULT:
+                        RETURN -1;
+                END SWITCH
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals(1.0, result);
+    }
+
+    public void testSwitchWithMultipleStatements() throws Exception {
+        String script = """
+            PROCEDURE test_switch_multi()
+            BEGIN
+                DECLARE level NUMBER = 2;
+                DECLARE msg STRING = '';
+                DECLARE code NUMBER = 0;
+                SWITCH level
+                    CASE 1:
+                        SET msg = 'Low';
+                        SET code = 100;
+                    CASE 2:
+                        SET msg = 'Medium';
+                        SET code = 200;
+                    CASE 3:
+                        SET msg = 'High';
+                        SET code = 300;
+                END SWITCH
+                RETURN msg || ':' || code;
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("Medium:200.0", result);
+    }
 }
 

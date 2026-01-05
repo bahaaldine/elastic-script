@@ -227,6 +227,62 @@ public class ExpressionEvaluator {
             return;
         }
         
+        // Handle IN (list) expression: value IN (1, 2, 3)
+        if (ctx instanceof ElasticScriptParser.InListExprContext inListCtx) {
+            evaluateAdditiveExpressionAsync(inListCtx.additiveExpression(), ActionListener.wrap(
+                value -> evaluateExpressionListForIn(inListCtx.expressionList().expression(), value, false, listener),
+                listener::onFailure
+            ));
+            return;
+        }
+        
+        // Handle NOT IN (list) expression: value NOT IN (1, 2, 3)
+        if (ctx instanceof ElasticScriptParser.NotInListExprContext notInListCtx) {
+            evaluateAdditiveExpressionAsync(notInListCtx.additiveExpression(), ActionListener.wrap(
+                value -> evaluateExpressionListForIn(notInListCtx.expressionList().expression(), value, true, listener),
+                listener::onFailure
+            ));
+            return;
+        }
+        
+        // Handle IN array expression: value IN arrayVar
+        if (ctx instanceof ElasticScriptParser.InArrayExprContext inArrayCtx) {
+            evaluateAdditiveExpressionAsync(inArrayCtx.additiveExpression(0), ActionListener.wrap(
+                value -> evaluateAdditiveExpressionAsync(inArrayCtx.additiveExpression(1), ActionListener.wrap(
+                    arrayValue -> {
+                        try {
+                            boolean found = checkValueInCollection(value, arrayValue);
+                            listener.onResponse(found);
+                        } catch (Exception e) {
+                            listener.onFailure(e);
+                        }
+                    },
+                    listener::onFailure
+                )),
+                listener::onFailure
+            ));
+            return;
+        }
+        
+        // Handle NOT IN array expression: value NOT IN arrayVar
+        if (ctx instanceof ElasticScriptParser.NotInArrayExprContext notInArrayCtx) {
+            evaluateAdditiveExpressionAsync(notInArrayCtx.additiveExpression(0), ActionListener.wrap(
+                value -> evaluateAdditiveExpressionAsync(notInArrayCtx.additiveExpression(1), ActionListener.wrap(
+                    arrayValue -> {
+                        try {
+                            boolean found = checkValueInCollection(value, arrayValue);
+                            listener.onResponse(!found);
+                        } catch (Exception e) {
+                            listener.onFailure(e);
+                        }
+                    },
+                    listener::onFailure
+                )),
+                listener::onFailure
+            ));
+            return;
+        }
+        
         // Handle comparison expression (the original logic)
         if (ctx instanceof ElasticScriptParser.ComparisonExprContext compCtx) {
             // Single operand: delegate to additive
@@ -612,5 +668,73 @@ public class ExpressionEvaluator {
             return (Boolean) obj;
         }
         throw new RuntimeException("Expected a boolean value, but got: " + obj);
+    }
+
+    /**
+     * Evaluates a list of expressions and checks if a value is in the resulting list.
+     */
+    private void evaluateExpressionListForIn(List<ElasticScriptParser.ExpressionContext> exprs,
+                                             Object value, boolean negate, ActionListener<Object> listener) {
+        evaluateExpressionListForIn(exprs, 0, value, listener, negate);
+    }
+
+    private void evaluateExpressionListForIn(List<ElasticScriptParser.ExpressionContext> exprs,
+                                             int index, Object value, ActionListener<Object> listener, boolean negate) {
+        if (index >= exprs.size()) {
+            // Value not found in any expression
+            listener.onResponse(negate);
+            return;
+        }
+        evaluateExpressionAsync(exprs.get(index), new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object exprValue) {
+                if (valuesEqual(value, exprValue)) {
+                    // Found a match
+                    listener.onResponse(!negate);
+                } else {
+                    // Continue checking
+                    evaluateExpressionListForIn(exprs, index + 1, value, listener, negate);
+                }
+            }
+            @Override
+            public void onFailure(Exception e) {
+                listener.onFailure(e);
+            }
+        });
+    }
+
+    /**
+     * Checks if a value is in a collection (array or list).
+     */
+    private boolean checkValueInCollection(Object value, Object collection) {
+        if (collection == null) {
+            return false;
+        }
+        if (collection instanceof List<?> list) {
+            for (Object item : list) {
+                if (valuesEqual(value, item)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        throw new RuntimeException("IN operator requires an array or list, but got: " + collection.getClass().getSimpleName());
+    }
+
+    /**
+     * Compares two values for equality, handling type coercion for numbers.
+     */
+    private boolean valuesEqual(Object a, Object b) {
+        if (a == null && b == null) {
+            return true;
+        }
+        if (a == null || b == null) {
+            return false;
+        }
+        // Handle numeric comparison with type coercion
+        if (a instanceof Number && b instanceof Number) {
+            return ((Number) a).doubleValue() == ((Number) b).doubleValue();
+        }
+        return a.equals(b);
     }
 }

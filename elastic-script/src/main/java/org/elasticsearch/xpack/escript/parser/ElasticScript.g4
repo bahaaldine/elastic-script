@@ -56,6 +56,10 @@ FUNCTION: 'FUNCTION';
 RETURN: 'RETURN';
 BREAK: 'BREAK';
 CONTINUE: 'CONTINUE';
+SWITCH: 'SWITCH';
+CASE: 'CASE';
+DEFAULT: 'DEFAULT';
+END_SWITCH: 'END SWITCH';
 PERSIST: 'PERSIST';
 INTO: 'INTO';
 CURSOR: 'CURSOR';
@@ -75,6 +79,7 @@ PLUS: '+';
 MINUS: '-';
 MULTIPLY: '*';
 DIVIDE: '/';
+MODULO: '%';
 GREATER_THAN: '>';
 LESS_THAN: '<';
 NOT_EQUAL: '!=';
@@ -226,6 +231,7 @@ statement
     | return_statement
     | break_statement
     | continue_statement
+    | switch_statement
     | expression_statement
     | SEMICOLON
     ;
@@ -246,6 +252,18 @@ break_statement
 
 continue_statement
     : CONTINUE SEMICOLON
+    ;
+
+switch_statement
+    : SWITCH expression case_clause+ default_clause? END_SWITCH
+    ;
+
+case_clause
+    : CASE expression ':' statement*
+    ;
+
+default_clause
+    : DEFAULT ':' statement*
     ;
 
 return_statement
@@ -386,6 +404,10 @@ relationalExpression
     : additiveExpression ((LESS_THAN | GREATER_THAN | LESS_EQUAL | GREATER_EQUAL) additiveExpression)*  # comparisonExpr
     | additiveExpression IS NULL                             # isNullExpr
     | additiveExpression IS NOT NULL                         # isNotNullExpr
+    | additiveExpression IN LPAREN expressionList RPAREN     # inListExpr
+    | additiveExpression NOT IN LPAREN expressionList RPAREN # notInListExpr
+    | additiveExpression IN additiveExpression               # inArrayExpr
+    | additiveExpression NOT IN additiveExpression           # notInArrayExpr
     ;
 
 additiveExpression
@@ -393,7 +415,7 @@ additiveExpression
     ;
 
 multiplicativeExpression
-    : unaryExpr ((MULTIPLY | DIVIDE) unaryExpr)*
+    : unaryExpr ((MULTIPLY | DIVIDE | MODULO) unaryExpr)*
     ;
 
 unaryExpr

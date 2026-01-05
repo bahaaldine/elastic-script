@@ -30,6 +30,13 @@ test {
   ]
 }
 
+// Disable 'this-escape' warning for generated ANTLR parser files
+tasks.withType(JavaCompile).configureEach {
+  options.compilerArgs.removeAll { it == '-Werror' }
+  options.compilerArgs.add('-Xlint:-this-escape')
+  options.compilerArgs.add('-Werror')
+}
+
 dependencies {
   compileOnly 'commons-logging:commons-logging:1.2'
 
@@ -148,6 +155,15 @@ import org.antlr.v4.runtime.VocabularyImpl;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.antlr.v4.runtime.tree.TerminalNode;''',
+      encoding: 'UTF-8'
+    ) {
+      fileset(dir: outputPath, includes: 'ElasticScriptParser*.java')
+    }
+
+    // Add "this-escape" to @SuppressWarnings in ElasticScriptParser.java to silence inner class warnings
+    ant.replaceregexp(
+      match: '@SuppressWarnings\\(\\{"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue"\\}\\)',
+      replace: '@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue", "this-escape"})',
       encoding: 'UTF-8'
     ) {
       fileset(dir: outputPath, includes: 'ElasticScriptParser*.java')
