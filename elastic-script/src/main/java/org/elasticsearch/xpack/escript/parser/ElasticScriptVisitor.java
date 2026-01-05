@@ -263,6 +263,18 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExpression(ElasticScriptParser.ExpressionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#ternaryExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTernaryExpression(ElasticScriptParser.TernaryExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#nullCoalesceExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNullCoalesceExpression(ElasticScriptParser.NullCoalesceExpressionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#logicalOrExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -390,11 +402,23 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPrimaryExpression(ElasticScriptParser.PrimaryExpressionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#accessExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAccessExpression(ElasticScriptParser.AccessExpressionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#bracketExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitBracketExpression(ElasticScriptParser.BracketExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#safeNavExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSafeNavExpression(ElasticScriptParser.SafeNavExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#simplePrimaryExpression}.
 	 * @param ctx the parse tree

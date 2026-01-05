@@ -2210,26 +2210,33 @@ END SWITCH
 
 ---
 
-### Phase 3: Null Safety & Ternary ⏳ Priority: Medium | Effort: Medium
+### Phase 3: Null Safety & Ternary ✅ Priority: Medium | Effort: Medium
 
 | Feature | Description | Status |
 |---------|-------------|--------|
-| `??` null coalescing | Default if null: `name ?? 'Unknown'` | 🔲 Planned |
-| `?.` safe navigation | Safe property access: `user?.address?.city` | 🔲 Planned |
-| Ternary `? :` | Inline conditional: `active ? 'Yes' : 'No'` | 🔲 Planned |
+| `??` null coalescing | Default if null: `value ?? 'Default'` | ✅ Implemented |
+| `?.` safe navigation | Safe property access: `user?.profile?.settings` | ✅ Implemented |
+| Ternary `? :` | Inline conditional: `active ? 'Yes' : 'No'` | ✅ Implemented |
 
-**Example usage after implementation:**
+**Example usage:**
 ```sql
--- Null coalescing
-DECLARE name STRING = user['name'] ?? 'Unknown';
-DECLARE port NUMBER = config['port'] ?? 8080;
+-- Null coalescing: returns 'Unknown' if doc['name'] is null
+RETURN doc['name'] ?? 'Unknown';
+RETURN config['port'] ?? 8080;
 
--- Safe navigation (returns null if any part is null)
-DECLARE city STRING = user?.address?.city;
+-- Null coalesce chain: returns first non-null value
+RETURN doc['primary'] ?? doc['secondary'] ?? 'Default';
 
--- Ternary operator
-DECLARE status STRING = is_active ? 'Active' : 'Inactive';
-DECLARE color STRING = error_count > 0 ? 'red' : 'green';
+-- Safe navigation: returns null if any part is null (instead of error)
+RETURN user?.profile?.settings?.theme;
+RETURN doc['profile']?.preferences ?? 'No preferences';
+
+-- Ternary operator: inline conditional
+RETURN is_active ? 'Active' : 'Inactive';
+RETURN error_count > 0 ? 'red' : 'green';
+
+-- Combined: ternary with null coalescing
+RETURN has_data ? data : (fallback ?? 'Default');
 ```
 
 ---

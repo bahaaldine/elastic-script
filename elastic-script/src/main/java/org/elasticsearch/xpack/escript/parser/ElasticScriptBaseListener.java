@@ -515,6 +515,30 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterTernaryExpression(ElasticScriptParser.TernaryExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTernaryExpression(ElasticScriptParser.TernaryExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNullCoalesceExpression(ElasticScriptParser.NullCoalesceExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNullCoalesceExpression(ElasticScriptParser.NullCoalesceExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterLogicalOrExpression(ElasticScriptParser.LogicalOrExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -755,6 +779,18 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterAccessExpression(ElasticScriptParser.AccessExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAccessExpression(ElasticScriptParser.AccessExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterBracketExpression(ElasticScriptParser.BracketExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -762,6 +798,18 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitBracketExpression(ElasticScriptParser.BracketExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSafeNavExpression(ElasticScriptParser.SafeNavExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSafeNavExpression(ElasticScriptParser.SafeNavExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

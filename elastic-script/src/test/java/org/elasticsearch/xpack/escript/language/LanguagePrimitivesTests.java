@@ -479,5 +479,151 @@ public class LanguagePrimitivesTests extends ESTestCase {
         Object result = executeScript(script);
         assertEquals("Medium:200.0", result);
     }
+
+    // ========== Phase 3: Null Coalescing, Ternary, Safe Navigation ==========
+
+    public void testNullCoalesceWithNull() throws Exception {
+        String script = """
+            PROCEDURE test_null_coalesce()
+            BEGIN
+                DECLARE doc DOCUMENT = {"name": "test"};
+                RETURN doc['missing'] ?? 'Unknown';
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("Unknown", result);
+    }
+
+    public void testNullCoalesceWithValue() throws Exception {
+        String script = """
+            PROCEDURE test_null_coalesce_value()
+            BEGIN
+                DECLARE name STRING = 'John';
+                RETURN name ?? 'Unknown';
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("John", result);
+    }
+
+    public void testNullCoalesceChain() throws Exception {
+        String script = """
+            PROCEDURE test_null_coalesce_chain()
+            BEGIN
+                DECLARE doc DOCUMENT = {"a": "value"};
+                RETURN doc['missing1'] ?? doc['missing2'] ?? 'Default';
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("Default", result);
+    }
+
+    public void testTernaryTrue() throws Exception {
+        String script = """
+            PROCEDURE test_ternary_true()
+            BEGIN
+                DECLARE active BOOLEAN = true;
+                RETURN active ? 'Active' : 'Inactive';
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("Active", result);
+    }
+
+    public void testTernaryFalse() throws Exception {
+        String script = """
+            PROCEDURE test_ternary_false()
+            BEGIN
+                DECLARE active BOOLEAN = false;
+                RETURN active ? 'Active' : 'Inactive';
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("Inactive", result);
+    }
+
+    public void testTernaryWithExpression() throws Exception {
+        String script = """
+            PROCEDURE test_ternary_expr()
+            BEGIN
+                DECLARE count NUMBER = 5;
+                RETURN count > 0 ? 'Has items' : 'Empty';
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("Has items", result);
+    }
+
+    public void testTernaryWithNumbers() throws Exception {
+        String script = """
+            PROCEDURE test_ternary_numbers()
+            BEGIN
+                DECLARE error_count NUMBER = 3;
+                RETURN error_count > 0 ? 1 : 0;
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals(1.0, result);
+    }
+
+    public void testSafeNavigationWithValue() throws Exception {
+        String script = """
+            PROCEDURE test_safe_nav()
+            BEGIN
+                DECLARE user DOCUMENT = {"name": "John", "address": {"city": "NYC"}};
+                RETURN user?.name;
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("John", result);
+    }
+
+    public void testSafeNavigationWithMissingField() throws Exception {
+        String script = """
+            PROCEDURE test_safe_nav_missing()
+            BEGIN
+                DECLARE user DOCUMENT = {"name": "John"};
+                RETURN user['profile']?.settings ?? 'No settings';
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("No settings", result);
+    }
+
+    public void testSafeNavigationChain() throws Exception {
+        String script = """
+            PROCEDURE test_safe_nav_chain()
+            BEGIN
+                DECLARE user DOCUMENT = {"profile": {"settings": {"theme": "dark"}}};
+                RETURN user?.profile?.settings?.theme;
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("dark", result);
+    }
+
+    public void testCombinedTernaryAndCoalesce() throws Exception {
+        String script = """
+            PROCEDURE test_combined()
+            BEGIN
+                DECLARE doc DOCUMENT = {"data": "test"};
+                DECLARE has_value BOOLEAN = false;
+                RETURN has_value ? 'Has value' : (doc['missing'] ?? 'Fallback');
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("Fallback", result);
+    }
 }
 

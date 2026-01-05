@@ -424,6 +424,26 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitExpression(ElasticScriptParser.ExpressionContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#ternaryExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterTernaryExpression(ElasticScriptParser.TernaryExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#ternaryExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitTernaryExpression(ElasticScriptParser.TernaryExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#nullCoalesceExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterNullCoalesceExpression(ElasticScriptParser.NullCoalesceExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#nullCoalesceExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitNullCoalesceExpression(ElasticScriptParser.NullCoalesceExpressionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#logicalOrExpression}.
 	 * @param ctx the parse tree
 	 */
@@ -638,6 +658,16 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitPrimaryExpression(ElasticScriptParser.PrimaryExpressionContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#accessExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterAccessExpression(ElasticScriptParser.AccessExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#accessExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitAccessExpression(ElasticScriptParser.AccessExpressionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#bracketExpression}.
 	 * @param ctx the parse tree
 	 */
@@ -647,6 +677,16 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitBracketExpression(ElasticScriptParser.BracketExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#safeNavExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterSafeNavExpression(ElasticScriptParser.SafeNavExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#safeNavExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitSafeNavExpression(ElasticScriptParser.SafeNavExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#simplePrimaryExpression}.
 	 * @param ctx the parse tree

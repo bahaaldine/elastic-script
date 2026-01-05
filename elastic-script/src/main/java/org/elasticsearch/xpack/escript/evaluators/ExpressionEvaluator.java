@@ -39,7 +39,7 @@ public class ExpressionEvaluator {
 
     /**
      * Evaluates an expression asynchronously.
-     * If the expression contains concatenation (i.e. multiple logicalOrExpressions separated by '||'),
+     * If the expression contains concatenation (i.e. multiple ternaryExpressions separated by '||'),
      * then each operand is evaluated and the results are concatenated as strings.
      *
      * @param ctx the ExpressionContext from the parse tree.
@@ -50,18 +50,18 @@ public class ExpressionEvaluator {
             listener.onFailure(new RuntimeException("Null expression context"));
             return;
         }
-        List<ElasticScriptParser.LogicalOrExpressionContext> operands = ctx.logicalOrExpression();
+        List<ElasticScriptParser.TernaryExpressionContext> operands = ctx.ternaryExpression();
         if (operands.size() == 1) {
             // No concatenation operator present – evaluate normally.
-            evaluateLogicalOrExpressionAsync(operands.get(0), listener);
+            evaluateTernaryExpressionAsync(operands.get(0), listener);
         } else {
             // Evaluate each operand and concatenate their results as strings.
-            evaluateOperandsAndConcatenate(operands, 0, new ArrayList<>(), listener);
+            evaluateTernaryOperandsAndConcatenate(operands, 0, new ArrayList<>(), listener);
         }
     }
 
-    private void evaluateOperandsAndConcatenate(List<ElasticScriptParser.LogicalOrExpressionContext> operands,
-                                                int index, List<Object> results, ActionListener<Object> listener) {
+    private void evaluateTernaryOperandsAndConcatenate(List<ElasticScriptParser.TernaryExpressionContext> operands,
+                                                       int index, List<Object> results, ActionListener<Object> listener) {
         if (index >= operands.size()) {
             // Concatenate all results into one string.
             StringBuilder sb = new StringBuilder();
@@ -72,17 +72,100 @@ public class ExpressionEvaluator {
             return;
         }
         // Evaluate each operand asynchronously.
-        evaluateLogicalOrExpressionAsync(operands.get(index), new ActionListener<Object>() {
+        evaluateTernaryExpressionAsync(operands.get(index), new ActionListener<Object>() {
             @Override
             public void onResponse(Object result) {
                 results.add(result);
-                evaluateOperandsAndConcatenate(operands, index + 1, results, listener);
+                evaluateTernaryOperandsAndConcatenate(operands, index + 1, results, listener);
             }
             @Override
             public void onFailure(Exception e) {
                 listener.onFailure(e);
             }
         });
+    }
+
+    /**
+     * Evaluates a ternary expression: condition ? trueValue : falseValue
+     */
+    private void evaluateTernaryExpressionAsync(ElasticScriptParser.TernaryExpressionContext ctx, ActionListener<Object> listener) {
+        List<ElasticScriptParser.NullCoalesceExpressionContext> parts = ctx.nullCoalesceExpression();
+        if (parts.size() == 1) {
+            // No ternary operator – just evaluate the null coalesce expression
+            evaluateNullCoalesceExpressionAsync(parts.get(0), listener);
+        } else if (parts.size() == 3) {
+            // Ternary: condition ? trueValue : falseValue
+            evaluateNullCoalesceExpressionAsync(parts.get(0), ActionListener.wrap(
+                conditionResult -> {
+                    boolean condition = toTruthyValue(conditionResult);
+                    if (condition) {
+                        evaluateNullCoalesceExpressionAsync(parts.get(1), listener);
+                    } else {
+                        evaluateNullCoalesceExpressionAsync(parts.get(2), listener);
+                    }
+                },
+                listener::onFailure
+            ));
+        } else {
+            listener.onFailure(new RuntimeException("Invalid ternary expression"));
+        }
+    }
+
+    /**
+     * Evaluates a null coalesce expression: value ?? defaultValue
+     */
+    private void evaluateNullCoalesceExpressionAsync(ElasticScriptParser.NullCoalesceExpressionContext ctx, ActionListener<Object> listener) {
+        List<ElasticScriptParser.LogicalOrExpressionContext> parts = ctx.logicalOrExpression();
+        if (parts.size() == 1) {
+            // No null coalesce operator
+            evaluateLogicalOrExpressionAsync(parts.get(0), listener);
+        } else {
+            // Null coalesce: evaluate left, if null evaluate right
+            evaluateNullCoalesceChainAsync(parts, 0, listener);
+        }
+    }
+
+    private void evaluateNullCoalesceChainAsync(List<ElasticScriptParser.LogicalOrExpressionContext> parts,
+                                                int index, ActionListener<Object> listener) {
+        if (index >= parts.size()) {
+            // All parts were null
+            listener.onResponse(null);
+            return;
+        }
+        evaluateLogicalOrExpressionAsync(parts.get(index), ActionListener.wrap(
+            result -> {
+                if (result != null) {
+                    // Found non-null value
+                    listener.onResponse(result);
+                } else {
+                    // Current is null, try next
+                    evaluateNullCoalesceChainAsync(parts, index + 1, listener);
+                }
+            },
+            listener::onFailure
+        ));
+    }
+
+    /**
+     * Converts a value to a truthy boolean (for ternary conditions).
+     */
+    private boolean toTruthyValue(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof Boolean) {
+            return (Boolean) obj;
+        }
+        if (obj instanceof Number) {
+            return ((Number) obj).doubleValue() != 0;
+        }
+        if (obj instanceof String) {
+            return !((String) obj).isEmpty();
+        }
+        if (obj instanceof List) {
+            return !((List<?>) obj).isEmpty();
+        }
+        return true; // Non-null objects are truthy
     }
 
     private void evaluateLogicalOrExpressionAsync(ElasticScriptParser.LogicalOrExpressionContext ctx, ActionListener<Object> listener) {
@@ -489,8 +572,8 @@ public class ExpressionEvaluator {
         ActionListener<Object> processResult = new ActionListener<Object>() {
             @Override
             public void onResponse(Object baseValue) {
-                if (ctx.bracketExpression() != null && ctx.bracketExpression().isEmpty() == false ) {
-                    evaluateDocumentFieldAccessRecursive(baseValue, ctx.bracketExpression(), 0, listener);
+                if (ctx.accessExpression() != null && ctx.accessExpression().isEmpty() == false) {
+                    evaluateAccessExpressionRecursive(baseValue, ctx.accessExpression(), 0, listener);
                 } else {
                     listener.onResponse(baseValue);
                 }
@@ -548,10 +631,10 @@ public class ExpressionEvaluator {
             if (var == null) {
                 listener.onFailure(new RuntimeException("Variable not defined: " + id));
             } else {
-                // if there are bracketExpressions, delegate into your recursive lookup
-                List<ElasticScriptParser.BracketExpressionContext> brackets = ctx.bracketExpression();
-                if ( brackets != null && brackets.isEmpty() == false ) {
-                    evaluateDocumentFieldAccessRecursive(var, brackets, 0, listener);
+                // if there are accessExpressions, delegate into recursive lookup
+                List<ElasticScriptParser.AccessExpressionContext> accesses = ctx.accessExpression();
+                if (accesses != null && accesses.isEmpty() == false) {
+                    evaluateAccessExpressionRecursive(var, accesses, 0, listener);
                 } else {
                     listener.onResponse(var);
                 }
@@ -560,6 +643,79 @@ public class ExpressionEvaluator {
         } else {
             listener.onFailure(new RuntimeException("Unsupported primary expression: " + ctx.getText()));
         }
+    }
+
+    /**
+     * Evaluates access expressions (bracket or safe navigation) recursively.
+     */
+    private void evaluateAccessExpressionRecursive(Object current, List<ElasticScriptParser.AccessExpressionContext> accessExprs,
+                                                   int index, ActionListener<Object> listener) {
+        if (index >= accessExprs.size()) {
+            listener.onResponse(current);
+            return;
+        }
+
+        ElasticScriptParser.AccessExpressionContext accessCtx = accessExprs.get(index);
+
+        // Handle safe navigation (?.)
+        if (accessCtx.safeNavExpression() != null) {
+            if (current == null) {
+                // Safe navigation: if current is null, result is null
+                listener.onResponse(null);
+                return;
+            }
+            String fieldName = accessCtx.safeNavExpression().ID().getText();
+            if (current instanceof Map) {
+                Object newValue = ((Map<?, ?>) current).get(fieldName);
+                evaluateAccessExpressionRecursive(newValue, accessExprs, index + 1, listener);
+            } else {
+                listener.onFailure(new RuntimeException(
+                    "Safe navigation requires a document/map, but got: " +
+                    current.getClass().getSimpleName()));
+            }
+            return;
+        }
+
+        // Handle bracket expression ([...])
+        if (accessCtx.bracketExpression() != null) {
+            evaluateExpressionAsync(accessCtx.bracketExpression().expression(), new ActionListener<Object>() {
+                @Override
+                public void onResponse(Object keyObj) {
+                    if ((keyObj instanceof String) == false) {
+                        // Check for list indexing using an integer index
+                        if (current instanceof List && keyObj instanceof Number) {
+                            List<?> list = (List<?>) current;
+                            int idx = ((Number) keyObj).intValue();
+                            if (idx < 0 || idx >= list.size()) {
+                                listener.onFailure(new RuntimeException("List index out of bounds: " + idx));
+                                return;
+                            }
+                            Object newValue = list.get(idx);
+                            evaluateAccessExpressionRecursive(newValue, accessExprs, index + 1, listener);
+                        } else {
+                            listener.onFailure(new RuntimeException(
+                                "Document field access requires a string key or numeric index, but got: " + keyObj));
+                        }
+                        return;
+                    }
+                    String key = (String) keyObj;
+                    if (current instanceof Map) {
+                        Object newValue = ((Map<?, ?>) current).get(key);
+                        evaluateAccessExpressionRecursive(newValue, accessExprs, index + 1, listener);
+                    } else {
+                        listener.onFailure(new RuntimeException("Attempted to index into unsupported type: " +
+                            (current != null ? current.getClass().getName() : "null")));
+                    }
+                }
+                @Override
+                public void onFailure(Exception e) {
+                    listener.onFailure(e);
+                }
+            });
+            return;
+        }
+
+        listener.onFailure(new RuntimeException("Unsupported access expression: " + accessCtx.getText()));
     }
 
     private void evaluateDocumentFieldAccessRecursive(Object current, List<ElasticScriptParser.BracketExpressionContext> bracketExprs,

@@ -99,6 +99,9 @@ DOT_DOT: '..';
 // Other Symbols
 PIPE: '|';
 DOT: '.';
+QUESTION: '?';
+NULLCOALESCE: '??';
+SAFENAV: '?.';
 LPAREN: '(';
 RPAREN: ')';
 COMMA: ',';
@@ -385,7 +388,15 @@ argument_list
     ;
 
 expression
-    : logicalOrExpression (CONCAT logicalOrExpression)*
+    : ternaryExpression (CONCAT ternaryExpression)*
+    ;
+
+ternaryExpression
+    : nullCoalesceExpression (QUESTION nullCoalesceExpression COLON nullCoalesceExpression)?
+    ;
+
+nullCoalesceExpression
+    : logicalOrExpression (NULLCOALESCE logicalOrExpression)*
     ;
 
 logicalOrExpression
@@ -449,11 +460,20 @@ pair
     ;
 
 primaryExpression
-    : simplePrimaryExpression bracketExpression*
+    : simplePrimaryExpression accessExpression*
+    ;
+
+accessExpression
+    : bracketExpression
+    | safeNavExpression
     ;
 
 bracketExpression
     : '[' expression ']'
+    ;
+
+safeNavExpression
+    : SAFENAV ID
     ;
 
 simplePrimaryExpression
