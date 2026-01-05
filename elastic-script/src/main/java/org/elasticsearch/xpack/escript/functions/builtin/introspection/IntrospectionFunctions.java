@@ -20,6 +20,8 @@ import org.elasticsearch.xpack.escript.functions.ParameterMode;
 import org.elasticsearch.xpack.escript.functions.api.FunctionCategory;
 import org.elasticsearch.xpack.escript.functions.api.FunctionCollectionSpec;
 import org.elasticsearch.xpack.escript.functions.builtin.BuiltInFunctionDefinition;
+import org.elasticsearch.xpack.escript.intent.IntentDefinition;
+import org.elasticsearch.xpack.escript.intent.IntentRegistry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +57,8 @@ public class IntrospectionFunctions {
         registerEscriptFunctions(context);
         registerEscriptFunction(context);
         registerEscriptVariables(context);
+        registerEscriptIntents(context);
+        registerEscriptIntent(context);
         registerEscriptCapabilities(context, null);
     }
 
@@ -68,6 +72,8 @@ public class IntrospectionFunctions {
         registerEscriptFunctions(context);
         registerEscriptFunction(context);
         registerEscriptVariables(context);
+        registerEscriptIntents(context);
+        registerEscriptIntent(context);
         registerEscriptProcedures(context, client);
         registerEscriptProcedure(context, client);
         registerEscriptCapabilities(context, client);
@@ -507,6 +513,22 @@ public class IntrospectionFunctions {
                         results.add(row);
                     }
                     
+                    // Add all intents
+                    if (filter == null || "INTENT".startsWith(filter)) {
+                        IntentRegistry registry = IntentRegistry.getInstance();
+                        for (IntentDefinition intent : registry.getAll()) {
+                            Map<String, Object> row = new HashMap<>();
+                            row.put("type", "INTENT");
+                            row.put("name", intent.getName());
+                            row.put("category", "INTENT");
+                            row.put("signature", intent.getSignature());
+                            row.put("parameter_count", intent.getParameters().size());
+                            row.put("description", intent.getDescription());
+                            row.put("has_requires", intent.hasRequires());
+                            results.add(row);
+                        }
+                    }
+                    
                     // If we have a client, also fetch procedures
                     if (client != null && (filter == null || "PROCEDURE".startsWith(filter))) {
                         SearchRequest searchRequest = new SearchRequest(PROCEDURES_INDEX);
@@ -581,6 +603,122 @@ public class IntrospectionFunctions {
                         });
                         listener.onResponse(results);
                     }
+                } catch (Exception e) {
+                    listener.onFailure(e);
+                }
+            })
+        );
+    }
+
+    /**
+     * ESCRIPT_INTENTS() - Returns an array of all defined intents.
+     * 
+     * Each element in the returned array is a DOCUMENT with:
+     * - name: The intent name
+     * - description: What the intent does
+     * - signature: Human-readable signature
+     * - parameter_count: Number of parameters
+     * - has_requires: Whether the intent has pre-conditions
+     * - has_on_failure: Whether the intent has failure handling
+     */
+    public static void registerEscriptIntents(ExecutionContext context) {
+        context.declareFunction("ESCRIPT_INTENTS",
+            List.of(), // No parameters
+            new BuiltInFunctionDefinition("ESCRIPT_INTENTS", (List<Object> args, ActionListener<Object> listener) -> {
+                try {
+                    List<Map<String, Object>> result = new ArrayList<>();
+                    
+                    IntentRegistry registry = IntentRegistry.getInstance();
+                    for (IntentDefinition intent : registry.getAll()) {
+                        Map<String, Object> intentInfo = new HashMap<>();
+                        intentInfo.put("name", intent.getName());
+                        intentInfo.put("description", intent.getDescription());
+                        intentInfo.put("signature", intent.getSignature());
+                        intentInfo.put("parameter_count", intent.getParameters().size());
+                        intentInfo.put("has_requires", intent.hasRequires());
+                        intentInfo.put("has_on_failure", intent.hasOnFailure());
+                        
+                        // Build parameters list
+                        List<Map<String, Object>> paramList = new ArrayList<>();
+                        for (Parameter param : intent.getParameters()) {
+                            Map<String, Object> paramInfo = new HashMap<>();
+                            paramInfo.put("name", param.getName());
+                            paramInfo.put("type", param.getType());
+                            paramInfo.put("mode", param.getMode().toString());
+                            paramList.add(paramInfo);
+                        }
+                        intentInfo.put("parameters", paramList);
+                        
+                        result.add(intentInfo);
+                    }
+                    
+                    // Sort by name
+                    result.sort((a, b) -> ((String) a.get("name")).compareTo((String) b.get("name")));
+                    
+                    listener.onResponse(result);
+                } catch (Exception e) {
+                    listener.onFailure(e);
+                }
+            })
+        );
+    }
+
+    /**
+     * ESCRIPT_INTENT(name) - Returns detailed information about a specific intent.
+     * 
+     * Returns a DOCUMENT with:
+     * - name: The intent name
+     * - exists: Whether the intent exists
+     * - description: What the intent does
+     * - signature: Human-readable signature
+     * - parameters: Array of parameter definitions
+     * - has_requires: Whether the intent has pre-conditions
+     * - requires_count: Number of pre-conditions
+     * - has_on_failure: Whether the intent has failure handling
+     */
+    public static void registerEscriptIntent(ExecutionContext context) {
+        context.declareFunction("ESCRIPT_INTENT",
+            List.of(new Parameter("name", "STRING", ParameterMode.IN)),
+            new BuiltInFunctionDefinition("ESCRIPT_INTENT", (List<Object> args, ActionListener<Object> listener) -> {
+                try {
+                    if (args.isEmpty() || args.get(0) == null) {
+                        listener.onFailure(new IllegalArgumentException("ESCRIPT_INTENT requires an intent name"));
+                        return;
+                    }
+                    
+                    String intentName = args.get(0).toString();
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("name", intentName);
+                    
+                    IntentRegistry registry = IntentRegistry.getInstance();
+                    IntentDefinition intent = registry.get(intentName);
+                    
+                    if (intent == null) {
+                        result.put("exists", false);
+                        listener.onResponse(result);
+                        return;
+                    }
+                    
+                    result.put("exists", true);
+                    result.put("description", intent.getDescription());
+                    result.put("signature", intent.getSignature());
+                    result.put("parameter_count", intent.getParameters().size());
+                    result.put("has_requires", intent.hasRequires());
+                    result.put("requires_count", intent.getRequiresConditions().size());
+                    result.put("has_on_failure", intent.hasOnFailure());
+                    
+                    // Build parameters list
+                    List<Map<String, Object>> paramList = new ArrayList<>();
+                    for (Parameter param : intent.getParameters()) {
+                        Map<String, Object> paramInfo = new HashMap<>();
+                        paramInfo.put("name", param.getName());
+                        paramInfo.put("type", param.getType());
+                        paramInfo.put("mode", param.getMode().toString());
+                        paramList.add(paramInfo);
+                    }
+                    result.put("parameters", paramList);
+                    
+                    listener.onResponse(result);
                 } catch (Exception e) {
                     listener.onFailure(e);
                 }

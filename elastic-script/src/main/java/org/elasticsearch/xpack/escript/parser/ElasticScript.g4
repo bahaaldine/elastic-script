@@ -13,6 +13,15 @@ IN: 'IN';
 OUT: 'OUT';
 INOUT: 'INOUT';
 
+// Intent
+DEFINE: 'DEFINE';
+INTENT: 'INTENT';
+DESCRIPTION: 'DESCRIPTION';
+REQUIRES: 'REQUIRES';
+ACTIONS: 'ACTIONS';
+ON_FAILURE: 'ON_FAILURE';
+WITH: 'WITH';
+
 // Print rules
 PRINT: 'PRINT';
 DEBUG: 'DEBUG';
@@ -182,6 +191,7 @@ program
     : create_procedure_statement
     | delete_procedure_statement
     | call_procedure_statement
+    | define_intent_statement
     ;
 
 procedure
@@ -208,6 +218,7 @@ statement
     | function_definition
     | function_call_statement
     | call_procedure_statement
+    | intent_statement
     | return_statement
     | break_statement
     | expression_statement
@@ -452,4 +463,48 @@ severity
     | INFO
     | WARN
     | ERROR
+    ;
+
+// =======================
+// Intent Rules
+// =======================
+
+// DEFINE INTENT name(params) DESCRIPTION 'text' REQUIRES conditions ACTIONS statements ON_FAILURE statements END INTENT
+define_intent_statement
+    : DEFINE INTENT ID LPAREN (parameter_list)? RPAREN
+      (DESCRIPTION STRING)?
+      (requires_clause)?
+      actions_clause
+      (on_failure_clause)?
+      END INTENT
+    ;
+
+requires_clause
+    : REQUIRES requires_condition (COMMA requires_condition)*
+    ;
+
+requires_condition
+    : expression
+    ;
+
+actions_clause
+    : ACTIONS statement+
+    ;
+
+on_failure_clause
+    : ON_FAILURE statement+
+    ;
+
+// Intent invocation: INTENT name(args); or INTENT name WITH param=value, param=value;
+intent_statement
+    : INTENT ID LPAREN (argument_list)? RPAREN SEMICOLON                    # intentCallWithArgs
+    | INTENT ID (WITH intent_named_args)? SEMICOLON                          # intentCallWithNamedArgs
+    ;
+
+intent_named_args
+    : intent_named_arg (COMMA intent_named_arg)*
+    ;
+
+intent_named_arg
+    : ID ASSIGN expression
     ;

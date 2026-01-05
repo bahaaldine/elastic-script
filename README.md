@@ -832,6 +832,8 @@ Introspection functions allow agents and users to discover what capabilities are
 | `ESCRIPT_FUNCTION(name)` | Returns detailed information about a specific function |
 | `ESCRIPT_PROCEDURES()` | Returns an array of all stored procedures |
 | `ESCRIPT_PROCEDURE(name)` | Returns detailed information about a specific procedure |
+| `ESCRIPT_INTENTS()` | Returns an array of all defined intents |
+| `ESCRIPT_INTENT(name)` | Returns detailed information about a specific intent |
 | `ESCRIPT_VARIABLES()` | Returns an array of all declared variables in scope |
 | `ESCRIPT_CAPABILITIES(category?)` | Returns all capabilities in a table-friendly format |
 
