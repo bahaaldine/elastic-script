@@ -2366,25 +2366,40 @@ DECLARE noInterp STRING = 'Hello ${name}';  -- "Hello ${name}" (literal)
 
 ---
 
-### Phase 7: Lambda Expressions ⏳ Priority: Low | Effort: Large
+### Phase 7: Lambda Expressions ✅ Complete
 
 | Feature | Description | Status |
 |---------|-------------|--------|
-| Lambda syntax | Anonymous functions: `(x) => x * 2` | 🔲 Planned |
+| Lambda syntax | Anonymous functions: `(x) => x * 2` | ✅ Implemented |
+| ARRAY_MAP with lambda | Transform elements | ✅ Implemented |
+| ARRAY_FILTER with lambda | Filter with predicate | ✅ Implemented |
 
-**Example usage after implementation:**
+**Usage:**
 ```sql
--- Filter with lambda
+-- Double all numbers
+DECLARE doubled ARRAY = ARRAY_MAP([1, 2, 3], (x) => x * 2);  -- [2.0, 4.0, 6.0]
+
+-- Filter even numbers
+DECLARE evens ARRAY = ARRAY_FILTER([1, 2, 3, 4, 5, 6], (x) => x % 2 == 0);  -- [2.0, 4.0, 6.0]
+
+-- Extract property from objects
+DECLARE names ARRAY = ARRAY_MAP(users, (u) => u['name']);
+
+-- Filter by condition
 DECLARE adults ARRAY = ARRAY_FILTER(users, (u) => u['age'] >= 18);
 
--- Map with lambda
-DECLARE names ARRAY = ARRAY_MAP(users, (u) => u['first_name'] || ' ' || u['last_name']);
+-- Use outer scope variables in lambdas
+DECLARE threshold NUMBER = 100;
+DECLARE large ARRAY = ARRAY_FILTER(values, (x) => x > threshold);
 
--- Sort with lambda
-DECLARE sorted ARRAY = ARRAY_SORT(users, (a, b) => a['age'] - b['age']);
+-- Chain operations
+DECLARE evens ARRAY = ARRAY_FILTER(numbers, (x) => x % 2 == 0);
+DECLARE doubled ARRAY = ARRAY_MAP(evens, (x) => x * 2);
+```
 
--- Reduce with lambda
-DECLARE total NUMBER = ARRAY_REDUCE(items, (acc, item) => acc + item['price'], 0);
+**Note:** For property-based filtering (without lambda), use `ARRAY_FILTER_BY`:
+```sql
+DECLARE active ARRAY = ARRAY_FILTER_BY(users, 'status', 'active');
 ```
 
 ---

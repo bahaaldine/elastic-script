@@ -123,6 +123,10 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
         this.tokenStream = tokenStream;
         // Initialize ExpressionEvaluator with this executor instance.
         this.expressionEvaluator = new ExpressionEvaluator(this);
+        
+        // Set up lambda invocation support in the context
+        context.setLambdaInvoker((lambda, args, listener) -> 
+            expressionEvaluator.invokeLambdaAsync(lambda, args, listener));
 
     }
 

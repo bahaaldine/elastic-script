@@ -104,6 +104,7 @@ DOT: '.';
 QUESTION: '?';
 NULLCOALESCE: '??';
 SAFENAV: '?.';
+ARROW: '=>';
 LPAREN: '(';
 RPAREN: ')';
 COMMA: ',';
@@ -506,6 +507,7 @@ safeNavExpression
 
 simplePrimaryExpression
     : LPAREN expression RPAREN
+    | lambdaExpression
     | call_procedure_statement
     | function_call
     | INT
@@ -516,6 +518,16 @@ simplePrimaryExpression
     | documentLiteral
     | ID
     | NULL
+    ;
+
+// Lambda expressions: (x) => x * 2  or  (a, b) => a + b
+lambdaExpression
+    : LPAREN lambdaParamList? RPAREN ARROW expression
+    | ID ARROW expression   // Single parameter without parens
+    ;
+
+lambdaParamList
+    : ID (COMMA ID)*
     ;
 
 varRef

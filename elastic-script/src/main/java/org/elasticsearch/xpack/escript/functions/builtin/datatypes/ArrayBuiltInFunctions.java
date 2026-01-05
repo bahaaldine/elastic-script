@@ -21,12 +21,16 @@ import org.elasticsearch.xpack.escript.functions.Parameter;
 import org.elasticsearch.xpack.escript.functions.ParameterMode;
 import org.elasticsearch.action.ActionListener;
 
+import org.elasticsearch.xpack.escript.primitives.LambdaExpression;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Collection of built-in array manipulation functions for Elastic Script.
@@ -422,14 +426,15 @@ public class ArrayBuiltInFunctions {
 
     @FunctionSpec(
         name = "ARRAY_MAP",
-        description = "Extracts a property from each object in the array.",
+        description = "Transforms array elements using a lambda or extracts a property.",
         parameters = {
-            @FunctionParam(name = "array", type = "ARRAY", description = "The array of objects"),
-            @FunctionParam(name = "property", type = "STRING", description = "The property name to extract")
+            @FunctionParam(name = "array", type = "ARRAY", description = "The array to transform"),
+            @FunctionParam(name = "mapperOrProperty", type = "ANY", description = "A lambda (x) => expr or property name")
         },
-        returnType = @FunctionReturn(type = "ARRAY", description = "Array of extracted values"),
+        returnType = @FunctionReturn(type = "ARRAY", description = "Array of transformed values"),
         examples = {
-            "ARRAY_MAP([{'name': 'a'}, {'name': 'b'}], 'name') -> ['a', 'b']"
+            "ARRAY_MAP(users, (u) => u['name'])",
+            "ARRAY_MAP(users, 'name')"
         },
         category = FunctionCategory.ARRAY
     )
@@ -438,11 +443,11 @@ public class ArrayBuiltInFunctions {
         context.declareFunction("ARRAY_MAP",
             Arrays.asList(
                 new Parameter("array", "ARRAY", ParameterMode.IN),
-                new Parameter("property", "STRING", ParameterMode.IN)
+                new Parameter("mapperOrProperty", "ANY", ParameterMode.IN)
             ),
             new BuiltInFunctionDefinition("ARRAY_MAP", (List<Object> args, ActionListener<Object> listener) -> {
                 if (args.size() != 2) {
-                    listener.onFailure(new RuntimeException("ARRAY_MAP expects two arguments: an array and a property name"));
+                    listener.onFailure(new RuntimeException("ARRAY_MAP expects two arguments: an array and a mapper/property"));
                     return;
                 }
                 if (!(args.get(0) instanceof List)) {
@@ -450,49 +455,120 @@ public class ArrayBuiltInFunctions {
                     return;
                 }
                 List<?> array = (List<?>) args.get(0);
-                String property = args.get(1) != null ? args.get(1).toString() : "";
-                List<Object> result = new ArrayList<>();
-                for (Object item : array) {
-                    if (item instanceof java.util.Map) {
-                        result.add(((java.util.Map<String, Object>) item).get(property));
-                    } else {
-                        result.add(null);
+                Object mapper = args.get(1);
+                
+                if (mapper instanceof LambdaExpression lambda) {
+                    // Use lambda for mapping
+                    if (lambda.getParameterCount() != 1) {
+                        listener.onFailure(new RuntimeException("ARRAY_MAP lambda must accept exactly 1 parameter"));
+                        return;
                     }
+                    List<Object> result = new ArrayList<>();
+                    mapWithLambdaAsync(array, lambda, 0, result, context, listener);
+                } else {
+                    // Use property name for mapping
+                    String property = mapper != null ? mapper.toString() : "";
+                    List<Object> result = new ArrayList<>();
+                    for (Object item : array) {
+                        if (item instanceof java.util.Map) {
+                            result.add(((java.util.Map<String, Object>) item).get(property));
+                        } else {
+                            result.add(null);
+                        }
+                    }
+                    listener.onResponse(result);
                 }
-                listener.onResponse(result);
             })
         );
+    }
+    
+    private static void mapWithLambdaAsync(List<?> array, LambdaExpression lambda, int index, 
+                                           List<Object> result, ExecutionContext context,
+                                           ActionListener<Object> listener) {
+        if (index >= array.size()) {
+            listener.onResponse(result);
+            return;
+        }
+        
+        Object item = array.get(index);
+        context.invokeLambda(lambda, List.of(item), new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object mappedValue) {
+                result.add(mappedValue);
+                mapWithLambdaAsync(array, lambda, index + 1, result, context, listener);
+            }
+            
+            @Override
+            public void onFailure(Exception e) {
+                listener.onFailure(e);
+            }
+        });
     }
 
     @FunctionSpec(
         name = "ARRAY_FILTER",
-        description = "Filters array elements where the specified property equals the given value.",
+        description = "Filters array elements using a lambda predicate or property matching.",
         parameters = {
             @FunctionParam(name = "array", type = "ARRAY", description = "The array to filter"),
-            @FunctionParam(name = "property", type = "STRING", description = "The property name to check"),
-            @FunctionParam(name = "value", type = "ANY", description = "The value to match")
+            @FunctionParam(name = "predicateOrProperty", type = "ANY", description = "A lambda (x) => boolean or property name"),
+            @FunctionParam(name = "value", type = "ANY", description = "Value to match (only for property mode)")
         },
         returnType = @FunctionReturn(type = "ARRAY", description = "Filtered array"),
         examples = {
-            "ARRAY_FILTER([{'status': 'active'}, {'status': 'inactive'}], 'status', 'active') -> [{'status': 'active'}]"
+            "ARRAY_FILTER(users, (u) => u['age'] >= 18)",
+            "ARRAY_FILTER(users, 'status', 'active')"
         },
         category = FunctionCategory.ARRAY
     )
     @SuppressWarnings("unchecked")
     public static void registerArrayFilter(ExecutionContext context) {
+        // Register 2-arg version for lambda filtering
         context.declareFunction("ARRAY_FILTER",
+            Arrays.asList(
+                new Parameter("array", "ARRAY", ParameterMode.IN),
+                new Parameter("predicate", "ANY", ParameterMode.IN)
+            ),
+            new BuiltInFunctionDefinition("ARRAY_FILTER", (List<Object> args, ActionListener<Object> listener) -> {
+                if (args.size() != 2) {
+                    listener.onFailure(new RuntimeException("ARRAY_FILTER expects 2 arguments: array and lambda"));
+                    return;
+                }
+                if (!(args.get(0) instanceof List)) {
+                    listener.onFailure(new RuntimeException("ARRAY_FILTER expects the first argument to be an array"));
+                    return;
+                }
+                List<?> array = (List<?>) args.get(0);
+                Object predicate = args.get(1);
+                
+                if (predicate instanceof LambdaExpression lambda) {
+                    // Use lambda for filtering
+                    if (lambda.getParameterCount() != 1) {
+                        listener.onFailure(new RuntimeException("ARRAY_FILTER lambda must accept exactly 1 parameter"));
+                        return;
+                    }
+                    List<Object> result = new ArrayList<>();
+                    filterWithLambdaAsync(array, lambda, 0, result, context, listener);
+                } else {
+                    listener.onFailure(new RuntimeException("ARRAY_FILTER with 2 arguments requires a lambda predicate. " +
+                        "For property matching, use ARRAY_FILTER_BY(array, property, value)"));
+                }
+            })
+        );
+        
+        // Register 3-arg version for property matching
+        context.declareFunction("ARRAY_FILTER_BY",
             Arrays.asList(
                 new Parameter("array", "ARRAY", ParameterMode.IN),
                 new Parameter("property", "STRING", ParameterMode.IN),
                 new Parameter("value", "ANY", ParameterMode.IN)
             ),
-            new BuiltInFunctionDefinition("ARRAY_FILTER", (List<Object> args, ActionListener<Object> listener) -> {
+            new BuiltInFunctionDefinition("ARRAY_FILTER_BY", (List<Object> args, ActionListener<Object> listener) -> {
                 if (args.size() != 3) {
-                    listener.onFailure(new RuntimeException("ARRAY_FILTER expects three arguments: array, property, value"));
+                    listener.onFailure(new RuntimeException("ARRAY_FILTER_BY expects 3 arguments: array, property, value"));
                     return;
                 }
                 if (!(args.get(0) instanceof List)) {
-                    listener.onFailure(new RuntimeException("ARRAY_FILTER expects the first argument to be an array"));
+                    listener.onFailure(new RuntimeException("ARRAY_FILTER_BY expects the first argument to be an array"));
                     return;
                 }
                 List<?> array = (List<?>) args.get(0);
@@ -510,6 +586,37 @@ public class ArrayBuiltInFunctions {
                 listener.onResponse(result);
             })
         );
+    }
+    
+    private static void filterWithLambdaAsync(List<?> array, LambdaExpression lambda, int index, 
+                                              List<Object> result, ExecutionContext context,
+                                              ActionListener<Object> listener) {
+        if (index >= array.size()) {
+            listener.onResponse(result);
+            return;
+        }
+        
+        Object item = array.get(index);
+        context.invokeLambda(lambda, List.of(item), new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object predicateResult) {
+                boolean include = false;
+                if (predicateResult instanceof Boolean) {
+                    include = (Boolean) predicateResult;
+                } else if (predicateResult != null) {
+                    include = true; // truthy
+                }
+                if (include) {
+                    result.add(item);
+                }
+                filterWithLambdaAsync(array, lambda, index + 1, result, context, listener);
+            }
+            
+            @Override
+            public void onFailure(Exception e) {
+                listener.onFailure(e);
+            }
+        });
     }
 
     @FunctionSpec(

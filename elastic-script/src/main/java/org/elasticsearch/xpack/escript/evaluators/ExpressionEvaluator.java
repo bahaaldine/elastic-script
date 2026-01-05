@@ -13,6 +13,7 @@ import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.xpack.escript.executors.ProcedureExecutor;
 import org.elasticsearch.xpack.escript.operators.primitives.BinaryOperatorHandler;
+import org.elasticsearch.xpack.escript.primitives.LambdaExpression;
 import org.elasticsearch.xpack.escript.operators.OperatorHandlerRegistry;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptLexer;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptParser;
@@ -635,6 +636,25 @@ public class ExpressionEvaluator {
             ElasticScriptParser.DocumentLiteralContext docCtx = ctx.simplePrimaryExpression().documentLiteral();
             evaluateDocumentLiteralAsync(docCtx, processResult);
             return;
+        } else if (ctx.simplePrimaryExpression().lambdaExpression() != null) {
+            // Create a LambdaExpression object without evaluating the body
+            ElasticScriptParser.LambdaExpressionContext lambdaCtx = ctx.simplePrimaryExpression().lambdaExpression();
+            List<String> params = new ArrayList<>();
+            
+            if (lambdaCtx.lambdaParamList() != null) {
+                // Multiple parameters: (a, b) => expr
+                for (var idNode : lambdaCtx.lambdaParamList().ID()) {
+                    params.add(idNode.getText());
+                }
+            } else if (lambdaCtx.ID() != null) {
+                // Single parameter without parens: x => expr
+                params.add(lambdaCtx.ID().getText());
+            }
+            
+            ElasticScriptParser.ExpressionContext bodyExpr = lambdaCtx.expression();
+            LambdaExpression lambda = new LambdaExpression(params, bodyExpr);
+            processResult.onResponse(lambda);
+            return;
         } else if (ctx.simplePrimaryExpression().NULL() != null) {
             processResult.onResponse(null);
         } else if (ctx.simplePrimaryExpression().ID() != null) {
@@ -1018,5 +1038,76 @@ public class ExpressionEvaluator {
             return ((Number) a).doubleValue() == ((Number) b).doubleValue();
         }
         return a.equals(b);
+    }
+
+    /**
+     * Invokes a lambda expression with the given arguments.
+     * Creates a temporary scope with the lambda parameters bound to the arguments,
+     * then evaluates the lambda body expression in that scope.
+     *
+     * @param lambda The lambda expression to invoke
+     * @param args The arguments to pass to the lambda (one per parameter)
+     * @param listener The listener to receive the result
+     */
+    public void invokeLambdaAsync(LambdaExpression lambda, List<Object> args, ActionListener<Object> listener) {
+        List<String> params = lambda.getParameters();
+        
+        if (args.size() != params.size()) {
+            listener.onFailure(new RuntimeException(
+                "Lambda expects " + params.size() + " argument(s) but received " + args.size()));
+            return;
+        }
+        
+        // Save the current variable values for the parameter names (if any exist)
+        Map<String, Object> savedValues = new java.util.HashMap<>();
+        for (String param : params) {
+            if (context.hasVariable(param)) {
+                savedValues.put(param, context.getVariable(param));
+            }
+        }
+        
+        try {
+            // Bind the arguments to the parameter names in the context
+            for (int i = 0; i < params.size(); i++) {
+                String param = params.get(i);
+                Object value = args.get(i);
+                
+                // Declare and set the parameter variable
+                if (!context.hasVariable(param)) {
+                    context.declareVariable(param, "ANY");
+                }
+                context.setVariable(param, value);
+            }
+            
+            // Evaluate the lambda body expression
+            evaluateExpressionAsync(lambda.getBodyExpression(), new ActionListener<Object>() {
+                @Override
+                public void onResponse(Object result) {
+                    // Restore the original variable values
+                    restoreVariables(params, savedValues);
+                    listener.onResponse(result);
+                }
+                
+                @Override
+                public void onFailure(Exception e) {
+                    // Restore the original variable values even on failure
+                    restoreVariables(params, savedValues);
+                    listener.onFailure(e);
+                }
+            });
+        } catch (Exception e) {
+            // Restore the original variable values on exception
+            restoreVariables(params, savedValues);
+            listener.onFailure(e);
+        }
+    }
+    
+    private void restoreVariables(List<String> params, Map<String, Object> savedValues) {
+        for (String param : params) {
+            if (savedValues.containsKey(param)) {
+                context.setVariable(param, savedValues.get(param));
+            }
+            // Note: We don't remove variables that were newly declared - they stay in scope
+        }
     }
 }

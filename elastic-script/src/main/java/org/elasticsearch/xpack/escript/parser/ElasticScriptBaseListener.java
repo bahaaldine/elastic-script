@@ -899,6 +899,30 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterLambdaExpression(ElasticScriptParser.LambdaExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLambdaExpression(ElasticScriptParser.LambdaExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLambdaParamList(ElasticScriptParser.LambdaParamListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLambdaParamList(ElasticScriptParser.LambdaParamListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterVarRef(ElasticScriptParser.VarRefContext ctx) { }
 	/**
 	 * {@inheritDoc}

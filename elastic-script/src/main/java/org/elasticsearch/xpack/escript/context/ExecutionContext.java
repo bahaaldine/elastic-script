@@ -7,10 +7,12 @@
 
 package org.elasticsearch.xpack.escript.context;
 
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.xpack.escript.functions.FunctionDefinition;
 import org.elasticsearch.xpack.escript.functions.Parameter;
 import org.elasticsearch.xpack.escript.functions.builtin.BuiltInFunctionDefinition;
 import org.elasticsearch.xpack.escript.primitives.CursorDefinition;
+import org.elasticsearch.xpack.escript.primitives.LambdaExpression;
 import org.elasticsearch.xpack.escript.primitives.VariableDefinition;
 
 import java.util.Collections;
@@ -30,6 +32,7 @@ public class ExecutionContext {
     private final Map<String, CursorDefinition> cursors;
     private final ExecutionContext parentContext;  // Reference to parent context
     private Map<String, Object> procedureArguments;
+    private LambdaInvoker lambdaInvoker;  // For invoking lambda expressions
 
     /**
      * Constructs a global ExecutionContext with no parent.
@@ -53,6 +56,45 @@ public class ExecutionContext {
         this.cursors = new HashMap<>();
         this.parentContext = parentContext;
         this.procedureArguments = new HashMap<>();
+        // Inherit the lambda invoker from parent
+        if (parentContext != null) {
+            this.lambdaInvoker = parentContext.lambdaInvoker;
+        }
+    }
+
+    /**
+     * Sets the lambda invoker for this context.
+     * This allows built-in functions to invoke lambda expressions.
+     */
+    public void setLambdaInvoker(LambdaInvoker invoker) {
+        this.lambdaInvoker = invoker;
+    }
+
+    /**
+     * Gets the lambda invoker for this context.
+     * Falls back to parent context if not set locally.
+     */
+    public LambdaInvoker getLambdaInvoker() {
+        if (lambdaInvoker != null) {
+            return lambdaInvoker;
+        }
+        if (parentContext != null) {
+            return parentContext.getLambdaInvoker();
+        }
+        return null;
+    }
+
+    /**
+     * Invokes a lambda expression with the given arguments.
+     * Convenience method that delegates to the lambda invoker.
+     */
+    public void invokeLambda(LambdaExpression lambda, List<Object> args, ActionListener<Object> listener) {
+        LambdaInvoker invoker = getLambdaInvoker();
+        if (invoker == null) {
+            listener.onFailure(new RuntimeException("Lambda invocation not available in this context"));
+            return;
+        }
+        invoker.invoke(lambda, args, listener);
     }
 
     // -------------------------

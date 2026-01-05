@@ -462,6 +462,18 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSimplePrimaryExpression(ElasticScriptParser.SimplePrimaryExpressionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#lambdaExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLambdaExpression(ElasticScriptParser.LambdaExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#lambdaParamList}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLambdaParamList(ElasticScriptParser.LambdaParamListContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#varRef}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

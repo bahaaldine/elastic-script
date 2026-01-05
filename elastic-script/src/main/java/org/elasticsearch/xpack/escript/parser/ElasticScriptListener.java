@@ -758,6 +758,26 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitSimplePrimaryExpression(ElasticScriptParser.SimplePrimaryExpressionContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#lambdaExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterLambdaExpression(ElasticScriptParser.LambdaExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#lambdaExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitLambdaExpression(ElasticScriptParser.LambdaExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#lambdaParamList}.
+	 * @param ctx the parse tree
+	 */
+	void enterLambdaParamList(ElasticScriptParser.LambdaParamListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#lambdaParamList}.
+	 * @param ctx the parse tree
+	 */
+	void exitLambdaParamList(ElasticScriptParser.LambdaParamListContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#varRef}.
 	 * @param ctx the parse tree
 	 */
