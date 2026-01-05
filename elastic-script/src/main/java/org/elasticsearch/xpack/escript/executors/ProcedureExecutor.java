@@ -24,7 +24,9 @@ import org.elasticsearch.xpack.escript.functions.Parameter;
 import org.elasticsearch.xpack.escript.functions.ParameterMode;
 import org.elasticsearch.xpack.escript.handlers.AssignmentStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.CallProcedureStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.ConstStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.DeclareStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.VarStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.ExecuteStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.FunctionDefinitionHandler;
 import org.elasticsearch.xpack.escript.handlers.IfStatementHandler;
@@ -70,6 +72,8 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
     // Statement handlers
     private final AssignmentStatementHandler assignmentHandler;
     private final DeclareStatementHandler declareHandler;
+    private final VarStatementHandler varHandler;
+    private final ConstStatementHandler constHandler;
     private final IfStatementHandler ifHandler;
     private final SwitchStatementHandler switchHandler;
     private final LoopStatementHandler loopHandler;
@@ -104,6 +108,8 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
         this.executeHandler = new ExecuteStatementHandler(this, client);
         this.assignmentHandler = new AssignmentStatementHandler(this);
         this.declareHandler = new DeclareStatementHandler(this);
+        this.varHandler = new VarStatementHandler(this);
+        this.constHandler = new ConstStatementHandler(this);
         this.ifHandler = new IfStatementHandler(this);
         this.switchHandler = new SwitchStatementHandler(this);
         this.loopHandler = new LoopStatementHandler(this);
@@ -227,6 +233,10 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
 
         if (ctx.declare_statement() != null) {
             declareHandler.handleAsync(ctx.declare_statement(), listener);
+        } else if (ctx.var_statement() != null) {
+            varHandler.handleAsync(ctx.var_statement(), listener);
+        } else if (ctx.const_statement() != null) {
+            constHandler.handleAsync(ctx.const_statement(), listener);
         } else if (ctx.assignment_statement() != null) {
             assignmentHandler.handleAsync(ctx.assignment_statement(), listener);
         } else if (ctx.if_statement() != null) {

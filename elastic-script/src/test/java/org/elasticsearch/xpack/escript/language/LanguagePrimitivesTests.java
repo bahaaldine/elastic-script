@@ -625,5 +625,164 @@ public class LanguagePrimitivesTests extends ESTestCase {
         Object result = executeScript(script);
         assertEquals("Fallback", result);
     }
+
+    // ========== Phase 4: VAR and CONST ==========
+
+    public void testVarWithString() throws Exception {
+        String script = """
+            PROCEDURE test_var_string()
+            BEGIN
+                VAR name = 'John';
+                RETURN name;
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("John", result);
+    }
+
+    public void testVarWithNumber() throws Exception {
+        String script = """
+            PROCEDURE test_var_number()
+            BEGIN
+                VAR count = 42;
+                SET count = count + 8;
+                RETURN count;
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals(50.0, result);
+    }
+
+    public void testVarWithArray() throws Exception {
+        String script = """
+            PROCEDURE test_var_array()
+            BEGIN
+                VAR items = [1, 2, 3];
+                DECLARE sum NUMBER = 0;
+                FOR item IN items LOOP
+                    SET sum = sum + item;
+                END LOOP
+                RETURN sum;
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals(6.0, result);
+    }
+
+    public void testVarWithBoolean() throws Exception {
+        String script = """
+            PROCEDURE test_var_boolean()
+            BEGIN
+                VAR active = true;
+                RETURN active ? 'yes' : 'no';
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("yes", result);
+    }
+
+    public void testVarWithDocument() throws Exception {
+        String script = """
+            PROCEDURE test_var_document()
+            BEGIN
+                VAR user = {"name": "Alice", "age": 30};
+                RETURN user['name'];
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("Alice", result);
+    }
+
+    public void testMultipleVarDeclarations() throws Exception {
+        String script = """
+            PROCEDURE test_multi_var()
+            BEGIN
+                VAR a = 10, b = 20, c = 30;
+                RETURN a + b + c;
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals(60.0, result);
+    }
+
+    public void testConstBasic() throws Exception {
+        String script = """
+            PROCEDURE test_const()
+            BEGIN
+                CONST MAX_RETRIES = 3;
+                RETURN MAX_RETRIES;
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals(3.0, result);
+    }
+
+    public void testConstWithExplicitType() throws Exception {
+        String script = """
+            PROCEDURE test_const_typed()
+            BEGIN
+                CONST API_URL STRING = 'https://api.example.com';
+                RETURN API_URL;
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("https://api.example.com", result);
+    }
+
+    public void testConstInExpression() throws Exception {
+        String script = """
+            PROCEDURE test_const_expr()
+            BEGIN
+                CONST BASE NUMBER = 100;
+                CONST MULTIPLIER NUMBER = 2;
+                RETURN BASE * MULTIPLIER;
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals(200.0, result);
+    }
+
+    public void testConstImmutability() throws Exception {
+        String script = """
+            PROCEDURE test_const_immutable()
+            BEGIN
+                CONST VALUE = 10;
+                SET VALUE = 20;
+                RETURN VALUE;
+            END PROCEDURE
+            """;
+        
+        try {
+            executeScript(script);
+            fail("Expected exception when modifying a constant");
+        } catch (Exception e) {
+            assertTrue(e.getMessage().contains("Cannot modify constant") ||
+                       e.getMessage().contains("immutable"));
+        }
+    }
+
+    public void testVarAndConstTogether() throws Exception {
+        String script = """
+            PROCEDURE test_var_const_together()
+            BEGIN
+                CONST FACTOR = 10;
+                VAR value = 5;
+                SET value = value * FACTOR;
+                RETURN value;
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals(50.0, result);
+    }
 }
 

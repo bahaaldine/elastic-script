@@ -125,6 +125,42 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDeclare_statement(ElasticScriptParser.Declare_statementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#var_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVar_statement(ElasticScriptParser.Var_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#var_declaration_list}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVar_declaration_list(ElasticScriptParser.Var_declaration_listContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#var_declaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVar_declaration(ElasticScriptParser.Var_declarationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#const_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConst_statement(ElasticScriptParser.Const_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#const_declaration_list}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConst_declaration_list(ElasticScriptParser.Const_declaration_listContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#const_declaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConst_declaration(ElasticScriptParser.Const_declarationContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#cursor_query}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

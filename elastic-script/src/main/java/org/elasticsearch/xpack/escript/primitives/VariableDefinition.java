@@ -18,6 +18,7 @@ public class VariableDefinition {
     private final ElasticScriptDataType type;
     private Object value;
     private final String elementType;
+    private final boolean constant;
 
     /**
      * Constructs a VariableDefinition with the specified name, type, and initial value.
@@ -27,6 +28,18 @@ public class VariableDefinition {
      * @param value The initial value of the variable.
      */
     public VariableDefinition(String name, String type, Object value) {
+        this(name, type, value, false);
+    }
+
+    /**
+     * Constructs a VariableDefinition with the specified name, type, initial value, and constant flag.
+     *
+     * @param name     The name of the variable.
+     * @param type     The data type of the variable.
+     * @param value    The initial value of the variable.
+     * @param constant Whether this is a constant (immutable).
+     */
+    public VariableDefinition(String name, String type, Object value, boolean constant) {
         this.name = name;
         try {
             this.type = ElasticScriptDataType.valueOf(type.toUpperCase());
@@ -35,6 +48,7 @@ public class VariableDefinition {
         }
         this.value = value;
         this.elementType = null;
+        this.constant = constant;
     }
 
     /**
@@ -52,7 +66,15 @@ public class VariableDefinition {
      * @throws IllegalArgumentException if the type string is invalid.
      */
     public VariableDefinition(String name, String type, String elementType) {
+        this(name, type, elementType, false);
+    }
+
+    /**
+     * Constructs a VariableDefinition with the specified name, type, element type, and constant flag.
+     */
+    public VariableDefinition(String name, String type, String elementType, boolean constant) {
         this.name = name;
+        this.constant = constant;
         String normalizedType = type.trim().toUpperCase();
 
         if (normalizedType.startsWith("ARRAY")) {
@@ -124,13 +146,26 @@ public class VariableDefinition {
     }
 
     /**
+     * Checks if this variable is a constant (immutable).
+     *
+     * @return true if this is a constant, false otherwise.
+     */
+    public boolean isConstant() {
+        return constant;
+    }
+
+    /**
      * Sets a new value for the variable after validating type compatibility.
      *
      * @param value The new value to assign.
      * @throws RuntimeException If the value's type does not match the variable's data type.
+     * @throws RuntimeException If this is a constant and already has a value.
      */
     public void setValue(Object value) {
-        if ( isTypeCompatible(value) == false ) {
+        if (constant && this.value != null) {
+            throw new RuntimeException("Cannot modify constant '" + name + "'. Constants are immutable.");
+        }
+        if (isTypeCompatible(value) == false) {
             throw new RuntimeException("Type mismatch: Expected " + type + " for variable '" + name + "', " +
                 "for value of type: " + value.getClass());
         }

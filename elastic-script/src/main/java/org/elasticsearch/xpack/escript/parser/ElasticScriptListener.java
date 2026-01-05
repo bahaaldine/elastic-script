@@ -194,6 +194,66 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitDeclare_statement(ElasticScriptParser.Declare_statementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#var_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterVar_statement(ElasticScriptParser.Var_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#var_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitVar_statement(ElasticScriptParser.Var_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#var_declaration_list}.
+	 * @param ctx the parse tree
+	 */
+	void enterVar_declaration_list(ElasticScriptParser.Var_declaration_listContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#var_declaration_list}.
+	 * @param ctx the parse tree
+	 */
+	void exitVar_declaration_list(ElasticScriptParser.Var_declaration_listContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#var_declaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterVar_declaration(ElasticScriptParser.Var_declarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#var_declaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitVar_declaration(ElasticScriptParser.Var_declarationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#const_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterConst_statement(ElasticScriptParser.Const_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#const_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitConst_statement(ElasticScriptParser.Const_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#const_declaration_list}.
+	 * @param ctx the parse tree
+	 */
+	void enterConst_declaration_list(ElasticScriptParser.Const_declaration_listContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#const_declaration_list}.
+	 * @param ctx the parse tree
+	 */
+	void exitConst_declaration_list(ElasticScriptParser.Const_declaration_listContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#const_declaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterConst_declaration(ElasticScriptParser.Const_declarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#const_declaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitConst_declaration(ElasticScriptParser.Const_declarationContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#cursor_query}.
 	 * @param ctx the parse tree
 	 */

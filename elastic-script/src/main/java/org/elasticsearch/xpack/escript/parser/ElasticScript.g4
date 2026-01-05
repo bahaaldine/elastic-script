@@ -38,6 +38,8 @@ END: 'END';
 BEGIN: 'BEGIN';
 EXECUTE: 'EXECUTE';
 DECLARE: 'DECLARE';
+VAR: 'VAR';
+CONST: 'CONST';
 SET: 'SET';
 FOR: 'FOR';
 NULL: [Nn][Uu][Ll][Ll];
@@ -223,6 +225,8 @@ statement
     | print_statement
     | execute_statement
     | declare_statement
+    | var_statement
+    | const_statement
     | assignment_statement
     | if_statement
     | loop_statement
@@ -292,6 +296,30 @@ esql_query_content
 declare_statement
     : DECLARE variable_declaration_list SEMICOLON
     | DECLARE ID CURSOR FOR cursor_query SEMICOLON
+    ;
+
+var_statement
+    : VAR var_declaration_list SEMICOLON
+    ;
+
+var_declaration_list
+    : var_declaration (COMMA var_declaration)*
+    ;
+
+var_declaration
+    : ID ASSIGN expression
+    ;
+
+const_statement
+    : CONST const_declaration_list SEMICOLON
+    ;
+
+const_declaration_list
+    : const_declaration (COMMA const_declaration)*
+    ;
+
+const_declaration
+    : ID datatype? ASSIGN expression
     ;
 
 cursor_query

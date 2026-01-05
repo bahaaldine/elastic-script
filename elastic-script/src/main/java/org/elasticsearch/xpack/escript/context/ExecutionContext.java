@@ -89,6 +89,85 @@ public class ExecutionContext {
     }
 
     /**
+     * Declares a constant with the specified name, inferred type, and value.
+     * Constants cannot be modified after declaration.
+     *
+     * @param name  The name of the constant.
+     * @param value The value to assign.
+     * @throws RuntimeException If the constant is already declared.
+     */
+    public void declareConstant(String name, Object value) {
+        if (variables.containsKey(name)) {
+            throw new RuntimeException("Variable or constant '" + name + "' is already declared in the current scope.");
+        }
+        String inferredType = inferType(value);
+        VariableDefinition varDef = new VariableDefinition(name, inferredType, (Object) null, true);
+        varDef.setValue(value);
+        variables.put(name, varDef);
+    }
+
+    /**
+     * Declares a constant with an explicit type and value.
+     *
+     * @param name  The name of the constant.
+     * @param type  The explicit type of the constant.
+     * @param value The value to assign.
+     * @throws RuntimeException If the constant is already declared.
+     */
+    public void declareConstant(String name, String type, Object value) {
+        if (variables.containsKey(name)) {
+            throw new RuntimeException("Variable or constant '" + name + "' is already declared in the current scope.");
+        }
+        VariableDefinition varDef = new VariableDefinition(name, type, (Object) null, true);
+        varDef.setValue(value);
+        variables.put(name, varDef);
+    }
+
+    /**
+     * Declares a variable with inferred type based on the initial value.
+     * Used for VAR declarations.
+     *
+     * @param name  The name of the variable.
+     * @param value The initial value (used to infer type).
+     * @throws RuntimeException If the variable is already declared.
+     */
+    public void declareVariableWithInferredType(String name, Object value) {
+        if (variables.containsKey(name)) {
+            throw new RuntimeException("Variable '" + name + "' is already declared in the current scope.");
+        }
+        String inferredType = inferType(value);
+        VariableDefinition varDef = new VariableDefinition(name, inferredType, (Object) null);
+        varDef.setValue(value);
+        variables.put(name, varDef);
+    }
+
+    /**
+     * Infers the type of a value.
+     *
+     * @param value The value to infer type from.
+     * @return The inferred type as a string.
+     */
+    private String inferType(Object value) {
+        if (value == null) {
+            return "ANY";
+        } else if (value instanceof String) {
+            return "STRING";
+        } else if (value instanceof Number) {
+            return "NUMBER";
+        } else if (value instanceof Boolean) {
+            return "BOOLEAN";
+        } else if (value instanceof java.util.List) {
+            return "ARRAY";
+        } else if (value instanceof java.util.Map) {
+            return "DOCUMENT";
+        } else if (value instanceof java.util.Date) {
+            return "DATE";
+        } else {
+            return "ANY";
+        }
+    }
+
+    /**
      * Sets or updates the value of a variable. Searches for the variable in the current
      * context and parent contexts recursively.
      *

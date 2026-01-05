@@ -2241,26 +2241,40 @@ RETURN has_data ? data : (fallback ?? 'Default');
 
 ---
 
-### Phase 4: Type Inference & Constants ⏳ Priority: Medium | Effort: Small
+### Phase 4: Type Inference & Constants ✅ Priority: Medium | Effort: Small
 
 | Feature | Description | Status |
 |---------|-------------|--------|
-| `VAR` keyword | Type inference: `VAR name = 'John';` | 🔲 Planned |
-| `CONST` keyword | Immutable constants: `CONST MAX_RETRIES = 3;` | 🔲 Planned |
+| `VAR` keyword | Type inference: `VAR name = 'John';` | ✅ Implemented |
+| `CONST` keyword | Immutable constants: `CONST MAX_RETRIES = 3;` | ✅ Implemented |
 
-**Example usage after implementation:**
+**Example usage:**
 ```sql
--- Type inference
+-- Type inference with VAR (type is inferred from the value)
 VAR name = 'John';           -- Inferred as STRING
 VAR count = 42;              -- Inferred as NUMBER
 VAR items = [1, 2, 3];       -- Inferred as ARRAY
+VAR active = true;           -- Inferred as BOOLEAN
+VAR user = {"name": "Alice"};-- Inferred as DOCUMENT
 
--- Constants (immutable)
-CONST MAX_RETRIES NUMBER = 3;
-CONST API_URL STRING = 'https://api.example.com';
+-- Multiple VAR declarations
+VAR a = 10, b = 20, c = 30;
 
--- This would throw an error:
--- SET MAX_RETRIES = 5;  -- Error: Cannot modify constant
+-- Constants (immutable) - type inferred
+CONST MAX_RETRIES = 3;
+CONST API_URL = 'https://api.example.com';
+
+-- Constants with explicit type
+CONST FACTOR NUMBER = 2.5;
+CONST PREFIX STRING = 'app_';
+
+-- Using VAR and CONST together
+CONST MULTIPLIER = 10;
+VAR value = 5;
+SET value = value * MULTIPLIER;  -- OK: value is mutable
+
+-- This throws an error:
+-- SET MAX_RETRIES = 5;  -- Error: Cannot modify constant 'MAX_RETRIES'
 ```
 
 ---
