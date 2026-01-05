@@ -2279,36 +2279,55 @@ SET value = value * MULTIPLIER;  -- OK: value is mutable
 
 ---
 
-### Phase 5: Functional Array Operations ⏳ Priority: Medium | Effort: Medium
+### Phase 5: Functional Array Operations ✅ Complete
 
 | Function | Description | Status |
 |----------|-------------|--------|
-| `ARRAY_MAP(arr, fn)` | Transform each element | 🔲 Planned |
-| `ARRAY_FILTER(arr, predicate)` | Keep elements matching condition | 🔲 Planned |
-| `ARRAY_REDUCE(arr, fn, initial)` | Reduce to single value | 🔲 Planned |
-| `ARRAY_FIND(arr, predicate)` | Find first matching element | 🔲 Planned |
-| `ARRAY_FIND_INDEX(arr, predicate)` | Find index of first match | 🔲 Planned |
-| `ARRAY_EVERY(arr, predicate)` | Check if all match | 🔲 Planned |
-| `ARRAY_SOME(arr, predicate)` | Check if any match | 🔲 Planned |
-| `ARRAY_FLATTEN(arr)` | Flatten nested arrays | 🔲 Planned |
-| `ARRAY_JOIN(arr, delimiter)` | Join to string | 🔲 Planned |
+| `ARRAY_MAP(arr, property)` | Extract property from each object | ✅ Implemented |
+| `ARRAY_FILTER(arr, property, value)` | Keep elements where property equals value | ✅ Implemented |
+| `ARRAY_REDUCE(arr, initial)` | Sum numbers or concatenate strings | ✅ Implemented |
+| `ARRAY_FIND(arr, property, value)` | Find first matching element | ✅ Implemented |
+| `ARRAY_FIND_INDEX(arr, property, value)` | Find index of first match | ✅ Implemented |
+| `ARRAY_EVERY(arr, property, value)` | Check if all match | ✅ Implemented |
+| `ARRAY_SOME(arr, property, value)` | Check if any match | ✅ Implemented |
+| `ARRAY_FLATTEN(arr)` | Flatten nested arrays | ✅ Implemented |
+| `ARRAY_JOIN(arr, delimiter)` | Join to string | ✅ Implemented |
+| `ARRAY_REVERSE(arr)` | Reverse array order | ✅ Implemented |
+| `ARRAY_SLICE(arr, start, end)` | Extract portion of array | ✅ Implemented |
+| `ARRAY_SORT(arr, property)` | Sort array by property | ✅ Implemented |
 
-**Example usage after implementation:**
+**Example usage:**
 ```sql
--- Filter active users
-DECLARE active_users ARRAY = ARRAY_FILTER(users, 'status == "active"');
+-- Filter active users by status property
+DECLARE active_users ARRAY = ARRAY_FILTER(users, 'status', 'active');
 
--- Map to names
+-- Map to extract names
 DECLARE names ARRAY = ARRAY_MAP(users, 'name');
 
 -- Sum all values
-DECLARE total NUMBER = ARRAY_REDUCE(numbers, 'acc + item', 0);
+DECLARE total NUMBER = ARRAY_REDUCE(numbers, 0);
 
 -- Find first admin
-DECLARE admin DOCUMENT = ARRAY_FIND(users, 'role == "admin"');
+DECLARE admin DOCUMENT = ARRAY_FIND(users, 'role', 'admin');
 
 -- Join array to string
 DECLARE csv STRING = ARRAY_JOIN(names, ', ');
+
+-- Flatten nested arrays
+DECLARE flat ARRAY = ARRAY_FLATTEN([[1, 2], [3, 4]]);  -- [1, 2, 3, 4]
+
+-- Reverse array
+DECLARE reversed ARRAY = ARRAY_REVERSE([1, 2, 3]);  -- [3, 2, 1]
+
+-- Slice array
+DECLARE subset ARRAY = ARRAY_SLICE([1, 2, 3, 4, 5], 1, 4);  -- [2, 3, 4]
+
+-- Sort by property
+DECLARE sorted ARRAY = ARRAY_SORT(users, 'age');
+
+-- Check conditions
+DECLARE all_active BOOLEAN = ARRAY_EVERY(users, 'active', true);
+DECLARE any_admin BOOLEAN = ARRAY_SOME(users, 'role', 'admin');
 ```
 
 ---
