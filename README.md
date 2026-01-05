@@ -26,6 +26,7 @@ elastic-script is designed for:
   - [TRY / CATCH / FINALLY](#try--catch--finally)
   - [THROW](#throw)
   - [PROCEDURE / RETURN](#procedure--return)
+  - [INTENT](#intent)
 - [Built-in Functions](#built-in-functions)
   - [String Functions](#string-functions)
   - [Number Functions](#number-functions)
@@ -387,6 +388,97 @@ BEGIN
     RETURN total;
 END PROCEDURE
 ```
+
+---
+
+### INTENT
+
+**Purpose:** Define goal-oriented automation with encoded expertise, guardrails, and pre-conditions.
+
+INTENTs are a higher-level abstraction than procedures, designed for:
+- **AI Agents**: Safe, semantic automation that agents can discover and invoke
+- **Encoded Expertise**: SRE best practices baked into the definition
+- **Guardrails**: REQUIRES clause ensures pre-conditions are met before execution
+- **Auditability**: Clear intent = clear audit trail
+
+**Define Syntax:**
+```sql
+DEFINE INTENT name(param1 TYPE, param2 TYPE, ...)
+DESCRIPTION 'What this intent does'
+REQUIRES
+    condition1,
+    condition2
+ACTIONS
+    <statements>
+ON_FAILURE
+    <statements>
+END INTENT
+```
+
+**Invoke Syntax:**
+```sql
+-- With positional arguments
+INTENT name(arg1, arg2);
+
+-- With named arguments
+INTENT name WITH param1 = value1, param2 = value2;
+```
+
+**Example - Safe Restart Intent:**
+```sql
+DEFINE INTENT safe_restart(service STRING, namespace STRING)
+DESCRIPTION 'Restart a service following SRE best practices'
+REQUIRES
+    K8S_GET('deployment', service, namespace) IS NOT NULL,
+    NOT is_peak_traffic_window()
+ACTIONS
+    -- Capture state before changes
+    DECLARE pre_state DOCUMENT;
+    SET pre_state = K8S_GET('deployment', service, namespace);
+    
+    -- Perform rolling restart
+    K8S_ROLLOUT_RESTART(service, namespace);
+    
+    -- Wait and verify
+    DECLARE status STRING;
+    SET status = K8S_ROLLOUT_WAIT(service, namespace);
+    
+    IF status != 'success' THEN
+        K8S_ROLLOUT_UNDO(service, namespace);
+        THROW 'Restart failed, rolled back';
+    END IF
+ON_FAILURE
+    SLACK_SEND('#sre-alerts', 'safe_restart failed for ' || service);
+    PAGERDUTY_TRIGGER('Automated restart failed: ' || service, 'high');
+END INTENT
+```
+
+**Invoking the Intent:**
+```sql
+-- Simple invocation
+INTENT safe_restart('api-server', 'production');
+
+-- With named parameters
+INTENT safe_restart WITH service = 'api-server', namespace = 'production';
+```
+
+**Introspection:**
+```sql
+-- List all defined intents
+DECLARE intents ARRAY = ESCRIPT_INTENTS();
+
+-- Get details about a specific intent
+DECLARE info DOCUMENT = ESCRIPT_INTENT('safe_restart');
+PRINT info['signature'];  -- safe_restart(service STRING, namespace STRING)
+PRINT info['description']; -- Restart a service following SRE best practices
+PRINT info['has_requires']; -- true
+```
+
+**Key Concepts:**
+- **REQUIRES**: Pre-conditions that must be true before ACTIONS execute. If any condition fails, the intent is blocked.
+- **ACTIONS**: The main logic that executes when the intent is invoked.
+- **ON_FAILURE**: Statements that execute if ACTIONS throws an error.
+- **DESCRIPTION**: Human-readable explanation (useful for agent discovery).
 
 ---
 
@@ -1691,7 +1783,7 @@ DECLARE region STRING = ENV('AWS_REGION', 'us-east-1');  -- with default
 
 ## Roadmap: INTENT Layer & Encoded Expertise
 
-> **Note:** This section documents planned capabilities that are not yet implemented. It serves as a design vision for how elastic-script will evolve to better serve AI agents and encode SRE best practices.
+> **Status:** The INTENT layer grammar and introspection are implemented. See the [INTENT](#intent) section in Language Constructs for syntax documentation. The examples below show advanced patterns and the vision for expertise encoding.
 
 ### The Problem: Knowledge Silos in SRE
 
@@ -1865,33 +1957,39 @@ INTENT safe_scale(service='payment-api', target_replicas=10);
 | Hard to audit what agent "tried" to do | Clear semantic meaning |
 | No guardrails | Built-in safety checks |
 
-### Introspection (Planned)
+### Intent Introspection
 
-Agents will be able to discover available intents using ESQL-style syntax:
+Agents can discover available intents using the introspection functions:
 
 ```sql
 -- List all available intents
-FROM escript_intents() 
-| WHERE category = 'remediation' 
-| KEEP name, description, parameters
+DECLARE intents ARRAY = ESCRIPT_INTENTS();
+FOR intent IN intents LOOP
+    PRINT intent['signature'] || ' - ' || intent['description'];
+END LOOP
 
--- Returns:
--- name                  | description                          | parameters
--- mitigate_latency      | Reduce latency through remediation   | service, namespace, strategy
--- safe_restart          | Restart following best practices     | service, namespace
--- safe_scale            | Scale with guardrails                | service, target_replicas
--- database_failover     | Safely failover database cluster     | cluster
+-- Output:
+-- safe_restart(service STRING, namespace STRING) - Restart following best practices
+-- safe_scale(service STRING, target_replicas NUMBER) - Scale with guardrails
+-- database_failover(cluster STRING) - Safely failover database cluster
 ```
 
 ```sql
 -- Get details about a specific intent
-FROM escript_intent_details('safe_restart')
-| KEEP parameter, type, default_value, description
+DECLARE info DOCUMENT = ESCRIPT_INTENT('safe_restart');
+IF info['exists'] THEN
+    PRINT 'Signature: ' || info['signature'];
+    PRINT 'Has pre-conditions: ' || info['has_requires'];
+    FOR param IN info['parameters'] LOOP
+        PRINT '  - ' || param['name'] || ': ' || param['type'];
+    END LOOP
+END IF
 
--- Returns:
--- parameter  | type    | default_value | description
--- service    | STRING  | null          | Name of the service to restart
--- namespace  | STRING  | 'production'  | Kubernetes namespace
+-- Output:
+-- Signature: safe_restart(service STRING, namespace STRING)
+-- Has pre-conditions: true
+--   - service: STRING
+--   - namespace: STRING
 ```
 
 ### The Expertise Lifecycle
