@@ -59,6 +59,12 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBreak_statement(ElasticScriptParser.Break_statementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#continue_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitContinue_statement(ElasticScriptParser.Continue_statementContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#return_statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -251,11 +257,26 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitEqualityExpression(ElasticScriptParser.EqualityExpressionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link ElasticScriptParser#relationalExpression}.
+	 * Visit a parse tree produced by the {@code comparisonExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRelationalExpression(ElasticScriptParser.RelationalExpressionContext ctx);
+	T visitComparisonExpr(ElasticScriptParser.ComparisonExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code isNullExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIsNullExpr(ElasticScriptParser.IsNullExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code isNotNullExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIsNotNullExpr(ElasticScriptParser.IsNotNullExprContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#additiveExpression}.
 	 * @param ctx the parse tree

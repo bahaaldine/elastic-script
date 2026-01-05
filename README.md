@@ -2081,6 +2081,233 @@ The INTENT layer transforms elastic-script from a procedural language into a **l
 
 ---
 
+---
+
+## Language Roadmap: Planned Enhancements
+
+This section outlines planned language improvements for elastic-script, organized by priority.
+
+### Phase 1: Core Language Primitives ✅ Priority: High | Effort: Small
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| `NOT` / `!` operator | Logical negation: `IF NOT active THEN` or `IF !is_admin THEN` | ✅ Implemented |
+| `IS NULL` / `IS NOT NULL` | SQL-style null checking: `IF value IS NULL THEN` | ✅ Implemented |
+| `CONTINUE` statement | Skip to next loop iteration | ✅ Implemented |
+
+**Example usage after implementation:**
+```sql
+IF NOT user_active THEN
+    PRINT 'User is inactive';
+END IF
+
+IF value IS NULL THEN
+    SET value = 'default';
+END IF
+
+FOR item IN items LOOP
+    IF item['skip'] == true THEN
+        CONTINUE;  -- Skip to next iteration
+    END IF
+    process_item(item);
+END LOOP
+```
+
+---
+
+### Phase 2: Expression Operators ⏳ Priority: High | Effort: Medium
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| `%` modulo operator | Inline modulo: `IF i % 2 == 0 THEN` | 🔲 Planned |
+| `IN` operator | Collection membership: `IF status IN ('active', 'pending') THEN` | 🔲 Planned |
+| `SWITCH/CASE` statement | Multi-branch selection | 🔲 Planned |
+
+**Example usage after implementation:**
+```sql
+-- Modulo operator
+IF i % 2 == 0 THEN
+    PRINT 'Even';
+END IF
+
+-- IN operator
+IF status IN ('active', 'pending', 'processing') THEN
+    PRINT 'Valid status';
+END IF
+
+-- SWITCH/CASE statement
+SWITCH severity
+    CASE 'critical' THEN
+        PAGERDUTY_TRIGGER(message, 'high');
+    CASE 'warning' THEN
+        SLACK_SEND('#alerts', message);
+    DEFAULT
+        PRINT message;
+END SWITCH
+```
+
+---
+
+### Phase 3: Null Safety & Ternary ⏳ Priority: Medium | Effort: Medium
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| `??` null coalescing | Default if null: `name ?? 'Unknown'` | 🔲 Planned |
+| `?.` safe navigation | Safe property access: `user?.address?.city` | 🔲 Planned |
+| Ternary `? :` | Inline conditional: `active ? 'Yes' : 'No'` | 🔲 Planned |
+
+**Example usage after implementation:**
+```sql
+-- Null coalescing
+DECLARE name STRING = user['name'] ?? 'Unknown';
+DECLARE port NUMBER = config['port'] ?? 8080;
+
+-- Safe navigation (returns null if any part is null)
+DECLARE city STRING = user?.address?.city;
+
+-- Ternary operator
+DECLARE status STRING = is_active ? 'Active' : 'Inactive';
+DECLARE color STRING = error_count > 0 ? 'red' : 'green';
+```
+
+---
+
+### Phase 4: Type Inference & Constants ⏳ Priority: Medium | Effort: Small
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| `VAR` keyword | Type inference: `VAR name = 'John';` | 🔲 Planned |
+| `CONST` keyword | Immutable constants: `CONST MAX_RETRIES = 3;` | 🔲 Planned |
+
+**Example usage after implementation:**
+```sql
+-- Type inference
+VAR name = 'John';           -- Inferred as STRING
+VAR count = 42;              -- Inferred as NUMBER
+VAR items = [1, 2, 3];       -- Inferred as ARRAY
+
+-- Constants (immutable)
+CONST MAX_RETRIES NUMBER = 3;
+CONST API_URL STRING = 'https://api.example.com';
+
+-- This would throw an error:
+-- SET MAX_RETRIES = 5;  -- Error: Cannot modify constant
+```
+
+---
+
+### Phase 5: Functional Array Operations ⏳ Priority: Medium | Effort: Medium
+
+| Function | Description | Status |
+|----------|-------------|--------|
+| `ARRAY_MAP(arr, fn)` | Transform each element | 🔲 Planned |
+| `ARRAY_FILTER(arr, predicate)` | Keep elements matching condition | 🔲 Planned |
+| `ARRAY_REDUCE(arr, fn, initial)` | Reduce to single value | 🔲 Planned |
+| `ARRAY_FIND(arr, predicate)` | Find first matching element | 🔲 Planned |
+| `ARRAY_FIND_INDEX(arr, predicate)` | Find index of first match | 🔲 Planned |
+| `ARRAY_EVERY(arr, predicate)` | Check if all match | 🔲 Planned |
+| `ARRAY_SOME(arr, predicate)` | Check if any match | 🔲 Planned |
+| `ARRAY_FLATTEN(arr)` | Flatten nested arrays | 🔲 Planned |
+| `ARRAY_JOIN(arr, delimiter)` | Join to string | 🔲 Planned |
+
+**Example usage after implementation:**
+```sql
+-- Filter active users
+DECLARE active_users ARRAY = ARRAY_FILTER(users, 'status == "active"');
+
+-- Map to names
+DECLARE names ARRAY = ARRAY_MAP(users, 'name');
+
+-- Sum all values
+DECLARE total NUMBER = ARRAY_REDUCE(numbers, 'acc + item', 0);
+
+-- Find first admin
+DECLARE admin DOCUMENT = ARRAY_FIND(users, 'role == "admin"');
+
+-- Join array to string
+DECLARE csv STRING = ARRAY_JOIN(names, ', ');
+```
+
+---
+
+### Phase 6: String Interpolation ⏳ Priority: Low | Effort: Medium
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| `${var}` interpolation | Template strings: `"User ${name} has ${count} items"` | 🔲 Planned |
+
+**Example usage after implementation:**
+```sql
+-- Instead of verbose concatenation:
+-- PRINT 'User ' || name || ' has ' || count || ' items in ' || location;
+
+-- Use interpolation:
+PRINT "User ${name} has ${count} items in ${location}";
+
+-- Works with expressions:
+PRINT "Total: ${subtotal + tax}";
+
+-- Works with document access:
+PRINT "Service ${doc['name']} is ${doc['status']}";
+```
+
+---
+
+### Phase 7: Lambda Expressions ⏳ Priority: Low | Effort: Large
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Lambda syntax | Anonymous functions: `(x) => x * 2` | 🔲 Planned |
+
+**Example usage after implementation:**
+```sql
+-- Filter with lambda
+DECLARE adults ARRAY = ARRAY_FILTER(users, (u) => u['age'] >= 18);
+
+-- Map with lambda
+DECLARE names ARRAY = ARRAY_MAP(users, (u) => u['first_name'] || ' ' || u['last_name']);
+
+-- Sort with lambda
+DECLARE sorted ARRAY = ARRAY_SORT(users, (a, b) => a['age'] - b['age']);
+
+-- Reduce with lambda
+DECLARE total NUMBER = ARRAY_REDUCE(items, (acc, item) => acc + item['price'], 0);
+```
+
+---
+
+### Phase 8: Enhanced ESQL Integration ⏳ Priority: Medium | Effort: Large
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Inline ESQL expressions | `FOR log IN (FROM logs \| LIMIT 10) LOOP` | 🔲 Planned |
+| Parameterized ESQL | Safe parameter binding with `:param` | ✅ Implemented |
+| FROM function() | Allow functions as ESQL sources | 🔲 Research |
+
+**Example usage after implementation:**
+```sql
+-- Inline ESQL (no CURSOR declaration needed)
+FOR log IN (FROM logs | WHERE level == 'error' | LIMIT 10) LOOP
+    PRINT log['message'];
+END LOOP
+
+-- ESQL as expression
+DECLARE count NUMBER = (FROM logs | STATS cnt = COUNT(*)).cnt;
+```
+
+---
+
+### Implementation Status Legend
+
+| Symbol | Meaning |
+|--------|---------|
+| ✅ | Implemented |
+| 🚧 | In Progress |
+| 🔲 | Planned |
+| ❌ | Not Planned |
+
+---
+
 ## See Also
 - [ESQL Documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql.html)
 - [Elasticsearch Inference API](https://www.elastic.co/guide/en/elasticsearch/reference/current/inference-apis.html)

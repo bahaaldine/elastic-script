@@ -88,6 +88,16 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitBreak_statement(ElasticScriptParser.Break_statementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#continue_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterContinue_statement(ElasticScriptParser.Continue_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#continue_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitContinue_statement(ElasticScriptParser.Continue_statementContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#return_statement}.
 	 * @param ctx the parse tree
 	 */
@@ -408,15 +418,41 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitEqualityExpression(ElasticScriptParser.EqualityExpressionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link ElasticScriptParser#relationalExpression}.
+	 * Enter a parse tree produced by the {@code comparisonExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
 	 * @param ctx the parse tree
 	 */
-	void enterRelationalExpression(ElasticScriptParser.RelationalExpressionContext ctx);
+	void enterComparisonExpr(ElasticScriptParser.ComparisonExprContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link ElasticScriptParser#relationalExpression}.
+	 * Exit a parse tree produced by the {@code comparisonExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
 	 * @param ctx the parse tree
 	 */
-	void exitRelationalExpression(ElasticScriptParser.RelationalExpressionContext ctx);
+	void exitComparisonExpr(ElasticScriptParser.ComparisonExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code isNullExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterIsNullExpr(ElasticScriptParser.IsNullExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code isNullExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitIsNullExpr(ElasticScriptParser.IsNullExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code isNotNullExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterIsNotNullExpr(ElasticScriptParser.IsNotNullExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code isNotNullExpr}
+	 * labeled alternative in {@link ElasticScriptParser#relationalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitIsNotNullExpr(ElasticScriptParser.IsNotNullExprContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#additiveExpression}.
 	 * @param ctx the parse tree

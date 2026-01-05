@@ -113,6 +113,18 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterContinue_statement(ElasticScriptParser.Continue_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitContinue_statement(ElasticScriptParser.Continue_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterReturn_statement(ElasticScriptParser.Return_statementContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -497,13 +509,37 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterRelationalExpression(ElasticScriptParser.RelationalExpressionContext ctx) { }
+	@Override public void enterComparisonExpr(ElasticScriptParser.ComparisonExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitRelationalExpression(ElasticScriptParser.RelationalExpressionContext ctx) { }
+	@Override public void exitComparisonExpr(ElasticScriptParser.ComparisonExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIsNullExpr(ElasticScriptParser.IsNullExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIsNullExpr(ElasticScriptParser.IsNullExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIsNotNullExpr(ElasticScriptParser.IsNotNullExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIsNotNullExpr(ElasticScriptParser.IsNotNullExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

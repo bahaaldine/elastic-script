@@ -10,6 +10,7 @@ package org.elasticsearch.xpack.escript.handlers;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.xpack.escript.executors.ProcedureExecutor;
 import org.elasticsearch.xpack.escript.exceptions.BreakException;
+import org.elasticsearch.xpack.escript.exceptions.ContinueException;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptParser;
 import org.elasticsearch.xpack.escript.context.ExecutionContext;
 import org.elasticsearch.xpack.escript.primitives.CursorDefinition;
@@ -80,6 +81,10 @@ public class LoopStatementHandler {
             listener.onResponse(null);
             return;
         }
+        // Declare the loop variable if not already declared
+        if (!executor.getContext().getVariables().containsKey(loopVarName)) {
+            executor.getContext().declareVariable(loopVarName, "NUMBER");
+        }
         executor.getContext().setVariable(loopVarName, currentVal);
         executeStatementsAsync(statements, 0, ActionListener.wrap(bodyResult -> {
             if (bodyResult instanceof BreakException) {
@@ -92,7 +97,19 @@ public class LoopStatementHandler {
                     executeRangeLoopIteration(loopVarName, nextVal, endVal, step, statements, listener)
                 );
             }
-        }, listener::onFailure));
+        }, e -> {
+            if (e instanceof BreakException) {
+                listener.onResponse(null);
+            } else if (e instanceof ContinueException) {
+                // Continue to next iteration
+                double nextVal = currentVal + step;
+                executor.getThreadPool().generic().execute(() ->
+                    executeRangeLoopIteration(loopVarName, nextVal, endVal, step, statements, listener)
+                );
+            } else {
+                listener.onFailure(e);
+            }
+        }));
     }
 
     /**
@@ -250,7 +267,18 @@ public class LoopStatementHandler {
                     executeCursorLoopIteration(loopVarName, items, currentIndex + 1, statements, listener)
                 );
             }
-        }, listener::onFailure));
+        }, e -> {
+            if (e instanceof BreakException) {
+                listener.onResponse(null);
+            } else if (e instanceof ContinueException) {
+                // Continue to next iteration
+                executor.getThreadPool().generic().execute(() ->
+                    executeCursorLoopIteration(loopVarName, items, currentIndex + 1, statements, listener)
+                );
+            } else {
+                listener.onFailure(e);
+            }
+        }));
     }
 
     /**
@@ -323,7 +351,18 @@ public class LoopStatementHandler {
                     executeArrayLoopIteration(loopVarName, items, currentIndex + 1, statements, listener)
                 );
             }
-        }, listener::onFailure));
+        }, e -> {
+            if (e instanceof BreakException) {
+                listener.onResponse(null);
+            } else if (e instanceof ContinueException) {
+                // Continue to next iteration
+                executor.getThreadPool().generic().execute(() ->
+                    executeArrayLoopIteration(loopVarName, items, currentIndex + 1, statements, listener)
+                );
+            } else {
+                listener.onFailure(e);
+            }
+        }));
     }
 
     /**
@@ -358,7 +397,18 @@ public class LoopStatementHandler {
                         doWhileIteration(ctx, listener)
                     );
                 }
-            }, listener::onFailure));
+            }, e -> {
+                if (e instanceof BreakException) {
+                    listener.onResponse(null);
+                } else if (e instanceof ContinueException) {
+                    // Continue - re-evaluate condition and start next iteration
+                    executor.getThreadPool().generic().execute(() ->
+                        doWhileIteration(ctx, listener)
+                    );
+                } else {
+                    listener.onFailure(e);
+                }
+            }));
         }, listener::onFailure));
     }
 

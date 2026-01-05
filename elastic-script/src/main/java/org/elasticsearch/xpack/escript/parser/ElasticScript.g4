@@ -55,6 +55,7 @@ ENDTRY: 'END TRY';
 FUNCTION: 'FUNCTION';
 RETURN: 'RETURN';
 BREAK: 'BREAK';
+CONTINUE: 'CONTINUE';
 PERSIST: 'PERSIST';
 INTO: 'INTO';
 CURSOR: 'CURSOR';
@@ -81,6 +82,9 @@ GREATER_EQUAL: '>=';
 LESS_EQUAL: '<=';
 OR: 'OR';
 AND: 'AND';
+NOT: 'NOT';
+BANG: '!';
+IS: 'IS';
     EQ: '==';             // equality operator
     ASSIGN: '=';          // assignment operator
 
@@ -221,6 +225,7 @@ statement
     | intent_statement
     | return_statement
     | break_statement
+    | continue_statement
     | expression_statement
     | SEMICOLON
     ;
@@ -237,6 +242,10 @@ print_statement
 
 break_statement
     : BREAK SEMICOLON
+    ;
+
+continue_statement
+    : CONTINUE SEMICOLON
     ;
 
 return_statement
@@ -374,7 +383,9 @@ equalityExpression
     ;
 
 relationalExpression
-    : additiveExpression ((LESS_THAN | GREATER_THAN | LESS_EQUAL | GREATER_EQUAL) additiveExpression)*
+    : additiveExpression ((LESS_THAN | GREATER_THAN | LESS_EQUAL | GREATER_EQUAL) additiveExpression)*  # comparisonExpr
+    | additiveExpression IS NULL                             # isNullExpr
+    | additiveExpression IS NOT NULL                         # isNotNullExpr
     ;
 
 additiveExpression
@@ -387,6 +398,8 @@ multiplicativeExpression
 
 unaryExpr
     : '-' unaryExpr
+    | NOT unaryExpr
+    | BANG unaryExpr
     | primaryExpression
     ;
 

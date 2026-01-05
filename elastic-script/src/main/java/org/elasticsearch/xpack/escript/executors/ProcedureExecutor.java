@@ -19,6 +19,7 @@ import org.elasticsearch.logging.Logger;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.xpack.escript.evaluators.ExpressionEvaluator;
 import org.elasticsearch.xpack.escript.exceptions.BreakException;
+import org.elasticsearch.xpack.escript.exceptions.ContinueException;
 import org.elasticsearch.xpack.escript.functions.Parameter;
 import org.elasticsearch.xpack.escript.functions.ParameterMode;
 import org.elasticsearch.xpack.escript.handlers.AssignmentStatementHandler;
@@ -248,6 +249,9 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
         } else if (ctx.break_statement() != null) {
             // Handle break statement.
             listener.onFailure(new BreakException("Break encountered"));
+        } else if (ctx.continue_statement() != null) {
+            // Handle continue statement.
+            listener.onFailure(new ContinueException("Continue encountered"));
         } else if (ctx.expression_statement() != null) {
             // Evaluate the expression asynchronously and ignore the result.
             ActionListener<Object> exprListener = new ActionListener<Object>() {

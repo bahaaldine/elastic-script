@@ -209,34 +209,59 @@ public class ExpressionEvaluator {
     }
 
     private void evaluateRelationalExpressionAsync(ElasticScriptParser.RelationalExpressionContext ctx, ActionListener<Object> listener) {
-        // Single operand: delegate to additive
-        if (ctx.additiveExpression().size() == 1) {
-            evaluateAdditiveExpressionAsync(ctx.additiveExpression(0), listener);
+        // Handle IS NULL expression
+        if (ctx instanceof ElasticScriptParser.IsNullExprContext isNullCtx) {
+            evaluateAdditiveExpressionAsync(isNullCtx.additiveExpression(), ActionListener.wrap(
+                value -> listener.onResponse(value == null),
+                listener::onFailure
+            ));
             return;
         }
-        // Use operator registry for '<', '<=', '>', '>='
-        String operator = ctx.getChild(1).getText();
-        OperatorHandlerRegistry registry = new OperatorHandlerRegistry();
-        BinaryOperatorHandler handler = registry.getHandler(operator);
-        // Evaluate both sides asynchronously
-        evaluateAdditiveExpressionAsync(ctx.additiveExpression(0), ActionListener.wrap(
-            left -> evaluateAdditiveExpressionAsync(ctx.additiveExpression(1), ActionListener.wrap(
-                right -> {
-                    try {
-                        if (left == null || right == null) {
-                            listener.onResponse(false);
-                        } else if (handler.isApplicable(left, right)) {
-                            listener.onResponse(handler.apply(left, right));
-                        } else {
-                            listener.onFailure(new RuntimeException(
-                                "Operator '" + operator + "' not applicable for types: "
-                                + left.getClass().getSimpleName() + ", " + right.getClass().getSimpleName()));
+        
+        // Handle IS NOT NULL expression
+        if (ctx instanceof ElasticScriptParser.IsNotNullExprContext isNotNullCtx) {
+            evaluateAdditiveExpressionAsync(isNotNullCtx.additiveExpression(), ActionListener.wrap(
+                value -> listener.onResponse(value != null),
+                listener::onFailure
+            ));
+            return;
+        }
+        
+        // Handle comparison expression (the original logic)
+        if (ctx instanceof ElasticScriptParser.ComparisonExprContext compCtx) {
+            // Single operand: delegate to additive
+            if (compCtx.additiveExpression().size() == 1) {
+                evaluateAdditiveExpressionAsync(compCtx.additiveExpression(0), listener);
+                return;
+            }
+            // Use operator registry for '<', '<=', '>', '>='
+            String operator = compCtx.getChild(1).getText();
+            OperatorHandlerRegistry registry = new OperatorHandlerRegistry();
+            BinaryOperatorHandler handler = registry.getHandler(operator);
+            // Evaluate both sides asynchronously
+            evaluateAdditiveExpressionAsync(compCtx.additiveExpression(0), ActionListener.wrap(
+                left -> evaluateAdditiveExpressionAsync(compCtx.additiveExpression(1), ActionListener.wrap(
+                    right -> {
+                        try {
+                            if (left == null || right == null) {
+                                listener.onResponse(false);
+                            } else if (handler.isApplicable(left, right)) {
+                                listener.onResponse(handler.apply(left, right));
+                            } else {
+                                listener.onFailure(new RuntimeException(
+                                    "Operator '" + operator + "' not applicable for types: "
+                                    + left.getClass().getSimpleName() + ", " + right.getClass().getSimpleName()));
+                            }
+                        } catch (Exception e) {
+                            listener.onFailure(e);
                         }
-                    } catch (Exception e) {
-                        listener.onFailure(e);
-                    }
-                }, listener::onFailure)),
-            listener::onFailure));
+                    }, listener::onFailure)),
+                listener::onFailure));
+            return;
+        }
+        
+        // Fallback for unexpected context type
+        listener.onFailure(new RuntimeException("Unsupported relational expression: " + ctx.getText()));
     }
 
     private void evaluateAdditiveExpressionAsync(ElasticScriptParser.AdditiveExpressionContext ctx, ActionListener<Object> listener) {
@@ -367,12 +392,23 @@ public class ExpressionEvaluator {
                             } else {
                                 listener.onFailure(new RuntimeException("Unary minus can only be applied to numbers."));
                             }
-                        } else if (operator.equals("NOT")) {
+                        } else if (operator.equals("NOT") || operator.equals("!")) {
+                            // Handle truthy/falsy for non-booleans
+                            boolean boolValue;
                             if (result instanceof Boolean) {
-                                listener.onResponse(!((Boolean) result));
+                                boolValue = (Boolean) result;
+                            } else if (result == null) {
+                                boolValue = false;  // null is falsy
+                            } else if (result instanceof Number) {
+                                boolValue = ((Number) result).doubleValue() != 0;  // 0 is falsy
+                            } else if (result instanceof String) {
+                                boolValue = !((String) result).isEmpty();  // empty string is falsy
+                            } else if (result instanceof List) {
+                                boolValue = !((List<?>) result).isEmpty();  // empty list is falsy
                             } else {
-                                listener.onFailure(new RuntimeException("NOT operator can only be applied to boolean values."));
+                                boolValue = true;  // non-null objects are truthy
                             }
+                            listener.onResponse(!boolValue);
                         } else {
                             listener.onFailure(new RuntimeException("Unknown unary operator: " + operator));
                         }
