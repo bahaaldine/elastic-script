@@ -1,4 +1,4 @@
-// Generated from /Users/baha/dev/elastic-script/elasticsearch/x-pack/plugin/elastic-script/src/main/java/org/elasticsearch/xpack/escript/parser/ElasticScript.g4 by ANTLR 4.13.1
+// Generated from ElasticScript.g4 by ANTLR 4.13.1
 package org.elasticsearch.xpack.escript.parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -587,4 +587,98 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSeverity(ElasticScriptParser.SeverityContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#define_intent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterDefine_intent_statement(ElasticScriptParser.Define_intent_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#define_intent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitDefine_intent_statement(ElasticScriptParser.Define_intent_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#requires_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterRequires_clause(ElasticScriptParser.Requires_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#requires_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitRequires_clause(ElasticScriptParser.Requires_clauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#requires_condition}.
+	 * @param ctx the parse tree
+	 */
+	void enterRequires_condition(ElasticScriptParser.Requires_conditionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#requires_condition}.
+	 * @param ctx the parse tree
+	 */
+	void exitRequires_condition(ElasticScriptParser.Requires_conditionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#actions_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterActions_clause(ElasticScriptParser.Actions_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#actions_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitActions_clause(ElasticScriptParser.Actions_clauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#on_failure_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterOn_failure_clause(ElasticScriptParser.On_failure_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#on_failure_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitOn_failure_clause(ElasticScriptParser.On_failure_clauseContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code intentCallWithArgs}
+	 * labeled alternative in {@link ElasticScriptParser#intent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterIntentCallWithArgs(ElasticScriptParser.IntentCallWithArgsContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code intentCallWithArgs}
+	 * labeled alternative in {@link ElasticScriptParser#intent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitIntentCallWithArgs(ElasticScriptParser.IntentCallWithArgsContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code intentCallWithNamedArgs}
+	 * labeled alternative in {@link ElasticScriptParser#intent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterIntentCallWithNamedArgs(ElasticScriptParser.IntentCallWithNamedArgsContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code intentCallWithNamedArgs}
+	 * labeled alternative in {@link ElasticScriptParser#intent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitIntentCallWithNamedArgs(ElasticScriptParser.IntentCallWithNamedArgsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#intent_named_args}.
+	 * @param ctx the parse tree
+	 */
+	void enterIntent_named_args(ElasticScriptParser.Intent_named_argsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#intent_named_args}.
+	 * @param ctx the parse tree
+	 */
+	void exitIntent_named_args(ElasticScriptParser.Intent_named_argsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#intent_named_arg}.
+	 * @param ctx the parse tree
+	 */
+	void enterIntent_named_arg(ElasticScriptParser.Intent_named_argContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#intent_named_arg}.
+	 * @param ctx the parse tree
+	 */
+	void exitIntent_named_arg(ElasticScriptParser.Intent_named_argContext ctx);
 }

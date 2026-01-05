@@ -252,6 +252,18 @@ public class ElasticScriptExecutor {
 
                     LOGGER.info("Storing procedure {}", procedureId);
                     storeProcedureAsync( procedureId, rawProcedureText, listener );
+                } else if (programContext.define_intent_statement() != null) {
+                    // Handle DEFINE INTENT at the program level
+                    ElasticScriptParser.Define_intent_statementContext intentCtx = programContext.define_intent_statement();
+                    String intentName = intentCtx.ID().getText();
+                    LOGGER.info("Defining intent {}", intentName);
+                    
+                    // Create a temporary executor context to handle the intent definition
+                    ExecutionContext tempContext = new ExecutionContext();
+                    ProcedureExecutor tempExecutor = new ProcedureExecutor(tempContext, threadPool, client, tokens);
+                    org.elasticsearch.xpack.escript.handlers.DefineIntentStatementHandler handler = 
+                        new org.elasticsearch.xpack.escript.handlers.DefineIntentStatementHandler(tempExecutor);
+                    handler.handleAsync(intentCtx, listener);
                 } else {
                     listener.onFailure(new IllegalArgumentException("Unsupported top-level statement"));
                 }

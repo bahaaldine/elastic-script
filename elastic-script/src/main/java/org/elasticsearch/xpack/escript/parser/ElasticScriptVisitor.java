@@ -1,4 +1,4 @@
-// Generated from /Users/baha/dev/elastic-script/elasticsearch/x-pack/plugin/elastic-script/src/main/java/org/elasticsearch/xpack/escript/parser/ElasticScript.g4 by ANTLR 4.13.1
+// Generated from ElasticScript.g4 by ANTLR 4.13.1
 package org.elasticsearch.xpack.escript.parser;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -358,4 +358,60 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSeverity(ElasticScriptParser.SeverityContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#define_intent_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDefine_intent_statement(ElasticScriptParser.Define_intent_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#requires_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRequires_clause(ElasticScriptParser.Requires_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#requires_condition}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRequires_condition(ElasticScriptParser.Requires_conditionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#actions_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitActions_clause(ElasticScriptParser.Actions_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#on_failure_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOn_failure_clause(ElasticScriptParser.On_failure_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code intentCallWithArgs}
+	 * labeled alternative in {@link ElasticScriptParser#intent_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIntentCallWithArgs(ElasticScriptParser.IntentCallWithArgsContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code intentCallWithNamedArgs}
+	 * labeled alternative in {@link ElasticScriptParser#intent_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIntentCallWithNamedArgs(ElasticScriptParser.IntentCallWithNamedArgsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#intent_named_args}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIntent_named_args(ElasticScriptParser.Intent_named_argsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#intent_named_arg}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIntent_named_arg(ElasticScriptParser.Intent_named_argContext ctx);
 }

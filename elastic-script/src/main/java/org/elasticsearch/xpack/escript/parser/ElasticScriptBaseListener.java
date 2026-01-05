@@ -1,4 +1,4 @@
-// Generated from /Users/baha/dev/elastic-script/elasticsearch/x-pack/plugin/elastic-script/src/main/java/org/elasticsearch/xpack/escript/parser/ElasticScript.g4 by ANTLR 4.13.1
+// Generated from ElasticScript.g4 by ANTLR 4.13.1
 package org.elasticsearch.xpack.escript.parser;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -708,6 +708,114 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSeverity(ElasticScriptParser.SeverityContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterDefine_intent_statement(ElasticScriptParser.Define_intent_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDefine_intent_statement(ElasticScriptParser.Define_intent_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterRequires_clause(ElasticScriptParser.Requires_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRequires_clause(ElasticScriptParser.Requires_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterRequires_condition(ElasticScriptParser.Requires_conditionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRequires_condition(ElasticScriptParser.Requires_conditionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterActions_clause(ElasticScriptParser.Actions_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitActions_clause(ElasticScriptParser.Actions_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterOn_failure_clause(ElasticScriptParser.On_failure_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitOn_failure_clause(ElasticScriptParser.On_failure_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIntentCallWithArgs(ElasticScriptParser.IntentCallWithArgsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIntentCallWithArgs(ElasticScriptParser.IntentCallWithArgsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIntentCallWithNamedArgs(ElasticScriptParser.IntentCallWithNamedArgsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIntentCallWithNamedArgs(ElasticScriptParser.IntentCallWithNamedArgsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIntent_named_args(ElasticScriptParser.Intent_named_argsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIntent_named_args(ElasticScriptParser.Intent_named_argsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIntent_named_arg(ElasticScriptParser.Intent_named_argContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIntent_named_arg(ElasticScriptParser.Intent_named_argContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

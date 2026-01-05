@@ -31,6 +31,8 @@ import org.elasticsearch.xpack.escript.handlers.LoopStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.PrintStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.ThrowStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.TryCatchStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.DefineIntentStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.IntentStatementHandler;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptBaseVisitor;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptLexer;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptParser;
@@ -74,6 +76,8 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
     private final ExecuteStatementHandler executeHandler;
     private final PrintStatementHandler printStatementHandler;
     private final CallProcedureStatementHandler callProcedureStatementHandler;
+    private final DefineIntentStatementHandler defineIntentHandler;
+    private final IntentStatementHandler intentHandler;
     private final Client client;
 
     private final CommonTokenStream tokenStream;
@@ -104,6 +108,8 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
         this.throwHandler = new ThrowStatementHandler(this);
         this.printStatementHandler = new PrintStatementHandler(this);
         this.callProcedureStatementHandler = new CallProcedureStatementHandler(this);
+        this.defineIntentHandler = new DefineIntentStatementHandler(this);
+        this.intentHandler = new IntentStatementHandler(this);
         this.tokenStream = tokenStream;
         // Initialize ExpressionEvaluator with this executor instance.
         this.expressionEvaluator = new ExpressionEvaluator(this);
@@ -235,6 +241,8 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
             printStatementHandler.execute(ctx.print_statement(), listener);
         }  else if (ctx.call_procedure_statement() != null) {
             callProcedureStatementHandler.handleAsync(ctx.call_procedure_statement(), listener);
+        } else if (ctx.intent_statement() != null) {
+            intentHandler.handleAsync(ctx.intent_statement(), listener);
         } else if (ctx.return_statement() != null) {
             visitReturn_statementAsync(ctx.return_statement(), listener);
         } else if (ctx.break_statement() != null) {
