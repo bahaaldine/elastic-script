@@ -2332,26 +2332,37 @@ DECLARE any_admin BOOLEAN = ARRAY_SOME(users, 'role', 'admin');
 
 ---
 
-### Phase 6: String Interpolation ⏳ Priority: Low | Effort: Medium
+### Phase 6: String Interpolation ✅ Complete
 
 | Feature | Description | Status |
 |---------|-------------|--------|
-| `${var}` interpolation | Template strings: `"User ${name} has ${count} items"` | 🔲 Planned |
+| `${var}` interpolation | Template strings: `"User ${name} has ${count} items"` | ✅ Implemented |
 
-**Example usage after implementation:**
+**Usage (double-quoted strings only):**
 ```sql
--- Instead of verbose concatenation:
--- PRINT 'User ' || name || ' has ' || count || ' items in ' || location;
+-- Variable interpolation
+DECLARE name STRING = 'Alice';
+DECLARE greeting STRING = "Hello, ${name}!";  -- "Hello, Alice!"
 
--- Use interpolation:
-PRINT "User ${name} has ${count} items in ${location}";
+-- Expression interpolation
+DECLARE x NUMBER = 10;
+DECLARE y NUMBER = 5;
+DECLARE msg STRING = "Sum: ${x + y}";  -- "Sum: 15.0"
 
--- Works with expressions:
-PRINT "Total: ${subtotal + tax}";
+-- Ternary in interpolation
+DECLARE score NUMBER = 85;
+DECLARE result STRING = "Result: ${score >= 60 ? 'Pass' : 'Fail'}";  -- "Result: Pass"
 
--- Works with document access:
-PRINT "Service ${doc['name']} is ${doc['status']}";
+-- Consecutive interpolations
+DECLARE a STRING = 'A';
+DECLARE b STRING = 'B';
+DECLARE combined STRING = "${a}${b}";  -- "AB"
+
+-- Single-quoted strings do NOT interpolate
+DECLARE noInterp STRING = 'Hello ${name}';  -- "Hello ${name}" (literal)
 ```
+
+**Note:** Numbers interpolate with decimal notation (e.g., `42` becomes `"42.0"`).
 
 ---
 

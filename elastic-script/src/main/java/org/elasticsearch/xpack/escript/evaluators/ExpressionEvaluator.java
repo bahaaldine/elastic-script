@@ -14,6 +14,7 @@ import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.xpack.escript.executors.ProcedureExecutor;
 import org.elasticsearch.xpack.escript.operators.primitives.BinaryOperatorHandler;
 import org.elasticsearch.xpack.escript.operators.OperatorHandlerRegistry;
+import org.elasticsearch.xpack.escript.parser.ElasticScriptLexer;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptParser;
 import org.elasticsearch.xpack.escript.context.ExecutionContext;
 import org.elasticsearch.xpack.escript.utils.ActionListenerUtils;
@@ -608,7 +609,18 @@ public class ExpressionEvaluator {
             }
         } else if (ctx.simplePrimaryExpression().STRING() != null) {
             String text = ctx.simplePrimaryExpression().STRING().getText();
-            String processedString = text.substring(1, text.length() - 1).replace("\\'", "'");
+            String processedString = text.substring(1, text.length() - 1);
+            // Unescape based on quote type
+            if (text.startsWith("\"")) {
+                processedString = processedString.replace("\\\"", "\"");
+            } else {
+                processedString = processedString.replace("\\'", "'");
+            }
+            // Check for string interpolation (only in double-quoted strings)
+            if (text.startsWith("\"") && processedString.contains("${")) {
+                evaluateInterpolatedStringAsync(processedString, processResult);
+                return;
+            }
             processResult.onResponse(processedString);
         } else if (ctx.simplePrimaryExpression().BOOLEAN() != null) {
             String boolText = ctx.simplePrimaryExpression().BOOLEAN().getText();
@@ -817,6 +829,120 @@ public class ExpressionEvaluator {
 
     private String stripQuotes(String quotedString) {
         return quotedString.substring(1, quotedString.length() - 1); // remove surrounding quotes
+    }
+
+    /**
+     * Evaluates a string with ${...} interpolation patterns.
+     * Parses out all ${expression} segments and evaluates them asynchronously.
+     */
+    private void evaluateInterpolatedStringAsync(String template, ActionListener<Object> listener) {
+        // Find all ${...} patterns
+        java.util.List<InterpolationSegment> segments = new java.util.ArrayList<>();
+        StringBuilder currentText = new StringBuilder();
+        int i = 0;
+        
+        while (i < template.length()) {
+            if (i < template.length() - 1 && template.charAt(i) == '$' && template.charAt(i + 1) == '{') {
+                // Found start of interpolation
+                if (currentText.length() > 0) {
+                    segments.add(new InterpolationSegment(currentText.toString(), false));
+                    currentText = new StringBuilder();
+                }
+                
+                // Find matching closing brace
+                int braceCount = 1;
+                int start = i + 2;
+                int end = start;
+                while (end < template.length() && braceCount > 0) {
+                    if (template.charAt(end) == '{') braceCount++;
+                    else if (template.charAt(end) == '}') braceCount--;
+                    if (braceCount > 0) end++;
+                }
+                
+                if (braceCount != 0) {
+                    listener.onFailure(new RuntimeException("Unclosed interpolation expression in string: " + template));
+                    return;
+                }
+                
+                String expr = template.substring(start, end);
+                segments.add(new InterpolationSegment(expr, true));
+                i = end + 1;
+            } else {
+                currentText.append(template.charAt(i));
+                i++;
+            }
+        }
+        
+        if (currentText.length() > 0) {
+            segments.add(new InterpolationSegment(currentText.toString(), false));
+        }
+        
+        // If no expressions to evaluate, return as-is
+        if (segments.stream().noneMatch(s -> s.isExpression)) {
+            listener.onResponse(template);
+            return;
+        }
+        
+        // Evaluate all expression segments
+        evaluateInterpolationSegmentsAsync(segments, 0, new String[segments.size()], listener);
+    }
+    
+    private void evaluateInterpolationSegmentsAsync(java.util.List<InterpolationSegment> segments, 
+                                                    int index, String[] results, 
+                                                    ActionListener<Object> listener) {
+        if (index >= segments.size()) {
+            // All segments processed, build final string
+            StringBuilder sb = new StringBuilder();
+            for (String s : results) {
+                sb.append(s);
+            }
+            listener.onResponse(sb.toString());
+            return;
+        }
+        
+        InterpolationSegment segment = segments.get(index);
+        if (!segment.isExpression) {
+            // Plain text segment
+            results[index] = segment.content;
+            evaluateInterpolationSegmentsAsync(segments, index + 1, results, listener);
+        } else {
+            // Expression segment - parse and evaluate
+            try {
+                org.antlr.v4.runtime.CharStream input = org.antlr.v4.runtime.CharStreams.fromString(segment.content);
+                ElasticScriptLexer lexer = new ElasticScriptLexer(input);
+                org.antlr.v4.runtime.CommonTokenStream tokens = new org.antlr.v4.runtime.CommonTokenStream(lexer);
+                ElasticScriptParser parser = new ElasticScriptParser(tokens);
+                ElasticScriptParser.ExpressionContext exprCtx = parser.expression();
+                
+                evaluateExpressionAsync(exprCtx, new ActionListener<Object>() {
+                    @Override
+                    public void onResponse(Object value) {
+                        results[index] = value != null ? value.toString() : "";
+                        evaluateInterpolationSegmentsAsync(segments, index + 1, results, listener);
+                    }
+                    
+                    @Override
+                    public void onFailure(Exception e) {
+                        listener.onFailure(new RuntimeException("Failed to evaluate interpolation expression '" + segment.content + "': " + e.getMessage(), e));
+                    }
+                });
+            } catch (Exception e) {
+                listener.onFailure(new RuntimeException("Failed to parse interpolation expression '" + segment.content + "': " + e.getMessage(), e));
+            }
+        }
+    }
+    
+    /**
+     * Helper class to represent a segment in an interpolated string.
+     */
+    private static class InterpolationSegment {
+        final String content;
+        final boolean isExpression;
+        
+        InterpolationSegment(String content, boolean isExpression) {
+            this.content = content;
+            this.isExpression = isExpression;
+        }
     }
 
     private boolean toBoolean(Object obj) {
