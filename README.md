@@ -2404,24 +2404,49 @@ DECLARE active ARRAY = ARRAY_FILTER_BY(users, 'status', 'active');
 
 ---
 
-### Phase 8: Enhanced ESQL Integration ⏳ Priority: Medium | Effort: Large
+### Phase 8: Enhanced ESQL Integration ✅ Complete
 
 | Feature | Description | Status |
 |---------|-------------|--------|
-| Inline ESQL expressions | `FOR log IN (FROM logs \| LIMIT 10) LOOP` | 🔲 Planned |
+| Inline ESQL expressions | `FOR log IN (FROM logs \| LIMIT 10) LOOP` | ✅ Implemented |
 | Parameterized ESQL | Safe parameter binding with `:param` | ✅ Implemented |
 | FROM function() | Allow functions as ESQL sources | 🔲 Research |
 
-**Example usage after implementation:**
+**Usage:**
 ```sql
 -- Inline ESQL (no CURSOR declaration needed)
 FOR log IN (FROM logs | WHERE level == 'error' | LIMIT 10) LOOP
     PRINT log['message'];
 END LOOP
 
--- ESQL as expression
-DECLARE count NUMBER = (FROM logs | STATS cnt = COUNT(*)).cnt;
+-- With aggregations
+FOR result IN (FROM sales | STATS total = SUM(amount) BY category) LOOP
+    PRINT result['category'] || ': $' || result['total'];
+END LOOP
+
+-- With sorting and filtering
+FOR user IN (FROM users | WHERE status == 'active' | SORT created_at DESC | LIMIT 5) LOOP
+    PRINT user['email'];
+END LOOP
+
+-- With KEEP and EVAL
+FOR order IN (FROM orders | EVAL total = quantity * price | KEEP product, total | WHERE total > 100) LOOP
+    PRINT order['product'] || ' - $' || order['total'];
+END LOOP
+
+-- Variable substitution with :varName
+DECLARE min_score NUMBER = 80;
+FOR student IN (FROM students | WHERE score >= :min_score) LOOP
+    PRINT student['name'] || ': ' || student['score'];
+END LOOP
 ```
+
+**Benefits:**
+- No separate CURSOR declaration needed
+- Cleaner, more readable code
+- Direct inline ESQL with full query capabilities
+- Supports all ESQL operators: WHERE, SORT, LIMIT, EVAL, STATS, KEEP, etc.
+- Variable substitution with `:varName` syntax
 
 ---
 

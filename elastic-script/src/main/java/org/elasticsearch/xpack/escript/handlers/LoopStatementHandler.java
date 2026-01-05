@@ -7,6 +7,8 @@
 
 package org.elasticsearch.xpack.escript.handlers;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.xpack.escript.executors.ProcedureExecutor;
 import org.elasticsearch.xpack.escript.exceptions.BreakException;
@@ -22,6 +24,7 @@ import java.util.Map;
 
 public class LoopStatementHandler {
 
+    private static final Logger LOGGER = LogManager.getLogger(LoopStatementHandler.class);
     private final ProcedureExecutor executor;
 
     public LoopStatementHandler(ProcedureExecutor executor) {
@@ -38,6 +41,8 @@ public class LoopStatementHandler {
             handleForRangeLoopAsync(ctx.for_range_loop(), listener);
         } else if (ctx.for_array_loop() != null) {
             handleForArrayLoopAsync(ctx.for_array_loop(), listener);
+        } else if (ctx.for_esql_loop() != null) {
+            handleForEsqlLoopAsync(ctx.for_esql_loop(), listener);
         } else if (ctx.while_loop() != null) {
             handleWhileLoopAsync(ctx.while_loop(), listener);
         } else {
@@ -179,6 +184,82 @@ public class LoopStatementHandler {
 
             executeArrayLoopIteration(loopVarName, items, 0, ctx.statement(), listener);
         }, listener::onFailure));
+    }
+
+    /**
+     * Processes an inline ESQL FOR loop.
+     * Example: FOR log IN (FROM logs | WHERE level == 'error' | LIMIT 10) LOOP ... END LOOP
+     * 
+     * This executes the ESQL query inline without requiring a separate CURSOR declaration.
+     */
+    @SuppressWarnings("unchecked")
+    private void handleForEsqlLoopAsync(ElasticScriptParser.For_esql_loopContext ctx, ActionListener<Object> listener) {
+        String loopVarName = ctx.ID().getText();
+        
+        // Extract the ESQL query from the inline_esql_query context
+        String esqlQuery = ctx.inline_esql_query().getText().trim();
+        
+        // Perform variable substitution for :varName placeholders
+        String substitutedQuery = substituteVariables(esqlQuery);
+        
+        LOGGER.info("Executing inline ESQL query: {}", substitutedQuery);
+        
+        // Execute the ESQL query
+        executor.executeEsqlQueryAsync(substitutedQuery, ActionListener.wrap(result -> {
+            if (result instanceof List) {
+                List<Map<String, Object>> rows = (List<Map<String, Object>>) result;
+                
+                if (rows.isEmpty()) {
+                    listener.onResponse(null);
+                    return;
+                }
+                
+                ExecutionContext context = executor.getContext();
+                
+                // Declare the loop variable as DOCUMENT if not already declared
+                if (context.getVariables().containsKey(loopVarName) == false) {
+                    context.declareVariable(loopVarName, "DOCUMENT");
+                }
+                
+                // Iterate over the results
+                executeEsqlLoopIteration(loopVarName, rows, 0, ctx.statement(), listener);
+            } else {
+                listener.onFailure(new RuntimeException("Inline ESQL query did not return a list of documents"));
+            }
+        }, listener::onFailure));
+    }
+
+    /**
+     * Recursively iterates over the inline ESQL query results.
+     */
+    private void executeEsqlLoopIteration(String loopVarName, List<Map<String, Object>> items, int currentIndex,
+                                          List<ElasticScriptParser.StatementContext> statements,
+                                          ActionListener<Object> listener) {
+        if (currentIndex >= items.size()) {
+            listener.onResponse(null);
+            return;
+        }
+        
+        // Set the loop variable to the current row
+        executor.getContext().setVariable(loopVarName, items.get(currentIndex));
+        
+        executeStatementsAsync(statements, 0, ActionListener.wrap(bodyResult -> {
+            if (bodyResult instanceof BreakException) {
+                listener.onResponse(null);
+            } else if (bodyResult instanceof ReturnValue) {
+                listener.onResponse(bodyResult);
+            } else {
+                executor.getThreadPool().generic().execute(() ->
+                    executeEsqlLoopIteration(loopVarName, items, currentIndex + 1, statements, listener)
+                );
+            }
+        }, e -> {
+            if (e instanceof BreakException) {
+                listener.onResponse(null);
+            } else {
+                listener.onFailure(e);
+            }
+        }));
     }
 
     /**

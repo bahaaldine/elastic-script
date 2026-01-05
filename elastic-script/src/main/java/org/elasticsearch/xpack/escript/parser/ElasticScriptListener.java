@@ -364,6 +364,36 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitFor_array_loop(ElasticScriptParser.For_array_loopContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#for_esql_loop}.
+	 * @param ctx the parse tree
+	 */
+	void enterFor_esql_loop(ElasticScriptParser.For_esql_loopContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#for_esql_loop}.
+	 * @param ctx the parse tree
+	 */
+	void exitFor_esql_loop(ElasticScriptParser.For_esql_loopContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#inline_esql_query}.
+	 * @param ctx the parse tree
+	 */
+	void enterInline_esql_query(ElasticScriptParser.Inline_esql_queryContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#inline_esql_query}.
+	 * @param ctx the parse tree
+	 */
+	void exitInline_esql_query(ElasticScriptParser.Inline_esql_queryContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#inline_esql_content}.
+	 * @param ctx the parse tree
+	 */
+	void enterInline_esql_content(ElasticScriptParser.Inline_esql_contentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#inline_esql_content}.
+	 * @param ctx the parse tree
+	 */
+	void exitInline_esql_content(ElasticScriptParser.Inline_esql_contentContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#while_loop}.
 	 * @param ctx the parse tree
 	 */

@@ -361,6 +361,7 @@ condition
 loop_statement
     : for_range_loop
     | for_array_loop
+    | for_esql_loop
     | while_loop
     ;
 
@@ -370,6 +371,18 @@ for_range_loop
 
 for_array_loop
     : FOR ID IN array_loop_expression LOOP statement+ ENDLOOP
+    ;
+
+for_esql_loop
+    : FOR ID IN LPAREN inline_esql_query RPAREN LOOP statement+ ENDLOOP
+    ;
+
+inline_esql_query
+    : inline_esql_content
+    ;
+
+inline_esql_content
+    : (~(LPAREN | RPAREN) | LPAREN inline_esql_content RPAREN)+  // Match balanced parentheses
     ;
 
 while_loop
