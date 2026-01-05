@@ -382,7 +382,7 @@ inline_esql_query
     ;
 
 inline_esql_content
-    : (~(LPAREN | RPAREN) | LPAREN inline_esql_content RPAREN)+  // Match balanced parentheses
+    : (~(LPAREN | RPAREN) | LPAREN inline_esql_content? RPAREN)+  // Match balanced parentheses, including empty ()
     ;
 
 while_loop

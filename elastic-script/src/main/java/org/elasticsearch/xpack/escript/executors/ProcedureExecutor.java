@@ -571,6 +571,12 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
             
             LOGGER.info("Executing ESQL query for cursor: {}", substitutedQuery);
             
+            // Check if this is a FROM function() query
+            if (isFunctionSourceQuery(substitutedQuery)) {
+                executeFunctionSourceQuery(substitutedQuery, listener);
+                return;
+            }
+            
             EsqlQueryRequest request = EsqlQueryRequest.syncEsqlQueryRequest(substitutedQuery);
             
             client.execute(
@@ -600,6 +606,326 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
         } catch (Exception e) {
             listener.onFailure(e);
         }
+    }
+    
+    /**
+     * Checks if the ESQL query is a function source query (FROM FUNCTION()).
+     * Function source queries start with FROM followed by a function call pattern.
+     */
+    private boolean isFunctionSourceQuery(String query) {
+        String trimmed = query.trim();
+        String upperTrimmed = trimmed.toUpperCase();
+        // Check for pattern: FROM FUNCTION_NAME(...) or FROMFUNCTION_NAME(...) (without space from ANTLR getText)
+        // Handle both cases: with and without space after FROM
+        String afterFrom;
+        if (upperTrimmed.startsWith("FROM ")) {
+            afterFrom = trimmed.substring(5).trim();
+        } else if (upperTrimmed.startsWith("FROM")) {
+            afterFrom = trimmed.substring(4).trim();
+        } else {
+            LOGGER.debug("Query does not start with FROM: {}", query);
+            return false;
+        }
+        // Check if it looks like a function call (WORD followed by parenthesis)
+        boolean matches = afterFrom.matches("^[A-Za-z_][A-Za-z0-9_]*\\s*\\(.*\\).*");
+        LOGGER.info("isFunctionSourceQuery check: afterFrom='{}', matches={}", afterFrom, matches);
+        return matches;
+    }
+    
+    /**
+     * Executes a function source query: FROM FUNCTION() | ESQL_OPERATIONS
+     * This allows using function results as ESQL data sources.
+     */
+    @SuppressWarnings("unchecked")
+    private void executeFunctionSourceQuery(String query, ActionListener<Object> listener) {
+        String trimmed = query.trim();
+        String upperTrimmed = trimmed.toUpperCase();
+        // Handle both cases: with and without space after FROM
+        String afterFrom;
+        if (upperTrimmed.startsWith("FROM ")) {
+            afterFrom = trimmed.substring(5).trim();
+        } else {
+            afterFrom = trimmed.substring(4).trim(); // "FROM" without space
+        }
+        
+        // Parse the function call and any ESQL operations
+        int pipeIndex = findFirstUnparenthesizedPipe(afterFrom);
+        String functionPart;
+        String esqlOps = null;
+        
+        if (pipeIndex > 0) {
+            functionPart = afterFrom.substring(0, pipeIndex).trim();
+            esqlOps = afterFrom.substring(pipeIndex + 1).trim();
+        } else {
+            functionPart = afterFrom.trim();
+        }
+        
+        LOGGER.info("Executing function source: {} with operations: {}", functionPart, esqlOps);
+        
+        // Parse the function call: FUNCTION_NAME(args)
+        int openParen = functionPart.indexOf('(');
+        int closeParen = functionPart.lastIndexOf(')');
+        
+        if (openParen < 0 || closeParen < openParen) {
+            listener.onFailure(new RuntimeException("Invalid function call syntax in FROM: " + functionPart));
+            return;
+        }
+        
+        String functionName = functionPart.substring(0, openParen).trim();
+        String argsString = functionPart.substring(openParen + 1, closeParen).trim();
+        
+        // Parse arguments (simple comma-separated for now)
+        List<Object> args = parseSimpleArgs(argsString);
+        
+        final String finalEsqlOps = esqlOps;
+        
+        // Execute the function
+        functionDefHandler.executeFunctionAsync(functionName, args, new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object result) {
+                try {
+                    // Convert the result to a list of maps
+                    List<Map<String, Object>> rows = convertToRowMaps(result);
+                    
+                    // Apply ESQL operations if present
+                    if (finalEsqlOps != null && !finalEsqlOps.isEmpty()) {
+                        rows = applyEsqlOperations(rows, finalEsqlOps);
+                    }
+                    
+                    listener.onResponse(rows);
+                } catch (Exception e) {
+                    listener.onFailure(e);
+                }
+            }
+            
+            @Override
+            public void onFailure(Exception e) {
+                listener.onFailure(e);
+            }
+        });
+    }
+    
+    /**
+     * Finds the first pipe character that is not inside parentheses.
+     */
+    private int findFirstUnparenthesizedPipe(String str) {
+        int parenDepth = 0;
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            if (c == '(') parenDepth++;
+            else if (c == ')') parenDepth--;
+            else if (c == '|' && parenDepth == 0) return i;
+        }
+        return -1;
+    }
+    
+    /**
+     * Parses simple comma-separated arguments.
+     */
+    private List<Object> parseSimpleArgs(String argsString) {
+        List<Object> args = new ArrayList<>();
+        if (argsString.isEmpty()) {
+            return args;
+        }
+        
+        // Simple split by comma (doesn't handle nested commas in strings)
+        String[] parts = argsString.split(",");
+        for (String part : parts) {
+            String trimmed = part.trim();
+            // Try to parse as number, boolean, or keep as string
+            if (trimmed.isEmpty()) continue;
+            
+            if (trimmed.matches("-?\\d+\\.?\\d*")) {
+                args.add(Double.parseDouble(trimmed));
+            } else if (trimmed.equalsIgnoreCase("true")) {
+                args.add(true);
+            } else if (trimmed.equalsIgnoreCase("false")) {
+                args.add(false);
+            } else if ((trimmed.startsWith("'") && trimmed.endsWith("'")) ||
+                       (trimmed.startsWith("\"") && trimmed.endsWith("\""))) {
+                args.add(trimmed.substring(1, trimmed.length() - 1));
+            } else {
+                // Check if it's a variable reference
+                Object varValue = context.getVariable(trimmed);
+                if (varValue != null) {
+                    args.add(varValue);
+                } else {
+                    args.add(trimmed);
+                }
+            }
+        }
+        return args;
+    }
+    
+    /**
+     * Converts a function result to a list of row maps.
+     */
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> convertToRowMaps(Object result) {
+        List<Map<String, Object>> rows = new ArrayList<>();
+        
+        if (result instanceof List) {
+            List<?> list = (List<?>) result;
+            for (Object item : list) {
+                if (item instanceof Map) {
+                    rows.add((Map<String, Object>) item);
+                } else {
+                    // Wrap non-map items in a single-column map
+                    Map<String, Object> row = new LinkedHashMap<>();
+                    row.put("value", item);
+                    rows.add(row);
+                }
+            }
+        } else if (result instanceof Map) {
+            rows.add((Map<String, Object>) result);
+        } else {
+            // Single value - wrap in a map
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("value", result);
+            rows.add(row);
+        }
+        
+        return rows;
+    }
+    
+    /**
+     * Applies simple ESQL-like operations to the rows.
+     * Supports: WHERE, SORT, LIMIT, KEEP
+     */
+    private List<Map<String, Object>> applyEsqlOperations(List<Map<String, Object>> rows, String ops) {
+        // Split by pipe and process each operation
+        String[] operations = ops.split("\\|");
+        
+        for (String op : operations) {
+            String trimmedOp = op.trim();
+            if (trimmedOp.isEmpty()) continue;
+            
+            String upperOp = trimmedOp.toUpperCase();
+            
+            // Handle cases with or without spaces after keywords (ANTLR getText may omit spaces)
+            if (upperOp.startsWith("LIMIT")) {
+                String limitStr = trimmedOp.substring(5).trim();
+                int limit = Integer.parseInt(limitStr);
+                rows = rows.subList(0, Math.min(limit, rows.size()));
+            } else if (upperOp.startsWith("WHERE")) {
+                String condition = trimmedOp.substring(5).trim();
+                rows = applyWhereFilter(rows, condition);
+            } else if (upperOp.startsWith("SORT")) {
+                String sortSpec = trimmedOp.substring(4).trim();
+                rows = applySortOperation(rows, sortSpec);
+            } else if (upperOp.startsWith("KEEP")) {
+                String fields = trimmedOp.substring(4).trim();
+                rows = applyKeepOperation(rows, fields);
+            }
+            // Other operations can be added as needed
+        }
+        
+        return rows;
+    }
+    
+    /**
+     * Applies a WHERE filter to the rows.
+     * Supports simple equality: field == 'value' or field == value
+     */
+    private List<Map<String, Object>> applyWhereFilter(List<Map<String, Object>> rows, String condition) {
+        List<Map<String, Object>> filtered = new ArrayList<>();
+        
+        // Parse simple equality: field == value
+        if (condition.contains("==")) {
+            String[] parts = condition.split("==", 2);
+            String field = parts[0].trim();
+            String valueStr = parts[1].trim();
+            
+            // Remove quotes if present
+            if ((valueStr.startsWith("'") && valueStr.endsWith("'")) ||
+                (valueStr.startsWith("\"") && valueStr.endsWith("\""))) {
+                valueStr = valueStr.substring(1, valueStr.length() - 1);
+            }
+            
+            final String matchValue = valueStr;
+            
+            for (Map<String, Object> row : rows) {
+                Object fieldValue = row.get(field);
+                if (fieldValue != null && fieldValue.toString().equals(matchValue)) {
+                    filtered.add(row);
+                }
+            }
+        } else {
+            // If we can't parse the condition, return all rows
+            return rows;
+        }
+        
+        return filtered;
+    }
+    
+    /**
+     * Applies SORT operation.
+     */
+    private List<Map<String, Object>> applySortOperation(List<Map<String, Object>> rows, String sortSpec) {
+        // Parse: field [ASC|DESC] - handle both with and without spaces
+        String spec = sortSpec.trim();
+        String field;
+        boolean ascending = true;
+        
+        String upperSpec = spec.toUpperCase();
+        if (upperSpec.endsWith("DESC")) {
+            field = spec.substring(0, spec.length() - 4).trim();
+            ascending = false;
+        } else if (upperSpec.endsWith("ASC")) {
+            field = spec.substring(0, spec.length() - 3).trim();
+        } else {
+            // Check for space-separated parts
+            String[] parts = spec.split("\\s+");
+            field = parts[0].trim();
+            if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("DESC")) {
+                ascending = false;
+            }
+        }
+        
+        final boolean asc = ascending;
+        List<Map<String, Object>> sorted = new ArrayList<>(rows);
+        sorted.sort((a, b) -> {
+            Object va = a.get(field);
+            Object vb = b.get(field);
+            
+            if (va == null && vb == null) return 0;
+            if (va == null) return asc ? -1 : 1;
+            if (vb == null) return asc ? 1 : -1;
+            
+            if (va instanceof Comparable && vb instanceof Comparable) {
+                @SuppressWarnings("unchecked")
+                int cmp = ((Comparable<Object>) va).compareTo(vb);
+                return asc ? cmp : -cmp;
+            }
+            
+            return 0;
+        });
+        
+        return sorted;
+    }
+    
+    /**
+     * Applies KEEP operation (select specific fields).
+     */
+    private List<Map<String, Object>> applyKeepOperation(List<Map<String, Object>> rows, String fields) {
+        String[] fieldNames = fields.split(",");
+        List<String> keepFields = new ArrayList<>();
+        for (String f : fieldNames) {
+            keepFields.add(f.trim());
+        }
+        
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Map<String, Object> row : rows) {
+            Map<String, Object> newRow = new LinkedHashMap<>();
+            for (String field : keepFields) {
+                if (row.containsKey(field)) {
+                    newRow.put(field, row.get(field));
+                }
+            }
+            result.add(newRow);
+        }
+        
+        return result;
     }
 
     /**

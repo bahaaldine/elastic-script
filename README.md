@@ -2410,7 +2410,7 @@ DECLARE active ARRAY = ARRAY_FILTER_BY(users, 'status', 'active');
 |---------|-------------|--------|
 | Inline ESQL expressions | `FOR log IN (FROM logs \| LIMIT 10) LOOP` | ✅ Implemented |
 | Parameterized ESQL | Safe parameter binding with `:param` | ✅ Implemented |
-| FROM function() | Allow functions as ESQL sources | 🔲 Research |
+| FROM function() | Use function results as ESQL sources | ✅ Implemented |
 
 **Usage:**
 ```sql
@@ -2447,6 +2447,43 @@ END LOOP
 - Direct inline ESQL with full query capabilities
 - Supports all ESQL operators: WHERE, SORT, LIMIT, EVAL, STATS, KEEP, etc.
 - Variable substitution with `:varName` syntax
+
+**FROM function() - Function Results as Data Sources:**
+
+Use any function that returns an array/list as an ESQL-like data source:
+
+```sql
+-- Use introspection functions as data sources
+FOR func IN (FROM ESCRIPT_FUNCTIONS() | LIMIT 10) LOOP
+    PRINT func['name'];
+END LOOP
+
+-- Filter function results with WHERE
+FOR v IN (FROM ESCRIPT_VARIABLES() | WHERE type == 'NUMBER') LOOP
+    PRINT v['name'] || ' = ' || v['value'];
+END LOOP
+
+-- Use custom functions as data sources
+FOR user IN (FROM GET_USERS() | WHERE role == 'admin' | SORT name) LOOP
+    PRINT user['name'];
+END LOOP
+
+-- Combine with SORT DESC
+FOR top IN (FROM GET_SCORES() | SORT score DESC | LIMIT 3) LOOP
+    PRINT top['player'] || ': ' || top['score'];
+END LOOP
+
+-- Use KEEP to select specific fields
+FOR item IN (FROM GET_PRODUCTS() | KEEP name, price | LIMIT 5) LOOP
+    PRINT item['name'] || ': $' || item['price'];
+END LOOP
+```
+
+**Supported FROM function() operations:**
+- `WHERE field == 'value'` - Filter by equality
+- `SORT field [ASC|DESC]` - Sort results
+- `LIMIT n` - Limit number of results
+- `KEEP field1, field2` - Select specific fields
 
 ---
 
