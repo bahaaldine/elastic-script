@@ -1,14 +1,295 @@
 # elastic-script Language Documentation
 
-## Introduction
+## The Observability Intelligence Language
 
-**elastic-script** (`escript`) is a procedural extension to ESQL (Elasticsearch Query Language), providing structured programming constructs and advanced workflow capabilities for agents and complex Elasticsearch automation. It enables users to define reusable procedures, control execution flow, manage variables, handle errors, and compose modular logic that integrates seamlessly with ESQL queries and Elasticsearch operations.
+**elastic-script** is a domain-specific programming language that extends ESQL (Elasticsearch Query Language) with procedural logic, encoded expertise, and AI-agent capabilities. It transforms Elasticsearch from a query engine into a programmable observability platform.
 
-elastic-script is designed for:
-- **AI Agents**: Automate multi-step Elasticsearch workflows with LLM integration.
-- **Observability**: Analyze logs, metrics, and traces with semantic search and AI.
-- **Advanced Users**: Orchestrate data processing, error handling, and conditional logic.
-- **Developers**: Contribute custom functions and extend the language for new use cases.
+---
+
+## Why elastic-script Exists
+
+### The Problem
+
+Observability is drowning in complexity:
+
+1. **Knowledge lives in runbooks that humans read, not execute.** When an incident occurs, SREs scramble through documentation, copy-paste commands, and hope they remember the right sequence.
+
+2. **AI agents can query data but can't act safely.** LLMs can write ESQL queries, but there's no structured way for them to discover capabilities, understand safety constraints, or execute remediation.
+
+3. **Best practices aren't enforceable.** "Always check for active incidents before scaling" is written in a wiki. It's not code. It's not enforced. It's forgotten at 3 AM.
+
+4. **Complex analysis requires leaving Elasticsearch.** Aggregating, correlating, and computing across logs, metrics, and traces means exporting data to external systems.
+
+### The Solution
+
+**Make observability expertise executable.**
+
+elastic-script allows you to:
+- **Encode SRE knowledge as code** - Runbooks become procedures. Best practices become INTENTs with guardrails.
+- **Query and compute in one language** - ESQL for data, elastic-script for logic. No context switching.
+- **Enable AI agents to act safely** - Discoverable capabilities, machine-readable pre-conditions, introspectable contracts.
+- **Store expertise in Elasticsearch** - Procedures are documents. Searchable, versionable, part of your data plane.
+
+---
+
+## What elastic-script Is
+
+### A Programming Language, Not Configuration
+
+elastic-script has a formal grammar (ANTLR-based), a type system, and full programming constructs:
+
+```sql
+-- Variables, types, expressions
+DECLARE error_rate NUMBER = errors / total * 100;
+
+-- Control flow
+IF error_rate > threshold THEN
+    INTENT ALERT_ONCALL FOR service;
+END IF
+
+-- Functional operations
+DECLARE critical_services ARRAY = ARRAY_FILTER(services, s => s['error_rate'] > 5.0);
+
+-- Inline ESQL
+FOR log IN (FROM logs | WHERE level == 'error' | STATS count = COUNT(*) BY service) LOOP
+    PRINT log['service'] || ': ' || log['count'] || ' errors';
+END LOOP
+```
+
+### ESQL-Native, Not a Wrapper
+
+elastic-script doesn't call Elasticsearch APIs—it **extends ESQL itself**:
+
+```sql
+-- ESQL queries embedded directly in the language
+FOR trace IN (
+    FROM traces 
+    | WHERE duration_ms > 1000 
+    | STATS p99 = PERCENTILE(duration_ms, 99) BY endpoint
+    | SORT p99 DESC 
+    | LIMIT 10
+) LOOP
+    IF trace['p99'] > SLA_THRESHOLD THEN
+        INTENT INVESTIGATE_LATENCY FOR trace['endpoint'];
+    END IF
+END LOOP
+
+-- Functions as data sources (unique capability)
+FOR func IN (FROM ESCRIPT_CAPABILITIES() | WHERE category == 'RUNBOOK') LOOP
+    PRINT func['name'] || ': ' || func['description'];
+END LOOP
+```
+
+### Stored Procedures as Elasticsearch Documents
+
+Procedures are stored **in Elasticsearch**, not in a separate system:
+
+```bash
+# Create a procedure
+PUT /_elastic_script/procedures/analyze_incident
+{
+  "source": "PROCEDURE analyze_incident(incident_id STRING) BEGIN ... END PROCEDURE"
+}
+```
+
+```sql
+-- Query your procedures with ESQL
+FROM .elastic_script_procedures 
+| WHERE author == 'sre-team' 
+| WHERE tags CONTAINS 'kubernetes'
+| SORT last_modified DESC
+```
+
+This means:
+- **Version control** via document history
+- **Access control** via Elasticsearch security
+- **Discovery** via ESQL queries
+- **Replication** across clusters automatically
+
+---
+
+## How elastic-script Works
+
+### 1. Procedural Logic for Complex Operations
+
+```sql
+PROCEDURE investigate_high_latency(service STRING, threshold_ms NUMBER)
+BEGIN
+    -- Query recent slow traces
+    DECLARE slow_traces ARRAY = (
+        FROM traces 
+        | WHERE service_name == :service AND duration_ms > :threshold_ms
+        | SORT duration_ms DESC 
+        | LIMIT 100
+    );
+    
+    -- Aggregate by endpoint
+    DECLARE by_endpoint DOCUMENT = {};
+    FOR trace IN slow_traces LOOP
+        VAR endpoint = trace['endpoint'];
+        SET by_endpoint[endpoint] = (by_endpoint[endpoint] ?? 0) + 1;
+    END LOOP
+    
+    -- Find worst endpoint using functional operations
+    VAR worst = ARRAY_REDUCE(
+        OBJECT_KEYS(by_endpoint),
+        (max, ep) => by_endpoint[ep] > (by_endpoint[max] ?? 0) ? ep : max
+    );
+    
+    RETURN {
+        "service": service,
+        "worst_endpoint": worst,
+        "slow_trace_count": ARRAY_LENGTH(slow_traces),
+        "by_endpoint": by_endpoint
+    };
+END PROCEDURE
+```
+
+### 2. INTENTs: Encoded Expertise with Guardrails
+
+INTENTs are semantic contracts that encode **what to do**, **when it's safe**, and **how to recover**:
+
+```sql
+DEFINE INTENT SCALE_SERVICE
+    DESCRIPTION 'Safely scale a Kubernetes service with operational guardrails'
+    
+    REQUIRES
+        -- Don't scale during active incidents
+        PAGERDUTY_ACTIVE_INCIDENTS(:service) == 0,
+        
+        -- Verify cluster has capacity
+        :target_replicas <= K8S_CLUSTER_CAPACITY(:cluster) * 0.8,
+        
+        -- Require approval for large scale-ups
+        :target_replicas < 10 OR APPROVAL_GRANTED(:change_id)
+    
+    ACTIONS
+        K8S_SCALE_DEPLOYMENT(:deployment, :target_replicas);
+        LOG_AUDIT('scale', :service, :target_replicas);
+        PRINT 'Scaled ' || :deployment || ' to ' || :target_replicas || ' replicas';
+    
+    ON_FAILURE
+        PAGERDUTY_TRIGGER('Scale operation failed: ' || :service, 'high');
+        INTENT NOTIFY_ONCALL FOR :service WITH message = 'Scale failed, manual intervention required';
+END INTENT
+
+-- Execute with safety guarantees
+INTENT SCALE_SERVICE 
+    FOR 'payment-service' 
+    WITH target_replicas = 5, cluster = 'production';
+```
+
+### 3. AI-Agent Introspection
+
+AI agents can **discover**, **understand**, and **reason about** capabilities:
+
+```sql
+-- Discovery: What capabilities exist?
+FOR cap IN (FROM ESCRIPT_CAPABILITIES() | WHERE category == 'RUNBOOK') LOOP
+    PRINT cap['name'] || ' - ' || cap['description'];
+END LOOP
+
+-- Understanding: How do I use this?
+DECLARE func_info DOCUMENT = ESCRIPT_FUNCTION('K8S_SCALE_DEPLOYMENT');
+PRINT 'Signature: ' || func_info['signature'];
+PRINT 'Parameters: ' || func_info['parameters'];
+
+-- Reasoning: Can I safely execute this intent?
+DECLARE intent_status DOCUMENT = ESCRIPT_INTENT_STATUS('SCALE_SERVICE', 'payment-service');
+IF intent_status['can_execute'] THEN
+    INTENT SCALE_SERVICE FOR 'payment-service' WITH target_replicas = 5;
+ELSE
+    FOR req IN intent_status['failed_requirements'] LOOP
+        PRINT 'Blocked: ' || req['description'] || ' (current: ' || req['value'] || ')';
+    END LOOP
+END IF
+```
+
+### 4. Expression-Level Composition
+
+Complex computations in single expressions, not multi-step data passing:
+
+```sql
+-- Single expression: filter, map, reduce, compute
+DECLARE avg_error_rate NUMBER = 
+    ARRAY_REDUCE(
+        ARRAY_MAP(
+            ARRAY_FILTER(services, s => s['status'] == 'degraded'),
+            s => s['error_count'] / s['request_count'] * 100
+        ),
+        (sum, rate) => sum + rate
+    ) / ARRAY_LENGTH(ARRAY_FILTER(services, s => s['status'] == 'degraded'));
+
+-- Ternary, null coalescing, safe navigation - all inline
+DECLARE alert_level STRING = 
+    error_rate > 10 ? 'critical' : 
+    error_rate > 5 ? 'warning' : 
+    'normal';
+
+DECLARE owner STRING = service?.team?.oncall ?? 'platform-team';
+```
+
+---
+
+## Vision: The Future of Observability
+
+### Phase 1: Language Foundation ✅ Complete
+- Procedural constructs (variables, loops, conditionals)
+- ESQL integration (inline queries, cursors)
+- Built-in functions (string, array, document, date)
+- Stored procedures in Elasticsearch
+
+### Phase 2: Expertise Encoding ✅ Complete
+- INTENT layer with pre-conditions and guardrails
+- Introspection functions for AI agents
+- Runbook integrations (Kubernetes, AWS, PagerDuty)
+- Lambda expressions and functional operations
+
+### Phase 3: AI-Native Operations 🚧 In Progress
+- `ESCRIPT_INTENT_STATUS()` - Machine-readable safety checks
+- `ESCRIPT_SUGGEST()` - AI-powered capability recommendations
+- Natural language to elastic-script compilation
+- Agent memory and context persistence
+
+### Phase 4: Observability Semantics 🔲 Planned
+- First-class `LOG`, `METRIC`, `TRACE` types
+- Semantic correlation (`CORRELATE logs WITH traces BY trace_id`)
+- Anomaly detection primitives (`DETECT_ANOMALY(metric, window)`)
+- SLO/SLI language constructs
+
+### Phase 5: Distributed Execution 🔲 Planned
+- Cross-cluster procedure calls
+- Async procedure execution with callbacks
+- Procedure scheduling and triggers
+- Event-driven elastic-script
+
+---
+
+## Who elastic-script Is For
+
+| User | Use Case |
+|------|----------|
+| **SRE Teams** | Encode runbooks as executable procedures with safety guardrails |
+| **AI Agents** | Discover, reason about, and execute observability operations safely |
+| **Platform Engineers** | Build reusable, composable observability primitives |
+| **Data Engineers** | Complex data transformations within Elasticsearch |
+| **Security Teams** | Automated threat detection and response procedures |
+
+---
+
+## Design Principles
+
+1. **ESQL-Native**: Extend ESQL, don't wrap it. The same query syntax, same mental model.
+
+2. **Expertise as Code**: Best practices should be executable, not documented.
+
+3. **AI-Agent First**: Every capability is discoverable, introspectable, and has machine-readable contracts.
+
+4. **Stored as Data**: Procedures are Elasticsearch documents—searchable, versionable, secure.
+
+5. **Expression Composition**: Complex logic in single expressions, not multi-step data passing.
+
+6. **Safety by Design**: INTENTs encode when operations are safe, not just how to execute them.
 
 ---
 
