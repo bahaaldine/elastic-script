@@ -62,6 +62,31 @@ public class ExpressionEvaluator {
         }
     }
 
+    /**
+     * Evaluates an expression from a string representation.
+     * This parses the string and evaluates it as an expression.
+     *
+     * @param expression The expression string to evaluate.
+     * @param listener   The ActionListener to receive the result.
+     */
+    public void evaluateExpressionStringAsync(String expression, ActionListener<Object> listener) {
+        try {
+            org.antlr.v4.runtime.CharStream charStream = org.antlr.v4.runtime.CharStreams.fromString(expression);
+            ElasticScriptLexer lexer = new ElasticScriptLexer(charStream);
+            org.antlr.v4.runtime.CommonTokenStream tokens = new org.antlr.v4.runtime.CommonTokenStream(lexer);
+            ElasticScriptParser parser = new ElasticScriptParser(tokens);
+            ElasticScriptParser.ExpressionContext exprCtx = parser.expression();
+            
+            if (exprCtx != null) {
+                evaluateExpressionAsync(exprCtx, listener);
+            } else {
+                listener.onFailure(new RuntimeException("Failed to parse expression: " + expression));
+            }
+        } catch (Exception e) {
+            listener.onFailure(e);
+        }
+    }
+
     private void evaluateTernaryOperandsAndConcatenate(List<ElasticScriptParser.TernaryExpressionContext> operands,
                                                        int index, List<Object> results, ActionListener<Object> listener) {
         if (index >= operands.size()) {

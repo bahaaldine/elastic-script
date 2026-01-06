@@ -321,6 +321,9 @@ See [Distributed Execution Roadmap](#distributed-execution-roadmap) for the comp
   - [TRY / CATCH / FINALLY](#try--catch--finally)
   - [THROW](#throw)
   - [PROCEDURE / RETURN](#procedure--return)
+  - [Async Execution (Pipe-Driven)](#async-execution-pipe-driven)
+  - [Execution Control](#execution-control)
+  - [Parallel Execution](#parallel-execution)
   - [INTENT](#intent)
 - [Built-in Functions](#built-in-functions)
   - [String Functions](#string-functions)
@@ -733,6 +736,132 @@ BEGIN
     RETURN total;
 END PROCEDURE
 ```
+
+---
+
+### Async Execution (Pipe-Driven)
+
+**Purpose:** Execute procedures asynchronously with pipe-driven continuations. Every procedure call can be made async by piping to handlers.
+
+**The pipe is the universal primitive** - same syntax users know from ESQL, now for execution flow.
+
+**Core Syntax:**
+```sql
+-- Basic async with continuation
+procedure_name(args)
+| ON_DONE handler(@result)
+| ON_FAIL handler(@error)
+| TRACK AS 'execution-name';
+
+-- Example: Analyze logs with error handling
+analyze_logs('logs-*')
+| ON_DONE process_results(@result)
+| ON_DONE notify_team(@result)
+| ON_FAIL alert_oncall(@error)
+| FINALLY cleanup()
+| TRACK AS 'daily-analysis';
+
+-- Fire and forget (no continuations)
+send_notification('All done!');
+```
+
+**Pipe Operations:**
+| Pipe | Description |
+|------|-------------|
+| `\| ON_DONE handler(@result)` | Called when procedure succeeds. @result binds the return value. |
+| `\| ON_FAIL handler(@error)` | Called when procedure fails. @error binds the error message. |
+| `\| FINALLY handler()` | Always called at the end (like try/finally). |
+| `\| TRACK AS 'name'` | Name the execution for tracking and querying. |
+| `\| TIMEOUT seconds` | Maximum execution time before auto-cancel. |
+
+**Chaining Continuations:**
+Multiple ON_DONE handlers are executed in sequence:
+```sql
+fetch_data('source')
+| ON_DONE transform(@result)
+| ON_DONE validate(@result)
+| ON_DONE store(@result)
+| ON_FAIL rollback(@error);
+```
+
+---
+
+### Execution Control
+
+**Purpose:** Query and control async executions by name.
+
+**Syntax:**
+```sql
+-- Get execution status
+EXECUTION('execution-name') | STATUS;
+
+-- Cancel a running execution
+EXECUTION('execution-name') | CANCEL;
+
+-- Retry a failed execution
+EXECUTION('execution-name') | RETRY;
+
+-- Block until completion (for notebooks/interactive use)
+EXECUTION('execution-name') | WAIT;
+EXECUTION('execution-name') | WAIT TIMEOUT 60;
+```
+
+**Querying Executions with ESQL:**
+Executions are stored in `.escript_executions` - query them with ESQL:
+```sql
+-- List all running executions
+FROM .escript_executions
+| WHERE status == 'RUNNING'
+| KEEP name, procedure, progress, started_at
+| SORT started_at DESC;
+
+-- Find recent failures
+FROM .escript_executions
+| WHERE status == 'FAILED' AND started_at > NOW() - 1 HOUR
+| KEEP name, error, started_at;
+
+-- Execution statistics
+FROM .escript_executions
+| STATS 
+    running = COUNT(*) WHERE status == 'RUNNING',
+    completed = COUNT(*) WHERE status == 'COMPLETED',
+    failed = COUNT(*) WHERE status == 'FAILED';
+```
+
+---
+
+### Parallel Execution
+
+**Purpose:** Execute multiple procedures simultaneously and handle their combined results.
+
+**Syntax:**
+```sql
+PARALLEL [proc1(), proc2(), proc3()]
+| ON_ALL_DONE merge_results(@results)
+| ON_ANY_FAIL handle_partial(@error)
+| TRACK AS 'parallel-job';
+```
+
+**Example:**
+```sql
+-- Fetch from multiple sources in parallel
+PARALLEL [
+    fetch_logs(),
+    fetch_metrics(),
+    fetch_traces()
+]
+| ON_ALL_DONE merge_data(@results)
+| ON_ANY_FAIL partial_analysis(@error)
+| TRACK AS 'parallel-fetch';
+```
+
+**Parallel Pipes:**
+| Pipe | Description |
+|------|-------------|
+| `\| ON_ALL_DONE handler(@results)` | Called when ALL procedures complete. @results is an array. |
+| `\| ON_ANY_FAIL handler(@error)` | Called if ANY procedure fails. |
+| `\| TRACK AS 'name'` | Name the parallel execution. |
+| `\| TIMEOUT seconds` | Timeout for all parallel procedures. |
 
 ---
 

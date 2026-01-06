@@ -23,20 +23,26 @@ import org.elasticsearch.xpack.escript.exceptions.ContinueException;
 import org.elasticsearch.xpack.escript.functions.Parameter;
 import org.elasticsearch.xpack.escript.functions.ParameterMode;
 import org.elasticsearch.xpack.escript.handlers.AssignmentStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.AsyncProcedureStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.CallProcedureStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.ConstStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.ContinuationExecutor;
 import org.elasticsearch.xpack.escript.handlers.DeclareStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.VarStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.ExecuteStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.ExecutionControlStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.FunctionDefinitionHandler;
 import org.elasticsearch.xpack.escript.handlers.IfStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.SwitchStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.LoopStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.ParallelStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.PrintStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.ThrowStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.TryCatchStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.DefineIntentStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.IntentStatementHandler;
+import org.elasticsearch.xpack.escript.execution.ExecutionRegistry;
+import org.elasticsearch.xpack.escript.execution.ExecutionIndexTemplateRegistry;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptBaseVisitor;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptLexer;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptParser;
@@ -86,6 +92,13 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
     private final DefineIntentStatementHandler defineIntentHandler;
     private final IntentStatementHandler intentHandler;
     private final Client client;
+    
+    // Async execution handlers
+    private final ExecutionRegistry executionRegistry;
+    private final ContinuationExecutor continuationExecutor;
+    private final AsyncProcedureStatementHandler asyncProcedureHandler;
+    private final ExecutionControlStatementHandler executionControlHandler;
+    private final ParallelStatementHandler parallelHandler;
 
     private final CommonTokenStream tokenStream;
 
@@ -128,6 +141,13 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
         context.setLambdaInvoker((lambda, args, listener) -> 
             expressionEvaluator.invokeLambdaAsync(lambda, args, listener));
 
+        // Initialize async execution handlers
+        // Note: For testing without ClusterService, we use a null for the template registry
+        this.executionRegistry = new ExecutionRegistry(client, "local-node");
+        this.continuationExecutor = new ContinuationExecutor(this);
+        this.asyncProcedureHandler = new AsyncProcedureStatementHandler(this, executionRegistry, continuationExecutor);
+        this.executionControlHandler = new ExecutionControlStatementHandler(executionRegistry);
+        this.parallelHandler = new ParallelStatementHandler(this, executionRegistry, continuationExecutor);
     }
 
     /**
@@ -146,6 +166,15 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
      */
     public ExecutionContext getContext() {
         return context;
+    }
+
+    /**
+     * Retrieves the expression evaluator.
+     *
+     * @return The ExpressionEvaluator instance.
+     */
+    public ExpressionEvaluator getExpressionEvaluator() {
+        return expressionEvaluator;
     }
 
     /**
@@ -306,6 +335,15 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
                 "Function-Call: " + ctx.function_call_statement().function_call());
 
             visitFunctionCallAsync(ctx.function_call_statement().function_call(), funcCallLogger);
+        } else if (ctx.async_procedure_statement() != null) {
+            // Handle async procedure with pipe continuations
+            asyncProcedureHandler.handleAsync(ctx.async_procedure_statement(), listener);
+        } else if (ctx.execution_control_statement() != null) {
+            // Handle execution control (STATUS, CANCEL, RETRY, WAIT)
+            executionControlHandler.handleAsync(ctx.execution_control_statement(), listener);
+        } else if (ctx.parallel_statement() != null) {
+            // Handle parallel execution
+            parallelHandler.handleAsync(ctx.parallel_statement(), listener);
         } else {
             listener.onResponse(null);
         }
@@ -554,6 +592,97 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
                 listener.onFailure(e);
             }
         });
+    }
+
+    /**
+     * Calls a procedure by name with the given arguments.
+     *
+     * @param procedureName The name of the procedure to call.
+     * @param args          The arguments to pass to the procedure.
+     * @param listener      The ActionListener to receive the result.
+     */
+    public void callProcedureByNameAsync(String procedureName, List<Object> args, ActionListener<Object> listener) {
+        getProcedureAsync(procedureName, ActionListener.wrap(
+            procDef -> {
+                if (procDef == null) {
+                    listener.onFailure(new RuntimeException("Procedure not found: " + procedureName));
+                    return;
+                }
+
+                // Set up the execution context with the arguments
+                ExecutionContext childContext = new ExecutionContext(context);
+                List<Parameter> params = procDef.getParameters();
+                for (int i = 0; i < params.size() && i < args.size(); i++) {
+                    Parameter param = params.get(i);
+                    childContext.declareVariable(param.getName(), param.getType());
+                    childContext.setVariable(param.getName(), args.get(i));
+                }
+
+                // Create a child executor for the procedure
+                ProcedureExecutor childExecutor = new ProcedureExecutor(childContext, threadPool, client, tokenStream);
+                
+                // Execute the procedure body
+                if (procDef instanceof StoredProcedureDefinition storedProc) {
+                    childExecutor.executeStatementsAsync(storedProc.getBody(), 0, ActionListener.wrap(
+                        result -> {
+                            // Unwrap ReturnValue if needed
+                            if (result instanceof ReturnValue rv) {
+                                listener.onResponse(rv.getValue());
+                            } else {
+                                listener.onResponse(result);
+                            }
+                        },
+                        listener::onFailure
+                    ));
+                } else {
+                    listener.onFailure(new RuntimeException("Unsupported procedure type: " + procDef.getClass()));
+                }
+            },
+            listener::onFailure
+        ));
+    }
+
+    /**
+     * Calls a function by name with the given arguments.
+     *
+     * @param functionName The name of the function to call.
+     * @param args         The arguments to pass to the function.
+     * @param listener     The ActionListener to receive the result.
+     */
+    public void callFunctionAsync(String functionName, List<Object> args, ActionListener<Object> listener) {
+        FunctionDefinition func = context.getFunction(functionName);
+        if (func == null) {
+            listener.onFailure(new RuntimeException("Function not found: " + functionName));
+            return;
+        }
+        
+        func.execute(args, listener);
+    }
+
+    /**
+     * Executes a statement block from a string.
+     *
+     * @param statementBlock The statement block as a string.
+     * @param listener       The ActionListener to receive the result.
+     */
+    public void executeStatementBlockAsync(String statementBlock, ActionListener<Object> listener) {
+        try {
+            // Wrap the statement block in a procedure for parsing
+            String wrappedCode = "PROCEDURE temp_lambda() BEGIN " + statementBlock + " END PROCEDURE";
+            
+            ElasticScriptLexer lexer = new ElasticScriptLexer(CharStreams.fromString(wrappedCode));
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            ElasticScriptParser parser = new ElasticScriptParser(tokens);
+            ElasticScriptParser.ProcedureContext procCtx = parser.procedure();
+            
+            if (procCtx != null && procCtx.statement() != null) {
+                executeStatementsAsync(procCtx.statement(), 0, listener);
+            } else {
+                listener.onFailure(new RuntimeException("Failed to parse statement block"));
+            }
+        } catch (Exception e) {
+            listener.onFailure(e);
+        }
     }
 
     /**

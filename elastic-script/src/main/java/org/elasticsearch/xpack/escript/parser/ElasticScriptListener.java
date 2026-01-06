@@ -74,6 +74,252 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitCall_procedure_statement(ElasticScriptParser.Call_procedure_statementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#async_procedure_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterAsync_procedure_statement(ElasticScriptParser.Async_procedure_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#async_procedure_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitAsync_procedure_statement(ElasticScriptParser.Async_procedure_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code onDoneContinuation}
+	 * labeled alternative in {@link ElasticScriptParser#pipe_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void enterOnDoneContinuation(ElasticScriptParser.OnDoneContinuationContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code onDoneContinuation}
+	 * labeled alternative in {@link ElasticScriptParser#pipe_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void exitOnDoneContinuation(ElasticScriptParser.OnDoneContinuationContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code onFailContinuation}
+	 * labeled alternative in {@link ElasticScriptParser#pipe_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void enterOnFailContinuation(ElasticScriptParser.OnFailContinuationContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code onFailContinuation}
+	 * labeled alternative in {@link ElasticScriptParser#pipe_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void exitOnFailContinuation(ElasticScriptParser.OnFailContinuationContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code finallyContinuation}
+	 * labeled alternative in {@link ElasticScriptParser#pipe_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void enterFinallyContinuation(ElasticScriptParser.FinallyContinuationContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code finallyContinuation}
+	 * labeled alternative in {@link ElasticScriptParser#pipe_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void exitFinallyContinuation(ElasticScriptParser.FinallyContinuationContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code trackAsContinuation}
+	 * labeled alternative in {@link ElasticScriptParser#pipe_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void enterTrackAsContinuation(ElasticScriptParser.TrackAsContinuationContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code trackAsContinuation}
+	 * labeled alternative in {@link ElasticScriptParser#pipe_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void exitTrackAsContinuation(ElasticScriptParser.TrackAsContinuationContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code timeoutContinuation}
+	 * labeled alternative in {@link ElasticScriptParser#pipe_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void enterTimeoutContinuation(ElasticScriptParser.TimeoutContinuationContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code timeoutContinuation}
+	 * labeled alternative in {@link ElasticScriptParser#pipe_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void exitTimeoutContinuation(ElasticScriptParser.TimeoutContinuationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#continuation_handler}.
+	 * @param ctx the parse tree
+	 */
+	void enterContinuation_handler(ElasticScriptParser.Continuation_handlerContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#continuation_handler}.
+	 * @param ctx the parse tree
+	 */
+	void exitContinuation_handler(ElasticScriptParser.Continuation_handlerContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#continuation_arg_list}.
+	 * @param ctx the parse tree
+	 */
+	void enterContinuation_arg_list(ElasticScriptParser.Continuation_arg_listContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#continuation_arg_list}.
+	 * @param ctx the parse tree
+	 */
+	void exitContinuation_arg_list(ElasticScriptParser.Continuation_arg_listContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#continuation_arg}.
+	 * @param ctx the parse tree
+	 */
+	void enterContinuation_arg(ElasticScriptParser.Continuation_argContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#continuation_arg}.
+	 * @param ctx the parse tree
+	 */
+	void exitContinuation_arg(ElasticScriptParser.Continuation_argContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#lambda_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void enterLambda_continuation(ElasticScriptParser.Lambda_continuationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#lambda_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void exitLambda_continuation(ElasticScriptParser.Lambda_continuationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#execution_control_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterExecution_control_statement(ElasticScriptParser.Execution_control_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#execution_control_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitExecution_control_statement(ElasticScriptParser.Execution_control_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code statusOperation}
+	 * labeled alternative in {@link ElasticScriptParser#execution_operation}.
+	 * @param ctx the parse tree
+	 */
+	void enterStatusOperation(ElasticScriptParser.StatusOperationContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code statusOperation}
+	 * labeled alternative in {@link ElasticScriptParser#execution_operation}.
+	 * @param ctx the parse tree
+	 */
+	void exitStatusOperation(ElasticScriptParser.StatusOperationContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code cancelOperation}
+	 * labeled alternative in {@link ElasticScriptParser#execution_operation}.
+	 * @param ctx the parse tree
+	 */
+	void enterCancelOperation(ElasticScriptParser.CancelOperationContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code cancelOperation}
+	 * labeled alternative in {@link ElasticScriptParser#execution_operation}.
+	 * @param ctx the parse tree
+	 */
+	void exitCancelOperation(ElasticScriptParser.CancelOperationContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code retryOperation}
+	 * labeled alternative in {@link ElasticScriptParser#execution_operation}.
+	 * @param ctx the parse tree
+	 */
+	void enterRetryOperation(ElasticScriptParser.RetryOperationContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code retryOperation}
+	 * labeled alternative in {@link ElasticScriptParser#execution_operation}.
+	 * @param ctx the parse tree
+	 */
+	void exitRetryOperation(ElasticScriptParser.RetryOperationContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code waitOperation}
+	 * labeled alternative in {@link ElasticScriptParser#execution_operation}.
+	 * @param ctx the parse tree
+	 */
+	void enterWaitOperation(ElasticScriptParser.WaitOperationContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code waitOperation}
+	 * labeled alternative in {@link ElasticScriptParser#execution_operation}.
+	 * @param ctx the parse tree
+	 */
+	void exitWaitOperation(ElasticScriptParser.WaitOperationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#parallel_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterParallel_statement(ElasticScriptParser.Parallel_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#parallel_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitParallel_statement(ElasticScriptParser.Parallel_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#parallel_procedure_list}.
+	 * @param ctx the parse tree
+	 */
+	void enterParallel_procedure_list(ElasticScriptParser.Parallel_procedure_listContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#parallel_procedure_list}.
+	 * @param ctx the parse tree
+	 */
+	void exitParallel_procedure_list(ElasticScriptParser.Parallel_procedure_listContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#parallel_procedure_call}.
+	 * @param ctx the parse tree
+	 */
+	void enterParallel_procedure_call(ElasticScriptParser.Parallel_procedure_callContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#parallel_procedure_call}.
+	 * @param ctx the parse tree
+	 */
+	void exitParallel_procedure_call(ElasticScriptParser.Parallel_procedure_callContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code onAllDoneContinuation}
+	 * labeled alternative in {@link ElasticScriptParser#parallel_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void enterOnAllDoneContinuation(ElasticScriptParser.OnAllDoneContinuationContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code onAllDoneContinuation}
+	 * labeled alternative in {@link ElasticScriptParser#parallel_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void exitOnAllDoneContinuation(ElasticScriptParser.OnAllDoneContinuationContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code onAnyFailContinuation}
+	 * labeled alternative in {@link ElasticScriptParser#parallel_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void enterOnAnyFailContinuation(ElasticScriptParser.OnAnyFailContinuationContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code onAnyFailContinuation}
+	 * labeled alternative in {@link ElasticScriptParser#parallel_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void exitOnAnyFailContinuation(ElasticScriptParser.OnAnyFailContinuationContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code parallelTrackAsContinuation}
+	 * labeled alternative in {@link ElasticScriptParser#parallel_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void enterParallelTrackAsContinuation(ElasticScriptParser.ParallelTrackAsContinuationContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code parallelTrackAsContinuation}
+	 * labeled alternative in {@link ElasticScriptParser#parallel_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void exitParallelTrackAsContinuation(ElasticScriptParser.ParallelTrackAsContinuationContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code parallelTimeoutContinuation}
+	 * labeled alternative in {@link ElasticScriptParser#parallel_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void enterParallelTimeoutContinuation(ElasticScriptParser.ParallelTimeoutContinuationContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code parallelTimeoutContinuation}
+	 * labeled alternative in {@link ElasticScriptParser#parallel_continuation}.
+	 * @param ctx the parse tree
+	 */
+	void exitParallelTimeoutContinuation(ElasticScriptParser.ParallelTimeoutContinuationContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#print_statement}.
 	 * @param ctx the parse tree
 	 */

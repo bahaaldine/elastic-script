@@ -22,6 +22,23 @@ ACTIONS: 'ACTIONS';
 ON_FAILURE: 'ON_FAILURE';
 WITH: 'WITH';
 
+// Async Execution (Pipe-Driven)
+ON_DONE: 'ON_DONE';
+ON_FAIL: 'ON_FAIL';
+TRACK: 'TRACK';
+AS: 'AS';
+TIMEOUT: 'TIMEOUT';
+EXECUTION: 'EXECUTION';
+STATUS: 'STATUS';
+CANCEL: 'CANCEL';
+RETRY: 'RETRY';
+WAIT: 'WAIT';
+PARALLEL: 'PARALLEL';
+ON_ALL_DONE: 'ON_ALL_DONE';
+ON_ANY_FAIL: 'ON_ANY_FAIL';
+START_WITH: 'START WITH';
+DO: 'DO';
+
 // Print rules
 PRINT: 'PRINT';
 DEBUG: 'DEBUG';
@@ -234,6 +251,9 @@ statement
     | try_catch_statement
     | function_definition
     | function_call_statement
+    | async_procedure_statement
+    | execution_control_statement
+    | parallel_statement
     | call_procedure_statement
     | intent_statement
     | return_statement
@@ -248,6 +268,74 @@ statement
 
 call_procedure_statement
     : CALL ID LPAREN (argument_list)? RPAREN
+    ;
+
+// =======================
+// Async Execution (Pipe-Driven)
+// =======================
+
+// Async procedure call with pipe continuations
+// Example: analyze_logs() | ON_DONE process(@result) | ON_FAIL handle(@error) | TRACK AS 'daily';
+async_procedure_statement
+    : ID LPAREN (argument_list)? RPAREN pipe_continuation+ SEMICOLON
+    ;
+
+pipe_continuation
+    : PIPE ON_DONE continuation_handler      # onDoneContinuation
+    | PIPE ON_FAIL continuation_handler      # onFailContinuation
+    | PIPE FINALLY continuation_handler      # finallyContinuation
+    | PIPE TRACK AS STRING                   # trackAsContinuation
+    | PIPE TIMEOUT INT                       # timeoutContinuation
+    ;
+
+continuation_handler
+    : ID LPAREN continuation_arg_list? RPAREN     // Handler call: process(@result)
+    | lambda_continuation                          // Inline handler: (@result) => { ... }
+    ;
+
+continuation_arg_list
+    : continuation_arg (COMMA continuation_arg)*
+    ;
+
+continuation_arg
+    : AT ID           // @result, @error, @progress
+    | expression      // Regular expressions
+    ;
+
+lambda_continuation
+    : LPAREN continuation_arg_list? RPAREN ARROW LBRACE statement+ RBRACE
+    ;
+
+// Execution control: EXECUTION('name') | STATUS;
+execution_control_statement
+    : EXECUTION LPAREN STRING RPAREN PIPE execution_operation SEMICOLON
+    ;
+
+execution_operation
+    : STATUS                                           # statusOperation
+    | CANCEL                                           # cancelOperation
+    | RETRY                                            # retryOperation
+    | WAIT (TIMEOUT INT)?                              # waitOperation
+    ;
+
+// Parallel execution: PARALLEL [proc1(), proc2()] | ON_ALL_DONE merge(@results);
+parallel_statement
+    : PARALLEL LBRACKET parallel_procedure_list RBRACKET parallel_continuation+ SEMICOLON
+    ;
+
+parallel_procedure_list
+    : parallel_procedure_call (COMMA parallel_procedure_call)*
+    ;
+
+parallel_procedure_call
+    : ID LPAREN (argument_list)? RPAREN
+    ;
+
+parallel_continuation
+    : PIPE ON_ALL_DONE continuation_handler   # onAllDoneContinuation
+    | PIPE ON_ANY_FAIL continuation_handler   # onAnyFailContinuation
+    | PIPE TRACK AS STRING                    # parallelTrackAsContinuation
+    | PIPE TIMEOUT INT                        # parallelTimeoutContinuation
     ;
 
 print_statement
