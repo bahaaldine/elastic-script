@@ -118,7 +118,7 @@ public class ESFunctionsTests extends ESIntegTestCase {
                 {"title": "Game One", "rating": 7},
                 {"title": "Game Two", "rating": 8}
             ];
-            DECLARE result DOCUMENT = INDEX_DOCUMENT("esfunctions_index_array", docs);
+            DECLARE result DOCUMENT = INDEX_BULK("esfunctions_index_array", docs);
             RETURN result;
         END PROCEDURE
     """;
@@ -129,7 +129,7 @@ public class ESFunctionsTests extends ESIntegTestCase {
 
         Client client = client();
         ProcedureExecutor executor = new ProcedureExecutor(context, threadPool, client, tokens);
-        ESFunctions.registerIndexDocumentFunction(context, client);
+        ESFunctions.registerIndexBulkFunction(context, client);
 
         executor.visitProcedureAsync(parser.procedure(), new ActionListener<>() {
             @Override

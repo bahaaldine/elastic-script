@@ -182,7 +182,8 @@ public class FunctionalArrayFunctionsTests extends ESTestCase {
         assertNull(list.get(1));
     }
 
-    // ==================== ARRAY_FILTER Tests ====================
+    // ==================== ARRAY_FILTER_BY Tests ====================
+    // Note: ARRAY_FILTER now takes 2 args (array, lambda). For property-based filtering, use ARRAY_FILTER_BY.
 
     public void testArrayFilterByProperty() throws Exception {
         List<Object> users = Arrays.asList(
@@ -190,7 +191,7 @@ public class FunctionalArrayFunctionsTests extends ESTestCase {
             Map.of("name", "Bob", "active", false),
             Map.of("name", "Carol", "active", true)
         );
-        Object result = executeFunction("ARRAY_FILTER", Arrays.asList(users, "active", true));
+        Object result = executeFunction("ARRAY_FILTER_BY", Arrays.asList(users, "active", true));
         List<?> list = (List<?>) result;
         assertEquals(2, list.size());
     }
@@ -201,7 +202,7 @@ public class FunctionalArrayFunctionsTests extends ESTestCase {
             Map.of("status", "inactive"),
             Map.of("status", "active")
         );
-        Object result = executeFunction("ARRAY_FILTER", Arrays.asList(items, "status", "active"));
+        Object result = executeFunction("ARRAY_FILTER_BY", Arrays.asList(items, "status", "active"));
         List<?> list = (List<?>) result;
         assertEquals(2, list.size());
     }
@@ -211,7 +212,7 @@ public class FunctionalArrayFunctionsTests extends ESTestCase {
             Map.of("status", "inactive"),
             Map.of("status", "pending")
         );
-        Object result = executeFunction("ARRAY_FILTER", Arrays.asList(items, "status", "active"));
+        Object result = executeFunction("ARRAY_FILTER_BY", Arrays.asList(items, "status", "active"));
         List<?> list = (List<?>) result;
         assertEquals(0, list.size());
     }
