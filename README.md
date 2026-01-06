@@ -259,6 +259,18 @@ DECLARE owner STRING = service?.team?.oncall ?? 'platform-team';
 
 ### Phase 5: Distributed Execution 🔲 Planned
 
+**Pipe-driven async execution.** Every procedure is async. Pipes define continuations.
+
+```sql
+analyze_logs()
+| ON_DONE process_result(@result)
+| ON_FAIL handle_error(@error)
+| TRACK AS 'daily-analysis';
+
+-- Query executions with ESQL
+FROM .escript_executions | WHERE status == 'RUNNING';
+```
+
 See [Distributed Execution Roadmap](#distributed-execution-roadmap) for the complete architecture and implementation plan.
 
 ---
@@ -279,15 +291,19 @@ See [Distributed Execution Roadmap](#distributed-execution-roadmap) for the comp
 
 1. **ESQL-Native**: Extend ESQL, don't wrap it. The same query syntax, same mental model.
 
-2. **Expertise as Code**: Best practices should be executable, not documented.
+2. **Pipe-Driven**: Everything flows through pipes—data transformations AND execution continuations. The pipe is the universal primitive.
 
-3. **AI-Agent First**: Every capability is discoverable, introspectable, and has machine-readable contracts.
+3. **Expertise as Code**: Best practices should be executable, not documented.
 
-4. **Stored as Data**: Procedures are Elasticsearch documents—searchable, versionable, secure.
+4. **AI-Agent First**: Every capability is discoverable, introspectable, and has machine-readable contracts.
 
-5. **Expression Composition**: Complex logic in single expressions, not multi-step data passing.
+5. **Stored as Data**: Procedures AND executions are Elasticsearch documents—searchable, versionable, queryable.
 
-6. **Safety by Design**: INTENTs encode when operations are safe, not just how to execute them.
+6. **Expression Composition**: Complex logic in single expressions, not multi-step data passing.
+
+7. **Safety by Design**: INTENTs encode when operations are safe, not just how to execute them.
+
+8. **Observability Built-In**: Execution state is queryable data. No instrumentation needed.
 
 ---
 
@@ -2837,37 +2853,186 @@ Currently, elastic-script executes on the coordinating node that receives the RE
 
 ---
 
-### Level 1: Task-Based Async Execution 🔲
+### Level 1: Pipe-Driven Async Execution 🔲
 
-**Goal:** Enable background procedure execution with progress tracking and cancellation.
+**Goal:** Enable truly async, event-driven execution using ESQL-inspired pipe syntax.
 
-**New Syntax:**
+**Design Principle:** Every procedure call is async by default. No special "async" keyword needed. Pipes define what happens next.
+
+**Core Syntax:**
 ```sql
--- Submit procedure for background execution
-DECLARE task_id STRING = SUBMIT ASYNC analyze_all_logs();
+-- Basic async with continuation
+analyze_logs()
+| ON_DONE process_result(@result)
+| ON_FAIL handle_error(@error);
 
+-- Chain multiple steps
+fetch_data()
+| ON_DONE transform(@result)
+| ON_DONE store(@result)
+| ON_FAIL rollback(@error);
+
+-- Named execution for tracking
+analyze_logs()
+| ON_DONE process_result(@result)
+| TRACK AS 'daily-analysis';
+
+-- Fire and forget
+analyze_logs();
+```
+
+**Execution Control (also pipe-driven):**
+```sql
 -- Check status
-DECLARE status DOCUMENT = TASK_STATUS(task_id);
-PRINT 'Progress: ' || status['progress'] || '%';
+EXECUTION('daily-analysis') | STATUS;
 
--- Wait for completion with timeout
-DECLARE result = AWAIT task_id TIMEOUT 300;
+-- Cancel
+EXECUTION('daily-analysis') | CANCEL;
 
--- Cancel if needed
-CANCEL TASK task_id;
+-- Retry failed
+EXECUTION('daily-analysis') | RETRY;
+
+-- Block and wait (for interactive/notebook use)
+EXECUTION('daily-analysis') | WAIT;
+```
+
+**Query Executions with ESQL:**
+```sql
+-- Executions are ES documents - query them with ESQL!
+FROM .escript_executions
+| WHERE status == 'RUNNING'
+| KEEP name, procedure, progress, started_at
+| SORT started_at DESC;
+
+-- Find failures
+FROM .escript_executions
+| WHERE status == 'FAILED' AND started_at > NOW() - 1 HOUR
+| KEEP name, error, started_at;
+
+-- Execution statistics
+FROM .escript_executions
+| STATS 
+    running = COUNT(*) WHERE status == 'RUNNING',
+    completed = COUNT(*) WHERE status == 'COMPLETED',
+    failed = COUNT(*) WHERE status == 'FAILED';
+```
+
+**Advanced Patterns:**
+```sql
+-- Parallel execution
+PARALLEL [fetch_logs(), fetch_metrics(), fetch_traces()]
+| ON_ALL_DONE merge_data(@results)
+| ON_ANY_FAIL handle_partial(@error)
+| TRACK AS 'parallel-fetch';
+
+-- Integration with INTENTs
+check_service_health('payment-service')
+| ON_DONE (health) => {
+    IF health['status'] == 'degraded' THEN
+        INTENT SCALE_SERVICE FOR 'payment-service';
+    END IF
+}
+| ON_FAIL INTENT ALERT_ONCALL
+| TRACK AS 'health-check';
+
+-- Sequential workflow with context
+START WITH { incident_id: 'INC-123' }
+| DO analyze_incident(@context)
+| DO remediate(@context, @result)
+| DO verify(@context, @result)
+| ON_FAIL rollback(@context, @error)
+| TRACK AS 'incident-workflow';
+```
+
+**Execution Data Model:**
+```json
+// .escript_executions/exec-abc123
+{
+    "execution_id": "exec-abc123",
+    "name": "daily-analysis",
+    "procedure": "analyze_logs",
+    "status": "RUNNING",
+    "progress": { "percent": 45, "message": "Processing..." },
+    "pipeline": {
+        "on_done": ["process_result"],
+        "on_fail": ["handle_error"]
+    },
+    "started_at": "2025-01-06T10:00:00Z",
+    "node": "node-1",
+    "result": null,
+    "error": null
+}
 ```
 
 **Implementation:**
-- Integrate with Elasticsearch Task Management framework
-- `ProcedureTask extends CancellableTask`
-- Transport action for distributed task execution
-- Task routed to least-loaded node
+- Executions stored in `.escript_executions` index
+- Execution Listener (persistent task) monitors for state changes
+- On completion: triggers continuation pipeline
+- Fault-tolerant: state survives node restarts
+- Queryable: use ESQL to monitor and analyze executions
+
+**Syntax Reference:**
+
+| Pattern | Description |
+|---------|-------------|
+| `proc() \| ON_DONE handler(@result)` | Success continuation |
+| `proc() \| ON_FAIL handler(@error)` | Error continuation |
+| `proc() \| FINALLY cleanup()` | Always runs |
+| `proc() \| TRACK AS 'name'` | Named for tracking |
+| `proc() \| TIMEOUT 60` | Execution timeout |
+| `EXECUTION('name') \| STATUS` | Get status |
+| `EXECUTION('name') \| CANCEL` | Cancel |
+| `EXECUTION('name') \| RETRY` | Retry failed |
+| `EXECUTION('name') \| WAIT` | Block until done |
+| `PARALLEL [...] \| ON_ALL_DONE` | Parallel execution |
 
 **Benefits:**
-- Long-running procedures don't block
-- Progress visibility
-- Graceful cancellation
-- Automatic load distribution
+- ESQL-native: Same pipe syntax users know
+- Truly async: No blocking, no timeout guessing
+- Queryable: Executions are ES documents
+- Fault-tolerant: State persists in Elasticsearch
+- Composable: Pipes chain naturally
+
+#### Why Pipe-Driven? The Philosophy
+
+The pipe-driven async model isn't just syntax - it's a fundamental design choice that makes elastic-script unique:
+
+**1. The Pipe is the Universal Primitive**
+ESQL users already think in pipes. Data flows through transformations. In elastic-script, *execution itself* flows through continuation pipes. This creates a unified mental model where everything - data and execution - flows through pipes.
+
+**2. Execution as Data**
+By storing executions in `.escript_executions`, we treat execution state as first-class data. This means:
+- Query executions with ESQL (no new query language)
+- Build dashboards over execution history
+- Analyze patterns in procedure performance
+- Alert on execution anomalies using standard Elastic Stack
+
+**3. Composition Over Configuration**
+Traditional async programming requires explicit configuration: thread pools, timeouts, retry policies. In the pipe model:
+```sql
+-- Retry is just another pipe operation
+risky_operation()
+| ON_FAIL RETRY WITH backoff = 'exponential', max_attempts = 3
+| ON_FAIL escalate(@error);
+```
+
+**4. The Language is the Orchestrator**
+Other systems need separate workflow engines (Airflow, Temporal, Step Functions) to orchestrate async work. In elastic-script, the language IS the orchestrator. No context switching between code and workflow definition.
+
+**5. Observability is Built In**
+Every execution is observable by default. No instrumentation needed. Want to know what's running? Query the index. Want historical trends? ESQL aggregate. Want alerts? Elastic Alerting rules on the execution index.
+
+```sql
+-- Example: Build an execution health dashboard
+FROM .escript_executions
+| STATS 
+    avg_duration = AVG(duration_ms),
+    p99_duration = PERCENTILE(duration_ms, 99),
+    failure_rate = COUNT(*) WHERE status == 'FAILED' / COUNT(*) * 100
+| BY procedure;
+```
+
+This is what makes elastic-script different: **the pipe isn't just syntax, it's an architecture**.
 
 ---
 
