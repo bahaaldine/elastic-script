@@ -258,10 +258,8 @@ DECLARE owner STRING = service?.team?.oncall ?? 'platform-team';
 - SLO/SLI language constructs
 
 ### Phase 5: Distributed Execution 🔲 Planned
-- Cross-cluster procedure calls
-- Async procedure execution with callbacks
-- Procedure scheduling and triggers
-- Event-driven elastic-script
+
+See [Distributed Execution Roadmap](#distributed-execution-roadmap) for the complete architecture and implementation plan.
 
 ---
 
@@ -2779,7 +2777,568 @@ END LOOP
 
 ---
 
+## Distributed Execution Roadmap
+
+### The Problem: Single-Node Execution
+
+Currently, elastic-script executes on the coordinating node that receives the REST request:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     Elasticsearch Cluster                        │
+│                                                                  │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐  │
+│  │  Node 1  │    │  Node 2  │    │  Node 3  │    │  Node 4  │  │
+│  │          │    │          │    │          │    │          │  │
+│  │ [Shards] │    │ [Shards] │    │ [Shards] │    │ [Shards] │  │
+│  └──────────┘    └──────────┘    └──────────┘    └──────────┘  │
+│       ▲                                                         │
+│       │ ALL elastic-script code runs on ONE node                │
+└───────┼─────────────────────────────────────────────────────────┘
+        │
+   [Client Request]
+```
+
+**Limitations:**
+- No load balancing across nodes
+- Loops execute sequentially on one node
+- Data ships to code (not code to data)
+- No data locality optimization
+- Memory bottleneck on coordinating node
+
+### The Vision: Distributed elastic-script
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                     Distributed elastic-script                       │
+│                                                                      │
+│  ┌────────────────────────────────────────────────────────────────┐ │
+│  │                    Procedure Coordinator                        │ │
+│  │  - Parse procedure, identify parallel regions                   │ │
+│  │  - Plan distribution, merge results                             │ │
+│  └────────────────────────────────────────────────────────────────┘ │
+│                               │                                      │
+│              ┌────────────────┼────────────────┐                    │
+│              ▼                ▼                ▼                    │
+│  ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐    │
+│  │   Node 1         │ │   Node 2         │ │   Node 3         │    │
+│  │ ┌──────────────┐ │ │ ┌──────────────┐ │ │ ┌──────────────┐ │    │
+│  │ │ Procedure    │ │ │ │ Procedure    │ │ │ │ Procedure    │ │    │
+│  │ │ Executor     │ │ │ │ Executor     │ │ │ │ Executor     │ │    │
+│  │ └──────────────┘ │ │ └──────────────┘ │ │ └──────────────┘ │    │
+│  │ ┌──────────────┐ │ │ ┌──────────────┐ │ │ ┌──────────────┐ │    │
+│  │ │ Local Shards │ │ │ │ Local Shards │ │ │ │ Local Shards │ │    │
+│  │ └──────────────┘ │ │ └──────────────┘ │ │ └──────────────┘ │    │
+│  └──────────────────┘ └──────────────────┘ └──────────────────┘    │
+│                                                                      │
+│  ✓ Code ships to data    ✓ Parallel execution    ✓ Linear scaling  │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Level 1: Task-Based Async Execution 🔲
+
+**Goal:** Enable background procedure execution with progress tracking and cancellation.
+
+**New Syntax:**
+```sql
+-- Submit procedure for background execution
+DECLARE task_id STRING = SUBMIT ASYNC analyze_all_logs();
+
+-- Check status
+DECLARE status DOCUMENT = TASK_STATUS(task_id);
+PRINT 'Progress: ' || status['progress'] || '%';
+
+-- Wait for completion with timeout
+DECLARE result = AWAIT task_id TIMEOUT 300;
+
+-- Cancel if needed
+CANCEL TASK task_id;
+```
+
+**Implementation:**
+- Integrate with Elasticsearch Task Management framework
+- `ProcedureTask extends CancellableTask`
+- Transport action for distributed task execution
+- Task routed to least-loaded node
+
+**Benefits:**
+- Long-running procedures don't block
+- Progress visibility
+- Graceful cancellation
+- Automatic load distribution
+
+---
+
+### Level 2: Parallel Loop Execution 🔲
+
+**Goal:** Distribute loop iterations across cluster nodes.
+
+**New Syntax:**
+```sql
+-- Parallel execution across nodes
+FOR PARALLEL item IN large_array LOOP
+    PROCESS(item);
+END LOOP
+
+-- With explicit partitioning
+FOR PARALLEL log IN logs PARTITION BY log['service'] LOOP
+    -- All logs for same service go to same node
+    PROCESS(log);
+END LOOP
+
+-- Control parallelism
+FOR PARALLEL item IN data PARALLEL DEGREE 8 LOOP
+    PROCESS(item);
+END LOOP
+```
+
+**Implementation:**
+- Coordinator splits data into partitions
+- Each partition sent to a node via transport action
+- Results merged at coordinator
+- Fault tolerance: retry failed partitions
+
+**Benefits:**
+- Linear speedup with cluster size
+- Automatic work distribution
+- Configurable parallelism
+
+---
+
+### Level 3: Data-Local Execution 🔲
+
+**Goal:** Ship code to data, not data to code.
+
+**New Syntax:**
+```sql
+-- Execute on node holding specific routing key
+EXECUTE LOCAL ON INDEX logs WITH ROUTING 'user-123'
+    analyze_user_behavior('user-123');
+
+-- Execute on all shards, aggregate results
+DECLARE results ARRAY = EXECUTE ON ALL SHARDS OF logs
+    count_errors_per_shard();
+
+-- Execute on specific node
+EXECUTE ON NODE 'node-3'
+    process_local_data();
+```
+
+**Implementation:**
+- Route procedure to node with relevant shards
+- Similar to how search requests are routed
+- Minimize data transfer over network
+
+**Benefits:**
+- Eliminate network transfer of large datasets
+- Leverage data locality
+- Reduce memory pressure on coordinator
+
+---
+
+### Level 4: Map-Reduce Primitives 🔲
+
+**Goal:** Native distributed aggregation patterns.
+
+**New Syntax:**
+```sql
+-- Map-Reduce pattern
+DECLARE result DOCUMENT = MAP_REDUCE(
+    -- Source: distributed across shards
+    SOURCE (FROM logs | WHERE level == 'error'),
+    
+    -- Map: runs on each shard
+    MAP (log) => {
+        "service": log['service'],
+        "count": 1
+    },
+    
+    -- Reduce: merges shard results
+    REDUCE (a, b) => {
+        "service": a['service'],
+        "count": a['count'] + b['count']
+    }
+);
+
+-- Full aggregation pipeline
+DECLARE stats DOCUMENT = PARALLEL_AGGREGATE(
+    SOURCE (FROM metrics),
+    INIT () => {"sum": 0, "count": 0},
+    ACCUMULATE (state, doc) => {
+        "sum": state['sum'] + doc['value'],
+        "count": state['count'] + 1
+    },
+    COMBINE (a, b) => {
+        "sum": a['sum'] + b['sum'],
+        "count": a['count'] + b['count']
+    },
+    FINALIZE (state) => {
+        "average": state['sum'] / state['count']
+    }
+);
+```
+
+**Implementation:**
+- Similar to `scripted_metric` aggregation
+- Map phase runs on data nodes
+- Reduce phase runs on coordinator
+- Leverage existing aggregation framework
+
+---
+
+### Level 5: Streaming Execution 🔲
+
+**Goal:** Process large datasets without full materialization.
+
+**New Syntax:**
+```sql
+-- Chunked streaming
+FOR STREAM chunk IN (FROM logs | WHERE level == 'error') 
+    CHUNK SIZE 1000 
+    PARALLEL DEGREE 4 
+LOOP
+    DECLARE processed ARRAY = ARRAY_MAP(chunk, log => analyze(log));
+    EMIT processed;  -- Emit results without waiting
+END LOOP
+
+-- Time-windowed streaming
+FOR STREAM window IN (FROM metrics) 
+    WINDOW TUMBLING 5 MINUTES 
+LOOP
+    DECLARE avg NUMBER = compute_average(window);
+    IF avg > threshold THEN
+        INTENT ALERT FOR window[0]['service'];
+    END IF
+END LOOP
+```
+
+**Benefits:**
+- Handle datasets larger than memory
+- Continuous processing
+- Real-time windowed analytics
+
+---
+
+### Level 6: Cross-Cluster Execution 🔲
+
+**Goal:** Federated procedure execution across clusters.
+
+**New Syntax:**
+```sql
+-- Execute on remote cluster
+DECLARE remote_result = EXECUTE ON CLUSTER 'us-west'
+    analyze_regional_data('us-west');
+
+-- Parallel across clusters
+DECLARE results ARRAY = EXECUTE PARALLEL ON CLUSTERS ['us-west', 'us-east', 'eu-central']
+    get_regional_stats();
+
+-- Aggregate cross-cluster
+DECLARE global_stats = REDUCE(results, merge_stats);
+```
+
+**Implementation:**
+- Leverage cross-cluster search infrastructure
+- Serialize procedure source for remote execution
+- Handle cluster connectivity failures
+
+---
+
+### New Language Constructs Summary
+
+| Construct | Level | Description |
+|-----------|-------|-------------|
+| `SUBMIT ASYNC` | 1 | Background execution, returns task ID |
+| `AWAIT task_id` | 1 | Wait for async task completion |
+| `TASK_STATUS()` | 1 | Query task progress |
+| `CANCEL TASK` | 1 | Cancel running task |
+| `FOR PARALLEL` | 2 | Parallel loop across nodes |
+| `PARTITION BY` | 2 | Control data distribution |
+| `PARALLEL DEGREE` | 2 | Control parallelism level |
+| `EXECUTE LOCAL` | 3 | Data-local execution |
+| `EXECUTE ON NODE` | 3 | Target specific node |
+| `EXECUTE ON ALL SHARDS` | 3 | Shard-level execution |
+| `MAP_REDUCE()` | 4 | Distributed map-reduce |
+| `PARALLEL_AGGREGATE()` | 4 | Full aggregation pipeline |
+| `FOR STREAM` | 5 | Streaming execution |
+| `CHUNK SIZE` | 5 | Control chunk sizes |
+| `WINDOW TUMBLING` | 5 | Time-windowed processing |
+| `EXECUTE ON CLUSTER` | 6 | Cross-cluster execution |
+
+---
+
+### Testing Strategy for Distributed Execution
+
+#### Test Environment
+
+**Multi-Node Local Cluster:**
+```bash
+# Start 3-node cluster for testing
+./gradlew :x-pack:plugin:elastic-script:integTestCluster \
+    -Dtests.cluster.nodes=3 \
+    -Dtests.cluster.name=distributed-test
+```
+
+**Docker Compose Setup:**
+```yaml
+# docker-compose.yml for distributed testing
+version: '3.8'
+services:
+  es01:
+    image: elasticsearch:9.0.0
+    environment:
+      - node.name=es01
+      - cluster.name=distributed-test
+      - discovery.seed_hosts=es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+    ports:
+      - 9200:9200
+
+  es02:
+    image: elasticsearch:9.0.0
+    environment:
+      - node.name=es02
+      - cluster.name=distributed-test
+      - discovery.seed_hosts=es01,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+
+  es03:
+    image: elasticsearch:9.0.0
+    environment:
+      - node.name=es03
+      - cluster.name=distributed-test
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01,es02,es03
+```
+
+#### Functional Tests
+
+**1. Task Distribution Tests:**
+```java
+public class DistributedExecutionTests extends ESIntegTestCase {
+    
+    @Override
+    protected int numberOfNodes() {
+        return 3;  // 3-node cluster
+    }
+    
+    public void testAsyncTaskDistribution() {
+        // Submit multiple async tasks
+        // Verify tasks are distributed across nodes
+        // Check task status and results
+    }
+    
+    public void testParallelLoopDistribution() {
+        // Create large dataset
+        // Execute FOR PARALLEL loop
+        // Verify work distributed across nodes
+        // Verify correct merged results
+    }
+    
+    public void testDataLocalExecution() {
+        // Create index with specific routing
+        // Execute LOCAL procedure
+        // Verify execution on correct node
+    }
+}
+```
+
+**2. Correctness Tests:**
+```java
+public void testParallelResultsMatchSequential() {
+    // Execute same operation sequentially
+    Object sequentialResult = executeSequential(procedure, data);
+    
+    // Execute same operation in parallel
+    Object parallelResult = executeParallel(procedure, data);
+    
+    // Results must be identical
+    assertEquals(sequentialResult, parallelResult);
+}
+
+public void testMapReduceCorrectness() {
+    // Known dataset with expected aggregation
+    // Execute MAP_REDUCE
+    // Verify result matches expected
+}
+```
+
+#### Performance Benchmarks
+
+**1. Baseline Measurement (Single Node):**
+```java
+public class DistributedPerformanceTests extends ESIntegTestCase {
+    
+    public void benchmarkSingleNodeBaseline() {
+        // Run procedure on 1 node
+        // Record: execution time, memory usage, CPU
+        long singleNodeTime = runOnSingleNode(procedure, largeDataset);
+        
+        // Store as baseline for comparison
+        recordBaseline("single_node", singleNodeTime);
+    }
+}
+```
+
+**2. Scaling Tests:**
+```java
+public void benchmarkScalingEfficiency() {
+    int[] nodeCounts = {1, 2, 3, 4, 6, 8};
+    
+    for (int nodes : nodeCounts) {
+        // Restart cluster with N nodes
+        restartClusterWithNodes(nodes);
+        
+        // Run parallel procedure
+        long executionTime = runParallelProcedure(procedure, largeDataset);
+        
+        // Calculate speedup
+        double speedup = baselineTime / executionTime;
+        double efficiency = speedup / nodes;
+        
+        // Log results
+        log("Nodes: {}, Time: {}ms, Speedup: {}x, Efficiency: {}%", 
+            nodes, executionTime, speedup, efficiency * 100);
+        
+        // Assert minimum efficiency (e.g., 70%)
+        assertTrue("Efficiency should be >= 70%", efficiency >= 0.70);
+    }
+}
+```
+
+**3. Comparative Benchmarks:**
+```java
+public void compareSequentialVsParallel() {
+    // Dataset sizes to test
+    int[] sizes = {1000, 10000, 100000, 1000000};
+    
+    for (int size : sizes) {
+        Object data = generateTestData(size);
+        
+        // Sequential execution
+        long seqStart = System.nanoTime();
+        executeSequential(procedure, data);
+        long seqTime = System.nanoTime() - seqStart;
+        
+        // Parallel execution (3 nodes)
+        long parStart = System.nanoTime();
+        executeParallel(procedure, data);
+        long parTime = System.nanoTime() - parStart;
+        
+        // Calculate and assert improvement
+        double improvement = (double) seqTime / parTime;
+        log("Size: {}, Sequential: {}ms, Parallel: {}ms, Improvement: {}x",
+            size, seqTime/1e6, parTime/1e6, improvement);
+        
+        // For large datasets, parallel should be faster
+        if (size >= 10000) {
+            assertTrue("Parallel should be faster for large datasets", 
+                improvement > 1.5);
+        }
+    }
+}
+```
+
+#### Performance Metrics to Track
+
+| Metric | Description | Target |
+|--------|-------------|--------|
+| **Speedup** | Sequential time / Parallel time | > 2x for 3 nodes |
+| **Efficiency** | Speedup / Number of nodes | > 70% |
+| **Latency Overhead** | Added latency for distribution | < 50ms |
+| **Memory Distribution** | Memory usage per node | Even distribution |
+| **Network Transfer** | Data moved between nodes | Minimize |
+
+#### Benchmark Reporting
+
+```java
+public class DistributedBenchmarkReport {
+    
+    public void generateReport() {
+        System.out.println("=== Distributed Execution Benchmark Report ===\n");
+        
+        System.out.println("## Cluster Configuration");
+        System.out.println("- Nodes: " + getNodeCount());
+        System.out.println("- Shards: " + getShardCount());
+        System.out.println("- Dataset Size: " + getDatasetSize());
+        
+        System.out.println("\n## Performance Results");
+        System.out.println("| Nodes | Time (ms) | Speedup | Efficiency |");
+        System.out.println("|-------|-----------|---------|------------|");
+        for (BenchmarkResult r : results) {
+            System.out.printf("| %d | %d | %.2fx | %.1f%% |\n",
+                r.nodes, r.timeMs, r.speedup, r.efficiency * 100);
+        }
+        
+        System.out.println("\n## Memory Usage");
+        for (NodeStats n : nodeStats) {
+            System.out.printf("- %s: %d MB (%.1f%% of total)\n",
+                n.name, n.memoryMB, n.percentage);
+        }
+    }
+}
+```
+
+#### CI/CD Integration
+
+```yaml
+# .github/workflows/distributed-tests.yml
+name: Distributed Execution Tests
+
+on:
+  push:
+    paths:
+      - 'elastic-script/src/main/java/**/distributed/**'
+      
+jobs:
+  distributed-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Start 3-node cluster
+        run: docker-compose -f docker-compose.test.yml up -d
+        
+      - name: Wait for cluster health
+        run: |
+          for i in {1..30}; do
+            curl -s http://localhost:9200/_cluster/health | grep -q '"status":"green"' && break
+            sleep 2
+          done
+          
+      - name: Run distributed tests
+        run: ./gradlew :x-pack:plugin:elastic-script:distributedTest
+        
+      - name: Run performance benchmarks
+        run: ./gradlew :x-pack:plugin:elastic-script:benchmarkDistributed
+        
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v3
+        with:
+          name: benchmark-results
+          path: build/reports/benchmark/
+```
+
+---
+
+### Implementation Priority
+
+| Priority | Level | Feature | Effort | Impact |
+|----------|-------|---------|--------|--------|
+| 1 | 1 | Task-Based Async | Medium | High - Foundation for all |
+| 2 | 2 | FOR PARALLEL | High | Very High - Biggest win |
+| 3 | 3 | Data-Local Execution | Medium | High - Network savings |
+| 4 | 4 | MAP_REDUCE | Medium | Medium - Specific use cases |
+| 5 | 5 | Streaming | High | Medium - Large datasets |
+| 6 | 6 | Cross-Cluster | High | Medium - Federated ops |
+
+---
+
 ## See Also
 - [ESQL Documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql.html)
 - [Elasticsearch Inference API](https://www.elastic.co/guide/en/elasticsearch/reference/current/inference-apis.html)
 - [Elasticsearch ML](https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-apis.html)
+- [Elasticsearch Task Management](https://www.elastic.co/guide/en/elasticsearch/reference/current/tasks.html)
