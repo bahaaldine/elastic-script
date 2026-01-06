@@ -24,6 +24,44 @@ Observability is drowning in complexity:
 
 **Make observability expertise executable.**
 
+---
+
+## 🚀 Quick Start
+
+Get elastic-script running in minutes:
+
+```bash
+# Clone the repository
+git clone https://github.com/elastic/elastic-script.git
+cd elastic-script
+
+# Run the quick start (builds, starts ES, loads data, opens notebooks)
+./scripts/quick-start.sh
+```
+
+**What this does:**
+1. ✅ Checks prerequisites (Java 21+, Python 3.8+)
+2. ✅ Builds the elastic-script plugin
+3. ✅ Starts Elasticsearch with the plugin
+4. ✅ Loads sample data (logs, metrics)
+5. ✅ Launches Jupyter with interactive notebooks
+
+**Try your first procedure:**
+```sql
+CREATE PROCEDURE hello_elastic()
+BEGIN
+    RETURN 'Welcome to elastic-script!';
+END PROCEDURE
+```
+
+```sql
+CALL hello_elastic()  -- Returns: "Welcome to elastic-script!"
+```
+
+See the [notebooks/](notebooks/) directory for interactive tutorials.
+
+---
+
 elastic-script allows you to:
 - **Encode SRE knowledge as code** - Runbooks become procedures. Best practices become INTENTs with guardrails.
 - **Query and compute in one language** - ESQL for data, elastic-script for logic. No context switching.

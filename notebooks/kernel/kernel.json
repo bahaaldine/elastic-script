@@ -1,0 +1,15 @@
+{
+    "argv": [
+        "python3",
+        "-m",
+        "plesql_kernel",
+        "-f",
+        "{connection_file}"
+    ],
+    "display_name": "elastic-script (PL|ESQL)",
+    "language": "plesql",
+    "metadata": {
+        "debugger": false
+    }
+}
+
