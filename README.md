@@ -32,7 +32,7 @@ Get elastic-script running in minutes:
 
 ```bash
 # Clone the repository
-git clone https://github.com/elastic/elastic-script.git
+git clone --recurse-submodules https://github.com/bahaaldine/elastic-script.git
 cd elastic-script
 
 # Run the quick start (builds, starts ES, loads data, opens notebooks)
