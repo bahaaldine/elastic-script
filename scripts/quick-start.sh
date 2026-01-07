@@ -362,6 +362,29 @@ check_status() {
     fi
 }
 
+# Print curl examples
+print_examples() {
+    print_header "📋 Try These Examples (copy & paste)"
+    echo ""
+    echo -e "${GREEN}# 1. Simple ESQL query${NC}"
+    echo 'curl -X POST "localhost:9200/_escript" -H "Content-Type: application/json" -d '\''{"query": "FROM logs-sample | LIMIT 5"}'\'''
+    echo ""
+    echo -e "${GREEN}# 2. Define and call a procedure${NC}"
+    echo 'curl -X POST "localhost:9200/_escript" -H "Content-Type: application/json" -d '\''{"query": "PROCEDURE get_logs() BEGIN FROM logs-sample | LIMIT 3 END; get_logs()"}'\'''
+    echo ""
+    echo -e "${GREEN}# 3. Async with pipe-driven continuation${NC}"
+    echo 'curl -X POST "localhost:9200/_escript" -H "Content-Type: application/json" -d '\''{"query": "PROCEDURE analyze() BEGIN FROM logs-sample | STATS count=COUNT(*) BY level END; analyze() | ON_DONE process(@result) | TRACK AS \"test\""}'\'''
+    echo ""
+    echo -e "${GREEN}# 4. Check execution status${NC}"
+    echo 'curl -X POST "localhost:9200/_escript" -H "Content-Type: application/json" -d '\''{"query": "EXECUTION(\"test\") | STATUS"}'\'''
+    echo ""
+    echo -e "${GREEN}# 5. Parallel execution${NC}"
+    echo 'curl -X POST "localhost:9200/_escript" -H "Content-Type: application/json" -d '\''{"query": "PARALLEL [task_a(), task_b()] | ON_ALL_DONE aggregate(@results)"}'\'''
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+}
+
 # Main
 case "${1:-}" in
     --help|-h)
@@ -397,7 +420,7 @@ case "${1:-}" in
         echo "  2. Build the plugin"
         echo "  3. Start Elasticsearch"
         echo "  4. Load sample data"
-        echo "  5. Start Jupyter notebooks"
+        echo "  5. Show examples & start Jupyter notebooks"
         echo ""
         read -p "Continue? [Y/n] " -n 1 -r
         echo
@@ -406,6 +429,7 @@ case "${1:-}" in
             build_plugin
             start_elasticsearch_background
             load_sample_data
+            print_examples
             setup_notebooks
             start_notebooks
         fi
@@ -416,4 +440,3 @@ case "${1:-}" in
         exit 1
         ;;
 esac
-
