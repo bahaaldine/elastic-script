@@ -99,9 +99,35 @@ check_prerequisites() {
     print_success "Elasticsearch source found"
 }
 
+# Setup plugin symlink
+setup_plugin_symlink() {
+    PLUGIN_SOURCE="$PROJECT_ROOT/elastic-script"
+    PLUGIN_TARGET="$ES_DIR/x-pack/plugin/elastic-script"
+    
+    # Check if elastic-script source exists
+    if [ ! -d "$PLUGIN_SOURCE" ]; then
+        print_error "elastic-script plugin source not found at $PLUGIN_SOURCE"
+        exit 1
+    fi
+    
+    # Create symlink if it doesn't exist
+    if [ ! -e "$PLUGIN_TARGET" ]; then
+        print_step "Creating plugin symlink..."
+        ln -s "$PLUGIN_SOURCE" "$PLUGIN_TARGET"
+        print_success "Symlink created: elastic-script -> x-pack/plugin/"
+    elif [ -L "$PLUGIN_TARGET" ]; then
+        print_success "Plugin symlink already exists"
+    else
+        print_warning "Plugin directory exists but is not a symlink"
+    fi
+}
+
 # Build elastic-script
 build_plugin() {
     print_header "Building elastic-script Plugin"
+    
+    # Ensure symlink exists
+    setup_plugin_symlink
     
     cd "$ES_DIR"
     
