@@ -83,20 +83,25 @@ check_prerequisites() {
     
     # Check if elasticsearch folder exists and has content
     if [ ! -d "$ES_DIR" ] || [ ! -f "$ES_DIR/gradlew" ]; then
-        print_error "Elasticsearch source not found!"
-        echo ""
-        echo "  The 'elasticsearch' folder is a git submodule."
-        echo "  Please run the following commands to initialize it:"
-        echo ""
-        echo "    git submodule init"
-        echo "    git submodule update"
-        echo ""
-        echo "  Or clone with submodules:"
-        echo "    git clone --recurse-submodules https://github.com/bahaaldine/elastic-script.git"
-        echo ""
-        exit 1
+        print_step "Elasticsearch submodule not initialized. Setting it up..."
+        cd "$PROJECT_ROOT"
+        git submodule init
+        git submodule update
+        
+        # Verify it worked
+        if [ ! -f "$ES_DIR/gradlew" ]; then
+            print_error "Failed to initialize Elasticsearch submodule"
+            echo ""
+            echo "  Try manually running:"
+            echo "    git submodule init"
+            echo "    git submodule update"
+            echo ""
+            exit 1
+        fi
+        print_success "Elasticsearch submodule initialized"
+    else
+        print_success "Elasticsearch source found"
     fi
-    print_success "Elasticsearch source found"
 }
 
 # Setup plugin symlink
