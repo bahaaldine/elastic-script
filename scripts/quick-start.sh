@@ -220,9 +220,11 @@ load_sample_data() {
     }' > /dev/null
     
     print_step "Indexing sample log data..."
+    LEVELS=("INFO" "WARN" "ERROR" "DEBUG")
+    SERVICES=("api" "gateway" "auth" "db" "cache")
     for i in {1..20}; do
-        LEVEL=$(echo "INFO WARN ERROR DEBUG" | tr ' ' '\n' | shuf -n 1)
-        SERVICE=$(echo "api gateway auth db cache" | tr ' ' '\n' | shuf -n 1)
+        LEVEL=${LEVELS[$((RANDOM % ${#LEVELS[@]}))]}
+        SERVICE=${SERVICES[$((RANDOM % ${#SERVICES[@]}))]}
         curl -s -X POST "localhost:9200/logs-sample/_doc" -H "Content-Type: application/json" -d "{
             \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",
             \"level\": \"$LEVEL\",
@@ -245,9 +247,11 @@ load_sample_data() {
     }' > /dev/null
     
     print_step "Indexing sample metrics data..."
+    METRICS=("cpu_usage" "memory_usage" "disk_io" "latency_ms")
+    METRIC_SERVICES=("api" "gateway" "auth")
     for i in {1..15}; do
-        METRIC=$(echo "cpu_usage memory_usage disk_io latency_ms" | tr ' ' '\n' | shuf -n 1)
-        SERVICE=$(echo "api gateway auth" | tr ' ' '\n' | shuf -n 1)
+        METRIC=${METRICS[$((RANDOM % ${#METRICS[@]}))]}
+        SERVICE=${METRIC_SERVICES[$((RANDOM % ${#METRIC_SERVICES[@]}))]}
         VALUE=$((RANDOM % 100))
         curl -s -X POST "localhost:9200/metrics-sample/_doc" -H "Content-Type: application/json" -d "{
             \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",
