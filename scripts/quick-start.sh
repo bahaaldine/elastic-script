@@ -415,23 +415,57 @@ case "${1:-}" in
     "")
         # Full setup
         print_header "🚀 elastic-script Quick Start"
-        echo "This will:"
-        echo "  1. Check prerequisites"
-        echo "  2. Build the plugin"
-        echo "  3. Start Elasticsearch"
-        echo "  4. Load sample data"
-        echo "  5. Show examples & start Jupyter notebooks"
-        echo ""
-        read -p "Continue? [Y/n] " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-            check_prerequisites
-            build_plugin
-            start_elasticsearch_background
-            load_sample_data
-            print_examples
-            setup_notebooks
-            start_notebooks
+        
+        # Check if ES is already running
+        if curl -s http://localhost:9200 > /dev/null 2>&1; then
+            print_success "Elasticsearch is already running!"
+            echo ""
+            echo "Skipping build and startup. Going straight to examples and notebooks."
+            echo ""
+            read -p "Continue? [Y/n] " -n 1 -r
+            echo
+            if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+                print_examples
+                setup_notebooks
+                echo ""
+                print_header "🚀 Launching Jupyter Notebooks"
+                cd "$NOTEBOOKS_DIR"
+                jupyter notebook --notebook-dir="$NOTEBOOKS_DIR" &
+                JUPYTER_PID=$!
+                echo ""
+                print_success "Jupyter started at http://localhost:8888"
+                echo ""
+                echo "Press Enter to continue (Jupyter runs in background)..."
+                read
+            fi
+        else
+            echo "This will:"
+            echo "  1. Check prerequisites"
+            echo "  2. Build the plugin"
+            echo "  3. Start Elasticsearch"
+            echo "  4. Load sample data"
+            echo "  5. Show examples & start Jupyter notebooks"
+            echo ""
+            read -p "Continue? [Y/n] " -n 1 -r
+            echo
+            if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+                check_prerequisites
+                build_plugin
+                start_elasticsearch_background
+                load_sample_data
+                print_examples
+                setup_notebooks
+                echo ""
+                print_header "🚀 Launching Jupyter Notebooks"
+                cd "$NOTEBOOKS_DIR"
+                jupyter notebook --notebook-dir="$NOTEBOOKS_DIR" &
+                JUPYTER_PID=$!
+                echo ""
+                print_success "Jupyter started at http://localhost:8888"
+                echo ""
+                echo "Press Enter to continue (Jupyter runs in background)..."
+                read
+            fi
         fi
         ;;
     *)
