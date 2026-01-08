@@ -47,10 +47,16 @@ class PlesqlKernel(Kernel):
         logger.info(f"Executing cell (silent={silent}):")
         logger.debug(f"Code:\n{code[:200]}..." if len(code) > 200 else f"Code:\n{code}")
         
-        # Skip empty or comment-only cells
+        # Skip empty cells only
         code = code.strip()
-        if not code or code.startswith('--'):
-            logger.info("Skipping empty or comment-only cell")
+        if not code:
+            logger.info("Skipping empty cell")
+            return self._success_response()
+        
+        # Check if cell is ONLY comments (all lines start with --)
+        lines = [line.strip() for line in code.split('\n') if line.strip()]
+        if all(line.startswith('--') for line in lines):
+            logger.info("Skipping comment-only cell")
             return self._success_response()
         
         headers = {"Content-Type": "application/json"}
