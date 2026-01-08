@@ -306,7 +306,7 @@ start_notebooks() {
     echo "    Press Ctrl+C to stop"
     echo ""
     
-    jupyter notebook --notebook-dir="$NOTEBOOKS_DIR"
+    python3 -m notebook --notebook-dir="$NOTEBOOKS_DIR"
 }
 
 # Show help
@@ -430,7 +430,7 @@ case "${1:-}" in
                 echo ""
                 print_header "🚀 Launching Jupyter Notebooks"
                 cd "$NOTEBOOKS_DIR"
-                jupyter notebook --notebook-dir="$NOTEBOOKS_DIR" &
+                python3 -m notebook --notebook-dir="$NOTEBOOKS_DIR" &
                 JUPYTER_PID=$!
                 echo ""
                 print_success "Jupyter started at http://localhost:8888"
@@ -458,7 +458,7 @@ case "${1:-}" in
                 echo ""
                 print_header "🚀 Launching Jupyter Notebooks"
                 cd "$NOTEBOOKS_DIR"
-                jupyter notebook --notebook-dir="$NOTEBOOKS_DIR" &
+                python3 -m notebook --notebook-dir="$NOTEBOOKS_DIR" &
                 JUPYTER_PID=$!
                 echo ""
                 print_success "Jupyter started at http://localhost:8888"
