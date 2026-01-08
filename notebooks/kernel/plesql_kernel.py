@@ -7,8 +7,18 @@ Sends code to Elasticsearch's _escript endpoint and displays results.
 """
 
 import json
+import logging
+import sys
 import requests
 from ipykernel.kernelbase import Kernel
+
+# Setup logging to stdout so it appears in Jupyter console
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='[PL|ESQL] %(asctime)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+logger = logging.getLogger('plesql_kernel')
 
 
 class PlesqlKernel(Kernel):
@@ -29,17 +39,24 @@ class PlesqlKernel(Kernel):
         self.es_endpoint = "http://localhost:9200/_escript"
         # Default credentials for dev builds (./gradlew :run)
         self.es_auth = ("elastic-admin", "elastic-password")
+        logger.info(f"PL|ESQL Kernel initialized. Endpoint: {self.es_endpoint}")
     
     def do_execute(self, code, silent, store_history=True, user_expressions=None, allow_stdin=False):
         """Execute the code by sending it to Elasticsearch."""
         
+        logger.info(f"Executing cell (silent={silent}):")
+        logger.debug(f"Code:\n{code[:200]}..." if len(code) > 200 else f"Code:\n{code}")
+        
         # Skip empty or comment-only cells
         code = code.strip()
         if not code or code.startswith('--'):
+            logger.info("Skipping empty or comment-only cell")
             return self._success_response()
         
         headers = {"Content-Type": "application/json"}
         payload = {"query": code}
+        
+        logger.info(f"Sending request to {self.es_endpoint}")
         
         try:
             response = requests.post(
@@ -49,19 +66,27 @@ class PlesqlKernel(Kernel):
                 auth=self.es_auth,
                 timeout=300  # 5 minute timeout for long-running procedures
             )
+            logger.info(f"Response status: {response.status_code}")
+            logger.debug(f"Response body: {response.text[:500]}")
             response.raise_for_status()
             json_resp = response.json()
             result = json_resp.get("result", json_resp)
+            logger.info(f"Got result: {type(result)}")
             
             if not silent:
                 self._display_result(result)
+            else:
+                logger.info("Silent mode, not displaying result")
                 
-        except requests.exceptions.ConnectionError:
+        except requests.exceptions.ConnectionError as e:
+            logger.error(f"Connection error: {e}")
             self._send_error("Connection Error: Cannot connect to Elasticsearch at localhost:9200\n"
                            "Make sure Elasticsearch is running: ./scripts/quick-start.sh --start")
         except requests.exceptions.Timeout:
+            logger.error("Request timed out")
             self._send_error("Timeout: Procedure took too long to execute")
         except requests.exceptions.HTTPError as e:
+            logger.error(f"HTTP error: {e.response.status_code} - {e.response.text[:200]}")
             try:
                 error_detail = e.response.json()
                 error_msg = error_detail.get("error", {}).get("reason", str(e))
@@ -69,6 +94,7 @@ class PlesqlKernel(Kernel):
                 error_msg = str(e)
             self._send_error(f"Elasticsearch Error: {error_msg}")
         except Exception as e:
+            logger.exception(f"Unexpected error: {e}")
             self._send_error(f"Error: {str(e)}")
         
         return self._success_response()
