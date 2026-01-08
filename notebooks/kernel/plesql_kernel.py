@@ -27,6 +27,8 @@ class PlesqlKernel(Kernel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.es_endpoint = "http://localhost:9200/_escript"
+        # Default credentials for dev builds (./gradlew :run)
+        self.es_auth = ("elastic-admin", "elastic-password")
     
     def do_execute(self, code, silent, store_history=True, user_expressions=None, allow_stdin=False):
         """Execute the code by sending it to Elasticsearch."""
@@ -44,6 +46,7 @@ class PlesqlKernel(Kernel):
                 self.es_endpoint, 
                 headers=headers, 
                 data=json.dumps(payload),
+                auth=self.es_auth,
                 timeout=300  # 5 minute timeout for long-running procedures
             )
             response.raise_for_status()
@@ -165,5 +168,6 @@ class PlesqlKernel(Kernel):
 if __name__ == "__main__":
     from ipykernel.kernelapp import IPKernelApp
     IPKernelApp.launch_instance(kernel_class=PlesqlKernel)
+
 
 
