@@ -324,7 +324,8 @@ show_help() {
     echo "  --start-bg      Start Elasticsearch (background)"
     echo "  --load-data     Load sample data into Elasticsearch"
     echo "  --notebooks     Start Jupyter notebooks"
-    echo "  --stop          Stop background Elasticsearch"
+    echo "  --stop          Stop Elasticsearch and Jupyter notebooks
+  --stop-notebooks  Stop only Jupyter notebooks"
     echo "  --status        Check if Elasticsearch is running"
     echo "  --help          Show this help"
     echo ""
@@ -347,6 +348,29 @@ stop_elasticsearch() {
     else
         print_warning "No PID file found"
     fi
+}
+
+
+# Stop Jupyter notebooks
+stop_notebooks() {
+    print_header "Stopping Jupyter Notebooks"
+    
+    # Try to find and kill jupyter processes
+    if pgrep -f "jupyter" > /dev/null 2>&1; then
+        pkill -f "jupyter"
+        print_success "Jupyter notebooks stopped"
+    elif lsof -ti:8888 > /dev/null 2>&1; then
+        lsof -ti:8888 | xargs kill 2>/dev/null
+        print_success "Jupyter notebooks stopped (port 8888)"
+    else
+        print_warning "No Jupyter notebooks running"
+    fi
+}
+
+# Stop everything
+stop_all() {
+    stop_notebooks
+    stop_elasticsearch
 }
 
 # Check status
@@ -406,8 +430,11 @@ case "${1:-}" in
     --notebooks)
         start_notebooks
         ;;
+    --stop-notebooks)
+        stop_notebooks
+        ;;
     --stop)
-        stop_elasticsearch
+        stop_all
         ;;
     --status)
         check_status
@@ -430,7 +457,7 @@ case "${1:-}" in
                 echo ""
                 print_header "🚀 Launching Jupyter Notebooks"
                 cd "$NOTEBOOKS_DIR"
-                python3 -m notebook --notebook-dir="$NOTEBOOKS_DIR" &
+                jupyter notebook --notebook-dir="$NOTEBOOKS_DIR" &
                 JUPYTER_PID=$!
                 echo ""
                 print_success "Jupyter started at http://localhost:8888"
@@ -458,12 +485,23 @@ case "${1:-}" in
                 echo ""
                 print_header "🚀 Launching Jupyter Notebooks"
                 cd "$NOTEBOOKS_DIR"
-                python3 -m notebook --notebook-dir="$NOTEBOOKS_DIR" &
+                jupyter notebook --notebook-dir="$NOTEBOOKS_DIR" &
                 JUPYTER_PID=$!
                 echo ""
                 print_success "Jupyter started at http://localhost:8888"
                 echo ""
                 echo "Press Enter to continue (Jupyter runs in background)..."
+                read
+            fi
+        fi
+        ;;
+    *)
+        print_error "Unknown option: $1"
+        show_help
+        exit 1
+        ;;
+esac
+
                 read
             fi
         fi
