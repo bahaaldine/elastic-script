@@ -49,6 +49,30 @@ print_success() {
     echo -e "${GREEN}✔${NC} $1"
 }
 
+# Prompt for OpenAI API key (optional)
+prompt_openai_key() {
+    print_header "OpenAI API Key (Optional)"
+    
+    # Check if already set
+    if [ -n "$OPENAI_API_KEY" ]; then
+        print_success "OPENAI_API_KEY already set in environment"
+        return 0
+    fi
+    
+    echo "The AI features (LLM_COMPLETE, etc.) require an OpenAI API key."
+    echo "You can skip this if you don't need AI features."
+    echo ""
+    read -p "Enter OpenAI API key (or press Enter to skip): " -r OPENAI_KEY
+    
+    if [ -n "$OPENAI_KEY" ]; then
+        export OPENAI_API_KEY="$OPENAI_KEY"
+        print_success "OpenAI API key configured"
+    else
+        print_warning "Skipped. AI features won't work without OPENAI_API_KEY."
+    fi
+    echo ""
+}
+
 # Check prerequisites
 check_prerequisites() {
     print_header "Checking Prerequisites"
@@ -465,15 +489,17 @@ case "${1:-}" in
         else
             echo "This will:"
             echo "  1. Check prerequisites"
-            echo "  2. Build the plugin"
-            echo "  3. Start Elasticsearch"
-            echo "  4. Load sample data"
-            echo "  5. Show examples & start Jupyter notebooks"
+            echo "  2. Configure OpenAI API key (optional, for AI features)"
+            echo "  3. Build the plugin"
+            echo "  4. Start Elasticsearch"
+            echo "  5. Load sample data"
+            echo "  6. Show examples & start Jupyter notebooks"
             echo ""
             read -p "Continue? [Y/n] " -n 1 -r
             echo
             if [[ ! $REPLY =~ ^[Nn]$ ]]; then
                 check_prerequisites
+                prompt_openai_key
                 build_plugin
                 start_elasticsearch_background
                 load_sample_data
@@ -488,17 +514,6 @@ case "${1:-}" in
                 print_success "Jupyter started at http://localhost:8888"
                 echo ""
                 echo "Press Enter to continue (Jupyter runs in background)..."
-                read
-            fi
-        fi
-        ;;
-    *)
-        print_error "Unknown option: $1"
-        show_help
-        exit 1
-        ;;
-esac
-
                 read
             fi
         fi
