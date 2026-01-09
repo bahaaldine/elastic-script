@@ -279,44 +279,98 @@ load_sample_data() {
     
     print_step "Indexing application logs (100 documents)..."
     
-    # Realistic log messages
-    INFO_MSGS=("Request processed successfully" "User authenticated" "Cache hit for key" "Database connection established" "Health check passed" "Configuration loaded" "Session created" "Payment processed" "Order confirmed" "Email sent successfully")
-    WARN_MSGS=("High memory usage detected" "Slow query execution" "Rate limit approaching" "Certificate expires in 30 days" "Deprecated API called" "Retry attempt" "Connection pool exhausted" "Queue size growing")
-    ERROR_MSGS=("Connection refused to database" "Authentication failed for user" "Timeout waiting for response" "Invalid request payload" "Service unavailable" "Out of memory error" "Disk space critical" "SSL handshake failed" "Permission denied" "Resource not found")
-    DEBUG_MSGS=("Entering function processOrder" "Query parameters validated" "Cache miss, fetching from source" "Serializing response object" "Checking user permissions")
-    
     SERVICES=("api-gateway" "user-service" "order-service" "payment-service" "notification-service" "inventory-service" "auth-service" "search-service")
     HOSTS=("prod-app-01" "prod-app-02" "prod-app-03" "prod-worker-01" "prod-worker-02")
     METHODS=("GET" "POST" "PUT" "DELETE" "PATCH")
-    PATHS=("/api/v1/users" "/api/v1/orders" "/api/v1/products" "/api/v1/payments" "/api/v1/search" "/health" "/api/v1/auth/login" "/api/v1/cart")
+    API_PATHS=("/api/v1/users" "/api/v1/orders" "/api/v1/products" "/api/v1/payments" "/api/v1/search" "/health" "/api/v1/auth/login" "/api/v1/cart")
     
-    for i in {1..100}; do
-        # Weight log levels realistically: 60% INFO, 20% DEBUG, 15% WARN, 5% ERROR
+    # First, create 20 guaranteed ERROR logs with detailed, varied messages
+    ERROR_DETAILS=(
+        "Connection refused to database server db-primary.internal:5432 after 3 retries. Last error: Connection timed out"
+        "Authentication failed for user john.doe@example.com - Invalid credentials. IP: 192.168.1.100, Attempt: 5/5"
+        "Timeout waiting for response from payment-service after 30000ms. Transaction ID: TXN-78234"
+        "OutOfMemoryError: Java heap space. Current heap: 7.8GB, Max heap: 8GB. Consider increasing -Xmx"
+        "SSL handshake failed with upstream server api.stripe.com: certificate has expired"
+        "Disk space critical on /var/log: 98% used (47.2GB/48GB). Immediate action required"
+        "NullPointerException in OrderProcessor.processPayment at line 234. Order ID: ORD-445566"
+        "Failed to connect to Redis cache cluster: All nodes are unreachable. Falling back to database"
+        "Rate limit exceeded for API key sk-prod-***89. Limit: 1000 req/min, Current: 1247 req/min"
+        "Kafka consumer lag critical: Topic orders-events partition 3 lag is 50000 messages"
+        "Database query timeout after 60s: SELECT * FROM orders WHERE status = 'pending' ORDER BY created_at"
+        "Service discovery failed: No healthy instances found for inventory-service in region us-east-1"
+        "File upload failed: Maximum file size exceeded. Received: 52MB, Limit: 50MB. User: user-42"
+        "Elasticsearch cluster health RED: 2 of 5 shards unassigned. Index: logs-2024.01"
+        "Circuit breaker OPEN for payment-service: Failure rate 67% exceeds threshold 50%"
+        "Failed to deserialize message from queue orders-dlq: Unexpected token at position 234"
+        "Permission denied: User analyst-bob attempted to access /admin/settings without admin role"
+        "External API error from shipping-partner.com: HTTP 503 Service Unavailable after 5 retries"
+        "Memory leak detected in user-session-cache: Size grew from 100MB to 2.3GB in 1 hour"
+        "Deadlock detected in database connection pool. Threads waiting: 15. Max pool size: 10"
+    )
+    
+    for i in {0..19}; do
+        MSG="${ERROR_DETAILS[$i]}"
+        SERVICE=${SERVICES[$((RANDOM % ${#SERVICES[@]}))]}
+        HOST=${HOSTS[$((RANDOM % ${#HOSTS[@]}))]}
+        METHOD=${METHODS[$((RANDOM % ${#METHODS[@]}))]}
+        API_PATH=${API_PATHS[$((RANDOM % ${#API_PATHS[@]}))]}
+        TRACE_ID=$(printf '%08x-%04x-%04x' $RANDOM $RANDOM $RANDOM)
+        USER_ID="user-$((RANDOM % 50 + 1))"
+        DURATION=$((RANDOM % 30000 + 5000))  # Errors typically have longer durations
+        
+        HOURS_AGO=$((RANDOM % 12))  # More recent errors
+        MINS_AGO=$((RANDOM % 60))
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            TS=$(date -u -v-${HOURS_AGO}H -v-${MINS_AGO}M +%Y-%m-%dT%H:%M:%SZ)
+        else
+            TS=$(date -u -d "$HOURS_AGO hours ago $MINS_AGO minutes ago" +%Y-%m-%dT%H:%M:%SZ)
+        fi
+        
+        curl -s $AUTH -X POST "$ES/logs-sample/_doc" -H "Content-Type: application/json" -d "{
+            \"@timestamp\": \"$TS\",
+            \"level\": \"ERROR\",
+            \"message\": \"$MSG\",
+            \"service\": \"$SERVICE\",
+            \"host\": \"$HOST\",
+            \"trace_id\": \"$TRACE_ID\",
+            \"user_id\": \"$USER_ID\",
+            \"duration_ms\": $DURATION,
+            \"status_code\": 500,
+            \"method\": \"$METHOD\",
+            \"path\": \"$API_PATH\"
+        }" > /dev/null
+    done
+    
+    # Now add INFO, DEBUG, and WARN logs
+    INFO_MSGS=("Request processed successfully" "User authenticated" "Cache hit for key" "Database connection established" "Health check passed" "Configuration loaded" "Session created" "Payment processed" "Order confirmed" "Email sent successfully")
+    WARN_MSGS=("High memory usage detected: 78% utilized" "Slow query execution: 2340ms for user lookup" "Rate limit approaching: 890/1000 requests" "Certificate expires in 30 days" "Deprecated API v1 called, please migrate to v2" "Retry attempt 2/3 for external service call" "Connection pool 85% exhausted" "Message queue size growing: 5000 pending")
+    DEBUG_MSGS=("Entering function processOrder with orderId=12345" "Query parameters validated successfully" "Cache miss for key user:42, fetching from database" "Serializing response object to JSON" "Checking user permissions for resource /api/admin")
+    
+    for i in {1..80}; do
+        # Weight: 55% INFO, 25% DEBUG, 20% WARN
         RAND=$((RANDOM % 100))
-        if [ $RAND -lt 60 ]; then
+        if [ $RAND -lt 55 ]; then
             LEVEL="INFO"
             MSG=${INFO_MSGS[$((RANDOM % ${#INFO_MSGS[@]}))]}
+            STATUS_CODE=200
         elif [ $RAND -lt 80 ]; then
             LEVEL="DEBUG"
             MSG=${DEBUG_MSGS[$((RANDOM % ${#DEBUG_MSGS[@]}))]}
-        elif [ $RAND -lt 95 ]; then
+            STATUS_CODE=200
+        else
             LEVEL="WARN"
             MSG=${WARN_MSGS[$((RANDOM % ${#WARN_MSGS[@]}))]}
-        else
-            LEVEL="ERROR"
-            MSG=${ERROR_MSGS[$((RANDOM % ${#ERROR_MSGS[@]}))]}
+            STATUS_CODE=$((RANDOM % 2 == 0 ? 200 : 429))
         fi
         
         SERVICE=${SERVICES[$((RANDOM % ${#SERVICES[@]}))]}
         HOST=${HOSTS[$((RANDOM % ${#HOSTS[@]}))]}
         METHOD=${METHODS[$((RANDOM % ${#METHODS[@]}))]}
-        PATH=${PATHS[$((RANDOM % ${#PATHS[@]}))]}
-        DURATION=$((RANDOM % 2000))
-        STATUS_CODE=$((RANDOM % 5 == 0 ? 500 : (RANDOM % 4 == 0 ? 404 : 200)))
+        API_PATH=${API_PATHS[$((RANDOM % ${#API_PATHS[@]}))]}
+        DURATION=$((RANDOM % 500 + 10))
         TRACE_ID=$(printf '%08x-%04x-%04x' $RANDOM $RANDOM $RANDOM)
         USER_ID="user-$((RANDOM % 50 + 1))"
         
-        # Vary timestamps over the past 24 hours
         HOURS_AGO=$((RANDOM % 24))
         MINS_AGO=$((RANDOM % 60))
         if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -336,7 +390,7 @@ load_sample_data() {
             \"duration_ms\": $DURATION,
             \"status_code\": $STATUS_CODE,
             \"method\": \"$METHOD\",
-            \"path\": \"$PATH\"
+            \"path\": \"$API_PATH\"
         }" > /dev/null
     done
     
@@ -451,7 +505,9 @@ load_sample_data() {
         FIRST=${FIRST_NAMES[$((RANDOM % ${#FIRST_NAMES[@]}))]}
         LAST=${LAST_NAMES[$((RANDOM % ${#LAST_NAMES[@]}))]}
         NAME="$FIRST $LAST"
-        EMAIL=$(echo "${FIRST,,}.${LAST,,}@example.com")
+        FIRST_LOWER=$(echo "$FIRST" | tr '[:upper:]' '[:lower:]')
+        LAST_LOWER=$(echo "$LAST" | tr '[:upper:]' '[:lower:]')
+        EMAIL="${FIRST_LOWER}.${LAST_LOWER}@example.com"
         ROLE=${ROLES[$((RANDOM % ${#ROLES[@]}))]}
         DEPT=${DEPARTMENTS[$((RANDOM % ${#DEPARTMENTS[@]}))]}
         ACTIVE=$([[ $((RANDOM % 10)) -lt 9 ]] && echo "true" || echo "false")
