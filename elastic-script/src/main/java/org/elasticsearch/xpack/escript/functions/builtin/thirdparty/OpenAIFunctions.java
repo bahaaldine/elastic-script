@@ -50,7 +50,6 @@ public class OpenAIFunctions {
     private static final String DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small";
 
     public static void registerAll(ExecutionContext context) {
-        LOGGER.info("Registering OpenAI built-in functions");
         registerLlmComplete(context);
         registerLlmChat(context);
         registerLlmEmbed(context);

@@ -45,7 +45,6 @@ public class PagerDutyFunctions {
     private static final String REST_API_URL = "https://api.pagerduty.com";
 
     public static void registerAll(ExecutionContext context) {
-        LOGGER.info("Registering PagerDuty built-in functions");
         registerPagerDutyTrigger(context);
         registerPagerDutyResolve(context);
         registerPagerDutyAcknowledge(context);

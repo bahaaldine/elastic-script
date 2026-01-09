@@ -60,7 +60,7 @@ public class ExecutionIndexTemplateRegistry {
                 response -> {
                     if (response.isAcknowledged()) {
                         indexCreated = true;
-                        LOGGER.info("Created {} index", INDEX_NAME);
+                        LOGGER.debug("Created {} index", INDEX_NAME);
                         listener.onResponse(true);
                     } else {
                         listener.onResponse(false);

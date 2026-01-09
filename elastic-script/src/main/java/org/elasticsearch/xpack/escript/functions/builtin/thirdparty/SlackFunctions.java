@@ -48,7 +48,6 @@ public class SlackFunctions {
     private static final String SLACK_API_BASE = "https://slack.com/api";
 
     public static void registerAll(ExecutionContext context) {
-        LOGGER.info("Registering Slack built-in functions");
         registerSlackWebhook(context);
         registerSlackSend(context);
         registerSlackSendBlocks(context);

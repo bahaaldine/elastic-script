@@ -83,7 +83,6 @@ public class ESFunctions  {
         category = FunctionCategory.DATASOURCE
     )
     public static void registerIndexDocumentFunction(ExecutionContext context, Client client) {
-        LOGGER.info("Registering INDEX_DOCUMENT function");
 
         context.declareFunction("INDEX_DOCUMENT",
             List.of(
@@ -138,7 +137,6 @@ public class ESFunctions  {
         category = FunctionCategory.DATASOURCE
     )
     public static void registerIndexBulkFunction(ExecutionContext context, Client client) {
-        LOGGER.info("Registering INDEX_BULK function");
 
         context.declareFunction("INDEX_BULK",
             List.of(
@@ -202,7 +200,6 @@ public class ESFunctions  {
         category = FunctionCategory.DATASOURCE
     )
     public static void registerUpdateDocumentFunction(ExecutionContext context, Client client) {
-        LOGGER.info("Registering UPDATE_DOCUMENT function");
 
         context.declareFunction("UPDATE_DOCUMENT",
             List.of(
@@ -258,7 +255,6 @@ public class ESFunctions  {
         category = FunctionCategory.DATASOURCE
     )
     public static void registerGetDocumentFunction(ExecutionContext context, Client client) {
-        LOGGER.info("Registering GET_DOCUMENT function");
 
         context.declareFunction("GET_DOCUMENT",
             List.of(
@@ -307,7 +303,6 @@ public class ESFunctions  {
         category = FunctionCategory.DATASOURCE
     )
     public static void registerRefreshIndexFunction(ExecutionContext context, Client client) {
-        LOGGER.info("Registering REFRESH_INDEX function");
 
         context.declareFunction("REFRESH_INDEX",
             List.of(

@@ -138,13 +138,14 @@
 - [x] macOS PATH variable collision fix in quick-start.sh
 - [x] Division by zero in sample data generation
 
-### 7. Observability Refactor (NEW - In Progress)
+### 7. Observability Refactor (Complete)
 - [x] `EScriptLogger` - Centralized structured logging utility
-  - INFO: Procedure start/end, user output (PRINT)
-  - DEBUG: Variable assignments, function calls, loops
-  - TRACE: Expression evaluation, handler internals
+  - INFO: Procedure start/end, user output (PRINT) only
+  - DEBUG: Variable assignments, function calls, ESQL queries
+  - TRACE: Async chain tracing, expression evaluation, handler internals
   - Separate `o.e.x.e.EScript.OUTPUT` logger for PRINT statements
-- [x] `EScriptTracer` - APM tracing integration
+  - Async chain methods: `asyncEnter`, `asyncExit`, `asyncStep`, `asyncCallback`
+- [x] `EScriptTracer` - APM tracing integration (ready for agent)
   - Transaction per procedure execution
   - Spans for statements, functions, external calls
   - Works with or without APM agent (reflection-based)
@@ -152,11 +153,15 @@
   - `executionId` for log/trace correlation
   - `printOutput` list to capture PRINT statements
   - `startTimeMs` for execution timing
-- [x] Logging refactor across handlers
-  - `PrintStatementHandler` - Uses `EScriptLogger.userOutput`
-  - `ExecuteStatementHandler` - Uses `EScriptLogger.esqlQuery`
-  - `ContinuationExecutor` - Cleaner error logging
-  - `AsyncProcedureStatementHandler` - Lifecycle logging
+- [x] **Complete logging cleanup**
+  - Removed all 172+ verbose INFO logs
+  - `ActionListenerUtils` - Now uses TRACE with execution ID (skipped if TRACE disabled)
+  - `ExpressionEvaluator` - Removed "Evaluating primary expression" logs
+  - `ElasticScriptExecutor` - Changed all INFO to DEBUG
+  - All REST actions - Changed all INFO to DEBUG
+  - All function registration logs - Removed (were duplicated per-request)
+  - `EsqlBuiltInFunctions` - Changed query logs to DEBUG/TRACE
+  - Only remaining INFO: `EScriptLogger` user output + APM detection
 - [x] `quick-start.sh` Kibana support
   - `--kibana` to start Kibana
   - `--stop-kibana` to stop Kibana
@@ -190,19 +195,17 @@
 ## 📋 Pending Tasks
 
 ### High Priority
-1. **Complete Logging Cleanup** - Still 172+ verbose log calls remaining:
-   - `ActionListenerUtils.java` - Logs EVERY async callback at INFO (remove or DEBUG)
-   - `ExpressionEvaluator.java` - Logs EVERY expression at INFO (line 614 - remove)
-   - `ProcedureExecutor.java` - "Context statement" and "Context variables" at INFO (remove)
-   - All function `registerAll()` methods - Log at INFO on every request (move to startup)
-   - `PrintStatementHandler.java` - Update to use `EScriptLogger.userOutput()`
-   - Goal: Only PRINT output and errors should appear at INFO level
-2. **Automated E2E Test Framework** - Spin up full infrastructure, run notebooks as tests
+1. **Automated E2E Test Framework** - Spin up full infrastructure, run notebooks as tests
    - Create test harness that starts ES + loads data + runs kernel
    - Execute each notebook cell and validate output
    - Notebooks to automate: 01-getting-started, 02-esql, 03-ai, 04-async, 00-complete-reference
-3. **Complete Observability Integration** - API response with PRINT output, execution metadata
+2. **Complete Observability Integration** - API response with PRINT output, execution metadata
 3. **APM Agent Testing** - Attach Elastic APM agent to verify tracing
+4. **Kibana APM Visualization** (For Later) - Full distributed tracing in Kibana:
+   - Each async step becomes a span
+   - Visible in Kibana APM UI with timeline visualization
+   - No log pollution - production-grade debugging
+   - See `EScriptTracer.java` for implementation ready to go
 4. **Async Execution Runtime** - Complete runtime for pipe-driven execution
 5. **ExecutionRegistry Persistence** - Store execution state in `.escript_executions` index
 

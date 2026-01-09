@@ -44,7 +44,6 @@ public class CICDFunctions {
     private static final Logger LOGGER = LogManager.getLogger(CICDFunctions.class);
 
     public static void registerAll(ExecutionContext context) {
-        LOGGER.info("Registering CI/CD built-in functions");
         registerJenkinsBuild(context);
         registerJenkinsStatus(context);
         registerGitHubWorkflow(context);

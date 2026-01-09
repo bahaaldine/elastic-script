@@ -54,7 +54,6 @@ public class AWSFunctions {
     private static final String DEFAULT_REGION = "us-east-1";
 
     public static void registerAll(ExecutionContext context) {
-        LOGGER.info("Registering AWS built-in functions");
         registerAwsSsmRun(context);
         registerAwsSsmStatus(context);
         registerAwsLambdaInvoke(context);

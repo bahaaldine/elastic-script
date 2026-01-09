@@ -106,7 +106,7 @@ public class ElasticScriptExecutor {
                             }
 
                             String procedureContent = procedureContentObj.toString();
-                            LOGGER.info("Executing stored procedure [{}]: {}",
+                            LOGGER.debug("Executing stored procedure [{}]: {}",
                                 programContext.call_procedure_statement().ID().getText(), procedureContent);
 
                             try {
@@ -160,7 +160,7 @@ public class ElasticScriptExecutor {
                                             case "ARRAYOFSTRING":
                                             case "ARRAYOFNUMBER":
                                             case "ARRAYOFDOCUMENT":
-                                                LOGGER.info("Param name {} is an array of document", paramName);
+                                                LOGGER.debug("Param name {} is an array of document", paramName);
                                                 try (XContentParser parser =
                                                          org.elasticsearch.xcontent.XContentType.JSON.xContent().createParser(
                                                     org.elasticsearch.xcontent.NamedXContentRegistry.EMPTY,
@@ -240,7 +240,7 @@ public class ElasticScriptExecutor {
                 } else if (programContext.delete_procedure_statement() != null) {
                     ElasticScriptParser.Delete_procedure_statementContext deleteContext = programContext.delete_procedure_statement();
                     String procedureId = deleteContext.ID().getText();
-                    LOGGER.info("Deleting procedure {}", procedureId);
+                    LOGGER.debug("Deleting procedure {}", procedureId);
                     deleteProcedureAsync(procedureId, listener);
                 } else if (programContext.create_procedure_statement() != null ) {
                     ElasticScriptParser.Create_procedure_statementContext createContext = programContext.create_procedure_statement();
@@ -250,13 +250,13 @@ public class ElasticScriptExecutor {
                     Token stop = createContext.procedure().getStop();
                     String rawProcedureText = tokens.getText(start, stop);
 
-                    LOGGER.info("Storing procedure {}", procedureId);
+                    LOGGER.debug("Storing procedure {}", procedureId);
                     storeProcedureAsync( procedureId, rawProcedureText, listener );
                 } else if (programContext.define_intent_statement() != null) {
                     // Handle DEFINE INTENT at the program level
                     ElasticScriptParser.Define_intent_statementContext intentCtx = programContext.define_intent_statement();
                     String intentName = intentCtx.ID().getText();
-                    LOGGER.info("Defining intent {}", intentName);
+                    LOGGER.debug("Defining intent {}", intentName);
                     
                     // Create a temporary executor context to handle the intent definition
                     ExecutionContext tempContext = new ExecutionContext();
@@ -339,7 +339,7 @@ public class ElasticScriptExecutor {
     public void storeProcedureAsync(String id, String procedureText, ActionListener<Object> listener) throws IOException {
         String indexName = ".elastic_script_procedures";
 
-        LOGGER.info( "Storing procedure {}", procedureText );
+        LOGGER.debug( "Storing procedure {}", procedureText );
 
         // Parse the procedure to extract parameters
         ElasticScriptLexer lexer = new ElasticScriptLexer(CharStreams.fromString(procedureText));
@@ -365,7 +365,7 @@ public class ElasticScriptExecutor {
             },
             error -> {
                 if (ExceptionsHelper.unwrapCause(error) instanceof IndexNotFoundException) {
-                    LOGGER.info( "Index {} does not exist, creating it ...", indexName );
+                    LOGGER.debug( "Index {} does not exist, creating it ...", indexName );
                     CreateIndexRequest createRequest = new CreateIndexRequest(indexName);
                     client.admin().indices().create(createRequest, ActionListener.wrap(
                         createResponse -> indexProcedureDocument(id, procedureText, parameters, listener),

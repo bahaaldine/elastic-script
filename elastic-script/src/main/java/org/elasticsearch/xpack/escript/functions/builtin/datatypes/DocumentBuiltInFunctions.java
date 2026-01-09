@@ -28,7 +28,6 @@ public class DocumentBuiltInFunctions {
     private static final Logger LOGGER = LogManager.getLogger(DocumentBuiltInFunctions.class);
 
     public static void registerAll(ExecutionContext context) {
-        LOGGER.info("Registering Document built-in functions");
 
         registerDocumentKeys(context);
         registerDocumentValues(context);

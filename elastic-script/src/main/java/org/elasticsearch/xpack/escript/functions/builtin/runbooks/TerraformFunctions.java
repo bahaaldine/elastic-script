@@ -44,7 +44,6 @@ public class TerraformFunctions {
     private static final String TFC_API_URL = "https://app.terraform.io/api/v2";
 
     public static void registerAll(ExecutionContext context) {
-        LOGGER.info("Registering Terraform Cloud built-in functions");
         registerTfCloudRun(context);
         registerTfCloudStatus(context);
         registerTfCloudWait(context);

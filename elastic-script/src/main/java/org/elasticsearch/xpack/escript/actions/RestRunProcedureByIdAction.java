@@ -61,7 +61,7 @@ public class RestRunProcedureByIdAction extends BaseRestHandler {
             throw new IllegalArgumentException("Procedure ID must be provided in the URL path");
         }
 
-        LOGGER.info("Fetching procedure with ID: {}", procedureId);
+        LOGGER.debug("Fetching procedure with ID: {}", procedureId);
 
         // Parse request body as a Map if present
         Map<String, Object> procedureArgs = Map.of();
@@ -73,7 +73,7 @@ public class RestRunProcedureByIdAction extends BaseRestHandler {
 
         Map<String, Object> finalProcedureArgs = procedureArgs; // because of lambda scope
 
-        LOGGER.info("Procedure arguments {}", finalProcedureArgs);
+        LOGGER.debug("Procedure arguments {}", finalProcedureArgs);
 
         GetRequest getRequest = new GetRequest(".elastic_script_procedures", procedureId);
 
@@ -109,7 +109,7 @@ public class RestRunProcedureByIdAction extends BaseRestHandler {
                 }
 
                 String procedureContent = procedureContentObj.toString();
-                LOGGER.info("Executing procedure [{}]: {}", procedureId, procedureContent);
+                LOGGER.debug("Executing procedure [{}]: {}", procedureId, procedureContent);
 
                 elasticScriptExecutor.executeProcedure(procedureContent, finalProcedureArgs, new ActionListener<>() {
                     @Override

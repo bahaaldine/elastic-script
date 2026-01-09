@@ -37,7 +37,6 @@ public class DateBuiltInFunctions {
     private static final Logger LOGGER = LogManager.getLogger(DateBuiltInFunctions.class);
 
     public static void registerAll(ExecutionContext context) {
-        LOGGER.info("Registering Date built-in functions");
         registerCurrentDate(context);
         registerCurrentTimestamp(context);
         registerDateAdd(context);

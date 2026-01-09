@@ -36,7 +36,6 @@ public class StringBuiltInFunctions {
     private static final Logger LOGGER = LogManager.getLogger(StringBuiltInFunctions.class);
 
     public static void registerAll(ExecutionContext context) {
-        LOGGER.info("Registering String built-in functions");
         registerLength(context);
         registerSubstr(context);
         registerUpper(context);

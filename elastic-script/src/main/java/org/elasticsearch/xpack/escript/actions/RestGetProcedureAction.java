@@ -49,7 +49,7 @@ public class RestGetProcedureAction extends BaseRestHandler {
     protected RestChannelConsumer prepareRequest(RestRequest request, NodeClient client) {
         String id = request.param("procedure_id");
 
-        LOGGER.info("Getting procedure : {}", id);
+        LOGGER.debug("Getting procedure : {}", id);
 
         return channel -> elasticScriptExecutor.getProcedureAsync(id, new ActionListener<>() {
             @Override
@@ -64,7 +64,7 @@ public class RestGetProcedureAction extends BaseRestHandler {
                     builder.field("_id", id);
                     builder.field("_source", result);
                     builder.endObject();
-                    LOGGER.info("Procedure {} found.", id);
+                    LOGGER.debug("Procedure {} found.", id);
                     channel.sendResponse(new RestResponse(RestStatus.OK, builder));
                 } catch (IOException e) {
                     channel.sendResponse(new RestResponse(RestStatus.INTERNAL_SERVER_ERROR, e.getMessage()));

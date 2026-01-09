@@ -60,7 +60,6 @@ public class InferenceFunctions {
      * Requires an ES client to execute inference actions.
      */
     public static void registerAll(ExecutionContext context, Client client) {
-        LOGGER.info("Registering Inference API built-in functions");
         // Endpoint management
         registerInferenceCreateEndpoint(context, client);
         registerInferenceDeleteEndpoint(context, client);
@@ -117,7 +116,7 @@ public class InferenceFunctions {
                     
                     TaskType taskType = parseTaskType(taskTypeStr);
                     
-                    LOGGER.info("Creating inference endpoint [{}] with task type [{}]", endpointId, taskType);
+                    LOGGER.debug("Creating inference endpoint [{}] with task type [{}]", endpointId, taskType);
 
                     PutInferenceModelAction.Request request = new PutInferenceModelAction.Request(
                         taskType,
@@ -130,7 +129,7 @@ public class InferenceFunctions {
                     client.execute(PutInferenceModelAction.INSTANCE, request, new ActionListener<PutInferenceModelAction.Response>() {
                         @Override
                         public void onResponse(PutInferenceModelAction.Response response) {
-                            LOGGER.info("Successfully created inference endpoint [{}]", endpointId);
+                            LOGGER.debug("Successfully created inference endpoint [{}]", endpointId);
                             listener.onResponse(true);
                         }
 
@@ -182,7 +181,7 @@ public class InferenceFunctions {
                     String endpointId = args.get(0).toString();
                     boolean force = args.size() > 1 && Boolean.parseBoolean(args.get(1).toString());
                     
-                    LOGGER.info("Deleting inference endpoint [{}], force=[{}]", endpointId, force);
+                    LOGGER.debug("Deleting inference endpoint [{}], force=[{}]", endpointId, force);
 
                     DeleteInferenceEndpointAction.Request request = new DeleteInferenceEndpointAction.Request(
                         endpointId,
@@ -194,7 +193,7 @@ public class InferenceFunctions {
                     client.execute(DeleteInferenceEndpointAction.INSTANCE, request, new ActionListener<DeleteInferenceEndpointAction.Response>() {
                         @Override
                         public void onResponse(DeleteInferenceEndpointAction.Response response) {
-                            LOGGER.info("Successfully deleted inference endpoint [{}]", endpointId);
+                            LOGGER.debug("Successfully deleted inference endpoint [{}]", endpointId);
                             listener.onResponse(true);
                         }
 

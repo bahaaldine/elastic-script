@@ -41,7 +41,6 @@ public class GenericFunctions {
     private static final Logger LOGGER = LogManager.getLogger(GenericFunctions.class);
 
     public static void registerAll(ExecutionContext context) {
-        LOGGER.info("Registering Generic built-in functions");
         registerWebhook(context);
         registerHttpGet(context);
         registerHttpPost(context);

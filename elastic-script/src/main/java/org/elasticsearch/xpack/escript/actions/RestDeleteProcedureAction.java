@@ -46,14 +46,14 @@ public class RestDeleteProcedureAction extends BaseRestHandler {
 
     @Override
     protected RestChannelConsumer prepareRequest(RestRequest request, NodeClient client) throws IOException {
-        LOGGER.info("Deleting procedure ... ");
+        LOGGER.debug("Deleting procedure ... ");
 
         String id = request.param("procedure_id");
         if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException("Path parameter [procedure_id] is required");
         }
 
-        LOGGER.info("Deleting procedure: " + id );
+        LOGGER.debug("Deleting procedure: " + id );
 
         return channel -> elasticScriptExecutor.deleteProcedureAsync(id, new ActionListener<>() {
             @Override

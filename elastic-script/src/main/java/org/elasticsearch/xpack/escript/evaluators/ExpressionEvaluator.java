@@ -271,7 +271,6 @@ public class ExpressionEvaluator {
             evaluateRelationalExpressionAsync(ctx.relationalExpression(0), listener);
             return;
         }
-        LOGGER.info("Running on thread [{}]", Thread.currentThread().getName());
         // Use operator registry for '==' and '<>'
         String operator = ctx.getChild(1).getText();
         OperatorHandlerRegistry registry = new OperatorHandlerRegistry();
@@ -610,8 +609,6 @@ public class ExpressionEvaluator {
                 listener.onFailure(e);
             }
         };
-
-        LOGGER.info("Evaluating primary expression for {} ", ctx.getText());
 
         if (ctx.simplePrimaryExpression().LPAREN() != null && ctx.simplePrimaryExpression().RPAREN() != null) {
             evaluateExpressionAsync(ctx.simplePrimaryExpression().expression(), processResult);

@@ -28,7 +28,6 @@ public class NumberBuiltInFunctions {
     private static final Logger LOGGER = LogManager.getLogger(NumberBuiltInFunctions.class);
 
     public static void registerAll(ExecutionContext context) {
-        LOGGER.info("Registering Number built-in functions");
         registerABS(context);
         registerCEIL(context);
         registerFLOOR(context);

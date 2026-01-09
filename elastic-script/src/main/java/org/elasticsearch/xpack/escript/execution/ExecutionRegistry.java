@@ -94,7 +94,7 @@ public class ExecutionRegistry {
                 if (trackName != null) {
                     localCache.put(trackName, state);
                 }
-                LOGGER.info("Created execution: {} (track: {})", executionId, trackName);
+                LOGGER.debug("Created execution: {} (track: {})", executionId, trackName);
                 listener.onResponse(state);
             },
             listener::onFailure

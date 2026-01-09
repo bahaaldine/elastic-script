@@ -63,7 +63,6 @@ public class S3Functions {
     private static final String DEFAULT_REGION = "us-east-1";
 
     public static void registerAll(ExecutionContext context) {
-        LOGGER.info("Registering S3 built-in functions");
         registerS3Get(context);
         registerS3Put(context);
         registerS3Delete(context);
@@ -516,7 +515,7 @@ public class S3Functions {
         
         // 200 = created, 409 = bucket already exists (which is fine)
         if (responseCode == 200 || responseCode == 409) {
-            LOGGER.info("S3 bucket '{}' created or already exists in region '{}'", bucket, creds.region);
+            LOGGER.debug("S3 bucket '{}' created or already exists in region '{}'", bucket, creds.region);
             return true;
         } else {
             String error = readErrorResponse(conn);

@@ -247,6 +247,57 @@ public final class EScriptLogger {
     }
 
     // ========================================================================
+    // ASYNC CHAIN TRACING (TRACE level)
+    // ========================================================================
+
+    /**
+     * Log async handler entry - shows the flow between async handlers.
+     */
+    public static void asyncEnter(String executionId, String handlerName) {
+        if (SYSTEM_LOGGER.isTraceEnabled()) {
+            SYSTEM_LOGGER.trace("[{}] → {}", executionId, handlerName);
+        }
+    }
+
+    /**
+     * Log async handler exit with result.
+     */
+    public static void asyncExit(String executionId, String handlerName, Object result) {
+        if (SYSTEM_LOGGER.isTraceEnabled()) {
+            SYSTEM_LOGGER.trace("[{}] ← {} ({})", executionId, handlerName, truncate(result));
+        }
+    }
+
+    /**
+     * Log async handler failure.
+     */
+    public static void asyncFailed(String executionId, String handlerName, String error) {
+        if (SYSTEM_LOGGER.isTraceEnabled()) {
+            SYSTEM_LOGGER.trace("[{}] ✗ {} failed: {}", executionId, handlerName, error);
+        }
+    }
+
+    /**
+     * Log async chain step with indentation for nested calls.
+     */
+    public static void asyncStep(String executionId, int depth, String step) {
+        if (SYSTEM_LOGGER.isTraceEnabled()) {
+            String indent = "  ".repeat(depth);
+            String prefix = depth > 0 ? "├─ " : "→ ";
+            SYSTEM_LOGGER.trace("[{}] {}{}{}", executionId, indent, prefix, step);
+        }
+    }
+
+    /**
+     * Log async callback between handlers.
+     */
+    public static void asyncCallback(String executionId, String from, String to) {
+        if (SYSTEM_LOGGER.isTraceEnabled()) {
+            SYSTEM_LOGGER.trace("[{}] {} → {}", executionId, from, to);
+        }
+    }
+
+    // ========================================================================
     // EXPRESSION EVALUATION (TRACE level)
     // ========================================================================
 

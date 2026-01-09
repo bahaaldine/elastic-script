@@ -93,7 +93,6 @@ public class EsqlBuiltInFunctions {
      * and returns the normalized result (i.e. a List of Maps, in this example).
      */
     public static void registerAll(ExecutionContext context, ProcedureExecutor executor, Client client) {
-        LOGGER.info("Registering ESQL built-in functions");
 
         // Register ESQL_QUERY as a built-in function.
         // It expects a single STRING parameter named "query".
@@ -126,16 +125,16 @@ public class EsqlBuiltInFunctions {
                                          ProcedureExecutor executor,
                                          Client client) {
         try {
-            LOGGER.info("Executing ESQL_QUERY: {}", query);
+            LOGGER.debug("Executing ESQL_QUERY: {}", query);
 
             // Perform variable substitution on the query (if needed)
             String substitutedQuery = substituteVariables(query, executor);
-            LOGGER.info("Query after substitution: {}", substitutedQuery);
+            LOGGER.debug("Query after substitution: {}", substitutedQuery);
 
             // Build a search request from the substituted query (this example uses a simple query builder).
             // Adjust buildSearchRequest as needed for your use case.
             SearchRequest searchRequest = buildSearchRequest(substitutedQuery);
-            LOGGER.info("Search Request: {}", searchRequest);
+            LOGGER.trace("Search Request: {}", searchRequest);
 
             // Build the EsqlQueryRequest
             EsqlQueryRequest request = EsqlQueryRequest.syncEsqlQueryRequest(substitutedQuery);

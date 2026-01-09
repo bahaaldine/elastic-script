@@ -44,7 +44,6 @@ public class KubernetesFunctions {
     private static final Logger LOGGER = LogManager.getLogger(KubernetesFunctions.class);
 
     public static void registerAll(ExecutionContext context) {
-        LOGGER.info("Registering Kubernetes built-in functions");
         registerK8sScale(context);
         registerK8sRestart(context);
         registerK8sGet(context);

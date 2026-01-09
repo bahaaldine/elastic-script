@@ -48,7 +48,6 @@ public class ArrayBuiltInFunctions {
     private static final Logger LOGGER = LogManager.getLogger(ArrayBuiltInFunctions.class);
 
     public static void registerAll(ExecutionContext context) {
-        LOGGER.info("Registering Array built-in functions");
 
         registerArrayLength(context);
         registerArrayAppend(context);
