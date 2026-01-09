@@ -256,11 +256,17 @@ elastic-script/
 ├── scripts/quick-start.sh            # Developer setup script
 ├── notebooks/                         # Jupyter notebooks
 │   ├── kernel/plesql_kernel.py       # Custom Jupyter kernel
+│   ├── 00-complete-reference.ipynb   # All functions showcase
 │   ├── 01-getting-started.ipynb
 │   ├── 02-esql-integration.ipynb
 │   ├── 03-ai-observability.ipynb
 │   ├── 04-async-execution.ipynb
 │   └── 05-runbook-integrations.ipynb
+├── tests/e2e/                         # E2E test framework
+│   ├── README.md                      # E2E documentation
+│   ├── run_notebook_tests.py          # Programmatic notebook execution
+│   ├── run_tests.sh                   # Shell wrapper
+│   └── requirements.txt               # nbclient, nbformat
 └── CLAUDE.md                          # This file
 ```
 
@@ -298,10 +304,25 @@ cd elastic-script/elasticsearch
 ./gradlew :elastic-script:regen
 ```
 
-### Run Tests
+### Run Unit Tests
 ```bash
 cd elastic-script/elasticsearch
-./gradlew :elastic-script:test
+./gradlew :x-pack:plugin:elastic-script:test
+```
+
+### Run E2E Notebook Tests
+```bash
+# Run all notebooks
+./tests/e2e/run_tests.sh
+
+# Run specific notebook
+./tests/e2e/run_tests.sh --notebook 01
+
+# Verbose mode
+./tests/e2e/run_tests.sh --verbose
+
+# Setup + run (starts ES if needed)
+./tests/e2e/run_tests.sh --setup
 ```
 
 ---
