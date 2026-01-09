@@ -1,0 +1,99 @@
+/* elastic-script custom styles */
+
+:root {
+  --md-primary-fg-color: #673ab7;
+  --md-primary-fg-color--light: #9575cd;
+  --md-primary-fg-color--dark: #512da8;
+  --md-accent-fg-color: #ffc107;
+}
+
+/* Code blocks */
+.md-typeset code {
+  background-color: rgba(103, 58, 183, 0.1);
+  border-radius: 4px;
+}
+
+/* SQL syntax highlighting in code blocks */
+.highlight .k,
+.highlight .kd,
+.highlight .kn,
+.highlight .kp,
+.highlight .kr,
+.highlight .kt {
+  color: #673ab7;
+  font-weight: bold;
+}
+
+/* String literals */
+.highlight .s,
+.highlight .s1,
+.highlight .s2 {
+  color: #558b2f;
+}
+
+/* Numbers */
+.highlight .mi,
+.highlight .mf {
+  color: #1976d2;
+}
+
+/* Comments */
+.highlight .c,
+.highlight .c1,
+.highlight .cm {
+  color: #757575;
+  font-style: italic;
+}
+
+/* Home page cards */
+.md-typeset .grid.cards > ul > li {
+  border: 1px solid rgba(103, 58, 183, 0.2);
+  border-radius: 8px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.md-typeset .grid.cards > ul > li:hover {
+  border-color: rgba(103, 58, 183, 0.5);
+  box-shadow: 0 4px 12px rgba(103, 58, 183, 0.15);
+}
+
+/* Admonitions */
+.md-typeset .admonition.tip,
+.md-typeset details.tip {
+  border-color: #4caf50;
+}
+
+.md-typeset .admonition.warning,
+.md-typeset details.warning {
+  border-color: #ff9800;
+}
+
+/* Tables */
+.md-typeset table:not([class]) th {
+  background-color: rgba(103, 58, 183, 0.1);
+}
+
+/* Header */
+.md-header {
+  background-color: #673ab7;
+}
+
+/* Hero section on home */
+.md-main__inner.md-grid {
+  max-width: 1200px;
+}
+
+/* Footer links */
+.md-footer-meta__inner {
+  padding: 1rem;
+}
+
+/* Dark mode adjustments */
+[data-md-color-scheme="slate"] {
+  --md-default-bg-color: #1e1e2e;
+  --md-default-fg-color: #cdd6f4;
+}
+
+[data-md-color-scheme="slate"] .md-typeset code {
+  background-color: rgba(205, 214, 244, 0.1);
+}
