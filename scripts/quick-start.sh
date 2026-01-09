@@ -186,7 +186,8 @@ start_elasticsearch() {
     
     # Pass OPENAI_API_KEY if set
     if [ -n "$OPENAI_API_KEY" ]; then
-        OPENAI_API_KEY="$OPENAI_API_KEY" ./gradlew :run
+        ./gradlew --stop > /dev/null 2>&1 || true
+        OPENAI_API_KEY="$OPENAI_API_KEY" ./gradlew :run --no-daemon
     else
         ./gradlew :run
     fi
@@ -208,8 +209,10 @@ start_elasticsearch_background() {
     
     # Build the command with optional OPENAI_API_KEY
     if [ -n "$OPENAI_API_KEY" ]; then
+        print_step "Stopping Gradle daemon to ensure environment is inherited..."
+        ./gradlew --stop > /dev/null 2>&1 || true
         print_step "Starting with OPENAI_API_KEY configured"
-        OPENAI_API_KEY="$OPENAI_API_KEY" nohup ./gradlew :run > "$PROJECT_ROOT/elasticsearch.log" 2>&1 &
+        OPENAI_API_KEY="$OPENAI_API_KEY" nohup ./gradlew :run --no-daemon > "$PROJECT_ROOT/elasticsearch.log" 2>&1 &
     else
         nohup ./gradlew :run > "$PROJECT_ROOT/elasticsearch.log" 2>&1 &
     fi
