@@ -106,16 +106,21 @@ public class ContinuationExecutor {
         String handlerName = continuation.getHandlerName();
         List<Object> args = buildArgumentList(continuation.getArgumentBindings(), result, error);
 
-        LOGGER.debug("Calling handler: {}({})", handlerName, args.size());
+        LOGGER.info("Calling continuation handler: {}({}) with args: {}", handlerName, args.size(), args);
 
         // Try to call as a procedure first
         executor.callProcedureByNameAsync(handlerName, args, ActionListener.wrap(
-            listener::onResponse,
+            handlerResult -> {
+                LOGGER.info("Handler {} completed successfully with result: {}", handlerName, handlerResult);
+                listener.onResponse(handlerResult);
+            },
             procError -> {
+                LOGGER.warn("Procedure lookup for '{}' failed: {}", handlerName, procError.getMessage());
                 // If procedure not found, try as a function
                 try {
                     executor.callFunctionAsync(handlerName, args, listener);
                 } catch (Exception funcError) {
+                    LOGGER.error("Function lookup for '{}' also failed: {}", handlerName, funcError.getMessage());
                     listener.onFailure(new RuntimeException(
                         "Handler '" + handlerName + "' not found as procedure or function", funcError));
                 }
@@ -194,7 +199,8 @@ public class ContinuationExecutor {
         List<Object> args = new ArrayList<>();
         
         for (String binding : bindings) {
-            if ("@result".equals(binding)) {
+            if ("@result".equals(binding) || "@results".equals(binding)) {
+                // @result for single async, @results for parallel (both map to the same value)
                 args.add(result);
             } else if ("@error".equals(binding)) {
                 args.add(error != null ? error.getMessage() : null);

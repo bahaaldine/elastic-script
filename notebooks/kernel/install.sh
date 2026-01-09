@@ -38,3 +38,4 @@ echo "To verify: jupyter kernelspec list"
 echo "To start:  jupyter notebook"
 
 
+
