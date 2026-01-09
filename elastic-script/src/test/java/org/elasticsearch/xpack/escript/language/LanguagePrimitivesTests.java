@@ -784,5 +784,179 @@ public class LanguagePrimitivesTests extends ESTestCase {
         Object result = executeScript(script);
         assertEquals(50.0, result);
     }
+
+    // ========== Phase 5: Case-Insensitive Booleans ==========
+
+    public void testBooleanUppercaseTrue() throws Exception {
+        String script = """
+            PROCEDURE test_bool_upper_true()
+            BEGIN
+                DECLARE active BOOLEAN = TRUE;
+                RETURN active ? 'yes' : 'no';
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("yes", result);
+    }
+
+    public void testBooleanUppercaseFalse() throws Exception {
+        String script = """
+            PROCEDURE test_bool_upper_false()
+            BEGIN
+                DECLARE active BOOLEAN = FALSE;
+                RETURN active ? 'yes' : 'no';
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("no", result);
+    }
+
+    public void testBooleanMixedCaseTrue() throws Exception {
+        String script = """
+            PROCEDURE test_bool_mixed_true()
+            BEGIN
+                DECLARE active BOOLEAN = True;
+                RETURN active ? 'yes' : 'no';
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("yes", result);
+    }
+
+    public void testBooleanMixedCaseFalse() throws Exception {
+        String script = """
+            PROCEDURE test_bool_mixed_false()
+            BEGIN
+                DECLARE active BOOLEAN = False;
+                RETURN active ? 'yes' : 'no';
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("no", result);
+    }
+
+    public void testBooleanLowercaseStillWorks() throws Exception {
+        String script = """
+            PROCEDURE test_bool_lower()
+            BEGIN
+                DECLARE a BOOLEAN = true;
+                DECLARE b BOOLEAN = false;
+                RETURN a ? (b ? 'both' : 'only a') : 'neither';
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("only a", result);
+    }
+
+    public void testVarWithUppercaseBoolean() throws Exception {
+        String script = """
+            PROCEDURE test_var_bool_upper()
+            BEGIN
+                VAR active = TRUE;
+                VAR inactive = FALSE;
+                RETURN active ? (inactive ? 'both' : 'only active') : 'neither';
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("only active", result);
+    }
+
+    // ========== Phase 6: Array Literals with Single-Quoted Strings ==========
+
+    public void testArrayWithSingleQuotedStrings() throws Exception {
+        String script = """
+            PROCEDURE test_array_single_quotes()
+            BEGIN
+                DECLARE items ARRAY = ['apple', 'banana', 'cherry'];
+                RETURN items[0];
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("apple", result);
+    }
+
+    public void testArrayWithMixedQuotes() throws Exception {
+        String script = """
+            PROCEDURE test_array_mixed_quotes()
+            BEGIN
+                DECLARE items ARRAY = ['single', "double"];
+                RETURN items[0] || ' and ' || items[1];
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("single and double", result);
+    }
+
+    public void testArrayIterationWithSingleQuotes() throws Exception {
+        String script = """
+            PROCEDURE test_array_iter_single_quotes()
+            BEGIN
+                DECLARE fruits ARRAY = ['a', 'b', 'c'];
+                DECLARE result STRING = '';
+                FOR fruit IN fruits LOOP
+                    SET result = result || fruit;
+                END LOOP
+                RETURN result;
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("abc", result);
+    }
+
+    public void testArrayAccessWithSingleQuotedStrings() throws Exception {
+        // Test accessing multiple elements from array with single-quoted strings
+        String script = """
+            PROCEDURE test_array_access_single_quotes()
+            BEGIN
+                DECLARE items ARRAY = ['one', 'two', 'three', 'four', 'five'];
+                RETURN items[0] || '-' || items[2] || '-' || items[4];
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("one-three-five", result);
+    }
+
+    public void testVarArrayWithSingleQuotes() throws Exception {
+        String script = """
+            PROCEDURE test_var_array_single_quotes()
+            BEGIN
+                VAR colors = ['red', 'green', 'blue'];
+                RETURN colors[1];
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("green", result);
+    }
+
+    public void testComplexTypesDemo() throws Exception {
+        // This is the full demo_types procedure from the notebook
+        String script = """
+            PROCEDURE demo_types()
+            BEGIN
+                DECLARE message STRING = 'Hello';
+                DECLARE count NUMBER = 42;
+                DECLARE is_active BOOLEAN = TRUE;
+                DECLARE user DOCUMENT = { "name": "Alice", "role": "admin" };
+                DECLARE items ARRAY = ['apple', 'banana', 'cherry'];
+                VAR inferred_type = 'This is a string';
+                CONST PI = 3.14159;
+                RETURN message || ':' || count || ':' || is_active || ':' || user['name'] || ':' || items[0];
+            END PROCEDURE
+            """;
+        
+        Object result = executeScript(script);
+        assertEquals("Hello:42.0:true:Alice:apple", result);
+    }
 }
 
