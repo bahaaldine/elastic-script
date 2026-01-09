@@ -15,11 +15,13 @@ import org.elasticsearch.xpack.escript.primitives.CursorDefinition;
 import org.elasticsearch.xpack.escript.primitives.LambdaExpression;
 import org.elasticsearch.xpack.escript.primitives.VariableDefinition;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * The ExecutionContext class manages the execution state, including variables and functions,
@@ -33,6 +35,12 @@ public class ExecutionContext {
     private final ExecutionContext parentContext;  // Reference to parent context
     private Map<String, Object> procedureArguments;
     private LambdaInvoker lambdaInvoker;  // For invoking lambda expressions
+    
+    // Observability: execution tracking
+    private final String executionId;
+    private final long startTimeMs;
+    private final List<String> printOutput;
+    private String procedureName;
 
     /**
      * Constructs a global ExecutionContext with no parent.
@@ -43,6 +51,10 @@ public class ExecutionContext {
         this.cursors = new HashMap<>();
         this.parentContext = null;
         this.procedureArguments = new HashMap<>();
+        // Observability
+        this.executionId = generateExecutionId();
+        this.startTimeMs = System.currentTimeMillis();
+        this.printOutput = new ArrayList<>();
     }
 
     /**
@@ -59,7 +71,23 @@ public class ExecutionContext {
         // Inherit the lambda invoker from parent
         if (parentContext != null) {
             this.lambdaInvoker = parentContext.lambdaInvoker;
+            // Inherit observability context from parent
+            this.executionId = parentContext.executionId;
+            this.startTimeMs = parentContext.startTimeMs;
+            this.printOutput = parentContext.printOutput;
+            this.procedureName = parentContext.procedureName;
+        } else {
+            this.executionId = generateExecutionId();
+            this.startTimeMs = System.currentTimeMillis();
+            this.printOutput = new ArrayList<>();
         }
+    }
+    
+    /**
+     * Generate a short execution ID for logging/tracing correlation.
+     */
+    private static String generateExecutionId() {
+        return UUID.randomUUID().toString().substring(0, 8);
     }
 
     /**
@@ -546,5 +574,66 @@ public class ExecutionContext {
         } else {
             throw new RuntimeException("Argument '" + name + "' is not defined for the procedure.");
         }
+    }
+
+    // ========================================================================
+    // OBSERVABILITY METHODS
+    // ========================================================================
+
+    /**
+     * Gets the execution ID for this context (used for log/trace correlation).
+     */
+    public String getExecutionId() {
+        return executionId;
+    }
+
+    /**
+     * Gets the start time of this execution in milliseconds.
+     */
+    public long getStartTimeMs() {
+        return startTimeMs;
+    }
+
+    /**
+     * Gets the elapsed time since execution started.
+     */
+    public long getElapsedMs() {
+        return System.currentTimeMillis() - startTimeMs;
+    }
+
+    /**
+     * Sets the procedure name for this execution context.
+     */
+    public void setProcedureName(String name) {
+        this.procedureName = name;
+    }
+
+    /**
+     * Gets the procedure name for this execution context.
+     */
+    public String getProcedureName() {
+        return procedureName;
+    }
+
+    /**
+     * Adds a PRINT statement output to be captured.
+     * This output can later be returned in the API response.
+     */
+    public void addPrintOutput(String message) {
+        printOutput.add(message);
+    }
+
+    /**
+     * Gets all captured PRINT output.
+     */
+    public List<String> getPrintOutput() {
+        return Collections.unmodifiableList(printOutput);
+    }
+
+    /**
+     * Clears all captured PRINT output.
+     */
+    public void clearPrintOutput() {
+        printOutput.clear();
     }
 }
