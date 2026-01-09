@@ -77,9 +77,16 @@ class PlesqlKernel(Kernel):
             response.raise_for_status()
             json_resp = response.json()
             result = json_resp.get("result", json_resp)
-            logger.info(f"Got result: {type(result)}")
+            output = json_resp.get("output", [])  # PRINT statements (when available)
+            
+            logger.info(f"Got result: {type(result)}, output lines: {len(output) if output else 0}")
             
             if not silent:
+                # Display PRINT output first (if any)
+                if output and isinstance(output, list) and len(output) > 0:
+                    self._display_output(output)
+                
+                # Display the result
                 self._display_result(result)
             else:
                 logger.info("Silent mode, not displaying result")
@@ -139,6 +146,16 @@ class PlesqlKernel(Kernel):
         # Handle simple values
         else:
             self._send_stream(str(result))
+    
+    def _display_output(self, output):
+        """Display PRINT statement output."""
+        if output:
+            # Format PRINT output with a distinct prefix
+            formatted = "\n".join([f"📝 {line}" for line in output])
+            self.send_response(self.iopub_socket, 'stream', {
+                'name': 'stdout',
+                'text': formatted + '\n'
+            })
     
     def _send_stream(self, text):
         """Send text to stdout stream."""

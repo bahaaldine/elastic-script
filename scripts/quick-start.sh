@@ -782,16 +782,18 @@ show_help() {
     echo "Usage: ./scripts/quick-start.sh [OPTION]"
     echo ""
     echo "Options:"
-    echo "  (no option)     Full setup: build, start ES, load data, start notebooks"
-    echo "  --build         Just build the plugin"
-    echo "  --start         Start Elasticsearch (foreground)"
-    echo "  --start-bg      Start Elasticsearch (background)"
-    echo "  --load-data     Load sample data into Elasticsearch"
-    echo "  --notebooks     Start Jupyter notebooks"
-    echo "  --stop          Stop Elasticsearch and Jupyter notebooks
-  --stop-notebooks  Stop only Jupyter notebooks"
-    echo "  --status        Check if Elasticsearch is running"
-    echo "  --help          Show this help"
+    echo "  (no option)       Full setup: build, start ES, load data, start notebooks"
+    echo "  --build           Just build the plugin"
+    echo "  --start           Start Elasticsearch (foreground)"
+    echo "  --start-bg        Start Elasticsearch (background)"
+    echo "  --load-data       Load sample data into Elasticsearch"
+    echo "  --notebooks       Start Jupyter notebooks"
+    echo "  --kibana          Start Kibana (for APM/observability)"
+    echo "  --stop            Stop all (Elasticsearch, Kibana, Jupyter)"
+    echo "  --stop-notebooks  Stop only Jupyter notebooks"
+    echo "  --stop-kibana     Stop only Kibana"
+    echo "  --status          Check service status"
+    echo "  --help            Show this help"
     echo ""
 }
 
@@ -834,20 +836,148 @@ stop_notebooks() {
 # Stop everything
 stop_all() {
     stop_notebooks
+    stop_kibana
     stop_elasticsearch
+}
+
+# =========================================================================
+# KIBANA SUPPORT (for APM/Observability)
+# =========================================================================
+
+KIBANA_VERSION="9.0.1-SNAPSHOT"
+KIBANA_DIR="$PROJECT_ROOT/kibana-${KIBANA_VERSION}"
+
+# Download Kibana if not present
+download_kibana() {
+    print_header "Setting up Kibana"
+    
+    if [ -d "$KIBANA_DIR" ]; then
+        print_success "Kibana already downloaded"
+        return 0
+    fi
+    
+    local OS=""
+    local ARCH=""
+    
+    case "$(uname -s)" in
+        Darwin) OS="darwin" ;;
+        Linux) OS="linux" ;;
+        *) print_error "Unsupported OS"; return 1 ;;
+    esac
+    
+    case "$(uname -m)" in
+        x86_64) ARCH="x86_64" ;;
+        arm64|aarch64) ARCH="aarch64" ;;
+        *) print_error "Unsupported architecture"; return 1 ;;
+    esac
+    
+    # For now, we'll use a local build approach
+    # In production, you'd download from Elastic
+    print_warning "Kibana auto-download not yet implemented."
+    print_step "For APM/observability, you can manually:"
+    echo "  1. Download Kibana matching your ES version"
+    echo "  2. Configure kibana.yml with elasticsearch.hosts: ['http://localhost:9200']"
+    echo "  3. Run: ./bin/kibana"
+    echo ""
+    print_step "For now, logging is available in elasticsearch.log"
+    return 1
+}
+
+# Start Kibana in background
+start_kibana_background() {
+    if [ ! -d "$KIBANA_DIR" ]; then
+        download_kibana
+        if [ $? -ne 0 ]; then
+            return 1
+        fi
+    fi
+    
+    # Check if already running
+    if curl -s http://localhost:5601/api/status > /dev/null 2>&1; then
+        print_warning "Kibana already running on port 5601"
+        return 0
+    fi
+    
+    print_step "Starting Kibana in background..."
+    
+    cd "$KIBANA_DIR"
+    nohup ./bin/kibana > "$PROJECT_ROOT/kibana.log" 2>&1 &
+    KIBANA_PID=$!
+    echo $KIBANA_PID > "$PROJECT_ROOT/.kibana_pid"
+    
+    print_step "Waiting for Kibana to be ready..."
+    for i in {1..90}; do
+        if curl -s http://localhost:5601/api/status > /dev/null 2>&1; then
+            print_success "Kibana is ready at http://localhost:5601"
+            return 0
+        fi
+        sleep 2
+        echo -n "."
+    done
+    
+    print_warning "Kibana taking longer than expected. Check kibana.log"
+    return 1
+}
+
+# Stop Kibana
+stop_kibana() {
+    print_header "Stopping Kibana"
+    
+    if [ -f "$PROJECT_ROOT/.kibana_pid" ]; then
+        PID=$(cat "$PROJECT_ROOT/.kibana_pid")
+        if kill -0 $PID 2>/dev/null; then
+            kill $PID
+            rm "$PROJECT_ROOT/.kibana_pid"
+            print_success "Kibana stopped"
+        else
+            print_warning "Kibana process not found"
+            rm "$PROJECT_ROOT/.kibana_pid"
+        fi
+    else
+        # Try to kill by port
+        if lsof -ti:5601 > /dev/null 2>&1; then
+            lsof -ti:5601 | xargs kill 2>/dev/null
+            print_success "Kibana stopped (port 5601)"
+        else
+            print_warning "No Kibana running"
+        fi
+    fi
 }
 
 # Check status
 check_status() {
     print_header "Checking Status"
     
+    # Elasticsearch
+    echo ""
+    echo "Elasticsearch (port 9200):"
     if curl -s http://localhost:9200 > /dev/null 2>&1; then
-        print_success "Elasticsearch is running"
-        echo ""
-        curl -s http://localhost:9200 | head -10
+        print_success "Running"
+        curl -s -u elastic-admin:elastic-password http://localhost:9200 2>/dev/null | grep "cluster_name" || true
     else
-        print_warning "Elasticsearch is not running"
+        print_warning "Not running"
     fi
+    
+    # Kibana
+    echo ""
+    echo "Kibana (port 5601):"
+    if curl -s http://localhost:5601/api/status > /dev/null 2>&1; then
+        print_success "Running at http://localhost:5601"
+    else
+        print_warning "Not running"
+    fi
+    
+    # Jupyter
+    echo ""
+    echo "Jupyter (port 8888):"
+    if curl -s http://localhost:8888 > /dev/null 2>&1; then
+        print_success "Running at http://localhost:8888"
+    elif pgrep -f "jupyter" > /dev/null 2>&1; then
+        print_success "Running (process found)"
+    else
+        print_warning "Not running"
+    fi
+    echo ""
 }
 
 # Print curl examples
@@ -891,8 +1021,14 @@ case "${1:-}" in
     --notebooks)
         start_notebooks
         ;;
+    --kibana)
+        start_kibana_background
+        ;;
     --stop-notebooks)
         stop_notebooks
+        ;;
+    --stop-kibana)
+        stop_kibana
         ;;
     --stop)
         stop_all
