@@ -31,6 +31,9 @@ import org.junit.Test;
 
 public class PrintStatementHandlerTests extends ESTestCase {
 
+    // Logger name used by EScriptLogger for user output (must match EScriptLogger.OUTPUT_LOGGER)
+    private static final String OUTPUT_LOGGER_NAME = "o.e.x.e.EScript.OUTPUT";
+
     private ExecutionContext context;
     private ProcedureExecutor executor;
     private ThreadPool threadPool;
@@ -40,16 +43,16 @@ public class PrintStatementHandlerTests extends ESTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        // Set up a TestListAppender to capture log messages from PrintStatementHandler.
+        // Set up a TestListAppender to capture log messages from EScriptLogger.OUTPUT
         LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
         Configuration config = loggerContext.getConfiguration();
         PatternLayout layout = PatternLayout.newBuilder().withPattern("%m").build();
         testListAppender = new TestListAppender("TestListAppender", null, layout);
         testListAppender.start();
         config.addAppender(testListAppender);
-        // Attach the TestListAppender to the logger for PrintStatementHandler.
+        // Attach the TestListAppender to the EScriptLogger OUTPUT logger
         org.apache.logging.log4j.core.Logger logger =
-            (org.apache.logging.log4j.core.Logger) LogManager.getLogger(PrintStatementHandler.class);
+            (org.apache.logging.log4j.core.Logger) LogManager.getLogger(OUTPUT_LOGGER_NAME);
         logger.addAppender(testListAppender);
         logger.setAdditive(false);
 
@@ -73,7 +76,7 @@ public class PrintStatementHandlerTests extends ESTestCase {
     public void tearDown() throws Exception {
         // Remove the TestListAppender from the logger using the appender instance.
         org.apache.logging.log4j.core.Logger logger =
-            (org.apache.logging.log4j.core.Logger) LogManager.getLogger(PrintStatementHandler.class);
+            (org.apache.logging.log4j.core.Logger) LogManager.getLogger(OUTPUT_LOGGER_NAME);
         logger.removeAppender(testListAppender);
         testListAppender.stop();
         terminate(threadPool);
@@ -104,7 +107,8 @@ public class PrintStatementHandlerTests extends ESTestCase {
         latch.await();
 
         List<String> messages = testListAppender.getMessages();
-        boolean found = messages.stream().anyMatch(msg -> msg.contains("[PRINT]") && msg.contains("Hello world"));
+        // New format: [executionId] message (no [PRINT] prefix)
+        boolean found = messages.stream().anyMatch(msg -> msg.contains("Hello world"));
         assertTrue("Expected log message not found. Captured messages: " + messages, found);
     }
 
@@ -132,7 +136,8 @@ public class PrintStatementHandlerTests extends ESTestCase {
         latch.await();
 
         List<String> messages = testListAppender.getMessages();
-        boolean found = messages.stream().anyMatch(msg -> msg.contains("[PRINT]") && msg.contains("Warning occurred"));
+        // New format: [executionId] [WARN] message
+        boolean found = messages.stream().anyMatch(msg -> msg.contains("Warning occurred"));
         assertTrue("Expected warning log message not found. Captured messages: " + messages, found);
     }
 
@@ -164,7 +169,7 @@ public class PrintStatementHandlerTests extends ESTestCase {
         latch.await();
 
         List<String> messages = testListAppender.getMessages();
-        boolean found = messages.stream().anyMatch(msg -> msg.contains("[PRINT]") && msg.contains("variableValue"));
+        boolean found = messages.stream().anyMatch(msg -> msg.contains("variableValue"));
         assertTrue("Expected printed variable value not found. Captured messages: " + messages, found);
     }
 
@@ -196,10 +201,10 @@ public class PrintStatementHandlerTests extends ESTestCase {
         latch.await();
 
         // Verify that the log output contains the concatenated result.
-        // Expected: "[PRINT] The value is: variableValue"
+        // Expected: "[executionId] The value is: variableValue"
         List<String> messages = testListAppender.getMessages();
         boolean found = messages.stream().anyMatch(
-            msg -> msg.contains("[PRINT]") && msg.contains("The value is: ") && msg.contains("variableValue"));
+            msg -> msg.contains("The value is: ") && msg.contains("variableValue"));
         assertTrue("Expected concatenated log message not found. Captured messages: " + messages, found);
     }
 
@@ -250,7 +255,7 @@ public class PrintStatementHandlerTests extends ESTestCase {
         List<String> messages = testListAppender.getMessages();
         String[] expectedNames = {"Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace", "Heidi", "Ivan", "Judy"};
         for (String name : expectedNames) {
-            boolean found = messages.stream().anyMatch(msg -> msg.contains("[PRINT]") && msg.contains(name));
+            boolean found = messages.stream().anyMatch(msg -> msg.contains(name));
             assertTrue("Expected log message to contain '" + name + "'. Captured messages: " + messages, found);
         }
     }
@@ -263,7 +268,7 @@ public class PrintStatementHandlerTests extends ESTestCase {
         //      UPPER(TRIM(doc['name'])) || ": " || LENGTH(TRIM(doc['value']))
         // For example, if the first document is {"name": " John Doe ", "value": " data1 "},
         // then UPPER(TRIM(" John Doe ")) gives "JOHN DOE" and LENGTH(TRIM(" data1 ")) gives 5,
-        // so the printed output should be: "[PRINT] JOHN DOE: 5"
+        // so the printed output should be: "[executionId] JOHN DOE: 5"
 
         String blockQuery =
             "PROCEDURE processLargeDataset() " +
@@ -304,7 +309,7 @@ public class PrintStatementHandlerTests extends ESTestCase {
         latch.await();
 
         // Verify that the log output (captured by TestListAppender) contains the expected messages.
-        // We expect for each record a message in the form "[PRINT] <NAME>: <LENGTH>".
+        // We expect for each record a message in the form "[executionId] <NAME>: <LENGTH>".
         // For our first document, after trimming, we expect:
         //   UPPER(" John Doe ") → "JOHN DOE"
         //   TRIM(" data1 ") → "data1" → LENGTH is 5
@@ -326,7 +331,7 @@ public class PrintStatementHandlerTests extends ESTestCase {
         };
 
         for (String expected : expectedOutputs) {
-            boolean found = messages.stream().anyMatch(msg -> msg.contains("[PRINT]") && msg.contains(expected));
+            boolean found = messages.stream().anyMatch(msg -> msg.contains(expected));
             assertTrue("Expected log message containing '" + expected + "' not found. Captured messages: " + messages, found);
         }
     }
