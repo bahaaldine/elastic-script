@@ -184,7 +184,12 @@ start_elasticsearch() {
     echo "    Press Ctrl+C to stop Elasticsearch"
     echo ""
     
-    ./gradlew :run
+    # Pass OPENAI_API_KEY if set
+    if [ -n "$OPENAI_API_KEY" ]; then
+        OPENAI_API_KEY="$OPENAI_API_KEY" ./gradlew :run
+    else
+        ./gradlew :run
+    fi
 }
 
 # Start Elasticsearch in background
@@ -200,7 +205,14 @@ start_elasticsearch_background() {
     fi
     
     print_step "Starting Elasticsearch in background..."
-    nohup ./gradlew :run > "$PROJECT_ROOT/elasticsearch.log" 2>&1 &
+    
+    # Build the command with optional OPENAI_API_KEY
+    if [ -n "$OPENAI_API_KEY" ]; then
+        print_step "Starting with OPENAI_API_KEY configured"
+        OPENAI_API_KEY="$OPENAI_API_KEY" nohup ./gradlew :run > "$PROJECT_ROOT/elasticsearch.log" 2>&1 &
+    else
+        nohup ./gradlew :run > "$PROJECT_ROOT/elasticsearch.log" 2>&1 &
+    fi
     ES_PID=$!
     echo $ES_PID > "$PROJECT_ROOT/.es_pid"
     
