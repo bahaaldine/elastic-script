@@ -138,6 +138,35 @@
 - [x] macOS PATH variable collision fix in quick-start.sh
 - [x] Division by zero in sample data generation
 
+### 7. Observability Refactor (NEW - In Progress)
+- [x] `EScriptLogger` - Centralized structured logging utility
+  - INFO: Procedure start/end, user output (PRINT)
+  - DEBUG: Variable assignments, function calls, loops
+  - TRACE: Expression evaluation, handler internals
+  - Separate `o.e.x.e.EScript.OUTPUT` logger for PRINT statements
+- [x] `EScriptTracer` - APM tracing integration
+  - Transaction per procedure execution
+  - Spans for statements, functions, external calls
+  - Works with or without APM agent (reflection-based)
+- [x] `ExecutionContext` enhancements
+  - `executionId` for log/trace correlation
+  - `printOutput` list to capture PRINT statements
+  - `startTimeMs` for execution timing
+- [x] Logging refactor across handlers
+  - `PrintStatementHandler` - Uses `EScriptLogger.userOutput`
+  - `ExecuteStatementHandler` - Uses `EScriptLogger.esqlQuery`
+  - `ContinuationExecutor` - Cleaner error logging
+  - `AsyncProcedureStatementHandler` - Lifecycle logging
+- [x] `quick-start.sh` Kibana support
+  - `--kibana` to start Kibana
+  - `--stop-kibana` to stop Kibana
+  - Enhanced `--status` shows all services
+- [x] `plesql_kernel.py` PRINT output handling
+  - `_display_output()` for captured PRINT statements
+  - Ready for API response enhancements
+- [ ] Full PRINT capture in API response (requires deeper integration)
+- [ ] APM agent attachment and testing
+
 ---
 
 ## 🔧 Current State
@@ -161,9 +190,10 @@
 ## 📋 Pending Tasks
 
 ### High Priority
-1. **Comprehensive Notebook Examples** - Create notebooks showcasing ALL 106 functions
-2. **Async Execution Runtime** - Complete runtime for pipe-driven execution
-3. **ExecutionRegistry Persistence** - Store execution state in `.escript_executions` index
+1. **Complete Observability Integration** - API response with PRINT output, execution metadata
+2. **APM Agent Testing** - Attach Elastic APM agent to verify tracing
+3. **Async Execution Runtime** - Complete runtime for pipe-driven execution
+4. **ExecutionRegistry Persistence** - Store execution state in `.escript_executions` index
 
 ### Medium Priority
 4. **Intent System** - Complete DEFINE INTENT functionality
@@ -187,7 +217,9 @@ elastic-script/elastic-script/src/main/java/org/elasticsearch/xpack/escript/
 ├── executors/ProcedureExecutor.java  # Main execution engine
 ├── handlers/                         # Statement handlers
 ├── functions/builtin/                # All 106 built-in functions
-└── execution/                        # Async execution framework
+├── execution/                        # Async execution framework
+├── logging/EScriptLogger.java        # Structured logging utility
+└── tracing/EScriptTracer.java        # APM tracing integration
 ```
 
 ### Scripts & Notebooks
@@ -255,4 +287,4 @@ cd elastic-script/elasticsearch
 
 ---
 
-*Last updated: January 8, 2026*
+*Last updated: January 9, 2026*
