@@ -7,12 +7,11 @@
 
 package org.elasticsearch.xpack.escript.handlers;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.xpack.escript.context.ExecutionContext;
 import org.elasticsearch.xpack.escript.execution.Continuation;
 import org.elasticsearch.xpack.escript.executors.ProcedureExecutor;
+import org.elasticsearch.xpack.escript.logging.EScriptLogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +23,6 @@ import java.util.Map;
  * Handles binding of special variables (@result, @error) and invoking handlers.
  */
 public class ContinuationExecutor {
-
-    private static final Logger LOGGER = LogManager.getLogger(ContinuationExecutor.class);
 
     private final ProcedureExecutor executor;
 
@@ -76,7 +73,8 @@ public class ContinuationExecutor {
                 executeContinuationChainAsync(continuations, index + 1, nextResult, error, listener);
             },
             e -> {
-                LOGGER.warn("Continuation {} failed: {}", continuation, e.getMessage());
+                EScriptLogger.warn(executor.getContext().getExecutionId(), 
+                    "Continuation " + continuation + " failed: " + e.getMessage());
                 listener.onFailure(e);
             }
         ));
@@ -88,8 +86,6 @@ public class ContinuationExecutor {
         Exception error,
         ActionListener<Object> listener
     ) {
-        LOGGER.debug("Executing continuation: {}", continuation);
-
         if (continuation.isInlineLambda()) {
             executeInlineLambda(continuation.getInlineLambda(), result, error, listener);
         } else {
@@ -105,22 +101,23 @@ public class ContinuationExecutor {
     ) {
         String handlerName = continuation.getHandlerName();
         List<Object> args = buildArgumentList(continuation.getArgumentBindings(), result, error);
+        String executionId = executor.getContext().getExecutionId();
 
-        LOGGER.info("Calling continuation handler: {}({}) with args: {}", handlerName, args.size(), args);
+        EScriptLogger.functionCall(executionId, "CONTINUATION:" + handlerName, args.size());
 
         // Try to call as a procedure first
         executor.callProcedureByNameAsync(handlerName, args, ActionListener.wrap(
             handlerResult -> {
-                LOGGER.info("Handler {} completed successfully with result: {}", handlerName, handlerResult);
+                EScriptLogger.functionResult(executionId, handlerName, handlerResult);
                 listener.onResponse(handlerResult);
             },
             procError -> {
-                LOGGER.warn("Procedure lookup for '{}' failed: {}", handlerName, procError.getMessage());
                 // If procedure not found, try as a function
                 try {
                     executor.callFunctionAsync(handlerName, args, listener);
                 } catch (Exception funcError) {
-                    LOGGER.error("Function lookup for '{}' also failed: {}", handlerName, funcError.getMessage());
+                    EScriptLogger.error(executionId, 
+                        "Handler '" + handlerName + "' not found as procedure or function", funcError);
                     listener.onFailure(new RuntimeException(
                         "Handler '" + handlerName + "' not found as procedure or function", funcError));
                 }
@@ -170,8 +167,6 @@ public class ContinuationExecutor {
         
         // For now, we'll support simple lambda expressions
         // More complex lambda execution would require parsing the lambda body
-        
-        LOGGER.debug("Executing inline lambda: {}", lambda);
         
         // Extract the body between { and }
         int braceStart = lambda.indexOf('{');

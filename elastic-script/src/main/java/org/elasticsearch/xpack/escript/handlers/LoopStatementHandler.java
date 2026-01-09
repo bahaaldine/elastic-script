@@ -7,9 +7,8 @@
 
 package org.elasticsearch.xpack.escript.handlers;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.xpack.escript.logging.EScriptLogger;
 import org.elasticsearch.xpack.escript.executors.ProcedureExecutor;
 import org.elasticsearch.xpack.escript.exceptions.BreakException;
 import org.elasticsearch.xpack.escript.exceptions.ContinueException;
@@ -24,7 +23,6 @@ import java.util.Map;
 
 public class LoopStatementHandler {
 
-    private static final Logger LOGGER = LogManager.getLogger(LoopStatementHandler.class);
     private final ProcedureExecutor executor;
 
     public LoopStatementHandler(ProcedureExecutor executor) {
@@ -202,7 +200,7 @@ public class LoopStatementHandler {
         // Perform variable substitution for :varName placeholders
         String substitutedQuery = substituteVariables(esqlQuery);
         
-        LOGGER.info("Executing inline ESQL query: {}", substitutedQuery);
+        EScriptLogger.esqlQuery(executor.getContext().getExecutionId(), substitutedQuery);
         
         // Execute the ESQL query
         executor.executeEsqlQueryAsync(substitutedQuery, ActionListener.wrap(result -> {

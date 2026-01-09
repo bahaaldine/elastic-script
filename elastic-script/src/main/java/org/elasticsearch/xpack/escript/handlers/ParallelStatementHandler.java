@@ -7,14 +7,13 @@
 
 package org.elasticsearch.xpack.escript.handlers;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.xpack.escript.execution.Continuation;
 import org.elasticsearch.xpack.escript.execution.ExecutionPipeline;
 import org.elasticsearch.xpack.escript.execution.ExecutionRegistry;
 import org.elasticsearch.xpack.escript.execution.ExecutionState;
 import org.elasticsearch.xpack.escript.executors.ProcedureExecutor;
+import org.elasticsearch.xpack.escript.logging.EScriptLogger;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptParser;
 
 import java.util.ArrayList;
@@ -31,8 +30,6 @@ import java.util.concurrent.atomic.AtomicReference;
  * Syntax: {@code PARALLEL [proc1(), proc2()] | ON_ALL_DONE merge(@results) | ON_ANY_FAIL handle(@error);}
  */
 public class ParallelStatementHandler {
-
-    private static final Logger LOGGER = LogManager.getLogger(ParallelStatementHandler.class);
 
     private final ProcedureExecutor executor;
     private final ExecutionRegistry registry;
@@ -60,7 +57,8 @@ public class ParallelStatementHandler {
             List<ElasticScriptParser.Parallel_procedure_callContext> procedures = 
                 ctx.parallel_procedure_list().parallel_procedure_call();
             
-            LOGGER.info("Executing {} procedures in parallel", procedures.size());
+            String executionId = executor.getContext().getExecutionId();
+            EScriptLogger.procedureStart(executionId, "PARALLEL", procedures.size());
 
             // Build the pipeline from continuations
             ExecutionPipeline pipeline = buildParallelPipeline(ctx.parallel_continuation());
@@ -94,8 +92,6 @@ public class ParallelStatementHandler {
                     result -> {
                         results.set(index, result);
                         int count = completed.incrementAndGet();
-                        LOGGER.debug("Parallel procedure {} completed ({}/{})", 
-                            procedureName, count, procedures.size());
                         
                         if (count == procedures.size()) {
                             // All completed
@@ -103,7 +99,8 @@ public class ParallelStatementHandler {
                         }
                     },
                     error -> {
-                        LOGGER.warn("Parallel procedure {} failed: {}", procedureName, error.getMessage());
+                        EScriptLogger.warn(executionId, 
+                            "Parallel procedure " + procedureName + " failed: " + error.getMessage());
                         if (firstError.compareAndSet(null, error)) {
                             anyFailed.set(true);
                         }
@@ -219,7 +216,7 @@ public class ParallelStatementHandler {
                 Object value = evaluateExpressionBlocking(expr);
                 results.add(value);
             } catch (Exception e) {
-                LOGGER.warn("Failed to evaluate argument: {}", e.getMessage());
+                // Argument evaluation failed, add null
                 results.add(null);
             }
         }

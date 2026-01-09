@@ -18,8 +18,7 @@ import org.elasticsearch.client.internal.Client;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.logging.LogManager;
-import org.elasticsearch.logging.Logger;
+import org.elasticsearch.xpack.escript.logging.EScriptLogger;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.xcontent.XContentBuilder;
 import org.elasticsearch.xcontent.XContentFactory;
@@ -52,17 +51,6 @@ import java.util.regex.Pattern;
  * Adjust the grammar parsing and the search-building logic to match your actual DSL or placeholders.
  */
 public class ExecuteStatementHandler {
-
-    private static Logger LOGGER;
-    static {
-        try {
-            LOGGER = LogManager.getLogger(ExecuteStatementHandler.class);
-        } catch (Exception e) {
-            // Log the error using System.err, or assign a no-op logger
-            System.err.println("Failed to initialize logger in ExecuteStatementHandler: " + e);
-            LOGGER = null; // or a fallback logger if available
-        }
-    }
 
     private final ProcedureExecutor executor;
     private final Client client;
@@ -113,16 +101,15 @@ public class ExecuteStatementHandler {
             // Extract raw query and variable name
             String rawEsqlQuery = executor.getRawText(ctx.esql_query_content());
                 String variableName = ctx.variable_assignment().ID().getText();
-                LOGGER.info(() -> String.format("Raw ESQL query substring: [%s] and variable [%s]", rawEsqlQuery, variableName));
+                String executionId = executor.getContext().getExecutionId();
 
                 // Variable substitution
                 String substitutedQuery = substituteVariables(rawEsqlQuery);
                 String finalSubstitutedQuery = substitutedQuery;
-                LOGGER.info(() -> String.format("After substitution, ESQL query: [%s]", finalSubstitutedQuery));
+                EScriptLogger.esqlQuery(executionId, finalSubstitutedQuery);
 
                 // Extract the content and the variable name
                 SearchRequest searchRequest = buildSearchRequest(finalSubstitutedQuery);
-                LOGGER.info("Search Query: [{}]", searchRequest);
 
                 EsqlQueryRequest request = EsqlQueryRequest.syncEsqlQueryRequest(finalSubstitutedQuery);
 
@@ -161,22 +148,18 @@ public class ExecuteStatementHandler {
                             builder.field("rows", normalizedRows);
                             builder.endObject();
                             String jsonString = Strings.toString(builder);
-                            LOGGER.debug("ESQL JSON Documents: {}", jsonString);
+                            EScriptLogger.esqlResult(executionId, normalizedRows.size());
 
                             // Retrieve the persist clause (if any)
                             String persistIndexName = null;
                             if (ctx.persist_clause() != null) {
                                 persistIndexName = ctx.persist_clause().ID().getText();
-                                LOGGER.debug("Persist clause provided: [{}]", persistIndexName);
-                            } else {
-                                LOGGER.debug("No persist clause provided. Result will remain transient.");
                             }
 
                             // If a persist clause is provided, index the result into that index
                             if (persistIndexName != null) {
-                                // Extract the source index from the query (e.g., "FROM retro_arcade_games" yields "retro_arcade_games")
+                                // Extract the source index from the query
                                 String sourceIndex = extractSourceIndex(finalSubstitutedQuery1);
-                                LOGGER.debug("Extracted source index: [{}]", sourceIndex);
 
                                 ActionListener<Void> persistIndexListener = new ActionListener<Void>() {
                                     @Override
@@ -255,28 +238,24 @@ public class ExecuteStatementHandler {
             public void onResponse(GetMappingsResponse getMappingsResponse) {
                 try {
                     Map<String, Object> sourceMapping = getMappingsResponse.mappings().get(sourceIndex).sourceAsMap();
-                    LOGGER.debug("Source mapping: {}", sourceMapping);
                     // 2) Check if target index exists asynchronously.
                     String[] indices = {targetIndex};
                     ResolveIndexAction.Request getIndexRequest = new ResolveIndexAction.Request(indices);
                     client.admin().indices().resolveIndex(getIndexRequest, new ActionListener<ResolveIndexAction.Response>() {
                         @Override
                         public void onResponse(ResolveIndexAction.Response exists) {
-                            LOGGER.debug("Target index [{}] already exists.", targetIndex);
-                            // If index exists, simply proceed to bulk indexing.
+                            // Index exists, proceed to bulk indexing.
                             PersistUtil.bulkIndexDocuments(client, targetIndex, documents, listener);
                         }
 
                         @Override
                         public void onFailure(Exception e) {
-                            LOGGER.debug("Index {} has not been created yet", targetIndex);
                             // 3) Create target index asynchronously using the source mapping.
                             CreateIndexRequest createIndexRequest = new CreateIndexRequest(targetIndex);
                             createIndexRequest.mapping(sourceMapping);
                             client.admin().indices().create(createIndexRequest, new ActionListener<CreateIndexResponse>() {
                                 @Override
                                 public void onResponse(CreateIndexResponse createIndexResponse) {
-                                    LOGGER.debug("Target index [{}] created successfully.", targetIndex);
                                     // 4) Bulk index documents.
                                     PersistUtil.bulkIndexDocuments(client, targetIndex, documents, listener);
                                 }

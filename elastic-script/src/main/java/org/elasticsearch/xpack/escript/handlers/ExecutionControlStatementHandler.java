@@ -7,8 +7,6 @@
 
 package org.elasticsearch.xpack.escript.handlers;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.xpack.escript.execution.ExecutionRegistry;
 import org.elasticsearch.xpack.escript.execution.ExecutionState;
@@ -26,8 +24,6 @@ import java.util.concurrent.atomic.AtomicReference;
  * Syntax: {@code EXECUTION('name') | STATUS/CANCEL/RETRY/WAIT;}
  */
 public class ExecutionControlStatementHandler {
-
-    private static final Logger LOGGER = LogManager.getLogger(ExecutionControlStatementHandler.class);
 
     private final ExecutionRegistry registry;
 
@@ -47,8 +43,6 @@ public class ExecutionControlStatementHandler {
             String executionName = ctx.STRING().getText();
             // Remove quotes
             executionName = executionName.substring(1, executionName.length() - 1);
-            
-            LOGGER.debug("Execution control for: {}", executionName);
 
             // Get the operation
             ElasticScriptParser.Execution_operationContext operation = ctx.execution_operation();
@@ -103,7 +97,6 @@ public class ExecutionControlStatementHandler {
     private void handleCancel(String executionName, ActionListener<Object> listener) {
         registry.markCancelled(executionName, ActionListener.wrap(
             state -> {
-                LOGGER.info("Cancelled execution: {}", executionName);
                 listener.onResponse(Map.of(
                     "name", executionName,
                     "status", "CANCELLED",
@@ -111,7 +104,6 @@ public class ExecutionControlStatementHandler {
                 ));
             },
             e -> {
-                LOGGER.warn("Failed to cancel execution {}: {}", executionName, e.getMessage());
                 listener.onResponse(Map.of(
                     "name", executionName,
                     "success", false,
@@ -144,7 +136,6 @@ public class ExecutionControlStatementHandler {
                 
                 registry.updateExecution(retryState, ActionListener.wrap(
                     updated -> {
-                        LOGGER.info("Retrying execution: {}", executionName);
                         // Note: The actual re-execution would need to be triggered by a listener
                         // For now, we just update the state
                         listener.onResponse(Map.of(
@@ -161,8 +152,6 @@ public class ExecutionControlStatementHandler {
     }
 
     private void handleWait(String executionName, int timeoutSeconds, ActionListener<Object> listener) {
-        LOGGER.debug("Waiting for execution: {} (timeout: {}s)", executionName, timeoutSeconds);
-        
         // Poll for completion
         long startTime = System.currentTimeMillis();
         long timeoutMillis = timeoutSeconds * 1000L;

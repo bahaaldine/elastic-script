@@ -7,8 +7,6 @@
 
 package org.elasticsearch.xpack.escript.handlers;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.xpack.escript.execution.Continuation;
 import org.elasticsearch.xpack.escript.execution.ExecutionPipeline;
@@ -16,6 +14,7 @@ import org.elasticsearch.xpack.escript.execution.ExecutionRegistry;
 import org.elasticsearch.xpack.escript.execution.ExecutionState;
 import org.elasticsearch.xpack.escript.execution.ExecutionStatus;
 import org.elasticsearch.xpack.escript.executors.ProcedureExecutor;
+import org.elasticsearch.xpack.escript.logging.EScriptLogger;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptParser;
 
 import java.util.ArrayList;
@@ -29,8 +28,6 @@ import java.util.Map;
  * Syntax: {@code procedure_name(args) | ON_DONE handler(@result) | ON_FAIL handler(@error) | TRACK AS 'name';}
  */
 public class AsyncProcedureStatementHandler {
-
-    private static final Logger LOGGER = LogManager.getLogger(AsyncProcedureStatementHandler.class);
 
     private final ProcedureExecutor executor;
     private final ExecutionRegistry registry;
@@ -56,7 +53,8 @@ public class AsyncProcedureStatementHandler {
         try {
             // 1. Extract procedure name
             String procedureName = ctx.ID().getText();
-            LOGGER.info("Executing async procedure: {}", procedureName);
+            String execId = executor.getContext().getExecutionId();
+            EScriptLogger.procedureStart(execId, "ASYNC:" + procedureName);
 
             // 2. Evaluate arguments
             List<Object> args = new ArrayList<>();
@@ -94,7 +92,6 @@ public class AsyncProcedureStatementHandler {
         registry.createExecution(procedureName, parameters, pipeline, ActionListener.wrap(
             executionState -> {
                 String executionId = executionState.getExecutionId();
-                LOGGER.info("Created execution: {} for procedure: {}", executionId, procedureName);
 
                 // 6. Mark as running
                 registry.markRunning(executionId, ActionListener.wrap(
@@ -120,8 +117,8 @@ public class AsyncProcedureStatementHandler {
         executor.callProcedureByNameAsync(procedureName, args, ActionListener.wrap(
             result -> {
                 // Procedure succeeded
-                LOGGER.info("Procedure {} completed successfully, result type: {}", 
-                    procedureName, result != null ? result.getClass().getSimpleName() : "null");
+                EScriptLogger.procedureEnd(executionId, procedureName, 
+                    executor.getContext().getElapsedMs());
 
                 // Mark as completed
                 registry.markCompleted(executionId, result, ActionListener.wrap(
@@ -146,7 +143,7 @@ public class AsyncProcedureStatementHandler {
             },
             error -> {
                 // Procedure failed
-                LOGGER.warn("Procedure {} failed: {}", procedureName, error.getMessage());
+                EScriptLogger.procedureFailed(executionId, procedureName, error.getMessage());
 
                 // Mark as failed
                 registry.markFailed(executionId, error.getMessage(), ActionListener.wrap(
@@ -186,7 +183,7 @@ public class AsyncProcedureStatementHandler {
                 ActionListener.wrap(
                     result -> completeExecution(executionId, listener, previousError),
                     e -> {
-                        LOGGER.warn("FINALLY handler failed: {}", e.getMessage());
+                        EScriptLogger.warn(executionId, "FINALLY handler failed: " + e.getMessage());
                         completeExecution(executionId, listener, previousError != null ? previousError : e);
                     }
                 )
@@ -199,11 +196,6 @@ public class AsyncProcedureStatementHandler {
     private void completeExecution(String executionId, ActionListener<Object> listener, Exception error) {
         // Return the execution ID to the caller
         // The caller can use this to query status later
-        if (error != null) {
-            // Even if there was an error, we consider the async statement itself successful
-            // The error is stored in the execution state
-            LOGGER.debug("Execution {} completed with error stored", executionId);
-        }
         listener.onResponse(executionId);
     }
 

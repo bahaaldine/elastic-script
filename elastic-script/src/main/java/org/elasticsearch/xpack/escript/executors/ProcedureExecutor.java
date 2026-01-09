@@ -20,6 +20,7 @@ import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.xpack.escript.evaluators.ExpressionEvaluator;
 import org.elasticsearch.xpack.escript.exceptions.BreakException;
 import org.elasticsearch.xpack.escript.exceptions.ContinueException;
+import org.elasticsearch.xpack.escript.logging.EScriptLogger;
 import org.elasticsearch.xpack.escript.functions.Parameter;
 import org.elasticsearch.xpack.escript.functions.ParameterMode;
 import org.elasticsearch.xpack.escript.handlers.AssignmentStatementHandler;
@@ -260,9 +261,10 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
      * @param listener The ActionListener for asynchronous callbacks.
      */
     public void visitStatementAsync(ElasticScriptParser.StatementContext ctx, ActionListener<Object> listener) {
-
-        LOGGER.info("Context statement {}", ctx.getText() );
-        LOGGER.info("Context variables {}", this.context.getVariables() );
+        String executionId = context.getExecutionId();
+        
+        // Log statement execution at TRACE level (very verbose)
+        EScriptLogger.statementExec(executionId, "STATEMENT", ctx.getText());
 
         if (ctx.declare_statement() != null) {
             declareHandler.handleAsync(ctx.declare_statement(), listener);
@@ -698,7 +700,7 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
             // Substitute variables in the query
             String substitutedQuery = substituteVariables(esqlQuery);
             
-            LOGGER.info("Executing ESQL query for cursor: {}", substitutedQuery);
+            EScriptLogger.esqlQuery(context.getExecutionId(), substitutedQuery);
             
             // Check if this is a FROM function() query
             if (isFunctionSourceQuery(substitutedQuery)) {
@@ -752,12 +754,10 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
         } else if (upperTrimmed.startsWith("FROM")) {
             afterFrom = trimmed.substring(4).trim();
         } else {
-            LOGGER.debug("Query does not start with FROM: {}", query);
             return false;
         }
         // Check if it looks like a function call (WORD followed by parenthesis)
         boolean matches = afterFrom.matches("^[A-Za-z_][A-Za-z0-9_]*\\s*\\(.*\\).*");
-        LOGGER.info("isFunctionSourceQuery check: afterFrom='{}', matches={}", afterFrom, matches);
         return matches;
     }
     
@@ -789,7 +789,7 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
             functionPart = afterFrom.trim();
         }
         
-        LOGGER.info("Executing function source: {} with operations: {}", functionPart, esqlOps);
+        EScriptLogger.functionCall(context.getExecutionId(), "FROM " + functionPart, esqlOps != null ? 1 : 0);
         
         // Parse the function call: FUNCTION_NAME(args)
         int openParen = functionPart.indexOf('(');
