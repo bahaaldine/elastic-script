@@ -650,7 +650,8 @@ public class ExpressionEvaluator {
             processResult.onResponse(processedString);
         } else if (ctx.simplePrimaryExpression().BOOLEAN() != null) {
             String boolText = ctx.simplePrimaryExpression().BOOLEAN().getText();
-            processResult.onResponse(Boolean.parseBoolean(boolText));
+            // Handle case-insensitive TRUE/FALSE
+            processResult.onResponse(boolText.equalsIgnoreCase("true"));
         } else if (ctx.simplePrimaryExpression().arrayLiteral() != null) {
             if (ctx.simplePrimaryExpression().arrayLiteral().expressionList() != null) {
                 evaluateExpressionList(ctx.simplePrimaryExpression().arrayLiteral().expressionList().expression(), processResult);

@@ -134,7 +134,7 @@ LBRACE: '{';
 RBRACE: '}';
 
 // Literals
-BOOLEAN: 'true' | 'false';
+BOOLEAN: [Tt][Rr][Uu][Ee] | [Ff][Aa][Ll][Ss][Ee];
 FLOAT: [0-9]+ '.' [0-9]+;
 INT: [0-9]+;
 STRING
