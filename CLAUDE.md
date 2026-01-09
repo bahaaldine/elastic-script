@@ -190,10 +190,14 @@
 ## 📋 Pending Tasks
 
 ### High Priority
-1. **Complete Observability Integration** - API response with PRINT output, execution metadata
-2. **APM Agent Testing** - Attach Elastic APM agent to verify tracing
-3. **Async Execution Runtime** - Complete runtime for pipe-driven execution
-4. **ExecutionRegistry Persistence** - Store execution state in `.escript_executions` index
+1. **Automated E2E Test Framework** - Spin up full infrastructure, run notebooks as tests
+   - Create test harness that starts ES + loads data + runs kernel
+   - Execute each notebook cell and validate output
+   - Notebooks to automate: 01-getting-started, 02-esql, 03-ai, 04-async, 00-complete-reference
+2. **Complete Observability Integration** - API response with PRINT output, execution metadata
+3. **APM Agent Testing** - Attach Elastic APM agent to verify tracing
+4. **Async Execution Runtime** - Complete runtime for pipe-driven execution
+5. **ExecutionRegistry Persistence** - Store execution state in `.escript_executions` index
 
 ### Medium Priority
 4. **Intent System** - Complete DEFINE INTENT functionality
