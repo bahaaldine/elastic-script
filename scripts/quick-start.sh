@@ -573,7 +573,7 @@ load_sample_data() {
         COUNTRY=${COUNTRIES[$((RANDOM % ${#COUNTRIES[@]}))]}
         PAYMENT=${PAYMENT_METHODS[$((RANDOM % ${#PAYMENT_METHODS[@]}))]}
         
-        DAYS_AGO=$((RANDOM % 90))
+        DAYS_AGO=$((RANDOM % 89 + 1))  # Ensure at least 1 to avoid division by zero
         if [[ "$OSTYPE" == "darwin"* ]]; then
             CREATED=$(date -u -v-${DAYS_AGO}d +%Y-%m-%dT%H:%M:%SZ)
             UPDATED=$(date -u -v-$((RANDOM % DAYS_AGO + 1))d +%Y-%m-%dT%H:%M:%SZ)
