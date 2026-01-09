@@ -190,11 +190,18 @@
 ## 📋 Pending Tasks
 
 ### High Priority
-1. **Automated E2E Test Framework** - Spin up full infrastructure, run notebooks as tests
+1. **Complete Logging Cleanup** - Still 172+ verbose log calls remaining:
+   - `ActionListenerUtils.java` - Logs EVERY async callback at INFO (remove or DEBUG)
+   - `ExpressionEvaluator.java` - Logs EVERY expression at INFO (line 614 - remove)
+   - `ProcedureExecutor.java` - "Context statement" and "Context variables" at INFO (remove)
+   - All function `registerAll()` methods - Log at INFO on every request (move to startup)
+   - `PrintStatementHandler.java` - Update to use `EScriptLogger.userOutput()`
+   - Goal: Only PRINT output and errors should appear at INFO level
+2. **Automated E2E Test Framework** - Spin up full infrastructure, run notebooks as tests
    - Create test harness that starts ES + loads data + runs kernel
    - Execute each notebook cell and validate output
    - Notebooks to automate: 01-getting-started, 02-esql, 03-ai, 04-async, 00-complete-reference
-2. **Complete Observability Integration** - API response with PRINT output, execution metadata
+3. **Complete Observability Integration** - API response with PRINT output, execution metadata
 3. **APM Agent Testing** - Attach Elastic APM agent to verify tracing
 4. **Async Execution Runtime** - Complete runtime for pipe-driven execution
 5. **ExecutionRegistry Persistence** - Store execution state in `.escript_executions` index
