@@ -1,0 +1,4 @@
+# E2E Test Dependencies
+nbformat>=5.9.0
+nbclient>=0.8.0
+jupyter_client>=8.0.0

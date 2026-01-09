@@ -195,10 +195,12 @@
 ## 📋 Pending Tasks
 
 ### High Priority
-1. **Automated E2E Test Framework** - Spin up full infrastructure, run notebooks as tests
-   - Create test harness that starts ES + loads data + runs kernel
-   - Execute each notebook cell and validate output
-   - Notebooks to automate: 01-getting-started, 02-esql, 03-ai, 04-async, 00-complete-reference
+1. ~~**Automated E2E Test Framework**~~ ✅ Complete
+   - `tests/e2e/run_notebook_tests.py` - Programmatic notebook execution
+   - `tests/e2e/run_tests.sh` - Shell wrapper with setup options
+   - Uses `nbclient` to execute Jupyter notebooks as tests
+   - Current results: 2/6 pass (01-getting-started, 05-runbook-integrations)
+   - Remaining failures need: sample data loaded, OpenAI API key
 2. **Complete Observability Integration** - API response with PRINT output, execution metadata
 3. **APM Agent Testing** - Attach Elastic APM agent to verify tracing
 4. **Kibana APM Visualization** (For Later) - Full distributed tracing in Kibana:
@@ -206,8 +208,12 @@
    - Visible in Kibana APM UI with timeline visualization
    - No log pollution - production-grade debugging
    - See `EScriptTracer.java` for implementation ready to go
-4. **Async Execution Runtime** - Complete runtime for pipe-driven execution
-5. **ExecutionRegistry Persistence** - Store execution state in `.escript_executions` index
+4. ~~**Async Execution Runtime**~~ ✅ Complete - ON_DONE, ON_FAIL, PARALLEL all working
+5. ~~**ExecutionRegistry Persistence**~~ ✅ Complete - `.escript_executions` index auto-created
+6. **Multi-Node Distributed Execution** (For Later) - Test async execution across multiple ES nodes:
+   - Verify execution state is accessible from any node
+   - Test parallel execution distribution across cluster
+   - Ensure continuation handlers can run on different nodes than initiator
 
 ### Medium Priority
 4. **Function Registration Performance** - Currently all 106 built-in functions are registered on EVERY execution:
