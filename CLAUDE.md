@@ -200,10 +200,18 @@
 5. **ExecutionRegistry Persistence** - Store execution state in `.escript_executions` index
 
 ### Medium Priority
-4. **Intent System** - Complete DEFINE INTENT functionality
-5. **CURSOR Iteration** - Full FOR loop over CURSOR results
-6. **Error Handling** - Better error messages and stack traces
-7. **Function Documentation** - Auto-generated docs from `@FunctionSpec` annotations
+4. **Function Registration Performance** - Currently all 106 built-in functions are registered on EVERY execution:
+   ```
+   [INFO] Registering ESQL built-in functions
+   [INFO] Registering String built-in functions
+   [INFO] Registering Array built-in functions
+   ... (repeated for each request)
+   ```
+   Should register once at plugin startup, not per-request. Potential significant performance gain.
+5. **Intent System** - Complete DEFINE INTENT functionality
+6. **CURSOR Iteration** - Full FOR loop over CURSOR results
+7. **Error Handling** - Better error messages and stack traces
+8. **Function Documentation** - Auto-generated docs from `@FunctionSpec` annotations
 
 ### Low Priority
 8. **Performance Optimization** - Batch operations, connection pooling
