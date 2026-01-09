@@ -94,13 +94,17 @@ public class RestRunEScriptAction extends BaseRestHandler {
                 @Override
                 public void onResponse(Object result) {
                     try {
-                        LOGGER.debug("Object instance type: {}", result.getClass().getName());
-
-                        // If 'result' is a ReturnValue, extract the .getValue() from it
+                        // Handle null result (procedure without RETURN statement)
                         Object finalValue = result;
-                        if (result instanceof ReturnValue) {
-                            LOGGER.debug("This is a ReturnValue, extracting getValue()");
-                            finalValue = ((ReturnValue) result).getValue();
+                        if (result == null) {
+                            LOGGER.debug("Result is null (no RETURN statement)");
+                        } else {
+                            LOGGER.debug("Object instance type: {}", result.getClass().getName());
+                            // If 'result' is a ReturnValue, extract the .getValue() from it
+                            if (result instanceof ReturnValue) {
+                                LOGGER.debug("This is a ReturnValue, extracting getValue()");
+                                finalValue = ((ReturnValue) result).getValue();
+                            }
                         }
 
                         LOGGER.debug("Actual finalValue after extraction: {}", finalValue);
