@@ -237,80 +237,449 @@ start_elasticsearch_background() {
 load_sample_data() {
     print_header "Loading Sample Data"
     
+    local AUTH="-u elastic-admin:elastic-password"
+    local ES="localhost:9200"
+    
     # Wait for ES to be ready
     for i in {1..30}; do
-        if curl -s -u elastic-admin:elastic-password http://localhost:9200 > /dev/null 2>&1; then
+        if curl -s $AUTH http://$ES > /dev/null 2>&1; then
             break
         fi
         sleep 1
     done
     
-    if ! curl -s -u elastic-admin:elastic-password http://localhost:9200 > /dev/null 2>&1; then
+    if ! curl -s $AUTH http://$ES > /dev/null 2>&1; then
         print_error "Elasticsearch not running. Start it first."
         exit 1
     fi
     
-    print_step "Creating sample logs index..."
-    curl -s -u elastic-admin:elastic-password -X PUT "localhost:9200/logs-sample" -H "Content-Type: application/json" -d '{
+    # =========================================================================
+    # 1. LOGS - Application logs with realistic messages
+    # =========================================================================
+    print_step "Creating logs-sample index..."
+    curl -s $AUTH -X DELETE "$ES/logs-sample" > /dev/null 2>&1
+    curl -s $AUTH -X PUT "$ES/logs-sample" -H "Content-Type: application/json" -d '{
+        "settings": { "number_of_replicas": 0 },
         "mappings": {
             "properties": {
-                "timestamp": { "type": "date" },
+                "@timestamp": { "type": "date" },
                 "level": { "type": "keyword" },
                 "message": { "type": "text" },
                 "service": { "type": "keyword" },
-                "host": { "type": "keyword" }
+                "host": { "type": "keyword" },
+                "trace_id": { "type": "keyword" },
+                "user_id": { "type": "keyword" },
+                "duration_ms": { "type": "integer" },
+                "status_code": { "type": "integer" },
+                "method": { "type": "keyword" },
+                "path": { "type": "keyword" }
             }
         }
     }' > /dev/null
     
-    print_step "Indexing sample log data..."
-    LEVELS=("INFO" "WARN" "ERROR" "DEBUG")
-    SERVICES=("api" "gateway" "auth" "db" "cache")
-    for i in {1..20}; do
-        LEVEL=${LEVELS[$((RANDOM % ${#LEVELS[@]}))]}
+    print_step "Indexing application logs (100 documents)..."
+    
+    # Realistic log messages
+    INFO_MSGS=("Request processed successfully" "User authenticated" "Cache hit for key" "Database connection established" "Health check passed" "Configuration loaded" "Session created" "Payment processed" "Order confirmed" "Email sent successfully")
+    WARN_MSGS=("High memory usage detected" "Slow query execution" "Rate limit approaching" "Certificate expires in 30 days" "Deprecated API called" "Retry attempt" "Connection pool exhausted" "Queue size growing")
+    ERROR_MSGS=("Connection refused to database" "Authentication failed for user" "Timeout waiting for response" "Invalid request payload" "Service unavailable" "Out of memory error" "Disk space critical" "SSL handshake failed" "Permission denied" "Resource not found")
+    DEBUG_MSGS=("Entering function processOrder" "Query parameters validated" "Cache miss, fetching from source" "Serializing response object" "Checking user permissions")
+    
+    SERVICES=("api-gateway" "user-service" "order-service" "payment-service" "notification-service" "inventory-service" "auth-service" "search-service")
+    HOSTS=("prod-app-01" "prod-app-02" "prod-app-03" "prod-worker-01" "prod-worker-02")
+    METHODS=("GET" "POST" "PUT" "DELETE" "PATCH")
+    PATHS=("/api/v1/users" "/api/v1/orders" "/api/v1/products" "/api/v1/payments" "/api/v1/search" "/health" "/api/v1/auth/login" "/api/v1/cart")
+    
+    for i in {1..100}; do
+        # Weight log levels realistically: 60% INFO, 20% DEBUG, 15% WARN, 5% ERROR
+        RAND=$((RANDOM % 100))
+        if [ $RAND -lt 60 ]; then
+            LEVEL="INFO"
+            MSG=${INFO_MSGS[$((RANDOM % ${#INFO_MSGS[@]}))]}
+        elif [ $RAND -lt 80 ]; then
+            LEVEL="DEBUG"
+            MSG=${DEBUG_MSGS[$((RANDOM % ${#DEBUG_MSGS[@]}))]}
+        elif [ $RAND -lt 95 ]; then
+            LEVEL="WARN"
+            MSG=${WARN_MSGS[$((RANDOM % ${#WARN_MSGS[@]}))]}
+        else
+            LEVEL="ERROR"
+            MSG=${ERROR_MSGS[$((RANDOM % ${#ERROR_MSGS[@]}))]}
+        fi
+        
         SERVICE=${SERVICES[$((RANDOM % ${#SERVICES[@]}))]}
-        curl -s -u elastic-admin:elastic-password -X POST "localhost:9200/logs-sample/_doc" -H "Content-Type: application/json" -d "{
-            \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",
+        HOST=${HOSTS[$((RANDOM % ${#HOSTS[@]}))]}
+        METHOD=${METHODS[$((RANDOM % ${#METHODS[@]}))]}
+        PATH=${PATHS[$((RANDOM % ${#PATHS[@]}))]}
+        DURATION=$((RANDOM % 2000))
+        STATUS_CODE=$((RANDOM % 5 == 0 ? 500 : (RANDOM % 4 == 0 ? 404 : 200)))
+        TRACE_ID=$(printf '%08x-%04x-%04x' $RANDOM $RANDOM $RANDOM)
+        USER_ID="user-$((RANDOM % 50 + 1))"
+        
+        # Vary timestamps over the past 24 hours
+        HOURS_AGO=$((RANDOM % 24))
+        MINS_AGO=$((RANDOM % 60))
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            TS=$(date -u -v-${HOURS_AGO}H -v-${MINS_AGO}M +%Y-%m-%dT%H:%M:%SZ)
+        else
+            TS=$(date -u -d "$HOURS_AGO hours ago $MINS_AGO minutes ago" +%Y-%m-%dT%H:%M:%SZ)
+        fi
+        
+        curl -s $AUTH -X POST "$ES/logs-sample/_doc" -H "Content-Type: application/json" -d "{
+            \"@timestamp\": \"$TS\",
             \"level\": \"$LEVEL\",
-            \"message\": \"Sample log message $i\",
+            \"message\": \"$MSG\",
             \"service\": \"$SERVICE\",
-            \"host\": \"host-$((i % 3 + 1))\"
+            \"host\": \"$HOST\",
+            \"trace_id\": \"$TRACE_ID\",
+            \"user_id\": \"$USER_ID\",
+            \"duration_ms\": $DURATION,
+            \"status_code\": $STATUS_CODE,
+            \"method\": \"$METHOD\",
+            \"path\": \"$PATH\"
         }" > /dev/null
     done
     
-    print_step "Creating sample metrics index..."
-    curl -s -u elastic-admin:elastic-password -X PUT "localhost:9200/metrics-sample" -H "Content-Type: application/json" -d '{
+    # =========================================================================
+    # 2. METRICS - System and application metrics
+    # =========================================================================
+    print_step "Creating metrics-sample index..."
+    curl -s $AUTH -X DELETE "$ES/metrics-sample" > /dev/null 2>&1
+    curl -s $AUTH -X PUT "$ES/metrics-sample" -H "Content-Type: application/json" -d '{
+        "settings": { "number_of_replicas": 0 },
         "mappings": {
             "properties": {
-                "timestamp": { "type": "date" },
-                "metric": { "type": "keyword" },
+                "@timestamp": { "type": "date" },
+                "metric_name": { "type": "keyword" },
                 "value": { "type": "float" },
-                "service": { "type": "keyword" }
+                "unit": { "type": "keyword" },
+                "service": { "type": "keyword" },
+                "host": { "type": "keyword" },
+                "environment": { "type": "keyword" }
             }
         }
     }' > /dev/null
     
-    print_step "Indexing sample metrics data..."
-    METRICS=("cpu_usage" "memory_usage" "disk_io" "latency_ms")
-    METRIC_SERVICES=("api" "gateway" "auth")
-    for i in {1..15}; do
-        METRIC=${METRICS[$((RANDOM % ${#METRICS[@]}))]}
-        SERVICE=${METRIC_SERVICES[$((RANDOM % ${#METRIC_SERVICES[@]}))]}
-        VALUE=$((RANDOM % 100))
-        curl -s -u elastic-admin:elastic-password -X POST "localhost:9200/metrics-sample/_doc" -H "Content-Type: application/json" -d "{
-            \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",
-            \"metric\": \"$METRIC\",
+    print_step "Indexing system metrics (80 documents)..."
+    
+    METRIC_NAMES=("cpu_percent" "memory_percent" "disk_used_percent" "network_in_bytes" "network_out_bytes" "request_latency_p99" "request_rate" "error_rate" "gc_pause_ms" "thread_count")
+    UNITS=("percent" "percent" "percent" "bytes" "bytes" "ms" "req/s" "percent" "ms" "count")
+    ENVIRONMENTS=("production" "staging")
+    
+    for i in {1..80}; do
+        METRIC_IDX=$((RANDOM % ${#METRIC_NAMES[@]}))
+        METRIC_NAME=${METRIC_NAMES[$METRIC_IDX]}
+        UNIT=${UNITS[$METRIC_IDX]}
+        
+        # Generate realistic values based on metric type
+        case $METRIC_NAME in
+            "cpu_percent"|"memory_percent"|"disk_used_percent")
+                VALUE=$((RANDOM % 40 + 30)).$((RANDOM % 100))
+                ;;
+            "network_in_bytes"|"network_out_bytes")
+                VALUE=$((RANDOM % 10000000 + 100000))
+                ;;
+            "request_latency_p99")
+                VALUE=$((RANDOM % 500 + 50)).$((RANDOM % 100))
+                ;;
+            "request_rate")
+                VALUE=$((RANDOM % 1000 + 100)).$((RANDOM % 100))
+                ;;
+            "error_rate")
+                VALUE=$((RANDOM % 5)).$((RANDOM % 100))
+                ;;
+            "gc_pause_ms")
+                VALUE=$((RANDOM % 100 + 5))
+                ;;
+            "thread_count")
+                VALUE=$((RANDOM % 200 + 50))
+                ;;
+        esac
+        
+        SERVICE=${SERVICES[$((RANDOM % ${#SERVICES[@]}))]}
+        HOST=${HOSTS[$((RANDOM % ${#HOSTS[@]}))]}
+        ENV=${ENVIRONMENTS[$((RANDOM % ${#ENVIRONMENTS[@]}))]}
+        
+        HOURS_AGO=$((RANDOM % 24))
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            TS=$(date -u -v-${HOURS_AGO}H +%Y-%m-%dT%H:%M:%SZ)
+        else
+            TS=$(date -u -d "$HOURS_AGO hours ago" +%Y-%m-%dT%H:%M:%SZ)
+        fi
+        
+        curl -s $AUTH -X POST "$ES/metrics-sample/_doc" -H "Content-Type: application/json" -d "{
+            \"@timestamp\": \"$TS\",
+            \"metric_name\": \"$METRIC_NAME\",
             \"value\": $VALUE,
-            \"service\": \"$SERVICE\"
+            \"unit\": \"$UNIT\",
+            \"service\": \"$SERVICE\",
+            \"host\": \"$HOST\",
+            \"environment\": \"$ENV\"
         }" > /dev/null
     done
     
-    curl -s -u elastic-admin:elastic-password -X POST "localhost:9200/_refresh" > /dev/null
+    # =========================================================================
+    # 3. USERS - User profiles for testing
+    # =========================================================================
+    print_step "Creating users-sample index..."
+    curl -s $AUTH -X DELETE "$ES/users-sample" > /dev/null 2>&1
+    curl -s $AUTH -X PUT "$ES/users-sample" -H "Content-Type: application/json" -d '{
+        "settings": { "number_of_replicas": 0 },
+        "mappings": {
+            "properties": {
+                "user_id": { "type": "keyword" },
+                "email": { "type": "keyword" },
+                "name": { "type": "text" },
+                "role": { "type": "keyword" },
+                "department": { "type": "keyword" },
+                "created_at": { "type": "date" },
+                "last_login": { "type": "date" },
+                "active": { "type": "boolean" },
+                "login_count": { "type": "integer" }
+            }
+        }
+    }' > /dev/null
+    
+    print_step "Indexing user profiles (30 documents)..."
+    
+    FIRST_NAMES=("Alice" "Bob" "Charlie" "Diana" "Eve" "Frank" "Grace" "Henry" "Ivy" "Jack" "Kate" "Leo" "Maya" "Nick" "Olivia" "Peter" "Quinn" "Rachel" "Sam" "Tara")
+    LAST_NAMES=("Smith" "Johnson" "Williams" "Brown" "Jones" "Garcia" "Miller" "Davis" "Wilson" "Taylor")
+    ROLES=("admin" "developer" "analyst" "manager" "viewer")
+    DEPARTMENTS=("Engineering" "Sales" "Marketing" "Support" "Finance" "Operations")
+    
+    for i in {1..30}; do
+        FIRST=${FIRST_NAMES[$((RANDOM % ${#FIRST_NAMES[@]}))]}
+        LAST=${LAST_NAMES[$((RANDOM % ${#LAST_NAMES[@]}))]}
+        NAME="$FIRST $LAST"
+        EMAIL=$(echo "${FIRST,,}.${LAST,,}@example.com")
+        ROLE=${ROLES[$((RANDOM % ${#ROLES[@]}))]}
+        DEPT=${DEPARTMENTS[$((RANDOM % ${#DEPARTMENTS[@]}))]}
+        ACTIVE=$([[ $((RANDOM % 10)) -lt 9 ]] && echo "true" || echo "false")
+        LOGIN_COUNT=$((RANDOM % 500 + 1))
+        
+        DAYS_AGO=$((RANDOM % 365))
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            CREATED=$(date -u -v-${DAYS_AGO}d +%Y-%m-%dT%H:%M:%SZ)
+            LAST_LOGIN=$(date -u -v-$((RANDOM % 30))d +%Y-%m-%dT%H:%M:%SZ)
+        else
+            CREATED=$(date -u -d "$DAYS_AGO days ago" +%Y-%m-%dT%H:%M:%SZ)
+            LAST_LOGIN=$(date -u -d "$((RANDOM % 30)) days ago" +%Y-%m-%dT%H:%M:%SZ)
+        fi
+        
+        curl -s $AUTH -X POST "$ES/users-sample/_doc" -H "Content-Type: application/json" -d "{
+            \"user_id\": \"user-$i\",
+            \"email\": \"$EMAIL\",
+            \"name\": \"$NAME\",
+            \"role\": \"$ROLE\",
+            \"department\": \"$DEPT\",
+            \"created_at\": \"$CREATED\",
+            \"last_login\": \"$LAST_LOGIN\",
+            \"active\": $ACTIVE,
+            \"login_count\": $LOGIN_COUNT
+        }" > /dev/null
+    done
+    
+    # =========================================================================
+    # 4. ORDERS - E-commerce orders
+    # =========================================================================
+    print_step "Creating orders-sample index..."
+    curl -s $AUTH -X DELETE "$ES/orders-sample" > /dev/null 2>&1
+    curl -s $AUTH -X PUT "$ES/orders-sample" -H "Content-Type: application/json" -d '{
+        "settings": { "number_of_replicas": 0 },
+        "mappings": {
+            "properties": {
+                "order_id": { "type": "keyword" },
+                "customer_id": { "type": "keyword" },
+                "status": { "type": "keyword" },
+                "total_amount": { "type": "float" },
+                "currency": { "type": "keyword" },
+                "items_count": { "type": "integer" },
+                "shipping_country": { "type": "keyword" },
+                "payment_method": { "type": "keyword" },
+                "created_at": { "type": "date" },
+                "updated_at": { "type": "date" }
+            }
+        }
+    }' > /dev/null
+    
+    print_step "Indexing order data (50 documents)..."
+    
+    STATUSES=("pending" "processing" "shipped" "delivered" "cancelled" "refunded")
+    COUNTRIES=("US" "UK" "DE" "FR" "CA" "AU" "JP" "BR" "IN" "MX")
+    PAYMENT_METHODS=("credit_card" "debit_card" "paypal" "apple_pay" "google_pay" "bank_transfer")
+    
+    for i in {1..50}; do
+        ORDER_ID=$(printf 'ORD-%06d' $((RANDOM % 999999)))
+        CUSTOMER_ID="user-$((RANDOM % 30 + 1))"
+        STATUS=${STATUSES[$((RANDOM % ${#STATUSES[@]}))]}
+        TOTAL=$((RANDOM % 500 + 10)).$((RANDOM % 100))
+        ITEMS=$((RANDOM % 10 + 1))
+        COUNTRY=${COUNTRIES[$((RANDOM % ${#COUNTRIES[@]}))]}
+        PAYMENT=${PAYMENT_METHODS[$((RANDOM % ${#PAYMENT_METHODS[@]}))]}
+        
+        DAYS_AGO=$((RANDOM % 90))
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            CREATED=$(date -u -v-${DAYS_AGO}d +%Y-%m-%dT%H:%M:%SZ)
+            UPDATED=$(date -u -v-$((RANDOM % DAYS_AGO + 1))d +%Y-%m-%dT%H:%M:%SZ)
+        else
+            CREATED=$(date -u -d "$DAYS_AGO days ago" +%Y-%m-%dT%H:%M:%SZ)
+            UPDATED=$(date -u -d "$((RANDOM % DAYS_AGO + 1)) days ago" +%Y-%m-%dT%H:%M:%SZ)
+        fi
+        
+        curl -s $AUTH -X POST "$ES/orders-sample/_doc" -H "Content-Type: application/json" -d "{
+            \"order_id\": \"$ORDER_ID\",
+            \"customer_id\": \"$CUSTOMER_ID\",
+            \"status\": \"$STATUS\",
+            \"total_amount\": $TOTAL,
+            \"currency\": \"USD\",
+            \"items_count\": $ITEMS,
+            \"shipping_country\": \"$COUNTRY\",
+            \"payment_method\": \"$PAYMENT\",
+            \"created_at\": \"$CREATED\",
+            \"updated_at\": \"$UPDATED\"
+        }" > /dev/null
+    done
+    
+    # =========================================================================
+    # 5. PRODUCTS - Product catalog
+    # =========================================================================
+    print_step "Creating products-sample index..."
+    curl -s $AUTH -X DELETE "$ES/products-sample" > /dev/null 2>&1
+    curl -s $AUTH -X PUT "$ES/products-sample" -H "Content-Type: application/json" -d '{
+        "settings": { "number_of_replicas": 0 },
+        "mappings": {
+            "properties": {
+                "product_id": { "type": "keyword" },
+                "name": { "type": "text" },
+                "description": { "type": "text" },
+                "category": { "type": "keyword" },
+                "price": { "type": "float" },
+                "stock": { "type": "integer" },
+                "rating": { "type": "float" },
+                "reviews_count": { "type": "integer" },
+                "in_stock": { "type": "boolean" },
+                "tags": { "type": "keyword" }
+            }
+        }
+    }' > /dev/null
+    
+    print_step "Indexing product catalog (40 documents)..."
+    
+    CATEGORIES=("Electronics" "Clothing" "Home & Garden" "Sports" "Books" "Toys" "Beauty" "Automotive")
+    PRODUCT_NAMES=(
+        "Wireless Bluetooth Headphones" "Smart Watch Pro" "USB-C Hub Adapter" "Mechanical Keyboard" "4K Webcam"
+        "Cotton T-Shirt" "Running Shoes" "Winter Jacket" "Denim Jeans" "Wool Sweater"
+        "LED Desk Lamp" "Coffee Maker" "Air Purifier" "Robot Vacuum" "Smart Thermostat"
+        "Yoga Mat" "Resistance Bands" "Foam Roller" "Jump Rope" "Dumbbells Set"
+        "Programming Guide" "Science Fiction Novel" "Cookbook" "Biography" "Self-Help Book"
+        "Building Blocks Set" "Remote Control Car" "Board Game" "Puzzle Set" "Art Supplies"
+        "Face Moisturizer" "Shampoo Set" "Sunscreen SPF 50" "Makeup Palette" "Perfume"
+        "Car Phone Mount" "Dash Camera" "Tire Inflator" "Seat Cushion" "Car Vacuum"
+    )
+    
+    for i in {1..40}; do
+        PRODUCT_ID=$(printf 'PROD-%04d' $i)
+        NAME="${PRODUCT_NAMES[$((i - 1))]}"
+        CATEGORY=${CATEGORIES[$((i / 5 % ${#CATEGORIES[@]}))]}
+        PRICE=$((RANDOM % 200 + 10)).$((RANDOM % 100))
+        STOCK=$((RANDOM % 500))
+        IN_STOCK=$([[ $STOCK -gt 0 ]] && echo "true" || echo "false")
+        RATING=$((RANDOM % 20 + 30))  # 3.0 to 5.0
+        RATING_FLOAT=$(echo "scale=1; $RATING / 10" | bc)
+        REVIEWS=$((RANDOM % 500 + 1))
+        
+        curl -s $AUTH -X POST "$ES/products-sample/_doc" -H "Content-Type: application/json" -d "{
+            \"product_id\": \"$PRODUCT_ID\",
+            \"name\": \"$NAME\",
+            \"description\": \"High quality $NAME for your needs.\",
+            \"category\": \"$CATEGORY\",
+            \"price\": $PRICE,
+            \"stock\": $STOCK,
+            \"rating\": $RATING_FLOAT,
+            \"reviews_count\": $REVIEWS,
+            \"in_stock\": $IN_STOCK,
+            \"tags\": [\"popular\", \"$(echo $CATEGORY | tr '[:upper:]' '[:lower:]' | tr ' ' '-')\"]
+        }" > /dev/null
+    done
+    
+    # =========================================================================
+    # 6. EVENTS - Security/Audit events
+    # =========================================================================
+    print_step "Creating security-events index..."
+    curl -s $AUTH -X DELETE "$ES/security-events" > /dev/null 2>&1
+    curl -s $AUTH -X PUT "$ES/security-events" -H "Content-Type: application/json" -d '{
+        "settings": { "number_of_replicas": 0 },
+        "mappings": {
+            "properties": {
+                "@timestamp": { "type": "date" },
+                "event_type": { "type": "keyword" },
+                "severity": { "type": "keyword" },
+                "source_ip": { "type": "ip" },
+                "user": { "type": "keyword" },
+                "action": { "type": "keyword" },
+                "resource": { "type": "keyword" },
+                "outcome": { "type": "keyword" },
+                "message": { "type": "text" }
+            }
+        }
+    }' > /dev/null
+    
+    print_step "Indexing security events (60 documents)..."
+    
+    EVENT_TYPES=("authentication" "authorization" "data_access" "configuration_change" "network" "file_operation")
+    SEVERITIES=("low" "medium" "high" "critical")
+    ACTIONS=("login" "logout" "read" "write" "delete" "create" "modify" "execute")
+    RESOURCES=("/admin/users" "/api/data" "/config/settings" "/reports/financial" "/files/sensitive" "/system/logs")
+    OUTCOMES=("success" "failure" "blocked")
+    
+    for i in {1..60}; do
+        EVENT_TYPE=${EVENT_TYPES[$((RANDOM % ${#EVENT_TYPES[@]}))]}
+        SEVERITY_RAND=$((RANDOM % 100))
+        if [ $SEVERITY_RAND -lt 60 ]; then
+            SEVERITY="low"
+        elif [ $SEVERITY_RAND -lt 85 ]; then
+            SEVERITY="medium"
+        elif [ $SEVERITY_RAND -lt 95 ]; then
+            SEVERITY="high"
+        else
+            SEVERITY="critical"
+        fi
+        
+        IP="192.168.$((RANDOM % 256)).$((RANDOM % 256))"
+        USER="user-$((RANDOM % 30 + 1))"
+        ACTION=${ACTIONS[$((RANDOM % ${#ACTIONS[@]}))]}
+        RESOURCE=${RESOURCES[$((RANDOM % ${#RESOURCES[@]}))]}
+        OUTCOME=${OUTCOMES[$((RANDOM % ${#OUTCOMES[@]}))]}
+        
+        HOURS_AGO=$((RANDOM % 48))
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            TS=$(date -u -v-${HOURS_AGO}H +%Y-%m-%dT%H:%M:%SZ)
+        else
+            TS=$(date -u -d "$HOURS_AGO hours ago" +%Y-%m-%dT%H:%M:%SZ)
+        fi
+        
+        curl -s $AUTH -X POST "$ES/security-events/_doc" -H "Content-Type: application/json" -d "{
+            \"@timestamp\": \"$TS\",
+            \"event_type\": \"$EVENT_TYPE\",
+            \"severity\": \"$SEVERITY\",
+            \"source_ip\": \"$IP\",
+            \"user\": \"$USER\",
+            \"action\": \"$ACTION\",
+            \"resource\": \"$RESOURCE\",
+            \"outcome\": \"$OUTCOME\",
+            \"message\": \"User $USER performed $ACTION on $RESOURCE with $OUTCOME\"
+        }" > /dev/null
+    done
+    
+    # Refresh all indices
+    curl -s $AUTH -X POST "$ES/_refresh" > /dev/null
     
     print_success "Sample data loaded!"
     echo ""
     echo "    Available indices:"
-    curl -s -u elastic-admin:elastic-password "localhost:9200/_cat/indices?v&h=index,docs.count" | grep -E "logs-|metrics-"
+    curl -s $AUTH "$ES/_cat/indices?v&h=index,docs.count" | grep -E "logs-|metrics-|users-|orders-|products-|security-" | sort
+    echo ""
+    echo "    Total: 360 documents across 6 indices"
 }
 
 # Setup notebooks
