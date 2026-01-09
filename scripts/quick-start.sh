@@ -200,19 +200,19 @@ load_sample_data() {
     
     # Wait for ES to be ready
     for i in {1..30}; do
-        if curl -s http://localhost:9200 > /dev/null 2>&1; then
+        if curl -s -u elastic-admin:elastic-password http://localhost:9200 > /dev/null 2>&1; then
             break
         fi
         sleep 1
     done
     
-    if ! curl -s http://localhost:9200 > /dev/null 2>&1; then
+    if ! curl -s -u elastic-admin:elastic-password http://localhost:9200 > /dev/null 2>&1; then
         print_error "Elasticsearch not running. Start it first."
         exit 1
     fi
     
     print_step "Creating sample logs index..."
-    curl -s -X PUT "localhost:9200/logs-sample" -H "Content-Type: application/json" -d '{
+    curl -s -u elastic-admin:elastic-password -X PUT "localhost:9200/logs-sample" -H "Content-Type: application/json" -d '{
         "mappings": {
             "properties": {
                 "timestamp": { "type": "date" },
@@ -230,7 +230,7 @@ load_sample_data() {
     for i in {1..20}; do
         LEVEL=${LEVELS[$((RANDOM % ${#LEVELS[@]}))]}
         SERVICE=${SERVICES[$((RANDOM % ${#SERVICES[@]}))]}
-        curl -s -X POST "localhost:9200/logs-sample/_doc" -H "Content-Type: application/json" -d "{
+        curl -s -u elastic-admin:elastic-password -X POST "localhost:9200/logs-sample/_doc" -H "Content-Type: application/json" -d "{
             \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",
             \"level\": \"$LEVEL\",
             \"message\": \"Sample log message $i\",
@@ -240,7 +240,7 @@ load_sample_data() {
     done
     
     print_step "Creating sample metrics index..."
-    curl -s -X PUT "localhost:9200/metrics-sample" -H "Content-Type: application/json" -d '{
+    curl -s -u elastic-admin:elastic-password -X PUT "localhost:9200/metrics-sample" -H "Content-Type: application/json" -d '{
         "mappings": {
             "properties": {
                 "timestamp": { "type": "date" },
@@ -258,7 +258,7 @@ load_sample_data() {
         METRIC=${METRICS[$((RANDOM % ${#METRICS[@]}))]}
         SERVICE=${METRIC_SERVICES[$((RANDOM % ${#METRIC_SERVICES[@]}))]}
         VALUE=$((RANDOM % 100))
-        curl -s -X POST "localhost:9200/metrics-sample/_doc" -H "Content-Type: application/json" -d "{
+        curl -s -u elastic-admin:elastic-password -X POST "localhost:9200/metrics-sample/_doc" -H "Content-Type: application/json" -d "{
             \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",
             \"metric\": \"$METRIC\",
             \"value\": $VALUE,
@@ -266,12 +266,12 @@ load_sample_data() {
         }" > /dev/null
     done
     
-    curl -s -X POST "localhost:9200/_refresh" > /dev/null
+    curl -s -u elastic-admin:elastic-password -X POST "localhost:9200/_refresh" > /dev/null
     
     print_success "Sample data loaded!"
     echo ""
     echo "    Available indices:"
-    curl -s "localhost:9200/_cat/indices?v&h=index,docs.count" | grep -E "logs-|metrics-"
+    curl -s -u elastic-admin:elastic-password "localhost:9200/_cat/indices?v&h=index,docs.count" | grep -E "logs-|metrics-"
 }
 
 # Setup notebooks
@@ -391,19 +391,16 @@ print_examples() {
     print_header "📋 Try These Examples (copy & paste)"
     echo ""
     echo -e "${GREEN}# 1. Simple ESQL query${NC}"
-    echo 'curl -X POST "localhost:9200/_escript" -H "Content-Type: application/json" -d '\''{"query": "FROM logs-sample | LIMIT 5"}'\'''
+    echo 'curl -u elastic-admin:elastic-password -X POST "localhost:9200/_escript" -H "Content-Type: application/json" -d '\''{"query": "FROM logs-sample | LIMIT 5"}'\'''
     echo ""
     echo -e "${GREEN}# 2. Define and call a procedure${NC}"
-    echo 'curl -X POST "localhost:9200/_escript" -H "Content-Type: application/json" -d '\''{"query": "PROCEDURE get_logs() BEGIN FROM logs-sample | LIMIT 3 END; get_logs()"}'\'''
+    echo 'curl -u elastic-admin:elastic-password -X POST "localhost:9200/_escript" -H "Content-Type: application/json" -d '\''{"query": "CREATE PROCEDURE get_logs() BEGIN DECLARE logs ARRAY = ESQL_QUERY('\''FROM logs-sample | LIMIT 3'\''); RETURN logs; END PROCEDURE"}'\'''
     echo ""
-    echo -e "${GREEN}# 3. Async with pipe-driven continuation${NC}"
-    echo 'curl -X POST "localhost:9200/_escript" -H "Content-Type: application/json" -d '\''{"query": "PROCEDURE analyze() BEGIN FROM logs-sample | STATS count=COUNT(*) BY level END; analyze() | ON_DONE process(@result) | TRACK AS \"test\""}'\'''
+    echo -e "${GREEN}# 3. Call the procedure${NC}"
+    echo 'curl -u elastic-admin:elastic-password -X POST "localhost:9200/_escript" -H "Content-Type: application/json" -d '\''{"query": "CALL get_logs()"}'\'''
     echo ""
-    echo -e "${GREEN}# 4. Check execution status${NC}"
-    echo 'curl -X POST "localhost:9200/_escript" -H "Content-Type: application/json" -d '\''{"query": "EXECUTION(\"test\") | STATUS"}'\'''
-    echo ""
-    echo -e "${GREEN}# 5. Parallel execution${NC}"
-    echo 'curl -X POST "localhost:9200/_escript" -H "Content-Type: application/json" -d '\''{"query": "PARALLEL [task_a(), task_b()] | ON_ALL_DONE aggregate(@results)"}'\'''
+    echo -e "${GREEN}# 4. Check available indices${NC}"
+    echo 'curl -u elastic-admin:elastic-password "localhost:9200/_cat/indices?v&h=index,docs.count"'
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
