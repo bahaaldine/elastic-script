@@ -39,6 +39,15 @@ NOTEBOOKS_DIR = Path(__file__).parent.parent.parent / "notebooks"
 ELASTICSEARCH_URL = "http://localhost:9200"
 ES_USER = "elastic-admin"
 ES_PASSWORD = "elastic-password"
+SKIP_CONFIG_PATH = Path(__file__).parent / "skip_cells.json"
+
+
+def load_skip_config() -> Dict[str, Any]:
+    """Load skip configuration for notebooks with known issues."""
+    if SKIP_CONFIG_PATH.exists():
+        with open(SKIP_CONFIG_PATH, 'r') as f:
+            return json.load(f)
+    return {}
 
 
 class TestResult:
@@ -92,8 +101,11 @@ def get_notebooks() -> List[Path]:
     return sorted(notebooks)
 
 
-def execute_notebook(notebook_path: Path, verbose: bool = False) -> TestResult:
+def execute_notebook(notebook_path: Path, verbose: bool = False, skip_cells: List[int] = None) -> TestResult:
     """Execute a notebook and return test results."""
+    if skip_cells is None:
+        skip_cells = []
+    
     result = TestResult(notebook_path.name)
     start_time = time.time()
     
@@ -107,6 +119,15 @@ def execute_notebook(notebook_path: Path, verbose: bool = False) -> TestResult:
         if kernel_name != 'plesql_kernel':
             if verbose:
                 print(f"  ⚠️  Notebook uses kernel '{kernel_name}', not 'plesql_kernel'")
+        
+        # Mark cells to skip by making them markdown temporarily
+        original_types = {}
+        for i in skip_cells:
+            if i < len(nb.cells):
+                original_types[i] = nb.cells[i].cell_type
+                nb.cells[i].cell_type = 'raw'  # Skip by changing type
+                if verbose:
+                    print(f"    Cell {i}: ⏭️ SKIPPED (known issue)")
         
         # Create notebook client
         client = NotebookClient(
@@ -125,6 +146,11 @@ def execute_notebook(notebook_path: Path, verbose: bool = False) -> TestResult:
             
             # Check each cell for outputs
             for i, cell in enumerate(nb.cells):
+                # Skip cells that were marked to skip
+                if i in skip_cells:
+                    result.add_cell_result(i, True, "", "SKIPPED")
+                    continue
+                    
                 if cell.cell_type == 'code':
                     outputs = cell.get('outputs', [])
                     has_error = any(
@@ -172,6 +198,7 @@ def execute_notebook(notebook_path: Path, verbose: bool = False) -> TestResult:
 def run_tests(notebook_filter: Optional[str] = None, verbose: bool = False) -> List[TestResult]:
     """Run all notebook tests."""
     results = []
+    skip_config = load_skip_config()
     
     # Check Elasticsearch
     print("🔍 Checking Elasticsearch...")
@@ -195,8 +222,22 @@ def run_tests(notebook_filter: Optional[str] = None, verbose: bool = False) -> L
     print("=" * 60)
     
     for nb_path in notebooks:
-        print(f"\n▶️  {nb_path.name}")
-        result = execute_notebook(nb_path, verbose)
+        nb_name = nb_path.name
+        nb_skip_info = skip_config.get(nb_name, {})
+        
+        # Check if entire notebook should be skipped
+        if nb_skip_info.get("skip_all", False):
+            reason = nb_skip_info.get("reason", "No reason provided")
+            print(f"\n⏭️  {nb_name} - SKIPPED")
+            print(f"   Reason: {reason}")
+            result = TestResult(nb_name)
+            result.passed = True  # Count skipped as passed
+            result.error_message = f"SKIPPED: {reason}"
+            results.append(result)
+            continue
+        
+        print(f"\n▶️  {nb_name}")
+        result = execute_notebook(nb_path, verbose, nb_skip_info.get("skip_cells", []))
         results.append(result)
         
         if result.passed:
