@@ -1,0 +1,163 @@
+# elastic-script Documentation
+# https://bahaaldine.github.io/elastic-script/
+
+site_name: elastic-script
+site_description: A procedural scripting language for Elasticsearch
+site_author: Bahaaldine Azarmi
+site_url: https://bahaaldine.github.io/elastic-script/
+
+repo_name: bahaaldine/elastic-script
+repo_url: https://github.com/bahaaldine/elastic-script
+edit_uri: edit/main/docs/
+
+# Theme Configuration
+theme:
+  name: material
+  custom_dir: docs/overrides
+  language: en
+  
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  
+  font:
+    text: Inter
+    code: JetBrains Mono
+  
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+  
+  icon:
+    logo: material/script-text
+    repo: fontawesome/brands/github
+
+# Plugins
+plugins:
+  - search:
+      separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
+  - minify:
+      minify_html: true
+
+# Extensions
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - tables
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: bahaaldine
+      repo: elastic-script
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+# Navigation
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quick-start.md
+    - Jupyter Setup: getting-started/jupyter-setup.md
+  - Language Guide:
+    - Overview: language/overview.md
+    - Variables & Types: language/variables-types.md
+    - Control Flow: language/control-flow.md
+    - Procedures: language/procedures.md
+    - Async Execution: language/async-execution.md
+    - Error Handling: language/error-handling.md
+  - Functions:
+    - Overview: functions/overview.md
+    - String Functions: functions/string.md
+    - Number Functions: functions/number.md
+    - Array Functions: functions/array.md
+    - Date Functions: functions/date.md
+    - Document Functions: functions/document.md
+    - Elasticsearch: functions/elasticsearch.md
+    - AI & LLM: functions/ai-llm.md
+    - Integrations: functions/integrations.md
+  - Examples:
+    - Log Analysis: examples/log-analysis.md
+    - Incident Response: examples/incident-response.md
+    - Data Pipeline: examples/data-pipeline.md
+  - Development:
+    - Contributing: development/contributing.md
+    - Testing: development/testing.md
+    - Architecture: development/architecture.md
+
+# Extra
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/bahaaldine/elastic-script
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/bfrancenot
+  
+  generator: false
+  
+  version:
+    provider: mike
+
+extra_css:
+  - stylesheets/extra.css
+
+# Copyright
+copyright: Copyright &copy; 2024-2026 Bahaaldine Azarmi
