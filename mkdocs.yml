@@ -150,6 +150,7 @@ nav:
     - Contributing: development/contributing.md
     - Testing: development/testing.md
     - Architecture: development/architecture.md
+  - Roadmap: roadmap.md
 
 # Extra
 extra:
