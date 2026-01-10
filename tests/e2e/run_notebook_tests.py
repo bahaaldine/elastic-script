@@ -11,6 +11,10 @@ Usage:
     python run_notebook_tests.py                    # Run all notebooks
     python run_notebook_tests.py --notebook 01      # Run specific notebook
     python run_notebook_tests.py --verbose          # Verbose output
+    python run_notebook_tests.py --no-prompt        # Skip OpenAI key prompt (for CI)
+
+Environment Variables:
+    OPENAI_API_KEY    - If set, AI tests will run without prompting
 """
 
 import argparse
@@ -41,13 +45,57 @@ ES_USER = "elastic-admin"
 ES_PASSWORD = "elastic-password"
 SKIP_CONFIG_PATH = Path(__file__).parent / "skip_cells.json"
 
+# OpenAI API key for AI notebooks
+OPENAI_API_KEY = None
 
-def load_skip_config() -> Dict[str, Any]:
+
+def check_openai_key() -> bool:
+    """Check if OpenAI API key is available, prompt if not."""
+    global OPENAI_API_KEY
+    
+    # First check environment variable
+    OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
+    
+    if OPENAI_API_KEY:
+        print(f"✅ OpenAI API key found in environment")
+        return True
+    
+    # Prompt user
+    print("\n🔑 OpenAI API Key")
+    print("   The AI notebook (03-ai-observability) requires an OpenAI API key.")
+    print("   You can:")
+    print("   1. Enter your key now")
+    print("   2. Press Enter to skip AI tests")
+    print("   3. Set OPENAI_API_KEY environment variable before running")
+    print()
+    
+    try:
+        key = input("   Enter OpenAI API key (or press Enter to skip): ").strip()
+        if key:
+            OPENAI_API_KEY = key
+            os.environ['OPENAI_API_KEY'] = key
+            print("   ✅ API key set for this session")
+            return True
+        else:
+            print("   ⏭️  Skipping AI tests")
+            return False
+    except (EOFError, KeyboardInterrupt):
+        print("\n   ⏭️  Skipping AI tests")
+        return False
+
+
+def load_skip_config(has_openai_key: bool = False) -> Dict[str, Any]:
     """Load skip configuration for notebooks with known issues."""
+    config = {}
     if SKIP_CONFIG_PATH.exists():
         with open(SKIP_CONFIG_PATH, 'r') as f:
-            return json.load(f)
-    return {}
+            config = json.load(f)
+    
+    # If OpenAI key is available, don't skip the AI notebook
+    if has_openai_key and "03-ai-observability.ipynb" in config:
+        del config["03-ai-observability.ipynb"]
+        
+    return config
 
 
 class TestResult:
@@ -195,10 +243,9 @@ def execute_notebook(notebook_path: Path, verbose: bool = False, skip_cells: Lis
     return result
 
 
-def run_tests(notebook_filter: Optional[str] = None, verbose: bool = False) -> List[TestResult]:
+def run_tests(notebook_filter: Optional[str] = None, verbose: bool = False, skip_openai_prompt: bool = False) -> List[TestResult]:
     """Run all notebook tests."""
     results = []
-    skip_config = load_skip_config()
     
     # Check Elasticsearch
     print("🔍 Checking Elasticsearch...")
@@ -207,6 +254,21 @@ def run_tests(notebook_filter: Optional[str] = None, verbose: bool = False) -> L
         print("   Run: ./scripts/quick-start.sh")
         sys.exit(1)
     print("✅ Elasticsearch is running")
+    
+    # Check OpenAI API key (unless running specific non-AI notebook)
+    has_openai_key = False
+    if not skip_openai_prompt:
+        # Check if we're running AI notebook or all notebooks
+        needs_openai = notebook_filter is None or "03" in (notebook_filter or "") or "ai" in (notebook_filter or "").lower()
+        if needs_openai:
+            has_openai_key = check_openai_key()
+        else:
+            # Check env var silently for non-AI runs
+            has_openai_key = bool(os.environ.get('OPENAI_API_KEY'))
+    else:
+        has_openai_key = bool(os.environ.get('OPENAI_API_KEY'))
+    
+    skip_config = load_skip_config(has_openai_key)
     print()
     
     # Get notebooks
@@ -278,6 +340,7 @@ def main():
     parser.add_argument("--notebook", "-n", help="Filter notebooks by name (e.g., '01', 'getting-started')")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     parser.add_argument("--list", "-l", action="store_true", help="List available notebooks")
+    parser.add_argument("--no-prompt", action="store_true", help="Don't prompt for OpenAI key (for CI)")
     args = parser.parse_args()
     
     if args.list:
@@ -286,7 +349,7 @@ def main():
             print(f"  - {nb.name}")
         return 0
     
-    results = run_tests(args.notebook, args.verbose)
+    results = run_tests(args.notebook, args.verbose, args.no_prompt)
     return print_summary(results)
 
 
