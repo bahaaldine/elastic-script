@@ -1,7 +1,7 @@
 {
   "04-async-execution.ipynb": {
-    "skip_cells": [7],
-    "reason": "EXECUTION STATUS returns complex document that causes storage issues - known bug"
+    "skip_cells": [7, 10],
+    "reason": "EXECUTION STATUS requires .escript_executions index - not auto-created yet"
   },
   "03-ai-observability.ipynb": {
     "skip_all": true,
