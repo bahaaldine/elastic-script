@@ -138,6 +138,14 @@ nav:
     - Log Analysis: examples/log-analysis.md
     - Incident Response: examples/incident-response.md
     - Data Pipeline: examples/data-pipeline.md
+  - Notebooks:
+    - Overview: notebooks/index.md
+    - Getting Started: notebooks/getting-started.md
+    - ES|QL Integration: notebooks/esql-integration.md
+    - AI & Observability: notebooks/ai-observability.md
+    - Async Execution: notebooks/async-execution.md
+    - Runbook Integrations: notebooks/runbook-integrations.md
+    - Complete Reference: notebooks/complete-reference.md
   - Development:
     - Contributing: development/contributing.md
     - Testing: development/testing.md
