@@ -243,3 +243,57 @@ FROM cluster:us-west/logs-* | WHERE level = 'ERROR' INTO remote_errors
 ## 💡 Feature Requests
 
 [:fontawesome-brands-github: Open a Feature Request](https://github.com/bahaaldine/elastic-script/issues/new?labels=enhancement){ .md-button .md-button--primary }
+
+---
+
+## 🔧 Near-Term Improvements (v1.1)
+
+These are implementation improvements for the current v1.0 codebase:
+
+### API Response Enhancement
+**Status:** 🔄 Planned | **Priority:** High
+
+Return richer execution information in the API response:
+
+```json
+{
+  "result": "procedure return value",
+  "output": ["PRINT line 1", "PRINT line 2"],
+  "execution_id": "abc-123-def",
+  "duration_ms": 150
+}
+```
+
+**Why:** Makes debugging easier - PRINT statements visible in API calls, execution tracking.
+
+---
+
+### Function Registration Optimization
+**Status:** 🔄 Planned | **Priority:** High
+
+Currently, all 106 built-in functions register on every execution request. Moving to startup-time registration for significant performance gains.
+
+**Current (per-request):**
+```
+Request 1: Register 106 functions → Execute
+Request 2: Register 106 functions → Execute  
+Request 3: Register 106 functions → Execute
+```
+
+**Target (once at startup):**
+```
+Plugin Startup: Register 106 functions (once)
+Request 1: Execute
+Request 2: Execute
+Request 3: Execute
+```
+
+**Impact:** Reduced latency on every procedure call.
+
+---
+
+### Known Issues
+
+| Issue | Status | Workaround |
+|-------|--------|------------|
+| `.escript_executions` index not auto-created | 🔄 In Progress | Create manually before STATUS calls |
