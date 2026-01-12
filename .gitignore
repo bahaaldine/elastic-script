@@ -7,3 +7,6 @@ build/
 .idea/
 out/
 site/
+
+# E2E test reports (generated)
+tests/e2e/reports/
