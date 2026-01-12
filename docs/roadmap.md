@@ -1,18 +1,17 @@
 # Roadmap
 
-Current status and future direction for elastic-script.
+Current status and future direction for elastic-script — a procedural language for Elasticsearch inspired by Oracle PL/SQL.
 
 ---
 
-## ✅ Completed Features
+## ✅ Completed Features (v1.0)
 
-### Core Language (v1.0)
+### Core Language
 - [x] **Procedure Creation** - `CREATE PROCEDURE ... END PROCEDURE`
 - [x] **Variable System** - `DECLARE`, `VAR`, `CONST` with type inference
 - [x] **Control Flow** - IF/THEN/ELSEIF/ELSE, FOR loops, WHILE loops
-- [x] **Exception Handling** - TRY/CATCH/FINALLY blocks
-- [x] **Functions** - IN/OUT/INOUT parameter modes
 - [x] **Data Types** - STRING, NUMBER, BOOLEAN, ARRAY, DOCUMENT, DATE
+- [x] **Functions with Parameters** - IN/OUT/INOUT parameter modes
 
 ### Built-in Functions (106 total)
 - [x] **String Functions** (18) - LENGTH, SUBSTR, REPLACE, REGEXP_*, etc.
@@ -35,150 +34,195 @@ Current status and future direction for elastic-script.
 - [x] **Quick Start Script** - `./scripts/quick-start.sh` for one-command setup
 - [x] **Jupyter Integration** - Custom kernel for interactive development
 - [x] **Sample Notebooks** - 6 comprehensive tutorial notebooks
-- [x] **E2E Test Framework** - Automated notebook execution tests (6/6 passing)
+- [x] **E2E Test Framework** - Automated notebook execution with HTML reports
 - [x] **GitHub Pages Documentation** - Full documentation site
 
 ---
 
-## 🚧 In Progress
+## 📊 Feature Gap Analysis (PL/SQL Comparison)
 
-### Observability & Debugging
-
-| Feature | Status | Description |
-|---------|--------|-------------|
-| Structured Logging | ✅ Done | `EScriptLogger` with log levels and execution IDs |
-| PRINT Output Capture | 🔄 Planned | Return PRINT statements in API response |
-| Execution Metadata | 🔄 Planned | Include `execution_id`, `duration_ms` in response |
-| APM Integration | 🔄 Ready | `EScriptTracer` implemented, needs agent testing |
-
----
-
-## 📋 Planned Features
-
-### High Priority
-
-#### 1. API Response Enhancement
-Return richer execution information:
-
-```json
-{
-  "result": "procedure return value",
-  "output": ["PRINT line 1", "PRINT line 2"],
-  "execution_id": "abc-123",
-  "duration_ms": 150
-}
-```
-
-**Why:** Makes debugging easier, PRINT statements visible in API calls.
+| Category | Feature | PL/SQL | elastic-script | Priority |
+|----------|---------|--------|----------------|----------|
+| **Error Handling** | TRY/CATCH blocks | ✅ | ❌ | 🔴 P0 |
+| | Named exceptions | ✅ | ❌ | 🟡 P1 |
+| | RAISE/THROW | ✅ | ❌ | 🔴 P0 |
+| **Functions** | User-defined functions | ✅ | ❌ | 🔴 P0 |
+| | Function overloading | ✅ | ❌ | 🟢 P2 |
+| **Cursors** | Explicit cursors | ✅ | ❌ | 🔴 P0 |
+| | FETCH INTO | ✅ | ❌ | 🔴 P0 |
+| | BULK COLLECT | ✅ | ❌ | 🔴 P0 |
+| **Modules** | Packages | ✅ | ❌ | 🟡 P1 |
+| | Package state | ✅ | ❌ | 🟡 P1 |
+| **Events** | Triggers | ✅ | ❌ | 🔴 P0 |
+| | Scheduled jobs | ✅ | ❌ | 🔴 P0 |
+| **Collections** | Associative arrays (MAP) | ✅ | ❌ | 🔴 P0 |
+| | User-defined types | ✅ | ❌ | 🟡 P1 |
+| **Dynamic** | EXECUTE IMMEDIATE | ✅ | ❌ | 🔴 P0 |
+| | Bind variables | ✅ | ❌ | 🔴 P0 |
+| **Bulk Ops** | FORALL | ✅ | ❌ | 🔴 P0 |
+| **Security** | GRANT/REVOKE | ✅ | ❌ | 🟡 P1 |
+| **Debug** | Profiler | ✅ | ❌ | 🟡 P1 |
 
 ---
 
-#### 2. Function Registration Optimization
-Currently, all 106 functions register on every execution. Moving to startup-time registration for significant performance gains.
+## 🚧 Phase 1: Core Language Completeness (Q1-Q2 2026)
 
-**Impact:** Reduced latency on every procedure call.
-
----
-
-#### 3. Multi-Node Distributed Execution
-Test and validate async execution across Elasticsearch clusters:
-
-- Execution state accessible from any node
-- Parallel execution distributed across cluster
-- Continuation handlers can run on different nodes
-
-**Why:** Essential for production-grade distributed workflows.
-
----
-
-#### 4. Kibana APM Visualization
-Full distributed tracing in Kibana APM:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│ Transaction: analyze_logs_pipeline                          │
-│ Duration: 2.5s                                               │
-├─────────────────────────────────────────────────────────────┤
-│ ├── analyze_logs() ─────────────────── 1.2s                │
-│ │   ├── ESQL_QUERY ─────────── 800ms                       │
-│ │   └── LLM_COMPLETE ───────── 400ms                       │
-│ ├── ON_DONE: process_results() ─────── 800ms               │
-│ └── FINALLY: cleanup() ──────────────── 500ms              │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**Why:** Production-grade debugging without log pollution.
-
----
-
-### Medium Priority
-
-#### 5. Intent System
-Complete the `DEFINE INTENT` functionality for declarative automation:
+### 1.1 Exception Handling (TRY/CATCH)
+**Priority:** 🔴 P0
 
 ```sql
-DEFINE INTENT maintain_replicas AS
-    'Ensure index has at least 2 replicas'
-    CHECK ESQL_QUERY('FROM _cat/indices | WHERE replicas < 2')
-    REMEDIATE increase_replicas(@index);
+TRY
+    SET result = HTTP_GET('https://api.example.com/data')
+CATCH http_error
+    PRINT 'HTTP failed: ' || @error.message
+CATCH parse_error
+    SET result = {}
+FINALLY
+    CALL cleanup()
+END TRY
 ```
 
----
-
-#### 6. Enhanced CURSOR Support
-Full iteration patterns for ESQL results:
+### 1.2 User-Defined Functions
+**Priority:** 🔴 P0
 
 ```sql
-FOR row IN ESQL_QUERY('FROM logs-* | LIMIT 1000') LOOP
-    -- Process each row
-END LOOP;
+CREATE FUNCTION calculate_severity(errors NUMBER, warns NUMBER) RETURNS STRING AS
+BEGIN
+    IF errors * 10 + warns > 100 THEN RETURN 'critical' END IF
+    IF errors * 10 + warns > 50 THEN RETURN 'high' END IF
+    RETURN 'low'
+END FUNCTION
+
+SET sev = calculate_severity(5, 10)
+```
+
+### 1.3 Dynamic ES|QL
+**Priority:** 🔴 P0
+
+```sql
+DECLARE query STRING = 'FROM logs-* | WHERE level = ''ERROR'''
+IF service IS NOT NULL THEN
+    SET query = query || ' | WHERE service = :svc'
+END IF
+EXECUTE IMMEDIATE query USING service INTO results
+```
+
+### 1.4 Associative Arrays (MAP)
+**Priority:** 🔴 P0
+
+```sql
+DECLARE counts MAP<STRING, NUMBER> = {}
+SET counts['api'] = 42
+FOR svc, cnt IN counts LOOP
+    PRINT svc || ': ' || cnt
+END LOOP
 ```
 
 ---
 
-#### 7. Better Error Messages
-Improved error reporting with:
+## 🚧 Phase 2: Scale & Performance (Q2-Q3 2026)
 
-- Line numbers and column positions
-- Contextual suggestions
-- Stack traces for nested procedure calls
+### 2.1 Cursor Management
+**Priority:** 🔴 P0
 
----
+```sql
+DECLARE CURSOR c FOR FROM logs-* | LIMIT 100000
+OPEN c
+WHILE FETCH c LIMIT 1000 INTO batch LOOP
+    FOR doc IN batch LOOP CALL process(doc) END LOOP
+END LOOP
+CLOSE c
+```
 
-#### 8. Auto-Generated Documentation
-Generate function docs from `@FunctionSpec` annotations:
+### 2.2 Bulk Operations (FORALL)
+**Priority:** 🔴 P0
 
-```java
-@FunctionSpec(
-    name = "ARRAY_LENGTH",
-    description = "Returns the number of elements in an array",
-    parameters = {"array ARRAY"},
-    returns = "NUMBER"
-)
+```sql
+BULK COLLECT INTO logs FROM logs-* | WHERE level = 'ERROR' | LIMIT 5000
+FORALL log IN logs
+    CALL archive(log)
+    SAVE EXCEPTIONS
+```
+
+### 2.3 Scheduled Jobs
+**Priority:** 🔴 P0
+
+```sql
+CREATE JOB daily_cleanup
+SCHEDULE '0 2 * * *'  -- 2 AM daily
+AS
+BEGIN
+    CALL archive_old_logs(30)
+    CALL send_report()
+END JOB
+```
+
+### 2.4 Triggers & Events
+**Priority:** 🔴 P0
+
+```sql
+CREATE TRIGGER on_error
+WHEN DOCUMENT INSERTED INTO logs-*
+WHERE level = 'ERROR' AND service = 'payment'
+BEGIN
+    CALL SLACK_SEND('#alerts', 'Error: ' || @document.message)
+    IF @document.error_code = 'PAY001' THEN
+        CALL PAGERDUTY_TRIGGER('Payment failure', 'critical')
+    END IF
+END TRIGGER
+
+CREATE TRIGGER on_alert
+WHEN ALERT 'high-error-rate' FIRES
+BEGIN
+    CALL escalate(@alert)
+END TRIGGER
 ```
 
 ---
 
-### Low Priority
+## 🚧 Phase 3: Enterprise Features (Q3-Q4 2026)
 
-#### 9. Performance Optimization
-- Batch operations for bulk indexing
-- Connection pooling for external services
-- Query result caching
+### 3.1 Packages & Modules
+
+```sql
+CREATE PACKAGE incident_response AS
+    PROCEDURE handle(id STRING)
+    FUNCTION get_severity(id STRING) RETURNS STRING
+END PACKAGE
+
+CREATE PACKAGE BODY incident_response AS
+    PROCEDURE handle(id STRING) AS BEGIN ... END
+END PACKAGE BODY
+```
+
+### 3.2 Security (GRANT/REVOKE)
+
+```sql
+GRANT EXECUTE ON PROCEDURE analyze_logs TO ROLE 'analyst'
+CREATE PROCEDURE admin_op() AUTHID DEFINER AS BEGIN ... END
+```
+
+### 3.3 Profiling & Debugging
+
+```sql
+SET PROFILING ON
+CALL complex_pipeline()
+SHOW PROFILE  -- Line-by-line timing breakdown
+```
 
 ---
 
-#### 10. Security Enhancements
-- Encrypted API key storage
-- RBAC integration for procedure access
-- Audit logging for sensitive operations
+## 🚧 Phase 4: Elasticsearch-Native (2027+)
 
----
+### 4.1 Vector Search & ML
+```sql
+VECTOR_SEARCH INTO results FROM kb QUERY_VECTOR LLM_EMBED(question) K 10
+```
 
-#### 11. Monitoring & Metrics
-- Execution metrics (count, duration, errors)
-- Slow query logging
-- Resource usage tracking
+### 4.2 Cross-Cluster
+```sql
+FROM cluster:us-west/logs-* | WHERE level = 'ERROR' INTO remote_errors
+```
 
 ---
 
@@ -186,21 +230,16 @@ Generate function docs from `@FunctionSpec` annotations:
 
 | Version | Target | Focus |
 |---------|--------|-------|
-| v1.0 | ✅ Current | Core language, 106 functions, async execution |
-| v1.1 | Q1 2026 | API enhancement, performance optimization |
-| v1.2 | Q2 2026 | Multi-node execution, APM integration |
-| v2.0 | Q3 2026 | Intent system, enhanced security |
+| v1.0 | ✅ Current | Core language, 106 functions, async |
+| v1.1 | Q1 2026 | Exception handling, UDFs |
+| v1.2 | Q2 2026 | Dynamic ES|QL, MAPs |
+| v1.3 | Q3 2026 | Cursors, bulk ops |
+| **v2.0** | **Q4 2026** | **Triggers, scheduled jobs** |
+| v2.1 | Q1 2027 | Packages, security |
+| v3.0 | Q3 2027 | Vector search, cross-cluster |
 
 ---
 
 ## 💡 Feature Requests
 
-Have an idea for elastic-script? We'd love to hear it!
-
-[:fontawesome-brands-github: Open a Feature Request](https://github.com/bahaaldine/elastic-script/issues/new?labels=enhancement&template=feature_request.md){ .md-button .md-button--primary }
-
----
-
-## 🤝 Contributing
-
-Want to help build these features? Check out the [Contributing Guide](development/contributing.md) to get started!
+[:fontawesome-brands-github: Open a Feature Request](https://github.com/bahaaldine/elastic-script/issues/new?labels=enhancement){ .md-button .md-button--primary }

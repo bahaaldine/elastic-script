@@ -343,3 +343,43 @@ cd elastic-script/elasticsearch
 ---
 
 *Last updated: January 9, 2026*
+
+---
+
+## 🔮 Future Language Features (PL/SQL Comparison)
+
+Based on comprehensive analysis comparing elastic-script to Oracle PL/SQL:
+
+### Phase 1: Core Completeness (Q1-Q2 2026)
+| Feature | Priority | Description |
+|---------|----------|-------------|
+| TRY/CATCH | 🔴 P0 | Exception handling with named exceptions |
+| CREATE FUNCTION | 🔴 P0 | User-defined functions (vs procedures) |
+| EXECUTE IMMEDIATE | 🔴 P0 | Dynamic ES|QL building |
+| MAP type | 🔴 P0 | Associative arrays (key-value) |
+
+### Phase 2: Scale & Performance (Q2-Q3 2026)
+| Feature | Priority | Description |
+|---------|----------|-------------|
+| Cursors | 🔴 P0 | Streaming large result sets |
+| FORALL | 🔴 P0 | Bulk operations with SAVE EXCEPTIONS |
+| CREATE JOB | 🔴 P0 | Scheduled job execution (cron) |
+| CREATE TRIGGER | 🔴 P0 | Event-driven execution |
+
+### Phase 3: Enterprise (Q3-Q4 2026)
+| Feature | Priority | Description |
+|---------|----------|-------------|
+| Packages | 🟡 P1 | Module organization |
+| GRANT/REVOKE | 🟡 P1 | Fine-grained permissions |
+| Profiler | 🟡 P1 | Performance analysis |
+
+### Trigger Event Types (Planned)
+- `DOCUMENT INSERTED INTO index` - New document indexed
+- `DOCUMENT UPDATED IN index` - Document updated  
+- `ALERT name FIRES` - Elasticsearch alert fires
+- `INDEX ROLLED OVER IN pattern` - ILM rollover event
+- `CLUSTER STATUS CHANGED TO status` - Health change
+
+See `docs/roadmap.md` for full details.
+
+*Last updated: January 11, 2026*
