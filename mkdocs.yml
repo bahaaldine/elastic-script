@@ -146,6 +146,8 @@ nav:
     - AI & Observability: notebooks/ai-observability.md
     - Async Execution: notebooks/async-execution.md
     - Runbook Integrations: notebooks/runbook-integrations.md
+    - Scheduled Jobs: notebooks/scheduled-jobs.md
+    - Event Triggers: notebooks/event-triggers.md
     - Complete Reference: notebooks/complete-reference.md
   - Development:
     - Contributing: development/contributing.md
