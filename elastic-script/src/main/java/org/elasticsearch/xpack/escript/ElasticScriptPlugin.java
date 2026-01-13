@@ -11,6 +11,7 @@ import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.client.internal.Client;
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.cluster.node.DiscoveryNodes;
+import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.io.stream.NamedWriteableRegistry;
 import org.elasticsearch.common.settings.ClusterSettings;
 import org.elasticsearch.common.settings.IndexScopedSettings;
@@ -30,9 +31,12 @@ import org.elasticsearch.xpack.escript.actions.RestRunEScriptAction;
 import org.elasticsearch.xpack.escript.executors.ElasticScriptExecutor;
 import org.elasticsearch.xpack.escript.actions.ElasticScriptAction;
 import org.elasticsearch.xpack.escript.actions.TransportElasticScriptAction;
+import org.elasticsearch.xpack.escript.scheduling.LeaderElectionService;
+import org.elasticsearch.xpack.escript.scheduling.JobSchedulerService;
+import org.elasticsearch.xpack.escript.scheduling.TriggerPollingService;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -40,6 +44,11 @@ import java.util.function.Supplier;
 public class ElasticScriptPlugin extends Plugin implements ActionPlugin {
     private ThreadPool threadPool;
     private ElasticScriptExecutor elasticScriptExecutor;
+    
+    // Scheduling services
+    private LeaderElectionService leaderElectionService;
+    private JobSchedulerService jobSchedulerService;
+    private TriggerPollingService triggerPollingService;
 
     private static final Logger LOGGER = LogManager.getLogger(ElasticScriptPlugin.class);
 
@@ -47,13 +56,31 @@ public class ElasticScriptPlugin extends Plugin implements ActionPlugin {
     public Collection<?> createComponents(PluginServices services) {
         this.threadPool = services.threadPool();
         Client client = services.client();
+        ClusterService clusterService = services.clusterService();
 
-        // Initialize your components here
-        // If ElasticScriptExecutor needs the ThreadPool or other services, pass them here
+        // Initialize ElasticScriptExecutor
         elasticScriptExecutor = new ElasticScriptExecutor(threadPool, client);
 
-        // Return components if any
-        return Collections.emptyList();
+        // Initialize scheduling services
+        LOGGER.info("Initializing elastic-script scheduling services");
+        
+        leaderElectionService = new LeaderElectionService(client, threadPool, clusterService);
+        jobSchedulerService = new JobSchedulerService(client, threadPool, elasticScriptExecutor, leaderElectionService);
+        triggerPollingService = new TriggerPollingService(client, threadPool, elasticScriptExecutor, leaderElectionService);
+        
+        // Start the services (they will wait for leader election)
+        leaderElectionService.start();
+        jobSchedulerService.start();
+        triggerPollingService.start();
+        
+        LOGGER.info("Elastic-script scheduling services initialized");
+
+        // Return lifecycle components for proper shutdown
+        List<Object> components = new ArrayList<>();
+        components.add(leaderElectionService);
+        components.add(jobSchedulerService);
+        components.add(triggerPollingService);
+        return components;
     }
 
     public ThreadPool getThreadPool() {
