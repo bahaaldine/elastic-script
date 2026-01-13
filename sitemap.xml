@@ -129,11 +129,19 @@
          <lastmod>2026-01-13</lastmod>
     </url>
     <url>
+         <loc>https://bahaaldine.github.io/elastic-script/notebooks/event-triggers/</loc>
+         <lastmod>2026-01-13</lastmod>
+    </url>
+    <url>
          <loc>https://bahaaldine.github.io/elastic-script/notebooks/getting-started/</loc>
          <lastmod>2026-01-13</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/notebooks/runbook-integrations/</loc>
+         <lastmod>2026-01-13</lastmod>
+    </url>
+    <url>
+         <loc>https://bahaaldine.github.io/elastic-script/notebooks/scheduled-jobs/</loc>
          <lastmod>2026-01-13</lastmod>
     </url>
 </urlset>
