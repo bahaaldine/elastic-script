@@ -1191,4 +1191,194 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitIntent_named_arg(ElasticScriptParser.Intent_named_argContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#job_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterJob_statement(ElasticScriptParser.Job_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#job_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitJob_statement(ElasticScriptParser.Job_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#create_job_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterCreate_job_statement(ElasticScriptParser.Create_job_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#create_job_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitCreate_job_statement(ElasticScriptParser.Create_job_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code alterJobEnableDisable}
+	 * labeled alternative in {@link ElasticScriptParser#alter_job_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterAlterJobEnableDisable(ElasticScriptParser.AlterJobEnableDisableContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code alterJobEnableDisable}
+	 * labeled alternative in {@link ElasticScriptParser#alter_job_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitAlterJobEnableDisable(ElasticScriptParser.AlterJobEnableDisableContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code alterJobSchedule}
+	 * labeled alternative in {@link ElasticScriptParser#alter_job_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterAlterJobSchedule(ElasticScriptParser.AlterJobScheduleContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code alterJobSchedule}
+	 * labeled alternative in {@link ElasticScriptParser#alter_job_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitAlterJobSchedule(ElasticScriptParser.AlterJobScheduleContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#drop_job_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterDrop_job_statement(ElasticScriptParser.Drop_job_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#drop_job_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitDrop_job_statement(ElasticScriptParser.Drop_job_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showAllJobs}
+	 * labeled alternative in {@link ElasticScriptParser#show_jobs_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowAllJobs(ElasticScriptParser.ShowAllJobsContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showAllJobs}
+	 * labeled alternative in {@link ElasticScriptParser#show_jobs_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowAllJobs(ElasticScriptParser.ShowAllJobsContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showJobDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_jobs_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowJobDetail(ElasticScriptParser.ShowJobDetailContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showJobDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_jobs_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowJobDetail(ElasticScriptParser.ShowJobDetailContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showJobRuns}
+	 * labeled alternative in {@link ElasticScriptParser#show_jobs_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowJobRuns(ElasticScriptParser.ShowJobRunsContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showJobRuns}
+	 * labeled alternative in {@link ElasticScriptParser#show_jobs_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowJobRuns(ElasticScriptParser.ShowJobRunsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#trigger_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterTrigger_statement(ElasticScriptParser.Trigger_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#trigger_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitTrigger_statement(ElasticScriptParser.Trigger_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#create_trigger_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterCreate_trigger_statement(ElasticScriptParser.Create_trigger_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#create_trigger_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitCreate_trigger_statement(ElasticScriptParser.Create_trigger_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#interval_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterInterval_expression(ElasticScriptParser.Interval_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#interval_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitInterval_expression(ElasticScriptParser.Interval_expressionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code alterTriggerEnableDisable}
+	 * labeled alternative in {@link ElasticScriptParser#alter_trigger_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterAlterTriggerEnableDisable(ElasticScriptParser.AlterTriggerEnableDisableContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code alterTriggerEnableDisable}
+	 * labeled alternative in {@link ElasticScriptParser#alter_trigger_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitAlterTriggerEnableDisable(ElasticScriptParser.AlterTriggerEnableDisableContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code alterTriggerInterval}
+	 * labeled alternative in {@link ElasticScriptParser#alter_trigger_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterAlterTriggerInterval(ElasticScriptParser.AlterTriggerIntervalContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code alterTriggerInterval}
+	 * labeled alternative in {@link ElasticScriptParser#alter_trigger_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitAlterTriggerInterval(ElasticScriptParser.AlterTriggerIntervalContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#drop_trigger_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterDrop_trigger_statement(ElasticScriptParser.Drop_trigger_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#drop_trigger_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitDrop_trigger_statement(ElasticScriptParser.Drop_trigger_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showAllTriggers}
+	 * labeled alternative in {@link ElasticScriptParser#show_triggers_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowAllTriggers(ElasticScriptParser.ShowAllTriggersContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showAllTriggers}
+	 * labeled alternative in {@link ElasticScriptParser#show_triggers_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowAllTriggers(ElasticScriptParser.ShowAllTriggersContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showTriggerDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_triggers_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowTriggerDetail(ElasticScriptParser.ShowTriggerDetailContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showTriggerDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_triggers_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowTriggerDetail(ElasticScriptParser.ShowTriggerDetailContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showTriggerRuns}
+	 * labeled alternative in {@link ElasticScriptParser#show_triggers_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowTriggerRuns(ElasticScriptParser.ShowTriggerRunsContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showTriggerRuns}
+	 * labeled alternative in {@link ElasticScriptParser#show_triggers_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowTriggerRuns(ElasticScriptParser.ShowTriggerRunsContext ctx);
 }

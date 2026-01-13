@@ -7,6 +7,7 @@ grammar ElasticScript;
 // Procedure
 CREATE: 'CREATE';
 DELETE: 'DELETE';
+DROP: 'DROP';
 CALL : 'CALL';
 PROCEDURE: 'PROCEDURE';
 IN: 'IN';
@@ -21,6 +22,30 @@ REQUIRES: 'REQUIRES';
 ACTIONS: 'ACTIONS';
 ON_FAILURE: 'ON_FAILURE';
 WITH: 'WITH';
+
+// Jobs and Triggers
+JOB: 'JOB';
+TRIGGER: 'TRIGGER';
+SCHEDULE: 'SCHEDULE';
+TIMEZONE: 'TIMEZONE';
+ENABLED: 'ENABLED';
+ON_KW: 'ON';
+INDEX: 'INDEX';
+WHEN: 'WHEN';
+EVERY: 'EVERY';
+RUNS: 'RUNS';
+SHOW: 'SHOW';
+JOBS: 'JOBS';
+TRIGGERS: 'TRIGGERS';
+ALTER: 'ALTER';
+ENABLE: 'ENABLE';
+DISABLE: 'DISABLE';
+SECOND: 'SECOND';
+SECONDS: 'SECONDS';
+MINUTE: 'MINUTE';
+MINUTES: 'MINUTES';
+HOUR: 'HOUR';
+HOURS: 'HOURS';
 
 // Async Execution (Pipe-Driven)
 ON_DONE: 'ON_DONE';
@@ -224,6 +249,8 @@ program
     | delete_procedure_statement
     | call_procedure_statement
     | define_intent_statement
+    | job_statement
+    | trigger_statement
     ;
 
 procedure
@@ -703,4 +730,88 @@ intent_named_args
 
 intent_named_arg
     : ID ASSIGN expression
+    ;
+
+// =======================
+// Job Rules
+// =======================
+
+job_statement
+    : create_job_statement
+    | alter_job_statement
+    | drop_job_statement
+    | show_jobs_statement
+    ;
+
+// CREATE JOB name SCHEDULE 'cron' [TIMEZONE 'tz'] [ENABLED true|false] [DESCRIPTION 'desc'] AS BEGIN ... END JOB
+create_job_statement
+    : CREATE JOB ID
+      SCHEDULE STRING
+      (TIMEZONE STRING)?
+      (ENABLED BOOLEAN)?
+      (DESCRIPTION STRING)?
+      AS BEGIN statement+ END JOB
+    ;
+
+// ALTER JOB name ENABLE|DISABLE or ALTER JOB name SCHEDULE 'cron'
+alter_job_statement
+    : ALTER JOB ID (ENABLE | DISABLE)                    # alterJobEnableDisable
+    | ALTER JOB ID SCHEDULE STRING                       # alterJobSchedule
+    ;
+
+// DROP JOB name
+drop_job_statement
+    : DROP JOB ID
+    ;
+
+// SHOW JOBS | SHOW JOB name | SHOW JOB RUNS FOR name
+show_jobs_statement
+    : SHOW JOBS                                          # showAllJobs
+    | SHOW JOB ID                                        # showJobDetail
+    | SHOW JOB RUNS FOR ID                               # showJobRuns
+    ;
+
+// =======================
+// Trigger Rules
+// =======================
+
+trigger_statement
+    : create_trigger_statement
+    | alter_trigger_statement
+    | drop_trigger_statement
+    | show_triggers_statement
+    ;
+
+// CREATE TRIGGER name ON INDEX 'pattern' [WHEN condition] [EVERY interval] [ENABLED bool] [DESCRIPTION 'desc'] AS BEGIN ... END TRIGGER
+create_trigger_statement
+    : CREATE TRIGGER ID
+      ON_KW INDEX STRING
+      (WHEN expression)?
+      (EVERY interval_expression)?
+      (ENABLED BOOLEAN)?
+      (DESCRIPTION STRING)?
+      AS BEGIN statement+ END TRIGGER
+    ;
+
+// Interval: 5 SECONDS, 1 MINUTE, etc.
+interval_expression
+    : INT (SECOND | SECONDS | MINUTE | MINUTES | HOUR | HOURS)
+    ;
+
+// ALTER TRIGGER name ENABLE|DISABLE or ALTER TRIGGER name EVERY interval
+alter_trigger_statement
+    : ALTER TRIGGER ID (ENABLE | DISABLE)                # alterTriggerEnableDisable
+    | ALTER TRIGGER ID EVERY interval_expression         # alterTriggerInterval
+    ;
+
+// DROP TRIGGER name
+drop_trigger_statement
+    : DROP TRIGGER ID
+    ;
+
+// SHOW TRIGGERS | SHOW TRIGGER name | SHOW TRIGGER RUNS FOR name
+show_triggers_statement
+    : SHOW TRIGGERS                                      # showAllTriggers
+    | SHOW TRIGGER ID                                    # showTriggerDetail
+    | SHOW TRIGGER RUNS FOR ID                           # showTriggerRuns
     ;

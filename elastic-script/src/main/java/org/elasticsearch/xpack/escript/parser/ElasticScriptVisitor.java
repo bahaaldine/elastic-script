@@ -716,4 +716,116 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitIntent_named_arg(ElasticScriptParser.Intent_named_argContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#job_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitJob_statement(ElasticScriptParser.Job_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#create_job_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCreate_job_statement(ElasticScriptParser.Create_job_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code alterJobEnableDisable}
+	 * labeled alternative in {@link ElasticScriptParser#alter_job_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAlterJobEnableDisable(ElasticScriptParser.AlterJobEnableDisableContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code alterJobSchedule}
+	 * labeled alternative in {@link ElasticScriptParser#alter_job_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAlterJobSchedule(ElasticScriptParser.AlterJobScheduleContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#drop_job_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDrop_job_statement(ElasticScriptParser.Drop_job_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code showAllJobs}
+	 * labeled alternative in {@link ElasticScriptParser#show_jobs_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowAllJobs(ElasticScriptParser.ShowAllJobsContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code showJobDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_jobs_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowJobDetail(ElasticScriptParser.ShowJobDetailContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code showJobRuns}
+	 * labeled alternative in {@link ElasticScriptParser#show_jobs_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowJobRuns(ElasticScriptParser.ShowJobRunsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#trigger_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTrigger_statement(ElasticScriptParser.Trigger_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#create_trigger_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCreate_trigger_statement(ElasticScriptParser.Create_trigger_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#interval_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInterval_expression(ElasticScriptParser.Interval_expressionContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code alterTriggerEnableDisable}
+	 * labeled alternative in {@link ElasticScriptParser#alter_trigger_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAlterTriggerEnableDisable(ElasticScriptParser.AlterTriggerEnableDisableContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code alterTriggerInterval}
+	 * labeled alternative in {@link ElasticScriptParser#alter_trigger_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAlterTriggerInterval(ElasticScriptParser.AlterTriggerIntervalContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#drop_trigger_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDrop_trigger_statement(ElasticScriptParser.Drop_trigger_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code showAllTriggers}
+	 * labeled alternative in {@link ElasticScriptParser#show_triggers_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowAllTriggers(ElasticScriptParser.ShowAllTriggersContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code showTriggerDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_triggers_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowTriggerDetail(ElasticScriptParser.ShowTriggerDetailContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code showTriggerRuns}
+	 * labeled alternative in {@link ElasticScriptParser#show_triggers_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowTriggerRuns(ElasticScriptParser.ShowTriggerRunsContext ctx);
 }

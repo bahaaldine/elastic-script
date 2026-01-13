@@ -124,6 +124,7 @@ nav:
     - Procedures: language/procedures.md
     - Async Execution: language/async-execution.md
     - Error Handling: language/error-handling.md
+    - Triggers & Scheduling: triggers-and-scheduling.md
   - Functions:
     - Overview: functions/overview.md
     - String Functions: functions/string.md

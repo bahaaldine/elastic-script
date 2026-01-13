@@ -49,6 +49,8 @@ import org.elasticsearch.xpack.escript.functions.builtin.introspection.Introspec
 import org.elasticsearch.xpack.escript.procedure.ProcedureDefinition;
 import org.elasticsearch.xpack.escript.utils.ActionListenerUtils;
 import org.elasticsearch.xpack.escript.visitors.ProcedureDefinitionVisitor;
+import org.elasticsearch.xpack.escript.handlers.JobStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.TriggerStatementHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -264,6 +266,12 @@ public class ElasticScriptExecutor {
                     org.elasticsearch.xpack.escript.handlers.DefineIntentStatementHandler handler = 
                         new org.elasticsearch.xpack.escript.handlers.DefineIntentStatementHandler(tempExecutor);
                     handler.handleAsync(intentCtx, listener);
+                } else if (programContext.job_statement() != null) {
+                    // Handle JOB statements (CREATE JOB, ALTER JOB, DROP JOB, SHOW JOBS)
+                    handleJobStatement(programContext.job_statement(), tokens, listener);
+                } else if (programContext.trigger_statement() != null) {
+                    // Handle TRIGGER statements (CREATE TRIGGER, ALTER TRIGGER, DROP TRIGGER, SHOW TRIGGERS)
+                    handleTriggerStatement(programContext.trigger_statement(), tokens, listener);
                 } else {
                     listener.onFailure(new IllegalArgumentException("Unsupported top-level statement"));
                 }
@@ -432,6 +440,125 @@ public class ElasticScriptExecutor {
                 },
                 listener::onFailure
             ));
+    }
+
+    /**
+     * Handles JOB statements (CREATE JOB, ALTER JOB, DROP JOB, SHOW JOBS).
+     */
+    private void handleJobStatement(ElasticScriptParser.Job_statementContext ctx, 
+                                    CommonTokenStream tokens,
+                                    ActionListener<Object> listener) {
+        JobStatementHandler handler = new JobStatementHandler(client);
+        
+        if (ctx.create_job_statement() != null) {
+            ElasticScriptParser.Create_job_statementContext createCtx = ctx.create_job_statement();
+            // Extract the procedure body (statements between BEGIN and END JOB)
+            String rawProcedureBody = extractJobProcedureBody(createCtx, tokens);
+            handler.handleCreateJob(createCtx, rawProcedureBody, listener);
+        } else if (ctx.alter_job_statement() != null) {
+            ElasticScriptParser.Alter_job_statementContext alterCtx = ctx.alter_job_statement();
+            if (alterCtx instanceof ElasticScriptParser.AlterJobEnableDisableContext) {
+                handler.handleAlterJobEnableDisable((ElasticScriptParser.AlterJobEnableDisableContext) alterCtx, listener);
+            } else if (alterCtx instanceof ElasticScriptParser.AlterJobScheduleContext) {
+                handler.handleAlterJobSchedule((ElasticScriptParser.AlterJobScheduleContext) alterCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown ALTER JOB variant"));
+            }
+        } else if (ctx.drop_job_statement() != null) {
+            handler.handleDropJob(ctx.drop_job_statement(), listener);
+        } else if (ctx.show_jobs_statement() != null) {
+            ElasticScriptParser.Show_jobs_statementContext showCtx = ctx.show_jobs_statement();
+            if (showCtx instanceof ElasticScriptParser.ShowAllJobsContext) {
+                handler.handleShowAllJobs(listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowJobDetailContext) {
+                handler.handleShowJobDetail((ElasticScriptParser.ShowJobDetailContext) showCtx, listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowJobRunsContext) {
+                handler.handleShowJobRuns((ElasticScriptParser.ShowJobRunsContext) showCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown SHOW JOB variant"));
+            }
+        } else {
+            listener.onFailure(new IllegalArgumentException("Unknown JOB statement"));
+        }
+    }
+
+    /**
+     * Handles TRIGGER statements (CREATE TRIGGER, ALTER TRIGGER, DROP TRIGGER, SHOW TRIGGERS).
+     */
+    private void handleTriggerStatement(ElasticScriptParser.Trigger_statementContext ctx,
+                                        CommonTokenStream tokens,
+                                        ActionListener<Object> listener) {
+        TriggerStatementHandler handler = new TriggerStatementHandler(client);
+        
+        if (ctx.create_trigger_statement() != null) {
+            ElasticScriptParser.Create_trigger_statementContext createCtx = ctx.create_trigger_statement();
+            // Extract condition and procedure body
+            String rawCondition = extractTriggerCondition(createCtx, tokens);
+            String rawProcedureBody = extractTriggerProcedureBody(createCtx, tokens);
+            handler.handleCreateTrigger(createCtx, rawCondition, rawProcedureBody, listener);
+        } else if (ctx.alter_trigger_statement() != null) {
+            ElasticScriptParser.Alter_trigger_statementContext alterCtx = ctx.alter_trigger_statement();
+            if (alterCtx instanceof ElasticScriptParser.AlterTriggerEnableDisableContext) {
+                handler.handleAlterTriggerEnableDisable((ElasticScriptParser.AlterTriggerEnableDisableContext) alterCtx, listener);
+            } else if (alterCtx instanceof ElasticScriptParser.AlterTriggerIntervalContext) {
+                handler.handleAlterTriggerInterval((ElasticScriptParser.AlterTriggerIntervalContext) alterCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown ALTER TRIGGER variant"));
+            }
+        } else if (ctx.drop_trigger_statement() != null) {
+            handler.handleDropTrigger(ctx.drop_trigger_statement(), listener);
+        } else if (ctx.show_triggers_statement() != null) {
+            ElasticScriptParser.Show_triggers_statementContext showCtx = ctx.show_triggers_statement();
+            if (showCtx instanceof ElasticScriptParser.ShowAllTriggersContext) {
+                handler.handleShowAllTriggers(listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowTriggerDetailContext) {
+                handler.handleShowTriggerDetail((ElasticScriptParser.ShowTriggerDetailContext) showCtx, listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowTriggerRunsContext) {
+                handler.handleShowTriggerRuns((ElasticScriptParser.ShowTriggerRunsContext) showCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown SHOW TRIGGER variant"));
+            }
+        } else {
+            listener.onFailure(new IllegalArgumentException("Unknown TRIGGER statement"));
+        }
+    }
+
+    /**
+     * Extract the procedure body from a CREATE JOB statement.
+     */
+    private String extractJobProcedureBody(ElasticScriptParser.Create_job_statementContext ctx,
+                                           CommonTokenStream tokens) {
+        // Get all statements between BEGIN and END JOB
+        StringBuilder body = new StringBuilder();
+        for (ElasticScriptParser.StatementContext stmt : ctx.statement()) {
+            body.append(tokens.getText(stmt.getStart(), stmt.getStop()));
+            body.append(" ");
+        }
+        return body.toString().trim();
+    }
+
+    /**
+     * Extract the WHEN condition from a CREATE TRIGGER statement.
+     */
+    private String extractTriggerCondition(ElasticScriptParser.Create_trigger_statementContext ctx,
+                                           CommonTokenStream tokens) {
+        if (ctx.expression() != null) {
+            return tokens.getText(ctx.expression().getStart(), ctx.expression().getStop());
+        }
+        return null;
+    }
+
+    /**
+     * Extract the procedure body from a CREATE TRIGGER statement.
+     */
+    private String extractTriggerProcedureBody(ElasticScriptParser.Create_trigger_statementContext ctx,
+                                               CommonTokenStream tokens) {
+        StringBuilder body = new StringBuilder();
+        for (ElasticScriptParser.StatementContext stmt : ctx.statement()) {
+            body.append(tokens.getText(stmt.getStart(), stmt.getStop()));
+            body.append(" ");
+        }
+        return body.toString().trim();
     }
 }
 
