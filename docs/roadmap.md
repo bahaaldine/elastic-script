@@ -641,39 +641,89 @@ AGGREGATE INTO global_stats
 
 ---
 
-## 🤖 Modernization Strategy (Preserving Procedural Style)
+## 🤖 Modernization Framework
+
+### Guiding Principles
 
 The procedural style (`BEGIN/END`, `DECLARE`, `PROCEDURE`) is a **strength** — familiar to database developers, SREs, and data engineers. Modernization focuses on **capabilities and tooling**, not syntax changes.
 
-### AI-Native Capabilities
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        ELASTIC-SCRIPT PRINCIPLES                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│   ┌─────────┐  ┌──────────┐  ┌────────────┐  ┌─────────────────────────┐   │
+│   │   AI    │  │   EASE   │  │   DATA     │  │    ELASTICSEARCH       │   │
+│   │ NATIVE  │  │  OF USE  │  │  DRIVEN    │  │      EVERYTHING        │   │
+│   └────┬────┘  └────┬─────┘  └─────┬──────┘  └───────────┬─────────────┘   │
+│        └────────────┴──────────────┴──────────────────────┘                 │
+│                              │                                               │
+│        ┌─────────────────────┼─────────────────────┐                        │
+│   ┌────┴─────┐        ┌──────┴──────┐       ┌──────┴──────┐                │
+│   │  MODERN  │        │ INTEROPER-  │       │  PLUGGABLE  │                │
+│   │   TECH   │        │    ABLE     │       │             │                │
+│   └──────────┘        └─────────────┘       └─────────────┘                │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
-Position elastic-script as **the language AI agents use to operate Elasticsearch**.
+### Key Design Decisions
 
-#### Natural Language Interface
+!!! warning "ES|QL is Untouched"
+    elastic-script **augments** ES|QL with new commands (like `INTO`, `PROCESS WITH`) — it does **not modify** ES|QL itself. ES|QL remains the standard query language.
+
+!!! info "Leverage Existing Elastic Platform APIs"
+    elastic-script is an **orchestration layer** that uses existing Elastic APIs:
+    
+    - **Agent Builder** → Build and manage AI agents
+    - **One Workflow** → Create and execute workflows  
+    - **Dashboard-as-Code** → Define dashboards programmatically
+    - **Elasticsearch APIs** → Full access to all ES functionality
+    - **Kibana APIs** → Saved objects, spaces, features
+
+---
+
+### 1. AI Native
+
+**Vision**: elastic-script is the language AI agents speak to operate Elasticsearch.
+
+#### Agent-First Architecture (via Agent Builder API)
 
 ```sql
--- User writes natural language, elastic-script understands intent
-INTERPRET "Show me all payment errors in the last hour and alert the team"
+-- Create agent using Elastic Agent Builder
+CREATE AGENT log_analyst
+    USING AGENT_BUILDER {
+        MODEL 'azure-openai-gpt4'
+        CAPABILITIES ['query_logs', 'identify_patterns', 'summarize']
+        PROMPT "You are an expert at analyzing log data and identifying anomalies"
+        TOOLS [
+            PROCEDURE analyze_errors,
+            PROCEDURE summarize_trends,
+            FUNCTION ESQL_QUERY
+        ]
+    }
 
--- Auto-generate procedures from description
-GENERATE PROCEDURE "Monitor payment service, alert on 5+ errors in 5 minutes"
-    SAVE AS payment_monitor
+-- Invoke agent
+DECLARE analysis = AGENT log_analyst 
+    TASK "Analyze payment errors in the last hour and identify patterns"
 
--- Refine generated code
-REFINE PROCEDURE payment_monitor "Also include error messages in the alert"
-
--- Conversational debugging
-DEBUG "Why did my procedure fail?"
+-- Multi-agent orchestration
+CREATE WORKFLOW incident_investigation 
+    USING ONE_WORKFLOW AS
+BEGIN
+    SET analysis = AGENT log_analyst TASK "Investigate errors"
+    IF analysis.severity = 'critical' THEN
+        AGENT incident_responder TASK "Create P1 incident"
+    END IF
+END WORKFLOW
 ```
 
 #### MCP Server (Model Context Protocol)
 
-Enable AI agents (Claude, GPT, etc.) to operate Elasticsearch through elastic-script:
+Enable external AI agents (Claude, GPT, etc.) to operate Elasticsearch:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    AI Agent (Claude, GPT, etc.)                  │
-│           "Analyze yesterday's errors and create a report"       │
+│                    External AI Agents                            │
+│              (Claude, GPT, Custom Agents)                        │
 ├─────────────────────────────────────────────────────────────────┤
 │                    MCP Protocol                                  │
 ├─────────────────────────────────────────────────────────────────┤
@@ -686,15 +736,523 @@ Enable AI agents (Claude, GPT, etc.) to operate Elasticsearch through elastic-sc
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**MCP Tools:**
-
-| Tool | Description |
-|------|-------------|
+| MCP Tool | Description |
+|----------|-------------|
 | `execute_escript` | Run arbitrary elastic-script code |
 | `call_procedure` | Call a stored procedure with arguments |
 | `discover_procedures` | List available procedures with descriptions |
-| `query_logs` | Simplified ES\|QL interface |
-| `create_alert` | Set up monitoring |
+| `query_elasticsearch` | Execute ES\|QL queries |
+
+#### Natural Language Interface
+
+```sql
+-- Direct natural language execution
+EXECUTE "Find all payment errors in the last hour and alert the team"
+
+-- Generate procedures from description
+GENERATE PROCEDURE "Monitor payment service, alert on 5+ errors in 5 minutes"
+    SAVE AS payment_monitor
+
+-- Semantic procedure discovery
+DISCOVER PROCEDURES LIKE "handle incidents"
+-- Returns: incident_response, alert_handler, on_call_escalation
+
+-- AI-powered recommendations
+RECOMMEND PROCEDURES FOR "I need to set up monitoring for a new microservice"
+```
+
+#### Agent Memory & Context
+
+```sql
+-- Persistent context across sessions
+REMEMBER "The payment service has been unstable since deployment v2.3.1"
+
+-- Recall in procedures
+CREATE PROCEDURE smart_alert()
+BEGIN
+    DECLARE context = RECALL "recent incidents for payment service"
+    IF context.has_ongoing_incident THEN
+        PRINT "Suppressing alert - ongoing incident exists"
+    ELSE
+        CALL create_incident()
+    END IF
+END PROCEDURE
+```
+
+---
+
+### 2. Ease of Use
+
+**Vision**: From zero to productive in minutes. Progressive complexity.
+
+#### Smart Defaults & One-Liners
+
+```sql
+-- Minimal syntax, sensible defaults
+CREATE JOB cleanup SCHEDULE '@daily' AS
+    CALL delete_old_logs()
+END JOB
+-- Defaults: ENABLED true, TIMEZONE UTC
+
+-- One-liners for common tasks
+ALERT ON (FROM logs-* | WHERE level = 'ERROR' | STATS count) > 10 
+    SEND SLACK '#alerts'
+
+-- Quick monitoring
+MONITOR 'payment-service' EVERY 5 MINUTES 
+    ALERT IF error_rate > 0.01
+```
+
+#### Progressive Disclosure
+
+```sql
+-- Level 1: Simple inline
+FROM logs-* | WHERE level = 'ERROR' | STATS count
+
+-- Level 2: Named procedure
+CREATE PROCEDURE count_errors()
+    RETURN FROM logs-* | WHERE level = 'ERROR' | STATS count
+END PROCEDURE
+
+-- Level 3: Parameterized with defaults
+CREATE PROCEDURE count_errors(time_range STRING DEFAULT '24h')
+    RETURN FROM logs-* 
+        | WHERE level = 'ERROR' AND @timestamp > NOW() - @time_range
+        | STATS count
+END PROCEDURE
+
+-- Level 4: Full-featured with security, observability
+@description "Counts errors with alerting"
+CREATE PROCEDURE count_errors(time_range STRING, alert_threshold NUMBER)
+WITH { TRACING ON, MAX_EXECUTION_TIME = 30 SECONDS }
+BEGIN
+    TRY
+        DECLARE count = FROM logs-* | WHERE ... | STATS count
+        IF count > alert_threshold THEN CALL alert_team(count) END IF
+        RETURN count
+    CATCH
+        CALL log_error(@error)
+        RAISE
+    END TRY
+END PROCEDURE
+```
+
+#### Contextual Help
+
+```sql
+-- Inline help
+HELP SLACK_SEND
+-- Shows: signature, parameters, examples
+
+-- Interactive examples
+EXAMPLE "send slack notification"
+-- Returns runnable example code
+
+-- Smart error messages
+> CALL SLCK_SEND('#alerts', 'test')
+-- Error: Unknown function 'SLCK_SEND'. Did you mean 'SLACK_SEND'?
+```
+
+---
+
+### 3. Data-Driven (Close to ES|QL)
+
+**Vision**: ES|QL is the native query language. elastic-script augments it, never replaces it.
+
+#### ES|QL Augmentation (Not Modification)
+
+```sql
+-- ES|QL is used as-is
+DECLARE errors = FROM logs-* | WHERE level = 'ERROR' | LIMIT 100
+
+-- elastic-script ADDS commands that work with ES|QL results
+FROM logs-* 
+| WHERE level = 'ERROR' 
+| INTO my_results                    -- NEW: Store results
+
+FROM logs-* 
+| PROCESS WITH analyze_error         -- NEW: Call procedure per row
+
+-- ES|QL in expressions (ES|QL unchanged, elastic-script wraps)
+IF (FROM metrics-* | STATS AVG(cpu)) > 80 THEN
+    CALL alert_high_cpu()
+END IF
+```
+
+#### Query Composition
+
+```sql
+-- Build queries programmatically (generates valid ES|QL)
+CREATE FUNCTION build_log_query(
+    indices STRING DEFAULT 'logs-*',
+    level STRING DEFAULT NULL,
+    service STRING DEFAULT NULL
+) RETURNS QUERY AS
+BEGIN
+    DECLARE q = QUERY FROM @indices
+    IF level IS NOT NULL THEN
+        SET q = q | WHERE level = @level
+    END IF
+    IF service IS NOT NULL THEN
+        SET q = q | WHERE service = @service
+    END IF
+    RETURN q
+END FUNCTION
+
+-- Execute composed query
+DECLARE results = EXECUTE build_log_query(level := 'ERROR') | LIMIT 100
+```
+
+#### Schema Awareness
+
+```sql
+-- Introspect index mappings (uses ES _mapping API)
+DECLARE schema = SCHEMA FOR 'logs-*'
+PRINT schema.fields.level.type  -- 'keyword'
+
+-- Validate data against schema
+VALIDATE document AGAINST SCHEMA 'logs-*'
+```
+
+#### Streaming & Continuous Queries
+
+```sql
+-- Continuous query (uses ES async search / PIT)
+CREATE STREAM error_monitor AS
+    FROM logs-* 
+    | WHERE level = 'ERROR'
+    | WINDOW TUMBLING 5 MINUTES
+    | STATS count BY service
+    | EMIT TO PROCEDURE handle_high_errors
+```
+
+---
+
+### 4. Everything Elasticsearch
+
+**Vision**: Full access to the Elasticsearch ecosystem via existing APIs.
+
+#### Complete API Coverage
+
+```sql
+-- Uses ES Cluster APIs
+CLUSTER HEALTH
+CLUSTER SETTINGS SET 'cluster.routing.allocation.enable' = 'all'
+
+-- Uses ES Index APIs  
+CREATE INDEX 'my-index' WITH MAPPINGS { ... }
+REINDEX FROM 'source-*' TO 'dest'
+
+-- Uses ES Alias APIs
+CREATE ALIAS 'current' FOR 'logs-2026.01'
+SWAP ALIAS 'current' FROM 'logs-2026.01' TO 'logs-2026.02'
+```
+
+#### ILM Integration
+
+```sql
+-- Uses ES ILM APIs
+CREATE ILM POLICY 'logs-policy' AS {
+    HOT { ROLLOVER MAX_SIZE '50GB' MAX_AGE '1d' }
+    WARM { MIN_AGE '7d', SHRINK NUMBER_OF_SHARDS 1 }
+    DELETE { MIN_AGE '90d' }
+}
+
+APPLY ILM POLICY 'logs-policy' TO INDEX TEMPLATE 'logs-template'
+```
+
+#### Alerting Integration
+
+```sql
+-- Uses ES Alerting / Watcher APIs
+CREATE ALERT high_error_rate
+    TRIGGER SCHEDULE EVERY 5 MINUTES
+    INPUT (FROM logs-* | WHERE level = 'ERROR' | STATS count)
+    CONDITION result.count > 100
+    ACTIONS {
+        SLACK '#alerts' MESSAGE 'High error rate: {{count}}'
+    }
+```
+
+#### ML Integration
+
+```sql
+-- Uses ES ML APIs
+CREATE ML JOB error_anomaly
+    ANALYSIS_CONFIG { DETECTORS [{ FUNCTION 'count' }], BUCKET_SPAN '15m' }
+    DATAFEED (FROM logs-* | WHERE level = 'ERROR')
+
+-- Uses ES Inference APIs
+DECLARE sentiment = INFER 'sentiment-model' WITH { text: message }
+```
+
+#### Ingest Pipeline Integration
+
+```sql
+-- Uses ES Ingest APIs
+CREATE INGEST PIPELINE 'enrich-logs' AS {
+    GROK FIELD 'message' PATTERNS ['%{TIMESTAMP:ts} %{LOGLEVEL:level}']
+    ENRICH POLICY 'geo-lookup' FIELD 'ip' TARGET 'geo'
+}
+
+INDEX document INTO 'logs' PIPELINE 'enrich-logs'
+```
+
+---
+
+### 5. Modern Technologies
+
+**Vision**: Built with and for modern infrastructure.
+
+#### Real-Time Streaming
+
+```sql
+-- Uses ES async capabilities
+WEBSOCKET NOTIFY '#channel' ON 
+    FROM logs-* | WHERE level = 'ERROR' | STATS count > 10
+
+-- Event publishing (to Kafka, etc.)
+PUBLISH EVENT 'order.created' TO 'events-topic' WITH order_data
+```
+
+#### Container & Kubernetes Native
+
+```sql
+-- Uses K8s API
+DECLARE pods = K8S_GET_PODS(namespace := 'production')
+
+FOR pod IN pods LOOP
+    IF (FROM logs-* | WHERE k8s.pod.name = pod.name | WHERE level = 'ERROR' | STATS count) > 10 THEN
+        CALL K8S_RESTART_POD(pod.name)
+    END IF
+END LOOP
+```
+
+#### Serverless Functions
+
+```sql
+-- Serverless execution model
+CREATE FUNCTION process_webhook(event DOCUMENT)
+SERVERLESS
+TRIGGER HTTP POST '/webhook/github'
+AS
+BEGIN
+    CALL handle_github_event(event.body)
+END FUNCTION
+```
+
+#### GitOps & Infrastructure as Code
+
+```sql
+-- Procedures stored as files, deployed via CI/CD
+-- File: procedures/incident_response.escript
+
+-- Deploy command
+DEPLOY FROM GIT 'main'
+PREVIEW DEPLOY 'procedures/*.escript'
+```
+
+---
+
+### 6. Interoperable
+
+**Vision**: Works with everything. Standards-based.
+
+#### OpenTelemetry Native
+
+```sql
+-- Automatic OTEL instrumentation
+CREATE PROCEDURE my_operation()
+WITH OTEL { SERVICE_NAME 'my-service' }
+AS
+BEGIN
+    -- Traces automatically created and sent to APM
+END PROCEDURE
+
+-- Custom spans
+OTEL_SPAN 'process-batch' BEGIN
+    FOR item IN batch LOOP
+        OTEL_METRIC 'items.processed' INCREMENT 1
+    END LOOP
+END OTEL_SPAN
+```
+
+#### Protocol Support
+
+```sql
+-- HTTP
+DECLARE response = HTTP_GET('https://api.example.com/data')
+
+-- gRPC  
+DECLARE response = GRPC_CALL('orders.OrderService/GetOrder', { id: '123' })
+
+-- GraphQL
+DECLARE response = GRAPHQL_QUERY('https://api/graphql', 
+    'query { user(id: "123") { name } }')
+
+-- Message Queues
+KAFKA_PRODUCE('topic', message)
+RABBITMQ_PUBLISH('exchange', 'routing.key', message)
+```
+
+#### Data Format Support
+
+```sql
+-- Parquet (for data interchange)
+EXPORT (FROM logs-* | LIMIT 10000) TO PARQUET 's3://bucket/logs.parquet'
+IMPORT PARQUET 's3://bucket/data.parquet' INTO 'imported-data'
+
+-- CSV, JSON, YAML, XML
+DECLARE records = PARSE_CSV(csv_string)
+DECLARE config = PARSE_YAML(yaml_string)
+```
+
+#### Cloud Provider Integration
+
+```sql
+-- AWS
+DECLARE secret = AWS_SECRETS_MANAGER_GET('my-secret')
+CALL AWS_LAMBDA_INVOKE('my-function', payload)
+
+-- GCP
+CALL GCP_PUBSUB_PUBLISH('projects/.../topics/my-topic', message)
+
+-- Azure
+DECLARE secret = AZURE_KEYVAULT_GET('my-secret')
+```
+
+---
+
+### 7. Pluggable
+
+**Vision**: Extensible at every layer without forking.
+
+#### Custom Functions
+
+```sql
+-- Register custom function (Java)
+REGISTER FUNCTION my_custom_function
+    CLASS 'com.mycompany.escript.MyFunction'
+    JAR 's3://plugins/my-functions.jar'
+
+-- Register from external service
+REGISTER FUNCTION external_calc
+    HTTP POST 'https://calc.service/compute'
+```
+
+#### Function Registries
+
+```sql
+-- Connect to function registry
+CONNECT REGISTRY 'https://registry.company.com/escript-functions'
+
+-- Install functions from registry
+INSTALL FUNCTIONS FROM 'company/data-quality' VERSION '^2.0'
+```
+
+#### Middleware / Interceptors
+
+```sql
+-- Define middleware
+CREATE MIDDLEWARE audit_all
+BEFORE EXECUTE ANY PROCEDURE
+AS
+BEGIN
+    CALL log_execution_start(@procedure, @args, @user)
+END MIDDLEWARE
+
+AFTER EXECUTE ANY PROCEDURE
+AS
+BEGIN
+    CALL log_execution_end(@procedure, @result, @duration)
+END MIDDLEWARE
+
+-- Apply middleware
+APPLY MIDDLEWARE audit_all TO ALL PROCEDURES
+```
+
+#### Custom Statements (DSL Extensions)
+
+```sql
+-- Extend grammar with domain-specific syntax
+EXTEND GRAMMAR WITH {
+    'MONITOR' service:STRING 'FOR' duration:DURATION 'ALERT' 'IF' condition:EXPRESSION
+    => CREATE TRIGGER ... (generates standard elastic-script)
+}
+
+-- Use new syntax
+MONITOR 'payment-api' FOR 5 MINUTES ALERT IF error_rate > 0.05
+```
+
+---
+
+### Security & Governance
+
+Enterprise-grade security controls.
+
+#### Sandboxing & Resource Limits
+
+```sql
+CREATE PROCEDURE untrusted_operation()
+WITH {
+    -- Execution limits
+    MAX_EXECUTION_TIME = 60 SECONDS
+    MAX_MEMORY = 256MB
+    MAX_ES_QUERIES = 100
+    MAX_RESULT_SIZE = 10MB
+    
+    -- Data access restrictions  
+    ALLOWED_INDICES = ['logs-*', 'metrics-*']
+    DENIED_INDICES = ['security-*', '.kibana*']
+    
+    -- Network restrictions
+    NETWORK = DENY
+    -- OR
+    ALLOWED_HOSTS = ['api.slack.com', 'api.pagerduty.com']
+    
+    -- Function restrictions
+    DENIED_FUNCTIONS = ['ES_DELETE', 'DROP_INDEX']
+}
+BEGIN
+    -- Runs in sandboxed environment
+END PROCEDURE
+```
+
+#### Execution Policies
+
+```sql
+CREATE POLICY production_safety AS
+BEGIN
+    REQUIRE MAX_EXECUTION_TIME <= 300 SECONDS
+    DENY FUNCTION 'ES_DELETE' UNLESS ROLE IN ('admin')
+    DENY INDEX_PATTERN '.security-*'
+    REQUIRE APPROVAL FOR FUNCTION 'DROP_INDEX'
+END POLICY
+
+APPLY POLICY production_safety TO ROLE 'developer'
+```
+
+#### Secrets Management
+
+```sql
+-- Reference secrets by name (uses ES keystore or external vault)
+CALL HTTP_POST(
+    'https://api.pagerduty.com/incidents',
+    headers = {'Authorization': SECRET('pagerduty_key')}
+)
+```
+
+#### Audit Trail & RBAC
+
+```sql
+-- Audit logging
+SHOW AUDIT LOG FOR PROCEDURE sensitive_operation
+    WHERE user = 'john' AND @timestamp > NOW() - 7 DAYS
+
+-- Role-based access
+GRANT EXECUTE ON PROCEDURE analyze_logs TO ROLE 'analyst'
+REVOKE EXECUTE ON PROCEDURE delete_data FROM ROLE 'developer'
+```
 
 ---
 
@@ -707,217 +1265,39 @@ Modern tooling around the procedural language.
 | Feature | Description |
 |---------|-------------|
 | **Autocomplete** | Procedures, functions, variables, ES\|QL fields |
-| **Hover docs** | Show function signatures, procedure documentation |
+| **Hover docs** | Function signatures, procedure documentation |
 | **Go to definition** | Jump to procedure source |
-| **Find references** | Where is this procedure called? |
 | **Diagnostics** | Real-time error detection |
-| **Code actions** | Quick fixes, refactoring suggestions |
 
 Enables: VS Code extension, Cursor extension, JetBrains plugin.
 
 #### Rich Notebook Outputs
 
 ```sql
-CREATE PROCEDURE analyze_errors()
-BEGIN
-    DECLARE errors = FROM logs-* | WHERE level = 'ERROR' | STATS count BY service
-    
-    -- Rich output in notebooks (renders as actual table/chart)
-    DISPLAY TABLE errors WITH {
-        TITLE 'Errors by Service'
-        SORTABLE true
-        CHART 'bar'
-    }
-END PROCEDURE
+-- Rich output in Jupyter notebooks
+DISPLAY TABLE errors WITH { TITLE 'Errors by Service', CHART 'bar' }
+DISPLAY CHART { TYPE 'timeseries', DATA query_results }
 ```
 
 #### Procedure Versioning
 
 ```sql
-SHOW PROCEDURE HISTORY my_procedure       -- View history
-DIFF PROCEDURE my_procedure VERSION 3 WITH VERSION 5  -- Compare
-ROLLBACK PROCEDURE my_procedure TO VERSION 3          -- Rollback
-FORK PROCEDURE analyze_logs AS analyze_logs_v2        -- Fork
+SHOW PROCEDURE HISTORY my_procedure
+DIFF PROCEDURE my_procedure VERSION 3 WITH VERSION 5
+ROLLBACK PROCEDURE my_procedure TO VERSION 3
 ```
-
-#### Annotations & Documentation
-
-```sql
-@description "Analyzes error patterns and alerts if threshold exceeded"
-@param errors_threshold "Number of errors to trigger alert" DEFAULT 10
-@param window_minutes "Time window to analyze" DEFAULT 5
-@returns "Alert status and details"
-@example "CALL analyze_errors(threshold := 5, window := 10)"
-CREATE PROCEDURE analyze_errors(errors_threshold NUMBER, window_minutes NUMBER)
-BEGIN
-    ...
-END PROCEDURE
-```
-
----
-
-### Observability-First Design
-
-Built for production from day one.
 
 #### Built-in OpenTelemetry
 
 ```sql
 CREATE PROCEDURE process_orders()
-WITH TRACING ON  -- Automatic span creation
+WITH TRACING ON
 BEGIN
-    DECLARE orders = FROM orders-* | WHERE status = 'pending'
-    FOR order IN orders LOOP
-        CALL process_single_order(order)  -- Nested spans
-    END LOOP
+    -- Traces automatically created and sent to APM
 END PROCEDURE
-```
 
-#### Execution Metrics
-
-```sql
 SHOW PROCEDURE METRICS my_procedure
-
--- Output:
--- ┌────────────────────────────────────────────────────────┐
--- │ Metric              │ Value     │ P50    │ P99       │
--- ├─────────────────────┼───────────┼────────┼───────────┤
--- │ Executions          │ 1,234     │ -      │ -         │
--- │ Success Rate        │ 98.2%     │ -      │ -         │
--- │ Duration            │ -         │ 45ms   │ 320ms     │
--- │ ES|QL Queries       │ 3.2/call  │ 12ms   │ 89ms      │
--- └────────────────────────────────────────────────────────┘
-```
-
----
-
-### Security & Governance
-
-Enterprise-grade security controls.
-
-#### Secrets Management
-
-```sql
--- Reference secrets by name, never hardcoded
-CALL HTTP_POST(
-    'https://api.pagerduty.com/incidents',
-    headers = {'Authorization': SECRET('pagerduty_key')}
-)
-
--- Secrets stored in Elasticsearch keystore or external vault
--- Full audit trail of secret access
-```
-
-#### Sandboxing & Resource Limits
-
-Control what procedures can access and consume:
-
-```sql
-CREATE PROCEDURE untrusted_operation()
-WITH {
-    -- Execution limits
-    MAX_EXECUTION_TIME = 60 SECONDS
-    MAX_MEMORY = 256MB
-    MAX_ES_QUERIES = 100
-    MAX_RESULT_SIZE = 10MB
-    
-    -- Data access restrictions
-    ALLOWED_INDICES = ['logs-*', 'metrics-*']
-    DENIED_INDICES = ['security-*', '.kibana*']
-    
-    -- Network restrictions
-    NETWORK = DENY                              -- No external calls
-    -- OR
-    ALLOWED_HOSTS = ['api.slack.com', 'api.pagerduty.com']
-    
-    -- Function restrictions
-    DENIED_FUNCTIONS = ['ES_DELETE', 'DROP_INDEX']
-}
-BEGIN
-    -- Procedure runs in sandboxed environment
-    -- Violations throw security exceptions
-END PROCEDURE
-```
-
-#### Execution Policies
-
-Define organization-wide policies:
-
-```sql
-CREATE POLICY production_safety AS
-BEGIN
-    -- All procedures must have resource limits
-    REQUIRE MAX_EXECUTION_TIME <= 300 SECONDS
-    REQUIRE MAX_MEMORY <= 1GB
-    
-    -- Restrict dangerous operations
-    DENY FUNCTION 'ES_DELETE' UNLESS ROLE IN ('admin')
-    DENY INDEX_PATTERN '.security-*'
-    DENY INDEX_PATTERN '.kibana*'
-    
-    -- Require approval for certain operations
-    REQUIRE APPROVAL FOR FUNCTION 'DROP_INDEX'
-END POLICY
-
--- Apply policy
-APPLY POLICY production_safety TO ROLE 'developer'
-```
-
-#### Audit Trail
-
-```sql
--- Every execution is logged
-SHOW AUDIT LOG FOR PROCEDURE sensitive_operation
-    WHERE user = 'john'
-    AND @timestamp > NOW() - 7 DAYS
-
--- Output: who ran what, when, with what parameters, result
-```
-
-#### Role-Based Access Control
-
-```sql
--- Grant execute permission
-GRANT EXECUTE ON PROCEDURE analyze_logs TO ROLE 'analyst'
-GRANT EXECUTE ON PACKAGE incident_response TO ROLE 'sre'
-
--- Revoke permission
-REVOKE EXECUTE ON PROCEDURE delete_old_data FROM ROLE 'analyst'
-
--- Invoker vs definer rights
-CREATE PROCEDURE admin_cleanup()
-AUTHID DEFINER  -- Runs with procedure owner's privileges
-AS BEGIN ... END
-```
-
----
-
-### Collaboration & Ecosystem
-
-#### Procedure Packages / Registry
-
-```sql
--- Import from a package
-IMPORT 'elastic/observability' AS obs
-IMPORT 'company/internal-utils' AS utils
-
--- Use imported procedures
-CALL obs.analyze_apm_data()
-CALL utils.send_to_datadog(metrics)
-
--- Publish your own
-PUBLISH PACKAGE 'my-org/monitoring-tools' VERSION '1.0.0'
-```
-
-#### Procedure Templates
-
-```sql
-CREATE PROCEDURE my_monitor FROM TEMPLATE 'standard-monitor'
-    WITH {
-        index_pattern = 'logs-*'
-        alert_channel = '#my-team'
-        threshold = 10
-    }
+-- Shows: executions, success rate, P50/P99 duration
 ```
 
 ---
@@ -927,15 +1307,17 @@ CREATE PROCEDURE my_monitor FROM TEMPLATE 'standard-monitor'
 | Strategy | Impact | Effort | Priority |
 |----------|--------|--------|----------|
 | **MCP Server** | 🔥🔥🔥 | Medium | ⭐ P0 |
-| **Natural Language Interface** | 🔥🔥🔥 | High | ⭐ P0 |
+| **Agent Builder Integration** | 🔥🔥🔥 | Medium | ⭐ P0 |
 | **Sandboxing & Resource Limits** | 🔥🔥🔥 | Medium | ⭐ P0 |
+| **Natural Language Interface** | 🔥🔥🔥 | High | P1 |
+| **ES\|QL Augmentation (INTO, PROCESS)** | 🔥🔥 | Medium | P1 |
+| **One Workflow Integration** | 🔥🔥 | Medium | P1 |
+| **Dashboard-as-Code Integration** | 🔥🔥 | Medium | P1 |
 | **Secrets Management** | 🔥🔥 | Low | P1 |
-| **Rich Notebook Outputs** | 🔥🔥 | Medium | P1 |
 | **LSP Implementation** | 🔥🔥 | High | P1 |
 | **OpenTelemetry Integration** | 🔥🔥 | Medium | P1 |
-| **Audit Trail** | 🔥🔥 | Medium | P1 |
+| **Custom Function Registry** | 🔥🔥 | High | P2 |
 | **Procedure Versioning** | 🔥 | Low | P2 |
-| **Package Registry** | 🔥🔥 | High | P2 |
 
 ---
 
