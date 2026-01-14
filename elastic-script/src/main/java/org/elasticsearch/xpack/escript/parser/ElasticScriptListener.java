@@ -444,50 +444,6 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitEsql_process_statement(ElasticScriptParser.Esql_process_statementContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link ElasticScriptParser#esql_text}.
-	 * @param ctx the parse tree
-	 */
-	void enterEsql_text(ElasticScriptParser.Esql_textContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link ElasticScriptParser#esql_text}.
-	 * @param ctx the parse tree
-	 */
-	void exitEsql_text(ElasticScriptParser.Esql_textContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link ElasticScriptParser#esql_token}.
-	 * @param ctx the parse tree
-	 */
-	void enterEsql_token(ElasticScriptParser.Esql_tokenContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link ElasticScriptParser#esql_token}.
-	 * @param ctx the parse tree
-	 */
-	void exitEsql_token(ElasticScriptParser.Esql_tokenContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code intoVariable}
-	 * labeled alternative in {@link ElasticScriptParser#into_target}.
-	 * @param ctx the parse tree
-	 */
-	void enterIntoVariable(ElasticScriptParser.IntoVariableContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code intoVariable}
-	 * labeled alternative in {@link ElasticScriptParser#into_target}.
-	 * @param ctx the parse tree
-	 */
-	void exitIntoVariable(ElasticScriptParser.IntoVariableContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code intoIndex}
-	 * labeled alternative in {@link ElasticScriptParser#into_target}.
-	 * @param ctx the parse tree
-	 */
-	void enterIntoIndex(ElasticScriptParser.IntoIndexContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code intoIndex}
-	 * labeled alternative in {@link ElasticScriptParser#into_target}.
-	 * @param ctx the parse tree
-	 */
-	void exitIntoIndex(ElasticScriptParser.IntoIndexContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#declare_statement}.
 	 * @param ctx the parse tree
 	 */

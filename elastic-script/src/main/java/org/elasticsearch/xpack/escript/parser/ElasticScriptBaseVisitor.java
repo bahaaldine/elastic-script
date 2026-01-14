@@ -305,34 +305,6 @@ public class ElasticScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> imp
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitEsql_text(ElasticScriptParser.Esql_textContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitEsql_token(ElasticScriptParser.Esql_tokenContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitIntoVariable(ElasticScriptParser.IntoVariableContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitIntoIndex(ElasticScriptParser.IntoIndexContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
 	@Override public T visitDeclare_statement(ElasticScriptParser.Declare_statementContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

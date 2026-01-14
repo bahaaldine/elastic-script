@@ -509,54 +509,6 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterEsql_text(ElasticScriptParser.Esql_textContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitEsql_text(ElasticScriptParser.Esql_textContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterEsql_token(ElasticScriptParser.Esql_tokenContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitEsql_token(ElasticScriptParser.Esql_tokenContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterIntoVariable(ElasticScriptParser.IntoVariableContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitIntoVariable(ElasticScriptParser.IntoVariableContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterIntoIndex(ElasticScriptParser.IntoIndexContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitIntoIndex(ElasticScriptParser.IntoIndexContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterDeclare_statement(ElasticScriptParser.Declare_statementContext ctx) { }
 	/**
 	 * {@inheritDoc}

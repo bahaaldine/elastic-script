@@ -417,39 +417,28 @@ esql_query_content
     ;
 
 // =======================
-// ES|QL Augmentation
+// ES|QL Augmentation (PLANNED)
 // =======================
+// Note: INTO and PROCESS WITH syntax is planned for a future release.
+// Currently, use ESQL_QUERY() function and CURSOR for ES|QL integration.
+//
+// Planned syntax:
+// - FROM logs-* INTO my_results;
+// - FROM logs-* | WHERE level = 'ERROR' INTO 'destination-index';
+// - FROM logs-* PROCESS WITH my_procedure;
+// - FROM logs-* PROCESS WITH my_procedure BATCH 50;
+//
+// Current supported patterns:
+// - DECLARE result ARRAY = ESQL_QUERY('FROM logs-* | WHERE level = "ERROR"');
+// - DECLARE logs CURSOR FOR FROM logs-* | WHERE level = 'ERROR';
 
-// These statements allow ES|QL queries to flow into variables, indices, or procedures.
-// The esql_text rule captures the raw ES|QL query text.
-
-// FROM logs-* | WHERE level = 'ERROR' INTO my_results;
-// FROM logs-* | WHERE level = 'ERROR' INTO 'destination-index';
+// Placeholder rules for future implementation
 esql_into_statement
-    : esql_text INTO into_target SEMICOLON
+    : 'ESQL_INTO_PLACEHOLDER' SEMICOLON
     ;
 
-// FROM logs-* | WHERE level = 'ERROR' | PROCESS WITH my_procedure;
-// FROM logs-* | WHERE level = 'ERROR' | PROCESS WITH my_procedure BATCH 50;
 esql_process_statement
-    : esql_text PROCESS WITH ID (BATCH INT)? SEMICOLON
-    ;
-
-// Captures any sequence of tokens that forms an ES|QL query
-// Stops when it encounters INTO, PROCESS, or SEMICOLON
-esql_text
-    : esql_token+
-    ;
-
-// Match any token except the terminators
-esql_token
-    : ~(INTO | PROCESS | SEMICOLON)
-    ;
-
-// Target for INTO: variable name or quoted index name
-into_target
-    : ID          # intoVariable
-    | STRING      # intoIndex
+    : 'ESQL_PROCESS_PLACEHOLDER' SEMICOLON
     ;
 
 declare_statement

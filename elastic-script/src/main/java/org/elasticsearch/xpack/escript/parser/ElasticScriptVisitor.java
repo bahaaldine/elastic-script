@@ -270,32 +270,6 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitEsql_process_statement(ElasticScriptParser.Esql_process_statementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link ElasticScriptParser#esql_text}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitEsql_text(ElasticScriptParser.Esql_textContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link ElasticScriptParser#esql_token}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitEsql_token(ElasticScriptParser.Esql_tokenContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code intoVariable}
-	 * labeled alternative in {@link ElasticScriptParser#into_target}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIntoVariable(ElasticScriptParser.IntoVariableContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code intoIndex}
-	 * labeled alternative in {@link ElasticScriptParser#into_target}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIntoIndex(ElasticScriptParser.IntoIndexContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#declare_statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
