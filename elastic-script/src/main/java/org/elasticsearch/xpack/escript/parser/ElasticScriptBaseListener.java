@@ -509,37 +509,25 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterEsql_query(ElasticScriptParser.Esql_queryContext ctx) { }
+	@Override public void enterEsql_text(ElasticScriptParser.Esql_textContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitEsql_query(ElasticScriptParser.Esql_queryContext ctx) { }
+	@Override public void exitEsql_text(ElasticScriptParser.Esql_textContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterEsql_body(ElasticScriptParser.Esql_bodyContext ctx) { }
+	@Override public void enterEsql_token(ElasticScriptParser.Esql_tokenContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitEsql_body(ElasticScriptParser.Esql_bodyContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterEsql_segment(ElasticScriptParser.Esql_segmentContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitEsql_segment(ElasticScriptParser.Esql_segmentContext ctx) { }
+	@Override public void exitEsql_token(ElasticScriptParser.Esql_tokenContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

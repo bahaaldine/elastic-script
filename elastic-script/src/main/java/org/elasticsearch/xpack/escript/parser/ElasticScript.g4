@@ -420,31 +420,30 @@ esql_query_content
 // ES|QL Augmentation
 // =======================
 
-// FROM logs-* | WHERE level = 'ERROR' | INTO my_results;
-// FROM logs-* | WHERE level = 'ERROR' | INTO 'destination-index';
+// These statements allow ES|QL queries to flow into variables, indices, or procedures.
+// The esql_text rule captures the raw ES|QL query text.
+
+// FROM logs-* | WHERE level = 'ERROR' INTO my_results;
+// FROM logs-* | WHERE level = 'ERROR' INTO 'destination-index';
 esql_into_statement
-    : esql_query INTO into_target SEMICOLON
+    : esql_text INTO into_target SEMICOLON
     ;
 
 // FROM logs-* | WHERE level = 'ERROR' | PROCESS WITH my_procedure;
 // FROM logs-* | WHERE level = 'ERROR' | PROCESS WITH my_procedure BATCH 50;
 esql_process_statement
-    : esql_query PROCESS WITH ID (BATCH INT)? SEMICOLON
+    : esql_text PROCESS WITH ID (BATCH INT)? SEMICOLON
     ;
 
-// ES|QL query starting with FROM
-esql_query
-    : FROM esql_body
+// Captures any sequence of tokens that forms an ES|QL query
+// Stops when it encounters INTO, PROCESS, or SEMICOLON
+esql_text
+    : esql_token+
     ;
 
-// Match ES|QL body (everything between FROM and INTO/PROCESS/;)
-esql_body
-    : esql_segment+
-    ;
-
-// ES|QL segment - handles pipes and content
-esql_segment
-    : ~(INTO | PROCESS | SEMICOLON)+
+// Match any token except the terminators
+esql_token
+    : ~(INTO | PROCESS | SEMICOLON)
     ;
 
 // Target for INTO: variable name or quoted index name

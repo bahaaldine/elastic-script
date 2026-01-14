@@ -9,7 +9,7 @@ package org.elasticsearch.xpack.escript.handlers;
 
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.client.internal.Client;
-import org.elasticsearch.xpack.esql.action.ColumnInfo;
+import org.elasticsearch.xpack.core.esql.action.ColumnInfo;
 import org.elasticsearch.xpack.esql.action.EsqlQueryAction;
 import org.elasticsearch.xpack.esql.action.EsqlQueryRequest;
 import org.elasticsearch.xpack.esql.action.EsqlQueryResponse;
@@ -49,10 +49,11 @@ public class EsqlProcessStatementHandler {
     /**
      * Handles the ES|QL PROCESS WITH statement asynchronously.
      */
+    @SuppressWarnings("unchecked")
     public void handleAsync(ElasticScriptParser.Esql_process_statementContext ctx, ActionListener<Object> listener) {
         try {
             // Extract the ES|QL query
-            String rawQuery = buildEsqlQuery(ctx.esql_query());
+            String rawQuery = buildEsqlQuery(ctx);
             String executionId = executor.getContext().getExecutionId();
 
             // Variable substitution
@@ -112,11 +113,8 @@ public class EsqlProcessStatementHandler {
     /**
      * Builds the ES|QL query string from the parse tree.
      */
-    private String buildEsqlQuery(ElasticScriptParser.Esql_queryContext ctx) {
-        StringBuilder query = new StringBuilder();
-        query.append("FROM ");
-        query.append(executor.getRawText(ctx.esql_body()));
-        return query.toString();
+    private String buildEsqlQuery(ElasticScriptParser.Esql_process_statementContext ctx) {
+        return executor.getRawText(ctx.esql_text());
     }
 
     /**
@@ -177,7 +175,7 @@ public class EsqlProcessStatementHandler {
         ExecutionContext ctx = executor.getContext();
         FunctionDefinition procDef = ctx.getFunction(procedureName);
 
-        procDef.invokeAsync(args, new ActionListener<>() {
+        procDef.execute(args, new ActionListener<>() {
             @Override
             public void onResponse(Object result) {
                 // Process next batch

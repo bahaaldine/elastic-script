@@ -12,8 +12,8 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.internal.Client;
-import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.xpack.esql.action.ColumnInfo;
+import org.elasticsearch.xcontent.XContentType;
+import org.elasticsearch.xpack.core.esql.action.ColumnInfo;
 import org.elasticsearch.xpack.esql.action.EsqlQueryAction;
 import org.elasticsearch.xpack.esql.action.EsqlQueryRequest;
 import org.elasticsearch.xpack.esql.action.EsqlQueryResponse;
@@ -50,10 +50,11 @@ public class EsqlIntoStatementHandler {
     /**
      * Handles the ES|QL INTO statement asynchronously.
      */
+    @SuppressWarnings("unchecked")
     public void handleAsync(ElasticScriptParser.Esql_into_statementContext ctx, ActionListener<Object> listener) {
         try {
             // Extract the ES|QL query (FROM ... without INTO)
-            String rawQuery = buildEsqlQuery(ctx.esql_query());
+            String rawQuery = buildEsqlQuery(ctx);
             String executionId = executor.getContext().getExecutionId();
 
             // Variable substitution
@@ -120,11 +121,8 @@ public class EsqlIntoStatementHandler {
     /**
      * Builds the ES|QL query string from the parse tree.
      */
-    private String buildEsqlQuery(ElasticScriptParser.Esql_queryContext ctx) {
-        StringBuilder query = new StringBuilder();
-        query.append("FROM ");
-        query.append(executor.getRawText(ctx.esql_body()));
-        return query.toString();
+    private String buildEsqlQuery(ElasticScriptParser.Esql_into_statementContext ctx) {
+        return executor.getRawText(ctx.esql_text());
     }
 
     /**

@@ -444,35 +444,25 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitEsql_process_statement(ElasticScriptParser.Esql_process_statementContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link ElasticScriptParser#esql_query}.
+	 * Enter a parse tree produced by {@link ElasticScriptParser#esql_text}.
 	 * @param ctx the parse tree
 	 */
-	void enterEsql_query(ElasticScriptParser.Esql_queryContext ctx);
+	void enterEsql_text(ElasticScriptParser.Esql_textContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link ElasticScriptParser#esql_query}.
+	 * Exit a parse tree produced by {@link ElasticScriptParser#esql_text}.
 	 * @param ctx the parse tree
 	 */
-	void exitEsql_query(ElasticScriptParser.Esql_queryContext ctx);
+	void exitEsql_text(ElasticScriptParser.Esql_textContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link ElasticScriptParser#esql_body}.
+	 * Enter a parse tree produced by {@link ElasticScriptParser#esql_token}.
 	 * @param ctx the parse tree
 	 */
-	void enterEsql_body(ElasticScriptParser.Esql_bodyContext ctx);
+	void enterEsql_token(ElasticScriptParser.Esql_tokenContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link ElasticScriptParser#esql_body}.
+	 * Exit a parse tree produced by {@link ElasticScriptParser#esql_token}.
 	 * @param ctx the parse tree
 	 */
-	void exitEsql_body(ElasticScriptParser.Esql_bodyContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link ElasticScriptParser#esql_segment}.
-	 * @param ctx the parse tree
-	 */
-	void enterEsql_segment(ElasticScriptParser.Esql_segmentContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link ElasticScriptParser#esql_segment}.
-	 * @param ctx the parse tree
-	 */
-	void exitEsql_segment(ElasticScriptParser.Esql_segmentContext ctx);
+	void exitEsql_token(ElasticScriptParser.Esql_tokenContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code intoVariable}
 	 * labeled alternative in {@link ElasticScriptParser#into_target}.
