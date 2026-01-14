@@ -641,17 +641,570 @@ AGGREGATE INTO global_stats
 
 ---
 
+## 🤖 Modernization Strategy (Preserving Procedural Style)
+
+The procedural style (`BEGIN/END`, `DECLARE`, `PROCEDURE`) is a **strength** — familiar to database developers, SREs, and data engineers. Modernization focuses on **capabilities and tooling**, not syntax changes.
+
+### AI-Native Capabilities
+
+Position elastic-script as **the language AI agents use to operate Elasticsearch**.
+
+#### Natural Language Interface
+
+```sql
+-- User writes natural language, elastic-script understands intent
+INTERPRET "Show me all payment errors in the last hour and alert the team"
+
+-- Auto-generate procedures from description
+GENERATE PROCEDURE "Monitor payment service, alert on 5+ errors in 5 minutes"
+    SAVE AS payment_monitor
+
+-- Refine generated code
+REFINE PROCEDURE payment_monitor "Also include error messages in the alert"
+
+-- Conversational debugging
+DEBUG "Why did my procedure fail?"
+```
+
+#### MCP Server (Model Context Protocol)
+
+Enable AI agents (Claude, GPT, etc.) to operate Elasticsearch through elastic-script:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    AI Agent (Claude, GPT, etc.)                  │
+│           "Analyze yesterday's errors and create a report"       │
+├─────────────────────────────────────────────────────────────────┤
+│                    MCP Protocol                                  │
+├─────────────────────────────────────────────────────────────────┤
+│              elastic-script MCP Server                           │
+│  ┌──────────────┐ ┌──────────────┐ ┌──────────────────────────┐ │
+│  │execute_code  │ │call_procedure│ │ discover_procedures     │ │
+│  └──────────────┘ └──────────────┘ └──────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────┤
+│                    Elasticsearch                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**MCP Tools:**
+
+| Tool | Description |
+|------|-------------|
+| `execute_escript` | Run arbitrary elastic-script code |
+| `call_procedure` | Call a stored procedure with arguments |
+| `discover_procedures` | List available procedures with descriptions |
+| `query_logs` | Simplified ES\|QL interface |
+| `create_alert` | Set up monitoring |
+
+---
+
+### Developer Experience
+
+Modern tooling around the procedural language.
+
+#### Language Server Protocol (LSP)
+
+| Feature | Description |
+|---------|-------------|
+| **Autocomplete** | Procedures, functions, variables, ES\|QL fields |
+| **Hover docs** | Show function signatures, procedure documentation |
+| **Go to definition** | Jump to procedure source |
+| **Find references** | Where is this procedure called? |
+| **Diagnostics** | Real-time error detection |
+| **Code actions** | Quick fixes, refactoring suggestions |
+
+Enables: VS Code extension, Cursor extension, JetBrains plugin.
+
+#### Rich Notebook Outputs
+
+```sql
+CREATE PROCEDURE analyze_errors()
+BEGIN
+    DECLARE errors = FROM logs-* | WHERE level = 'ERROR' | STATS count BY service
+    
+    -- Rich output in notebooks (renders as actual table/chart)
+    DISPLAY TABLE errors WITH {
+        TITLE 'Errors by Service'
+        SORTABLE true
+        CHART 'bar'
+    }
+END PROCEDURE
+```
+
+#### Procedure Versioning
+
+```sql
+SHOW PROCEDURE HISTORY my_procedure       -- View history
+DIFF PROCEDURE my_procedure VERSION 3 WITH VERSION 5  -- Compare
+ROLLBACK PROCEDURE my_procedure TO VERSION 3          -- Rollback
+FORK PROCEDURE analyze_logs AS analyze_logs_v2        -- Fork
+```
+
+#### Annotations & Documentation
+
+```sql
+@description "Analyzes error patterns and alerts if threshold exceeded"
+@param errors_threshold "Number of errors to trigger alert" DEFAULT 10
+@param window_minutes "Time window to analyze" DEFAULT 5
+@returns "Alert status and details"
+@example "CALL analyze_errors(threshold := 5, window := 10)"
+CREATE PROCEDURE analyze_errors(errors_threshold NUMBER, window_minutes NUMBER)
+BEGIN
+    ...
+END PROCEDURE
+```
+
+---
+
+### Observability-First Design
+
+Built for production from day one.
+
+#### Built-in OpenTelemetry
+
+```sql
+CREATE PROCEDURE process_orders()
+WITH TRACING ON  -- Automatic span creation
+BEGIN
+    DECLARE orders = FROM orders-* | WHERE status = 'pending'
+    FOR order IN orders LOOP
+        CALL process_single_order(order)  -- Nested spans
+    END LOOP
+END PROCEDURE
+```
+
+#### Execution Metrics
+
+```sql
+SHOW PROCEDURE METRICS my_procedure
+
+-- Output:
+-- ┌────────────────────────────────────────────────────────┐
+-- │ Metric              │ Value     │ P50    │ P99       │
+-- ├─────────────────────┼───────────┼────────┼───────────┤
+-- │ Executions          │ 1,234     │ -      │ -         │
+-- │ Success Rate        │ 98.2%     │ -      │ -         │
+-- │ Duration            │ -         │ 45ms   │ 320ms     │
+-- │ ES|QL Queries       │ 3.2/call  │ 12ms   │ 89ms      │
+-- └────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Security & Governance
+
+Enterprise-grade security controls.
+
+#### Secrets Management
+
+```sql
+-- Reference secrets by name, never hardcoded
+CALL HTTP_POST(
+    'https://api.pagerduty.com/incidents',
+    headers = {'Authorization': SECRET('pagerduty_key')}
+)
+
+-- Secrets stored in Elasticsearch keystore or external vault
+-- Full audit trail of secret access
+```
+
+#### Sandboxing & Resource Limits
+
+Control what procedures can access and consume:
+
+```sql
+CREATE PROCEDURE untrusted_operation()
+WITH {
+    -- Execution limits
+    MAX_EXECUTION_TIME = 60 SECONDS
+    MAX_MEMORY = 256MB
+    MAX_ES_QUERIES = 100
+    MAX_RESULT_SIZE = 10MB
+    
+    -- Data access restrictions
+    ALLOWED_INDICES = ['logs-*', 'metrics-*']
+    DENIED_INDICES = ['security-*', '.kibana*']
+    
+    -- Network restrictions
+    NETWORK = DENY                              -- No external calls
+    -- OR
+    ALLOWED_HOSTS = ['api.slack.com', 'api.pagerduty.com']
+    
+    -- Function restrictions
+    DENIED_FUNCTIONS = ['ES_DELETE', 'DROP_INDEX']
+}
+BEGIN
+    -- Procedure runs in sandboxed environment
+    -- Violations throw security exceptions
+END PROCEDURE
+```
+
+#### Execution Policies
+
+Define organization-wide policies:
+
+```sql
+CREATE POLICY production_safety AS
+BEGIN
+    -- All procedures must have resource limits
+    REQUIRE MAX_EXECUTION_TIME <= 300 SECONDS
+    REQUIRE MAX_MEMORY <= 1GB
+    
+    -- Restrict dangerous operations
+    DENY FUNCTION 'ES_DELETE' UNLESS ROLE IN ('admin')
+    DENY INDEX_PATTERN '.security-*'
+    DENY INDEX_PATTERN '.kibana*'
+    
+    -- Require approval for certain operations
+    REQUIRE APPROVAL FOR FUNCTION 'DROP_INDEX'
+END POLICY
+
+-- Apply policy
+APPLY POLICY production_safety TO ROLE 'developer'
+```
+
+#### Audit Trail
+
+```sql
+-- Every execution is logged
+SHOW AUDIT LOG FOR PROCEDURE sensitive_operation
+    WHERE user = 'john'
+    AND @timestamp > NOW() - 7 DAYS
+
+-- Output: who ran what, when, with what parameters, result
+```
+
+#### Role-Based Access Control
+
+```sql
+-- Grant execute permission
+GRANT EXECUTE ON PROCEDURE analyze_logs TO ROLE 'analyst'
+GRANT EXECUTE ON PACKAGE incident_response TO ROLE 'sre'
+
+-- Revoke permission
+REVOKE EXECUTE ON PROCEDURE delete_old_data FROM ROLE 'analyst'
+
+-- Invoker vs definer rights
+CREATE PROCEDURE admin_cleanup()
+AUTHID DEFINER  -- Runs with procedure owner's privileges
+AS BEGIN ... END
+```
+
+---
+
+### Collaboration & Ecosystem
+
+#### Procedure Packages / Registry
+
+```sql
+-- Import from a package
+IMPORT 'elastic/observability' AS obs
+IMPORT 'company/internal-utils' AS utils
+
+-- Use imported procedures
+CALL obs.analyze_apm_data()
+CALL utils.send_to_datadog(metrics)
+
+-- Publish your own
+PUBLISH PACKAGE 'my-org/monitoring-tools' VERSION '1.0.0'
+```
+
+#### Procedure Templates
+
+```sql
+CREATE PROCEDURE my_monitor FROM TEMPLATE 'standard-monitor'
+    WITH {
+        index_pattern = 'logs-*'
+        alert_channel = '#my-team'
+        threshold = 10
+    }
+```
+
+---
+
+### Modernization Priority
+
+| Strategy | Impact | Effort | Priority |
+|----------|--------|--------|----------|
+| **MCP Server** | 🔥🔥🔥 | Medium | ⭐ P0 |
+| **Natural Language Interface** | 🔥🔥🔥 | High | ⭐ P0 |
+| **Sandboxing & Resource Limits** | 🔥🔥🔥 | Medium | ⭐ P0 |
+| **Secrets Management** | 🔥🔥 | Low | P1 |
+| **Rich Notebook Outputs** | 🔥🔥 | Medium | P1 |
+| **LSP Implementation** | 🔥🔥 | High | P1 |
+| **OpenTelemetry Integration** | 🔥🔥 | Medium | P1 |
+| **Audit Trail** | 🔥🔥 | Medium | P1 |
+| **Procedure Versioning** | 🔥 | Low | P2 |
+| **Package Registry** | 🔥🔥 | High | P2 |
+
+---
+
+## 🚀 App Deployment Platform (Vercel-Style)
+
+Deploy data-driven applications directly from elastic-script. Write code, get a deployed app URL.
+
+### Vision
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     Developer Experience                         │
+│  CREATE APP inventory_manager                                    │
+│  ROUTE '/inventory'                                              │
+│  AS BEGIN                                                        │
+│      RENDER EUI.Page { ... }                                     │
+│      RENDER DASHBOARD 'inventory-overview'                       │
+│  END APP                                                         │
+│                            ↓ DEPLOY                              │
+├─────────────────────────────────────────────────────────────────┤
+│                     EScript App Runtime                          │
+│  • Hosts apps at /apps/{app-name}                                │
+│  • Renders EUI components                                        │
+│  • Embeds Dashboards-as-Code                                     │
+│  • Executes elastic-script logic                                 │
+│  • Connects to Elasticsearch for data                            │
+├─────────────────────────────────────────────────────────────────┤
+│                     Elasticsearch                                │
+│  .escript_apps      Your Data Indices      .kibana_dashboards   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Architecture
+
+**Standalone Runtime** (not a Kibana plugin):
+
+- Serves apps at routes like `https://apps.company.com/inventory`
+- Uses Kibana's rendering stack (EUI, Elastic Charts, React)
+- Embeds dashboards via dashboards-as-code API (March 2026)
+- Executes elastic-script for business logic
+- Authenticates via Elasticsearch security
+- Apps can work standalone OR be embedded in Kibana later
+
+---
+
+### App Definition Syntax
+
+```sql
+CREATE APP incident_response
+    ROUTE '/incidents'                    -- URL path
+    TITLE 'Incident Response Center'      -- Browser title
+    ICON 'alert'                          -- EUI icon
+    AUTH REQUIRED                         -- Requires login
+    ROLES ['sre', 'oncall']               -- Who can access
+AS
+BEGIN
+    -- App state (reactive)
+    STATE selected_incident DOCUMENT DEFAULT NULL
+    STATE severity_filter STRING DEFAULT 'all'
+    
+    -- UI components
+    RENDER HEADER 'Incident Response' WITH {
+        ACTIONS [
+            BUTTON 'Create' ON_CLICK => MODAL create_modal
+        ]
+    }
+    
+    RENDER STATS { ... }
+    RENDER TABLE { ... }
+    RENDER CHART { ... }
+    RENDER FORM { ... }
+    RENDER DASHBOARD 'service-health' { ... }
+    
+END APP
+```
+
+---
+
+### EUI Component Mapping
+
+#### Data Display
+
+```sql
+-- Table (EUI.EuiBasicTable)
+RENDER TABLE inventory_table {
+    DATA (FROM inventory-* | SORT last_updated DESC | LIMIT 100)
+    COLUMNS [
+        { FIELD 'sku' LABEL 'SKU' SORTABLE },
+        { FIELD 'name' LABEL 'Product Name' },
+        { FIELD 'quantity' LABEL 'Qty' TYPE 'number' }
+    ]
+    PAGINATION { PAGE_SIZE 25 }
+    ACTIONS [
+        { LABEL 'Edit' ON_CLICK (row) => CALL edit_item(row) }
+    ]
+}
+
+-- Stats (EUI.EuiStat)
+RENDER STATS {
+    STAT { TITLE 'Total Items' VALUE (FROM inventory-* | STATS COUNT(*)) }
+    STAT { TITLE 'Low Stock' VALUE (...) COLOR 'danger' }
+}
+
+-- Chart (Elastic Charts)
+RENDER CHART inventory_trend {
+    TYPE 'area'
+    DATA (FROM inventory-* | STATS sum(quantity) BY @timestamp BUCKET 1d)
+    X '@timestamp'
+    Y 'sum_quantity'
+}
+```
+
+#### Forms & Input
+
+```sql
+RENDER FORM add_item_form {
+    FIELD sku { TYPE 'text' LABEL 'SKU' REQUIRED }
+    FIELD quantity { TYPE 'number' DEFAULT 0 }
+    FIELD category { 
+        TYPE 'select' 
+        OPTIONS (FROM categories-* | STATS DISTINCT(name))
+    }
+    
+    ON_SUBMIT (values) => BEGIN
+        CALL add_inventory_item(values)
+        TOAST 'Item added' TYPE 'success'
+        REFRESH inventory_table
+    END
+}
+
+RENDER SEARCH {
+    PLACEHOLDER 'Search...'
+    FILTERS [
+        { FIELD 'category' TYPE 'select' OPTIONS [...] }
+    ]
+    ON_CHANGE (query) => REFRESH table WITH FILTER query
+}
+```
+
+#### Dashboard Embedding
+
+```sql
+-- Embed existing dashboard
+RENDER DASHBOARD 'abc-123-def' {
+    HEIGHT '600px'
+    FILTERS { 'service' = @selected_service }
+}
+
+-- Or define inline (dashboards-as-code)
+RENDER DASHBOARD {
+    TITLE 'Error Analysis'
+    TIME_RANGE 'now-24h' TO 'now'
+    
+    PANEL 'errors_over_time' {
+        TYPE 'lens'
+        VISUALIZATION 'line'
+        DATA (FROM logs-* | WHERE level = 'ERROR' | STATS count BY @timestamp)
+    }
+}
+```
+
+#### Layout
+
+```sql
+RENDER ROW {
+    RENDER COLUMN { WIDTH '30%' ... }
+    RENDER COLUMN { WIDTH '70%' ... }
+}
+
+RENDER TABS {
+    TAB 'Overview' { ... }
+    TAB 'Details' { ... }
+}
+
+MODAL create_modal {
+    TITLE 'Create New Item'
+    RENDER FORM { ... }
+    ON_SUBMIT => BEGIN ... CLOSE MODAL END
+}
+```
+
+---
+
+### State & Interactivity
+
+```sql
+CREATE APP interactive_demo ROUTE '/demo' AS
+BEGIN
+    -- Reactive state
+    STATE selected_service STRING DEFAULT 'all'
+    STATE date_range STRING DEFAULT 'now-24h'
+    
+    -- Components react to state changes
+    RENDER SELECT {
+        VALUE @selected_service
+        ON_CHANGE (val) => SET selected_service = val
+    }
+    
+    RENDER TABLE {
+        DATA (FROM logs-* | WHERE service = @selected_service)
+        REFRESH EVERY 30 SECONDS
+    }
+    
+    -- Lifecycle hooks
+    ON_MOUNT => CALL log_app_access()
+    ON_UNMOUNT => CALL cleanup()
+END APP
+```
+
+---
+
+### Deployment Management
+
+```sql
+-- Deploy an app
+DEPLOY APP incident_response
+
+-- View all apps
+SHOW APPS
+-- ┌────────────────────────────────────────────────────┐
+-- │ Name              │ Route      │ Status  │ Version│
+-- ├───────────────────┼────────────┼─────────┼────────┤
+-- │ incident_response │ /incidents │ Running │ v3     │
+-- │ inventory_manager │ /inventory │ Running │ v1     │
+-- └────────────────────────────────────────────────────┘
+
+-- Version management
+ROLLBACK APP incident_response TO VERSION 2
+STOP APP my_app
+START APP my_app
+DROP APP my_app
+```
+
+**Access URLs:**
+
+```
+https://your-cluster.com/escript-apps/incidents
+https://apps.company.com/incidents  (custom domain)
+```
+
+---
+
+### Implementation Phases
+
+| Phase | Deliverables | Duration |
+|-------|--------------|----------|
+| **1. Runtime Foundation** | App Server, Router, Auth | 2 weeks |
+| **2. Core Components** | TABLE, STATS, CHART, FORM | 2 weeks |
+| **3. Dashboard Integration** | Embed dashboards-as-code | 1 week |
+| **4. Interactivity** | STATE, Events, Modals | 2 weeks |
+| **5. Advanced Components** | Search, Filters, Tabs | 1 week |
+| **6. Deployment CLI** | DEPLOY, SHOW, ROLLBACK | 1 week |
+
+---
+
 ## 🗓️ Release Timeline
 
 | Version | Target | Focus |
 |---------|--------|-------|
 | **v1.0** | ✅ Current | Core language, 106 functions, async execution |
 | **v1.1** | Q1 2026 | Exception handling, user-defined functions |
-| **v1.2** | Q2 2026 | Dynamic ES|QL, associative arrays |
+| **v1.2** | Q2 2026 | Dynamic ES\|QL, associative arrays, **sandboxing** |
 | **v1.3** | Q3 2026 | Cursors, bulk operations |
 | **v2.0** | Q4 2026 | **Triggers, scheduled jobs** |
-| **v2.1** | Q1 2027 | Packages, security |
-| **v3.0** | Q3 2027 | Vector search, cross-cluster |
+| **v2.1** | Q1 2027 | Packages, security, secrets management |
+| **v2.5** | Q2 2027 | **MCP Server, natural language interface** |
+| **v3.0** | Q3 2027 | **App Deployment Platform (Phase 1-3)** |
+| **v3.5** | Q4 2027 | **App Platform (Phase 4-6), LSP** |
+| **v4.0** | 2028 | Vector search, cross-cluster, package registry |
 
 ---
 
