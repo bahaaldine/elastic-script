@@ -42,6 +42,8 @@ import org.elasticsearch.xpack.escript.handlers.ThrowStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.TryCatchStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.DefineIntentStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.IntentStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.EsqlIntoStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.EsqlProcessStatementHandler;
 import org.elasticsearch.xpack.escript.execution.ExecutionRegistry;
 import org.elasticsearch.xpack.escript.execution.ExecutionIndexTemplateRegistry;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptBaseVisitor;
@@ -92,6 +94,8 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
     private final CallProcedureStatementHandler callProcedureStatementHandler;
     private final DefineIntentStatementHandler defineIntentHandler;
     private final IntentStatementHandler intentHandler;
+    private final EsqlIntoStatementHandler esqlIntoHandler;
+    private final EsqlProcessStatementHandler esqlProcessHandler;
     private final Client client;
     
     // Async execution handlers
@@ -134,6 +138,8 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
         this.callProcedureStatementHandler = new CallProcedureStatementHandler(this);
         this.defineIntentHandler = new DefineIntentStatementHandler(this);
         this.intentHandler = new IntentStatementHandler(this);
+        this.esqlIntoHandler = new EsqlIntoStatementHandler(this, client);
+        this.esqlProcessHandler = new EsqlProcessStatementHandler(this, client);
         this.tokenStream = tokenStream;
         // Initialize ExpressionEvaluator with this executor instance.
         this.expressionEvaluator = new ExpressionEvaluator(this);
@@ -346,6 +352,12 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
         } else if (ctx.parallel_statement() != null) {
             // Handle parallel execution
             parallelHandler.handleAsync(ctx.parallel_statement(), listener);
+        } else if (ctx.esql_into_statement() != null) {
+            // Handle ES|QL INTO statement
+            esqlIntoHandler.handleAsync(ctx.esql_into_statement(), listener);
+        } else if (ctx.esql_process_statement() != null) {
+            // Handle ES|QL PROCESS WITH statement
+            esqlProcessHandler.handleAsync(ctx.esql_process_statement(), listener);
         } else {
             listener.onResponse(null);
         }

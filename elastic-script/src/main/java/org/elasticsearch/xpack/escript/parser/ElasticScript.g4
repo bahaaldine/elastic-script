@@ -240,6 +240,11 @@ DOCUMENT_CONTAINS: 'DOCUMENT_CONTAINS';
 ESQL_QUERY: 'ESQL_QUERY';
 INDEX_DOCUMENT: 'INDEX_DOCUMENT';
 
+// ES|QL Augmentation
+PROCESS: 'PROCESS';
+BATCH: 'BATCH';
+FROM: 'FROM';
+
 // =======================
 // Parser Rules
 // =======================
@@ -287,6 +292,8 @@ statement
     | break_statement
     | continue_statement
     | switch_statement
+    | esql_into_statement
+    | esql_process_statement
     | expression_statement
     | SEMICOLON
     ;
@@ -407,6 +414,43 @@ variable_assignment
 
 esql_query_content
     : ( . )*?  // Match any content non-greedily
+    ;
+
+// =======================
+// ES|QL Augmentation
+// =======================
+
+// FROM logs-* | WHERE level = 'ERROR' | INTO my_results;
+// FROM logs-* | WHERE level = 'ERROR' | INTO 'destination-index';
+esql_into_statement
+    : esql_query INTO into_target SEMICOLON
+    ;
+
+// FROM logs-* | WHERE level = 'ERROR' | PROCESS WITH my_procedure;
+// FROM logs-* | WHERE level = 'ERROR' | PROCESS WITH my_procedure BATCH 50;
+esql_process_statement
+    : esql_query PROCESS WITH ID (BATCH INT)? SEMICOLON
+    ;
+
+// ES|QL query starting with FROM
+esql_query
+    : FROM esql_body
+    ;
+
+// Match ES|QL body (everything between FROM and INTO/PROCESS/;)
+esql_body
+    : esql_segment+
+    ;
+
+// ES|QL segment - handles pipes and content
+esql_segment
+    : ~(INTO | PROCESS | SEMICOLON)+
+    ;
+
+// Target for INTO: variable name or quoted index name
+into_target
+    : ID          # intoVariable
+    | STRING      # intoIndex
     ;
 
 declare_statement

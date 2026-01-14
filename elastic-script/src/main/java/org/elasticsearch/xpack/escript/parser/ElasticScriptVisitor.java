@@ -1,4 +1,4 @@
-// Generated from /Users/baha/dev/elastic-script/elasticsearch/x-pack/plugin/elastic-script/src/main/java/org/elasticsearch/xpack/escript/parser/ElasticScript.g4 by ANTLR 4.13.1
+// Generated from ElasticScript.g4 by ANTLR 4.13.1
 package org.elasticsearch.xpack.escript.parser;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -257,6 +257,50 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitEsql_query_content(ElasticScriptParser.Esql_query_contentContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#esql_into_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEsql_into_statement(ElasticScriptParser.Esql_into_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#esql_process_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEsql_process_statement(ElasticScriptParser.Esql_process_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#esql_query}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEsql_query(ElasticScriptParser.Esql_queryContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#esql_body}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEsql_body(ElasticScriptParser.Esql_bodyContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#esql_segment}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEsql_segment(ElasticScriptParser.Esql_segmentContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code intoVariable}
+	 * labeled alternative in {@link ElasticScriptParser#into_target}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIntoVariable(ElasticScriptParser.IntoVariableContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code intoIndex}
+	 * labeled alternative in {@link ElasticScriptParser#into_target}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIntoIndex(ElasticScriptParser.IntoIndexContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#declare_statement}.
 	 * @param ctx the parse tree

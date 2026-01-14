@@ -1,4 +1,4 @@
-// Generated from /Users/baha/dev/elastic-script/elasticsearch/x-pack/plugin/elastic-script/src/main/java/org/elasticsearch/xpack/escript/parser/ElasticScript.g4 by ANTLR 4.13.1
+// Generated from ElasticScript.g4 by ANTLR 4.13.1
 package org.elasticsearch.xpack.escript.parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -423,6 +423,80 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitEsql_query_content(ElasticScriptParser.Esql_query_contentContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#esql_into_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterEsql_into_statement(ElasticScriptParser.Esql_into_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#esql_into_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitEsql_into_statement(ElasticScriptParser.Esql_into_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#esql_process_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterEsql_process_statement(ElasticScriptParser.Esql_process_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#esql_process_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitEsql_process_statement(ElasticScriptParser.Esql_process_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#esql_query}.
+	 * @param ctx the parse tree
+	 */
+	void enterEsql_query(ElasticScriptParser.Esql_queryContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#esql_query}.
+	 * @param ctx the parse tree
+	 */
+	void exitEsql_query(ElasticScriptParser.Esql_queryContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#esql_body}.
+	 * @param ctx the parse tree
+	 */
+	void enterEsql_body(ElasticScriptParser.Esql_bodyContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#esql_body}.
+	 * @param ctx the parse tree
+	 */
+	void exitEsql_body(ElasticScriptParser.Esql_bodyContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#esql_segment}.
+	 * @param ctx the parse tree
+	 */
+	void enterEsql_segment(ElasticScriptParser.Esql_segmentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#esql_segment}.
+	 * @param ctx the parse tree
+	 */
+	void exitEsql_segment(ElasticScriptParser.Esql_segmentContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code intoVariable}
+	 * labeled alternative in {@link ElasticScriptParser#into_target}.
+	 * @param ctx the parse tree
+	 */
+	void enterIntoVariable(ElasticScriptParser.IntoVariableContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code intoVariable}
+	 * labeled alternative in {@link ElasticScriptParser#into_target}.
+	 * @param ctx the parse tree
+	 */
+	void exitIntoVariable(ElasticScriptParser.IntoVariableContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code intoIndex}
+	 * labeled alternative in {@link ElasticScriptParser#into_target}.
+	 * @param ctx the parse tree
+	 */
+	void enterIntoIndex(ElasticScriptParser.IntoIndexContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code intoIndex}
+	 * labeled alternative in {@link ElasticScriptParser#into_target}.
+	 * @param ctx the parse tree
+	 */
+	void exitIntoIndex(ElasticScriptParser.IntoIndexContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#declare_statement}.
 	 * @param ctx the parse tree
