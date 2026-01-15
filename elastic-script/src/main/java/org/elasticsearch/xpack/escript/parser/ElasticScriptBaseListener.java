@@ -1,4 +1,10 @@
-// Generated from ElasticScript.g4 by ANTLR 4.13.1
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 package org.elasticsearch.xpack.escript.parser;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -516,6 +522,42 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDeclare_statement(ElasticScriptParser.Declare_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterEsql_binding_type(ElasticScriptParser.Esql_binding_typeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEsql_binding_type(ElasticScriptParser.Esql_binding_typeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterEsql_binding_query(ElasticScriptParser.Esql_binding_queryContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEsql_binding_query(ElasticScriptParser.Esql_binding_queryContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterEsql_binding_content(ElasticScriptParser.Esql_binding_contentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEsql_binding_content(ElasticScriptParser.Esql_binding_contentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

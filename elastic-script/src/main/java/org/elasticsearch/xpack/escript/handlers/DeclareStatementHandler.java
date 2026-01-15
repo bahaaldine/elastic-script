@@ -21,6 +21,7 @@ import org.elasticsearch.xpack.escript.utils.ActionListenerUtils;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 public class DeclareStatementHandler {
     private final ProcedureExecutor executor;
@@ -94,6 +95,12 @@ public class DeclareStatementHandler {
             return;
         }
         
+        // Check if this is a type-aware ES|QL binding (DECLARE name TYPE FROM esql_query)
+        if (ctx.esql_binding_type() != null) {
+            handleEsqlBinding(ctx, listener);
+            return;
+        }
+        
         // Otherwise, it's a regular variable declaration
         List<ElasticScriptParser.Variable_declarationContext> varDecls =
             ctx.variable_declaration_list().variable_declaration();
@@ -122,6 +129,164 @@ public class DeclareStatementHandler {
             listener.onResponse(null);
         } catch (Exception e) {
             listener.onFailure(e);
+        }
+    }
+
+    /**
+     * Handles type-aware ES|QL binding: DECLARE name TYPE FROM esql_query;
+     * 
+     * Supported binding types:
+     * - ARRAY: Captures all rows as an array of documents
+     * - DOCUMENT: Single row as a document (validates row count = 1)
+     * - NUMBER/STRING/DATE/BOOLEAN: Scalar value (validates single row, single column)
+     */
+    @SuppressWarnings("unchecked")
+    private void handleEsqlBinding(ElasticScriptParser.Declare_statementContext ctx, ActionListener<Object> listener) {
+        String varName = ctx.ID().getText();
+        String bindingType = ctx.esql_binding_type().getText().toUpperCase();
+        
+        // Extract the ESQL query
+        ElasticScriptParser.Esql_binding_queryContext queryCtx = ctx.esql_binding_query();
+        if (queryCtx == null || queryCtx.esql_binding_content() == null) {
+            listener.onFailure(new RuntimeException("Variable '" + varName + "' must have an ES|QL query defined"));
+            return;
+        }
+        
+        String esqlQuery = executor.getRawText(queryCtx.esql_binding_content()).trim();
+        
+        // Declare the variable with appropriate type
+        try {
+            if ("ARRAY".equals(bindingType)) {
+                executor.getContext().declareVariable(varName, "ARRAY", "DOCUMENT");
+            } else {
+                executor.getContext().declareVariable(varName, bindingType);
+            }
+        } catch (Exception e) {
+            listener.onFailure(e);
+            return;
+        }
+        
+        // Execute the ES|QL query and bind the result
+        executor.executeEsqlQueryAsync(esqlQuery, ActionListener.wrap(
+            result -> {
+                try {
+                    if (!(result instanceof List)) {
+                        listener.onFailure(new RuntimeException(
+                            "ES|QL query for '" + varName + "' did not return a result set"));
+                        return;
+                    }
+                    
+                    List<Map<String, Object>> rows = (List<Map<String, Object>>) result;
+                    Object value = extractTypedValue(varName, bindingType, rows);
+                    executor.getContext().setVariable(varName, value);
+                    listener.onResponse(null);
+                } catch (Exception e) {
+                    listener.onFailure(e);
+                }
+            },
+            listener::onFailure
+        ));
+    }
+
+    /**
+     * Extracts a typed value from ES|QL query results based on the binding type.
+     * 
+     * @param varName The variable name (for error messages)
+     * @param bindingType The declared type (ARRAY, DOCUMENT, NUMBER, STRING, DATE, BOOLEAN)
+     * @param rows The query results
+     * @return The extracted value
+     */
+    private Object extractTypedValue(String varName, String bindingType, List<Map<String, Object>> rows) {
+        switch (bindingType) {
+            case "ARRAY":
+                // Return all rows as an array of documents
+                return rows;
+                
+            case "DOCUMENT":
+                // Validate single row, return as document
+                if (rows.isEmpty()) {
+                    throw new RuntimeException(
+                        "ES|QL query for DOCUMENT variable '" + varName + "' returned no rows (expected exactly 1)");
+                }
+                if (rows.size() > 1) {
+                    throw new RuntimeException(
+                        "ES|QL query for DOCUMENT variable '" + varName + "' returned " + rows.size() + 
+                        " rows (expected exactly 1). Use ARRAY type to capture multiple rows.");
+                }
+                return rows.get(0);
+                
+            case "NUMBER":
+            case "STRING":
+            case "DATE":
+            case "BOOLEAN":
+                // Validate single row, single column, extract scalar
+                return extractScalar(varName, bindingType, rows);
+                
+            default:
+                throw new RuntimeException("Unsupported ES|QL binding type: " + bindingType);
+        }
+    }
+
+    /**
+     * Extracts a scalar value from single-row, single-column query results.
+     */
+    private Object extractScalar(String varName, String bindingType, List<Map<String, Object>> rows) {
+        if (rows.isEmpty()) {
+            throw new RuntimeException(
+                "ES|QL query for " + bindingType + " variable '" + varName + "' returned no rows (expected exactly 1)");
+        }
+        if (rows.size() > 1) {
+            throw new RuntimeException(
+                "ES|QL query for " + bindingType + " variable '" + varName + "' returned " + rows.size() + 
+                " rows (expected exactly 1). Use ARRAY type to capture multiple rows.");
+        }
+        
+        Map<String, Object> row = rows.get(0);
+        
+        if (row.isEmpty()) {
+            throw new RuntimeException(
+                "ES|QL query for " + bindingType + " variable '" + varName + "' returned no columns");
+        }
+        if (row.size() > 1) {
+            throw new RuntimeException(
+                "ES|QL query for " + bindingType + " variable '" + varName + "' returned " + row.size() + 
+                " columns (expected exactly 1). Use DOCUMENT type to capture multiple columns.");
+        }
+        
+        // Extract the single value
+        Object value = row.values().iterator().next();
+        
+        // Type validation and conversion
+        switch (bindingType) {
+            case "NUMBER":
+                if (value == null) return null;
+                if (value instanceof Number) return value;
+                try {
+                    return Double.parseDouble(value.toString());
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException(
+                        "Cannot convert value '" + value + "' to NUMBER for variable '" + varName + "'");
+                }
+                
+            case "STRING":
+                if (value == null) return null;
+                return value.toString();
+                
+            case "BOOLEAN":
+                if (value == null) return null;
+                if (value instanceof Boolean) return value;
+                String strVal = value.toString().toLowerCase();
+                if ("true".equals(strVal)) return true;
+                if ("false".equals(strVal)) return false;
+                throw new RuntimeException(
+                    "Cannot convert value '" + value + "' to BOOLEAN for variable '" + varName + "'");
+                
+            case "DATE":
+                // Return as-is for now (dates are typically ISO strings from ES|QL)
+                return value;
+                
+            default:
+                return value;
         }
     }
 

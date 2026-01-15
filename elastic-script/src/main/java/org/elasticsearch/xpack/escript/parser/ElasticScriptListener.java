@@ -1,4 +1,10 @@
-// Generated from ElasticScript.g4 by ANTLR 4.13.1
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 package org.elasticsearch.xpack.escript.parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -453,6 +459,36 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDeclare_statement(ElasticScriptParser.Declare_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#esql_binding_type}.
+	 * @param ctx the parse tree
+	 */
+	void enterEsql_binding_type(ElasticScriptParser.Esql_binding_typeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#esql_binding_type}.
+	 * @param ctx the parse tree
+	 */
+	void exitEsql_binding_type(ElasticScriptParser.Esql_binding_typeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#esql_binding_query}.
+	 * @param ctx the parse tree
+	 */
+	void enterEsql_binding_query(ElasticScriptParser.Esql_binding_queryContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#esql_binding_query}.
+	 * @param ctx the parse tree
+	 */
+	void exitEsql_binding_query(ElasticScriptParser.Esql_binding_queryContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#esql_binding_content}.
+	 * @param ctx the parse tree
+	 */
+	void enterEsql_binding_content(ElasticScriptParser.Esql_binding_contentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#esql_binding_content}.
+	 * @param ctx the parse tree
+	 */
+	void exitEsql_binding_content(ElasticScriptParser.Esql_binding_contentContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#var_statement}.
 	 * @param ctx the parse tree

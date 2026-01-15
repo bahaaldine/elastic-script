@@ -18,5 +18,9 @@
   "08-esql-augmentation.ipynb": {
     "skip_all": true,
     "reason": "ES|QL augmentation grammar needs refinement - INTO and PROCESS WITH parsing issues"
+  },
+  "09-esql-binding.ipynb": {
+    "skip_all": true,
+    "reason": "Type-aware ES|QL binding requires Elasticsearch integration - grammar complete, runtime testing pending"
   }
 }

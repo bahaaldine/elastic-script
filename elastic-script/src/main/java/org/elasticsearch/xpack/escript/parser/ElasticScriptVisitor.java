@@ -1,4 +1,10 @@
-// Generated from ElasticScript.g4 by ANTLR 4.13.1
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 package org.elasticsearch.xpack.escript.parser;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -275,6 +281,24 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitDeclare_statement(ElasticScriptParser.Declare_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#esql_binding_type}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEsql_binding_type(ElasticScriptParser.Esql_binding_typeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#esql_binding_query}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEsql_binding_query(ElasticScriptParser.Esql_binding_queryContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#esql_binding_content}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEsql_binding_content(ElasticScriptParser.Esql_binding_contentContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#var_statement}.
 	 * @param ctx the parse tree

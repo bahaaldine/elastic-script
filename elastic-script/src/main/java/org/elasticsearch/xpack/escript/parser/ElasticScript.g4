@@ -158,6 +158,11 @@ RBRACKET: ']';
 LBRACE: '{';
 RBRACE: '}';
 
+// ES|QL Augmentation (must be before ID to avoid matching as identifier)
+PROCESS: 'PROCESS';
+BATCH: 'BATCH';
+FROM: 'FROM';
+
 // Literals
 BOOLEAN: [Tt][Rr][Uu][Ee] | [Ff][Aa][Ll][Ss][Ee];
 FLOAT: [0-9]+ '.' [0-9]+;
@@ -166,7 +171,7 @@ STRING
     : ('\'' ( ~('\'' | '\\') | '\\' . )* '\''
     | '"' ( ~('"' | '\\') | '\\' . )* '"')
     ;
-// Identifier
+// Identifier (must be AFTER all keyword tokens)
 ID: [a-zA-Z_][a-zA-Z_0-9]*;
 
 // Comments and Whitespace
@@ -239,11 +244,6 @@ DOCUMENT_CONTAINS: 'DOCUMENT_CONTAINS';
 // Datasource
 ESQL_QUERY: 'ESQL_QUERY';
 INDEX_DOCUMENT: 'INDEX_DOCUMENT';
-
-// ES|QL Augmentation
-PROCESS: 'PROCESS';
-BATCH: 'BATCH';
-FROM: 'FROM';
 
 // =======================
 // Parser Rules
@@ -442,8 +442,27 @@ esql_process_statement
     ;
 
 declare_statement
-    : DECLARE variable_declaration_list SEMICOLON
-    | DECLARE ID CURSOR FOR cursor_query SEMICOLON
+    : DECLARE ID esql_binding_type FROM esql_binding_query SEMICOLON   // ES|QL binding (must be first due to ARRAY/STRING/etc overlap with datatype)
+    | DECLARE ID CURSOR FOR cursor_query SEMICOLON                     // Cursor declaration
+    | DECLARE variable_declaration_list SEMICOLON                      // Regular variable declaration
+    ;
+
+// Type-aware ES|QL binding: DECLARE x TYPE FROM <esql>
+esql_binding_type
+    : ARRAY_TYPE       // Multiple rows captured as array
+    | DOCUMENT_TYPE    // Single row as document
+    | NUMBER_TYPE      // Single row, single column as number
+    | STRING_TYPE      // Single row, single column as string
+    | DATE_TYPE        // Single row, single column as date
+    | BOOLEAN_TYPE     // Single row, single column as boolean
+    ;
+
+esql_binding_query
+    : esql_binding_content
+    ;
+
+esql_binding_content
+    : (~SEMICOLON)+  // Match everything until semicolon
     ;
 
 var_statement
