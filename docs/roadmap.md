@@ -1302,10 +1302,135 @@ SHOW PROCEDURE METRICS my_procedure
 
 ---
 
+### Syntax Modernization: Commands & Type-Namespaced Functions
+
+**Status:** 🔴 Not Started | **Priority:** P0
+
+#### First-Class Commands
+
+Core Elasticsearch operations become language keywords (not functions):
+
+```sql
+-- ✅ Proposed: First-class commands
+INDEX document INTO 'my-index';
+DELETE FROM 'my-index' WHERE _id = '123';
+SEARCH 'my-index' QUERY { "match": { "title": "elastic" } };
+REFRESH 'my-index';
+CREATE INDEX 'new-index' WITH { "mappings": {...} };
+
+-- ❌ Current: Function calls (will be deprecated)
+INDEX_DOCUMENT('my-index', document);
+ES_DELETE('my-index', '123');
+```
+
+#### Type-Namespaced Functions (UPPERCASE)
+
+Functions use `TYPE.FUNCTION()` pattern for clarity and to avoid ambiguity:
+
+```sql
+-- ✅ Proposed: Type-namespaced functions
+DECLARE len = ARRAY.LENGTH(my_array);
+DECLARE keys = DOCUMENT.KEYS(my_doc);
+DECLARE upper_name = STRING.UPPER(name);
+DECLARE tomorrow = DATE.ADD(today, 1, 'DAY');
+
+-- Extensions follow same pattern
+DECLARE pods = K8S.GET_PODS('default');
+DECLARE result = OPENAI.COMPLETE(prompt);
+DECLARE msg = SLACK.POST_MESSAGE(channel, text);
+
+-- ❌ Current: SNAKE_CASE functions (will be deprecated)
+ARRAY_LENGTH(my_array);
+DOCUMENT_KEYS(my_doc);
+STRING_UPPER(name);
+```
+
+**Benefits:**
+- No ambiguity with variable names
+- Self-documenting type expectations
+- Consistent UPPERCASE style
+- Extensible namespace pattern
+
+---
+
+### Type-Aware ES|QL Binding
+
+**Status:** 🔴 Not Started | **Priority:** P0
+
+Inline ES|QL with type-specific result binding:
+
+```sql
+-- ═══════════════════════════════════════════════════════════════
+-- CURSOR: Multiple rows → Iterate one at a time
+-- ═══════════════════════════════════════════════════════════════
+DECLARE logs CURSOR FOR 
+    FROM logs-* | WHERE level = 'ERROR' | LIMIT 100;
+
+FOR log IN logs LOOP
+    PRINT log.message;
+END LOOP
+
+-- ═══════════════════════════════════════════════════════════════
+-- ARRAY: Multiple rows → Capture all rows at once
+-- ═══════════════════════════════════════════════════════════════
+DECLARE logs ARRAY FROM logs-* | WHERE level = 'ERROR' | LIMIT 100;
+PRINT 'Found ' || ARRAY.LENGTH(logs) || ' errors';
+
+-- ═══════════════════════════════════════════════════════════════
+-- DOCUMENT: Single row with multiple fields → One document
+-- ═══════════════════════════════════════════════════════════════
+DECLARE stats DOCUMENT FROM logs-* 
+    | STATS count = COUNT(*), errors = COUNT(*) WHERE level = 'ERROR';
+
+PRINT 'Total: ' || stats.count || ', Errors: ' || stats.errors;
+
+-- ═══════════════════════════════════════════════════════════════
+-- SCALAR: Single row, single column → Direct value
+-- ═══════════════════════════════════════════════════════════════
+DECLARE total_count NUMBER FROM logs-* | STATS c = COUNT(*);
+PRINT 'Total logs: ' || total_count;  -- Directly a number, not {c: 42}
+
+DECLARE latest DATE FROM logs-* | STATS latest = MAX(@timestamp);
+PRINT 'Latest: ' || latest;
+
+DECLARE service STRING FROM services 
+    | WHERE id = 'svc-001' | KEEP name | LIMIT 1;
+PRINT 'Service: ' || service;
+```
+
+**Type Binding Summary:**
+
+| Declaration | ES\|QL Result Expected | Binding |
+|-------------|------------------------|---------|
+| `DECLARE x CURSOR FOR <esql>` | Multiple rows | Iterate with FOR |
+| `DECLARE x ARRAY FROM <esql>` | Multiple rows | All rows as array |
+| `DECLARE x DOCUMENT FROM <esql>` | Single row | Row as document |
+| `DECLARE x NUMBER FROM <esql>` | 1 row, 1 column | Scalar value |
+| `DECLARE x STRING FROM <esql>` | 1 row, 1 column | Scalar value |
+| `DECLARE x DATE FROM <esql>` | 1 row, 1 column | Scalar value |
+| `DECLARE x BOOLEAN FROM <esql>` | 1 row, 1 column | Scalar value |
+
+**Runtime Validation:**
+
+```sql
+-- ERROR: Expected scalar but got multiple rows
+DECLARE count NUMBER FROM logs-* | LIMIT 10;  
+-- → RuntimeError: Query returned 10 rows, expected 1 for NUMBER
+
+-- ERROR: Expected scalar but got multiple columns  
+DECLARE count NUMBER FROM logs-* | STATS a = COUNT(*), b = SUM(size);
+-- → RuntimeError: Query returned 2 columns, expected 1 for NUMBER
+```
+
+---
+
 ### Modernization Priority
 
 | Strategy | Impact | Effort | Priority |
 |----------|--------|--------|----------|
+| **Syntax: First-Class Commands** | 🔥🔥🔥 | Medium | ⭐ P0 |
+| **Syntax: Type-Namespaced Functions** | 🔥🔥🔥 | Medium | ⭐ P0 |
+| **Type-Aware ES\|QL Binding** | 🔥🔥🔥 | Medium | ⭐ P0 |
 | **MCP Server** | 🔥🔥🔥 | Medium | ⭐ P0 |
 | **Agent Builder Integration** | 🔥🔥🔥 | Medium | ⭐ P0 |
 | **Sandboxing & Resource Limits** | 🔥🔥🔥 | Medium | ⭐ P0 |
