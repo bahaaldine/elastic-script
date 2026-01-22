@@ -148,6 +148,8 @@ nav:
     - Runbook Integrations: notebooks/runbook-integrations.md
     - Scheduled Jobs: notebooks/scheduled-jobs.md
     - Event Triggers: notebooks/event-triggers.md
+    - First-Class Commands: notebooks/first-class-commands.md
+    - Namespaced Functions: notebooks/namespaced-functions.md
     - Complete Reference: notebooks/complete-reference.md
   - Development:
     - Contributing: development/contributing.md
