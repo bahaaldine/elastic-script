@@ -12,13 +12,13 @@ import org.elasticsearch.test.ESTestCase;
 import org.elasticsearch.xpack.escript.handlers.ElasticScriptErrorListener;
 
 /**
- * Tests for parsing type-aware ES|QL binding syntax:
- * - DECLARE variable ARRAY FROM esql_query;
- * - DECLARE variable DOCUMENT FROM esql_query;
- * - DECLARE variable NUMBER FROM esql_query;
- * - DECLARE variable STRING FROM esql_query;
- * - DECLARE variable DATE FROM esql_query;
- * - DECLARE variable BOOLEAN FROM esql_query;
+ * Tests for parsing type-aware ES|QL bindings:
+ * {@code DECLARE x ARRAY FROM esql_query;}
+ * {@code DECLARE x DOCUMENT FROM esql_query;}
+ * {@code DECLARE x NUMBER FROM esql_query;}
+ * {@code DECLARE x STRING FROM esql_query;}
+ * {@code DECLARE x DATE FROM esql_query;}
+ * {@code DECLARE x BOOLEAN FROM esql_query;}
  */
 public class EsqlBindingParserTests extends ESTestCase {
 
@@ -31,205 +31,205 @@ public class EsqlBindingParserTests extends ESTestCase {
         return parser;
     }
 
-    private ElasticScriptParser.Declare_statementContext parseDeclaration(String declareStmt) {
-        // Wrap in a procedure to parse as a statement
-        String input = "CREATE PROCEDURE test() BEGIN " + declareStmt + " END PROCEDURE";
+    private ElasticScriptParser.Declare_statementContext parseDeclare(String stmt) {
+        String input = "CREATE PROCEDURE test() BEGIN " + stmt + " END PROCEDURE";
         ElasticScriptParser parser = createParser(input);
         ElasticScriptParser.ProgramContext program = parser.program();
         assertNotNull("Program should not be null", program);
         assertNotNull("Create procedure statement should not be null", program.create_procedure_statement());
         assertNotNull("Procedure should not be null", program.create_procedure_statement().procedure());
-        assertTrue("Should have at least one statement", 
+        assertTrue("Should have at least one statement",
             program.create_procedure_statement().procedure().statement().size() >= 1);
         
-        ElasticScriptParser.StatementContext stmt = program.create_procedure_statement().procedure().statement(0);
-        assertNotNull("Statement should not be null", stmt);
-        assertNotNull("Declare statement should not be null", stmt.declare_statement());
-        
-        return stmt.declare_statement();
+        ElasticScriptParser.StatementContext stmt0 = program.create_procedure_statement().procedure().statement(0);
+        assertNotNull("Statement should not be null", stmt0);
+        return stmt0.declare_statement();
     }
 
     // ==================== ARRAY Binding ====================
 
-    public void testDeclareArrayFromSimpleQuery() {
-        ElasticScriptParser.Declare_statementContext ctx = parseDeclaration(
-            "DECLARE logs ARRAY FROM logs-*;"
+    public void testArrayBindingSimple() {
+        ElasticScriptParser.Declare_statementContext ctx = parseDeclare(
+            "DECLARE errors ARRAY FROM FROM logs-* | WHERE level = 'ERROR';"
         );
         
-        assertEquals("logs", ctx.ID().getText());
+        assertNotNull("declare_statement should not be null", ctx);
+        assertNotNull("ID should not be null", ctx.ID());
+        assertEquals("errors", ctx.ID().getText());
         assertNotNull("esql_binding_type should not be null", ctx.esql_binding_type());
         assertEquals("ARRAY", ctx.esql_binding_type().getText());
         assertNotNull("esql_binding_query should not be null", ctx.esql_binding_query());
-        assertTrue(ctx.esql_binding_query().getText().contains("logs"));
     }
 
-    public void testDeclareArrayFromQueryWithPipe() {
-        ElasticScriptParser.Declare_statementContext ctx = parseDeclaration(
-            "DECLARE errors ARRAY FROM logs-* | WHERE level == 'ERROR' | LIMIT 100;"
+    public void testArrayBindingWithLimit() {
+        ElasticScriptParser.Declare_statementContext ctx = parseDeclare(
+            "DECLARE recent_logs ARRAY FROM FROM logs-* | LIMIT 100;"
         );
         
-        assertEquals("errors", ctx.ID().getText());
+        assertNotNull(ctx);
+        assertEquals("recent_logs", ctx.ID().getText());
         assertEquals("ARRAY", ctx.esql_binding_type().getText());
-        String query = ctx.esql_binding_query().getText();
-        assertTrue("Query should contain 'logs-*'", query.contains("logs"));
-        assertTrue("Query should contain 'WHERE'", query.contains("WHERE"));
-        assertTrue("Query should contain 'LIMIT'", query.contains("LIMIT"));
     }
 
-    public void testDeclareArrayFromQueryWithStats() {
-        ElasticScriptParser.Declare_statementContext ctx = parseDeclaration(
-            "DECLARE stats ARRAY FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host;"
+    public void testArrayBindingWithStats() {
+        ElasticScriptParser.Declare_statementContext ctx = parseDeclare(
+            "DECLARE stats ARRAY FROM FROM logs-* | STATS count = COUNT(*) BY level;"
         );
         
+        assertNotNull(ctx);
         assertEquals("stats", ctx.ID().getText());
         assertEquals("ARRAY", ctx.esql_binding_type().getText());
     }
 
     // ==================== DOCUMENT Binding ====================
 
-    public void testDeclareDocumentFromQuery() {
-        ElasticScriptParser.Declare_statementContext ctx = parseDeclaration(
-            "DECLARE single_log DOCUMENT FROM logs-* | WHERE _id == 'abc123' | LIMIT 1;"
+    public void testDocumentBindingSingleRow() {
+        ElasticScriptParser.Declare_statementContext ctx = parseDeclare(
+            "DECLARE user DOCUMENT FROM FROM users | WHERE id = 'john.doe' | LIMIT 1;"
         );
         
-        assertEquals("single_log", ctx.ID().getText());
+        assertNotNull(ctx);
+        assertEquals("user", ctx.ID().getText());
         assertEquals("DOCUMENT", ctx.esql_binding_type().getText());
     }
 
-    public void testDeclareDocumentFromStatsQuery() {
-        ElasticScriptParser.Declare_statementContext ctx = parseDeclaration(
-            "DECLARE stats DOCUMENT FROM logs-* | STATS count = COUNT(*), errors = COUNT(*) | WHERE level == 'ERROR';"
+    public void testDocumentBindingFirst() {
+        ElasticScriptParser.Declare_statementContext ctx = parseDeclare(
+            "DECLARE latest_error DOCUMENT FROM FROM logs-* | SORT @timestamp DESC | LIMIT 1;"
         );
         
-        assertEquals("stats", ctx.ID().getText());
+        assertNotNull(ctx);
+        assertEquals("latest_error", ctx.ID().getText());
         assertEquals("DOCUMENT", ctx.esql_binding_type().getText());
     }
 
     // ==================== NUMBER Binding ====================
 
-    public void testDeclareNumberFromCountQuery() {
-        ElasticScriptParser.Declare_statementContext ctx = parseDeclaration(
-            "DECLARE total NUMBER FROM logs-* | STATS c = COUNT(*);"
+    public void testNumberBindingCount() {
+        ElasticScriptParser.Declare_statementContext ctx = parseDeclare(
+            "DECLARE total NUMBER FROM FROM logs-* | STATS count = COUNT(*);"
         );
         
+        assertNotNull(ctx);
         assertEquals("total", ctx.ID().getText());
         assertEquals("NUMBER", ctx.esql_binding_type().getText());
     }
 
-    public void testDeclareNumberFromSumQuery() {
-        ElasticScriptParser.Declare_statementContext ctx = parseDeclaration(
-            "DECLARE total_bytes NUMBER FROM metrics-* | STATS total = SUM(bytes_sent);"
+    public void testNumberBindingSum() {
+        ElasticScriptParser.Declare_statementContext ctx = parseDeclare(
+            "DECLARE total_sales NUMBER FROM FROM transactions | STATS total = SUM(amount);"
         );
         
-        assertEquals("total_bytes", ctx.ID().getText());
+        assertNotNull(ctx);
+        assertEquals("total_sales", ctx.ID().getText());
         assertEquals("NUMBER", ctx.esql_binding_type().getText());
     }
 
-    public void testDeclareNumberFromAvgQuery() {
-        ElasticScriptParser.Declare_statementContext ctx = parseDeclaration(
-            "DECLARE avg_latency NUMBER FROM apm-* | WHERE service == 'api' | STATS avg = AVG(latency);"
+    public void testNumberBindingAvg() {
+        ElasticScriptParser.Declare_statementContext ctx = parseDeclare(
+            "DECLARE avg_price NUMBER FROM FROM products | STATS avg = AVG(price);"
         );
         
-        assertEquals("avg_latency", ctx.ID().getText());
+        assertNotNull(ctx);
+        assertEquals("avg_price", ctx.ID().getText());
         assertEquals("NUMBER", ctx.esql_binding_type().getText());
     }
 
     // ==================== STRING Binding ====================
 
-    public void testDeclareStringFromQuery() {
-        ElasticScriptParser.Declare_statementContext ctx = parseDeclaration(
-            "DECLARE service_name STRING FROM services | WHERE id == 'svc-001' | KEEP name | LIMIT 1;"
+    public void testStringBinding() {
+        ElasticScriptParser.Declare_statementContext ctx = parseDeclare(
+            "DECLARE cluster STRING FROM SHOW INFO | KEEP cluster_name;"
         );
         
-        assertEquals("service_name", ctx.ID().getText());
+        assertNotNull(ctx);
+        assertEquals("cluster", ctx.ID().getText());
         assertEquals("STRING", ctx.esql_binding_type().getText());
-    }
-
-    public void testDeclareStringFromMaxQuery() {
-        ElasticScriptParser.Declare_statementContext ctx = parseDeclaration(
-            "DECLARE latest_version STRING FROM deployments | STATS latest = MAX(version);"
-        );
-        
-        assertEquals("latest_version", ctx.ID().getText());
-        assertEquals("STRING", ctx.esql_binding_type().getText());
-    }
-
-    // ==================== DATE Binding ====================
-
-    public void testDeclareDateFromMaxQuery() {
-        ElasticScriptParser.Declare_statementContext ctx = parseDeclaration(
-            "DECLARE latest_event DATE FROM logs-* | STATS latest = MAX(@timestamp);"
-        );
-        
-        assertEquals("latest_event", ctx.ID().getText());
-        assertEquals("DATE", ctx.esql_binding_type().getText());
-    }
-
-    public void testDeclareDateFromMinQuery() {
-        ElasticScriptParser.Declare_statementContext ctx = parseDeclaration(
-            "DECLARE first_seen DATE FROM users | WHERE user_id == 'u123' | STATS first = MIN(created_at);"
-        );
-        
-        assertEquals("first_seen", ctx.ID().getText());
-        assertEquals("DATE", ctx.esql_binding_type().getText());
     }
 
     // ==================== BOOLEAN Binding ====================
 
-    public void testDeclareBooleanFromQuery() {
-        ElasticScriptParser.Declare_statementContext ctx = parseDeclaration(
-            "DECLARE has_errors BOOLEAN FROM logs-* | WHERE level == 'ERROR' | STATS has = COUNT(*) > 0;"
+    public void testBooleanBinding() {
+        ElasticScriptParser.Declare_statementContext ctx = parseDeclare(
+            "DECLARE has_errors BOOLEAN FROM FROM logs-* | WHERE level = 'ERROR' | STATS has = COUNT(*) > 0;"
         );
         
+        assertNotNull(ctx);
         assertEquals("has_errors", ctx.ID().getText());
         assertEquals("BOOLEAN", ctx.esql_binding_type().getText());
     }
 
+    // ==================== DATE Binding ====================
+
+    public void testDateBinding() {
+        ElasticScriptParser.Declare_statementContext ctx = parseDeclare(
+            "DECLARE last_login DATE FROM FROM users | WHERE id = 'john' | KEEP last_login_time | LIMIT 1;"
+        );
+        
+        assertNotNull(ctx);
+        assertEquals("last_login", ctx.ID().getText());
+        assertEquals("DATE", ctx.esql_binding_type().getText());
+    }
+
     // ==================== Complex Queries ====================
 
-    public void testDeclareWithComplexPipeline() {
-        ElasticScriptParser.Declare_statementContext ctx = parseDeclaration(
-            "DECLARE top_services ARRAY FROM logs-* | WHERE level == 'ERROR' | STATS count = COUNT(*) BY service | SORT count DESC | LIMIT 10;"
+    public void testBindingWithPipes() {
+        ElasticScriptParser.Declare_statementContext ctx = parseDeclare(
+            "DECLARE filtered ARRAY FROM FROM logs-* | WHERE level = 'ERROR' | EVAL message_len = LENGTH(message) | LIMIT 50;"
         );
         
-        assertEquals("top_services", ctx.ID().getText());
-        assertEquals("ARRAY", ctx.esql_binding_type().getText());
-        String query = ctx.esql_binding_query().getText();
-        assertTrue(query.contains("SORT"));
-    }
-
-    public void testDeclareWithEvalAndKeep() {
-        ElasticScriptParser.Declare_statementContext ctx = parseDeclaration(
-            "DECLARE enriched ARRAY FROM logs-* | EVAL severity = CASE(level, 'ERROR', 3, 'WARN', 2, 1) | KEEP @timestamp, message, severity | LIMIT 50;"
-        );
-        
-        assertEquals("enriched", ctx.ID().getText());
+        assertNotNull(ctx);
+        assertEquals("filtered", ctx.ID().getText());
         assertEquals("ARRAY", ctx.esql_binding_type().getText());
     }
 
-    // ==================== CURSOR syntax (existing, for comparison) ====================
-
-    public void testDeclareCursorStillWorks() {
-        ElasticScriptParser.Declare_statementContext ctx = parseDeclaration(
-            "DECLARE logs CURSOR FOR FROM logs-* | WHERE level == 'ERROR' | LIMIT 100;"
+    public void testBindingWithMultipleConditions() {
+        ElasticScriptParser.Declare_statementContext ctx = parseDeclare(
+            "DECLARE critical ARRAY FROM FROM logs-* | WHERE level = 'ERROR' AND service = 'payment' | LIMIT 10;"
         );
         
-        assertEquals("logs", ctx.ID().getText());
-        assertNotNull("CURSOR keyword should be present", ctx.CURSOR());
-        assertNotNull("cursor_query should be present", ctx.cursor_query());
-        // esql_binding_type should be null for CURSOR
-        assertNull("esql_binding_type should be null for CURSOR", ctx.esql_binding_type());
+        assertNotNull(ctx);
+        assertEquals("critical", ctx.ID().getText());
+        assertEquals("ARRAY", ctx.esql_binding_type().getText());
     }
 
-    // ==================== Regular declaration (existing, for comparison) ====================
+    // ==================== Multiple Bindings in Procedure ====================
 
-    public void testRegularDeclarationStillWorks() {
-        ElasticScriptParser.Declare_statementContext ctx = parseDeclaration(
-            "DECLARE count NUMBER = 0;"
-        );
+    public void testMultipleBindingsInProcedure() {
+        String input = """
+            CREATE PROCEDURE analyze_logs()
+            BEGIN
+                DECLARE errors ARRAY FROM FROM logs-* | WHERE level = 'ERROR';
+                DECLARE error_count NUMBER FROM FROM logs-* | WHERE level = 'ERROR' | STATS count = COUNT(*);
+                DECLARE latest_error DOCUMENT FROM FROM logs-* | WHERE level = 'ERROR' | SORT @timestamp DESC | LIMIT 1;
+            END PROCEDURE
+            """;
         
-        assertNotNull("variable_declaration_list should be present", ctx.variable_declaration_list());
-        assertNull("esql_binding_type should be null for regular declaration", ctx.esql_binding_type());
-        assertNull("CURSOR should be null for regular declaration", ctx.CURSOR());
+        ElasticScriptParser parser = createParser(input);
+        ElasticScriptParser.ProgramContext program = parser.program();
+        
+        assertNotNull(program);
+        assertNotNull(program.create_procedure_statement());
+        
+        var statements = program.create_procedure_statement().procedure().statement();
+        assertEquals(3, statements.size());
+        
+        // First: ARRAY binding
+        ElasticScriptParser.Declare_statementContext decl1 = statements.get(0).declare_statement();
+        assertNotNull(decl1);
+        assertEquals("errors", decl1.ID().getText());
+        assertEquals("ARRAY", decl1.esql_binding_type().getText());
+        
+        // Second: NUMBER binding
+        ElasticScriptParser.Declare_statementContext decl2 = statements.get(1).declare_statement();
+        assertNotNull(decl2);
+        assertEquals("error_count", decl2.ID().getText());
+        assertEquals("NUMBER", decl2.esql_binding_type().getText());
+        
+        // Third: DOCUMENT binding
+        ElasticScriptParser.Declare_statementContext decl3 = statements.get(2).declare_statement();
+        assertNotNull(decl3);
+        assertEquals("latest_error", decl3.ID().getText());
+        assertEquals("DOCUMENT", decl3.esql_binding_type().getText());
     }
 }

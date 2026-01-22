@@ -37,6 +37,14 @@ Current status and future direction for elastic-script — a procedural language
 - [x] **REFRESH Command** - `REFRESH 'index-name';`
 - [x] **CREATE INDEX Command** - `CREATE INDEX 'name' WITH MAPPINGS {...};`
 
+### Type-Aware ES|QL Binding (NEW)
+- [x] **ARRAY Binding** - `DECLARE errors ARRAY FROM FROM logs-* | WHERE level = 'ERROR';`
+- [x] **DOCUMENT Binding** - `DECLARE user DOCUMENT FROM FROM users | WHERE id = 'john' | LIMIT 1;`
+- [x] **NUMBER Binding** - `DECLARE count NUMBER FROM FROM logs-* | STATS count = COUNT(*);`
+- [x] **STRING Binding** - `DECLARE name STRING FROM FROM config | KEEP value | LIMIT 1;`
+- [x] **DATE Binding** - `DECLARE last_login DATE FROM FROM users | KEEP login_time | LIMIT 1;`
+- [x] **BOOLEAN Binding** - `DECLARE has_errors BOOLEAN FROM FROM logs | STATS has = COUNT(*) > 0;`
+
 ### Developer Experience
 - [x] **Quick Start Script** - `./scripts/quick-start.sh` for one-command setup
 - [x] **Jupyter Integration** - Custom kernel for interactive development
