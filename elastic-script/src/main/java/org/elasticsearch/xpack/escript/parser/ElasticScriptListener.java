@@ -450,6 +450,76 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitEsql_process_statement(ElasticScriptParser.Esql_process_statementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#index_command}.
+	 * @param ctx the parse tree
+	 */
+	void enterIndex_command(ElasticScriptParser.Index_commandContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#index_command}.
+	 * @param ctx the parse tree
+	 */
+	void exitIndex_command(ElasticScriptParser.Index_commandContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#index_target}.
+	 * @param ctx the parse tree
+	 */
+	void enterIndex_target(ElasticScriptParser.Index_targetContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#index_target}.
+	 * @param ctx the parse tree
+	 */
+	void exitIndex_target(ElasticScriptParser.Index_targetContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#delete_command}.
+	 * @param ctx the parse tree
+	 */
+	void enterDelete_command(ElasticScriptParser.Delete_commandContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#delete_command}.
+	 * @param ctx the parse tree
+	 */
+	void exitDelete_command(ElasticScriptParser.Delete_commandContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#search_command}.
+	 * @param ctx the parse tree
+	 */
+	void enterSearch_command(ElasticScriptParser.Search_commandContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#search_command}.
+	 * @param ctx the parse tree
+	 */
+	void exitSearch_command(ElasticScriptParser.Search_commandContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#refresh_command}.
+	 * @param ctx the parse tree
+	 */
+	void enterRefresh_command(ElasticScriptParser.Refresh_commandContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#refresh_command}.
+	 * @param ctx the parse tree
+	 */
+	void exitRefresh_command(ElasticScriptParser.Refresh_commandContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#create_index_command}.
+	 * @param ctx the parse tree
+	 */
+	void enterCreate_index_command(ElasticScriptParser.Create_index_commandContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#create_index_command}.
+	 * @param ctx the parse tree
+	 */
+	void exitCreate_index_command(ElasticScriptParser.Create_index_commandContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#create_index_options}.
+	 * @param ctx the parse tree
+	 */
+	void enterCreate_index_options(ElasticScriptParser.Create_index_optionsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#create_index_options}.
+	 * @param ctx the parse tree
+	 */
+	void exitCreate_index_options(ElasticScriptParser.Create_index_optionsContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#declare_statement}.
 	 * @param ctx the parse tree
 	 */

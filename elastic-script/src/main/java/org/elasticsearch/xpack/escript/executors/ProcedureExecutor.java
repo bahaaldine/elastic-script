@@ -44,6 +44,7 @@ import org.elasticsearch.xpack.escript.handlers.DefineIntentStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.IntentStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.EsqlIntoStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.EsqlProcessStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.FirstClassCommandsHandler;
 import org.elasticsearch.xpack.escript.execution.ExecutionRegistry;
 import org.elasticsearch.xpack.escript.execution.ExecutionIndexTemplateRegistry;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptBaseVisitor;
@@ -96,6 +97,7 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
     private final IntentStatementHandler intentHandler;
     private final EsqlIntoStatementHandler esqlIntoHandler;
     private final EsqlProcessStatementHandler esqlProcessHandler;
+    private final FirstClassCommandsHandler firstClassCommandsHandler;
     private final Client client;
     
     // Async execution handlers
@@ -140,6 +142,7 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
         this.intentHandler = new IntentStatementHandler(this);
         this.esqlIntoHandler = new EsqlIntoStatementHandler(this, client);
         this.esqlProcessHandler = new EsqlProcessStatementHandler(this, client);
+        this.firstClassCommandsHandler = new FirstClassCommandsHandler(this, client);
         this.tokenStream = tokenStream;
         // Initialize ExpressionEvaluator with this executor instance.
         this.expressionEvaluator = new ExpressionEvaluator(this);
@@ -358,6 +361,21 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
         } else if (ctx.esql_process_statement() != null) {
             // Handle ES|QL PROCESS WITH statement
             esqlProcessHandler.handleAsync(ctx.esql_process_statement(), listener);
+        } else if (ctx.index_command() != null) {
+            // Handle INDEX command: INDEX document INTO 'index-name';
+            firstClassCommandsHandler.handleIndexCommand(ctx.index_command(), listener);
+        } else if (ctx.delete_command() != null) {
+            // Handle DELETE command: DELETE FROM 'index-name' WHERE condition;
+            firstClassCommandsHandler.handleDeleteCommand(ctx.delete_command(), listener);
+        } else if (ctx.search_command() != null) {
+            // Handle SEARCH command: SEARCH 'index-name' QUERY {...};
+            firstClassCommandsHandler.handleSearchCommand(ctx.search_command(), listener);
+        } else if (ctx.refresh_command() != null) {
+            // Handle REFRESH command: REFRESH 'index-name';
+            firstClassCommandsHandler.handleRefreshCommand(ctx.refresh_command(), listener);
+        } else if (ctx.create_index_command() != null) {
+            // Handle CREATE INDEX command: CREATE INDEX 'name' WITH {...};
+            firstClassCommandsHandler.handleCreateIndexCommand(ctx.create_index_command(), listener);
         } else {
             listener.onResponse(null);
         }

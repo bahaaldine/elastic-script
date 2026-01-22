@@ -276,6 +276,48 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitEsql_process_statement(ElasticScriptParser.Esql_process_statementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#index_command}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIndex_command(ElasticScriptParser.Index_commandContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#index_target}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIndex_target(ElasticScriptParser.Index_targetContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#delete_command}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDelete_command(ElasticScriptParser.Delete_commandContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#search_command}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSearch_command(ElasticScriptParser.Search_commandContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#refresh_command}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRefresh_command(ElasticScriptParser.Refresh_commandContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#create_index_command}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCreate_index_command(ElasticScriptParser.Create_index_commandContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#create_index_options}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCreate_index_options(ElasticScriptParser.Create_index_optionsContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#declare_statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

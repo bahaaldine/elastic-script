@@ -47,6 +47,14 @@ MINUTES: 'MINUTES';
 HOUR: 'HOUR';
 HOURS: 'HOURS';
 
+// First-Class Commands (Elasticsearch Operations)
+SEARCH: 'SEARCH';
+REFRESH: 'REFRESH';
+QUERY: 'QUERY';
+MAPPINGS: 'MAPPINGS';
+SETTINGS: 'SETTINGS';
+WHERE_CMD: 'WHERE';
+
 // Async Execution (Pipe-Driven)
 ON_DONE: 'ON_DONE';
 ON_FAIL: 'ON_FAIL';
@@ -294,6 +302,11 @@ statement
     | switch_statement
     | esql_into_statement
     | esql_process_statement
+    | index_command
+    | delete_command
+    | search_command
+    | refresh_command
+    | create_index_command
     | expression_statement
     | SEMICOLON
     ;
@@ -439,6 +452,57 @@ esql_into_statement
 
 esql_process_statement
     : 'ESQL_PROCESS_PLACEHOLDER' SEMICOLON
+    ;
+
+// =======================
+// First-Class Commands (Elasticsearch Operations)
+// =======================
+// These are language-level commands for core Elasticsearch operations,
+// replacing function calls with cleaner, more intuitive syntax.
+
+// INDEX document INTO 'index-name';
+// INDEX { 'field': 'value' } INTO 'my-index';
+// INDEX my_doc INTO 'my-index';
+index_command
+    : INDEX expression INTO index_target SEMICOLON
+    ;
+
+index_target
+    : STRING    // Literal index name: 'my-index'
+    | ID        // Variable containing index name
+    ;
+
+// DELETE FROM 'index-name' WHERE _id == 'doc-id';
+// DELETE FROM 'my-index' WHERE condition;
+delete_command
+    : DELETE FROM index_target WHERE_CMD expression SEMICOLON
+    ;
+
+// SEARCH 'index-name' QUERY { ... };
+// SEARCH 'logs-*' QUERY { "match": { "level": "ERROR" } };
+// SEARCH index_var QUERY query_doc;
+search_command
+    : SEARCH index_target QUERY expression SEMICOLON
+    ;
+
+// REFRESH 'index-name';
+// REFRESH my_index_var;
+refresh_command
+    : REFRESH index_target SEMICOLON
+    ;
+
+// CREATE INDEX 'name' WITH { mappings: {...}, settings: {...} };
+// CREATE INDEX 'my-index' WITH MAPPINGS { ... };
+// CREATE INDEX 'my-index' WITH SETTINGS { ... } MAPPINGS { ... };
+create_index_command
+    : CREATE INDEX index_target (WITH create_index_options)? SEMICOLON
+    ;
+
+create_index_options
+    : MAPPINGS expression                                    // CREATE INDEX 'x' WITH MAPPINGS {...}
+    | SETTINGS expression                                    // CREATE INDEX 'x' WITH SETTINGS {...}
+    | SETTINGS expression MAPPINGS expression                // CREATE INDEX 'x' WITH SETTINGS {...} MAPPINGS {...}
+    | expression                                             // CREATE INDEX 'x' WITH {...} (full body)
     ;
 
 declare_statement

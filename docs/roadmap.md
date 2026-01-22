@@ -30,10 +30,17 @@ Current status and future direction for elastic-script — a procedural language
 - [x] **Execution Control** - `EXECUTION('name') | STATUS/CANCEL/RETRY`
 - [x] **State Persistence** - Execution state stored in `.escript_executions`
 
+### First-Class Commands (NEW)
+- [x] **INDEX Command** - `INDEX document INTO 'index-name';`
+- [x] **DELETE Command** - `DELETE FROM 'index-name' WHERE id;`
+- [x] **SEARCH Command** - `SEARCH 'index-name' QUERY {...};`
+- [x] **REFRESH Command** - `REFRESH 'index-name';`
+- [x] **CREATE INDEX Command** - `CREATE INDEX 'name' WITH MAPPINGS {...};`
+
 ### Developer Experience
 - [x] **Quick Start Script** - `./scripts/quick-start.sh` for one-command setup
 - [x] **Jupyter Integration** - Custom kernel for interactive development
-- [x] **Sample Notebooks** - 6 comprehensive tutorial notebooks
+- [x] **Sample Notebooks** - 7 comprehensive tutorial notebooks + first-class commands demo
 - [x] **E2E Test Framework** - Automated notebook execution with HTML reports
 - [x] **GitHub Pages Documentation** - Full documentation site
 
