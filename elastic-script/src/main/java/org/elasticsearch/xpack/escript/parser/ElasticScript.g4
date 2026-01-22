@@ -644,6 +644,29 @@ function_call_statement
     ;
 
 function_call
+    : namespaced_function_call
+    | simple_function_call
+    ;
+
+// Namespaced function call: ARRAY.MAP(...), STRING.UPPER(...), K8S.GET_PODS(...)
+// namespace_id allows keywords like ARRAY, STRING, etc. to be used as namespaces
+namespaced_function_call
+    : namespace_id DOT ID LPAREN (argument_list)? RPAREN
+    ;
+
+// Namespace identifier - can be ID or type keywords used as namespace
+namespace_id
+    : ID
+    | ARRAY_TYPE       // ARRAY.MAP(...)
+    | STRING_TYPE      // STRING.UPPER(...)
+    | NUMBER_TYPE      // NUMBER.FORMAT(...)
+    | DATE_TYPE        // DATE.ADD(...)
+    | DOCUMENT_TYPE    // DOCUMENT.KEYS(...)
+    | BOOLEAN_TYPE     // BOOLEAN.PARSE(...)
+    ;
+
+// Simple function call: MY_FUNCTION(...)
+simple_function_call
     : ID LPAREN (argument_list)? RPAREN
     ;
 

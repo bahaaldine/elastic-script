@@ -45,6 +45,12 @@ Current status and future direction for elastic-script — a procedural language
 - [x] **DATE Binding** - `DECLARE last_login DATE FROM FROM users | KEEP login_time | LIMIT 1;`
 - [x] **BOOLEAN Binding** - `DECLARE has_errors BOOLEAN FROM FROM logs | STATS has = COUNT(*) > 0;`
 
+### Type-Namespaced Functions (NEW)
+- [x] **Namespaced Syntax** - `NAMESPACE.METHOD()` for organized function calls
+- [x] **Type Namespaces** - `ARRAY.MAP()`, `STRING.UPPER()`, `DOCUMENT.KEYS()`, `DATE.ADD()`
+- [x] **Extension Namespaces** - `K8S.GET_PODS()`, `AWS.S3_GET()`, `HTTP.GET()`
+- [x] **Keyword Support** - Type keywords (ARRAY, STRING, etc.) work as namespace identifiers
+
 ### Developer Experience
 - [x] **Quick Start Script** - `./scripts/quick-start.sh` for one-command setup
 - [x] **Jupyter Integration** - Custom kernel for interactive development

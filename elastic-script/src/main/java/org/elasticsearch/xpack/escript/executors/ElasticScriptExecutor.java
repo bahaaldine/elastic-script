@@ -282,6 +282,31 @@ public class ElasticScriptExecutor {
     }
 
     /**
+     * Extracts the function name from a function_call context.
+     * Handles both simple (MY_FUNC) and namespaced (NAMESPACE.METHOD) function calls.
+     */
+    private String getFunctionName(ElasticScriptParser.Function_callContext ctx) {
+        if (ctx.namespaced_function_call() != null) {
+            ElasticScriptParser.Namespaced_function_callContext nsCtx = ctx.namespaced_function_call();
+            return nsCtx.namespace_id().getText().toUpperCase() + "_" + nsCtx.ID().getText().toUpperCase();
+        } else {
+            return ctx.simple_function_call().ID().getText();
+        }
+    }
+
+    /**
+     * Extracts the argument list from a function_call context.
+     * Handles both simple and namespaced function calls.
+     */
+    private ElasticScriptParser.Argument_listContext getArgumentList(ElasticScriptParser.Function_callContext ctx) {
+        if (ctx.namespaced_function_call() != null) {
+            return ctx.namespaced_function_call().argument_list();
+        } else {
+            return ctx.simple_function_call().argument_list();
+        }
+    }
+
+    /**
      * Helper method to determine if a statement is a procedure call.
      * In this example, we assume procedure calls are written using function_call_statement,
      * and we check if the called name's definition is an instance of ProcedureDefinition.
@@ -292,7 +317,7 @@ public class ElasticScriptExecutor {
      */
     private boolean isProcedureCall(ElasticScriptParser.StatementContext stmt, ExecutionContext globalContext) {
         if (stmt.function_call_statement() != null) {
-            String callName = stmt.function_call_statement().function_call().ID().getText();
+            String callName = getFunctionName(stmt.function_call_statement().function_call());
             try {
                 return globalContext.getFunction(callName) instanceof ProcedureDefinition;
             } catch (RuntimeException e) {
@@ -309,7 +334,7 @@ public class ElasticScriptExecutor {
      * @return The procedure name.
      */
     private String extractProcedureName(ElasticScriptParser.StatementContext stmt) {
-        return stmt.function_call_statement().function_call().ID().getText();
+        return getFunctionName(stmt.function_call_statement().function_call());
     }
 
     /**
@@ -320,9 +345,9 @@ public class ElasticScriptExecutor {
      * @return A list of evaluated argument values.
      */
     private List<Object> extractProcedureArguments(ElasticScriptParser.StatementContext stmt) {
-        if (stmt.function_call_statement().function_call().argument_list() != null) {
-            List<ElasticScriptParser.ExpressionContext> exprs =
-                stmt.function_call_statement().function_call().argument_list().expression();
+        ElasticScriptParser.Argument_listContext argList = getArgumentList(stmt.function_call_statement().function_call());
+        if (argList != null) {
+            List<ElasticScriptParser.ExpressionContext> exprs = argList.expression();
             List<Object> args = new ArrayList<>();
             for (ElasticScriptParser.ExpressionContext expr : exprs) {
                 try {

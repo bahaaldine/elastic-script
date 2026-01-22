@@ -510,6 +510,24 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFunction_call(ElasticScriptParser.Function_callContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#namespaced_function_call}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNamespaced_function_call(ElasticScriptParser.Namespaced_function_callContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#namespace_id}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNamespace_id(ElasticScriptParser.Namespace_idContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#simple_function_call}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSimple_function_call(ElasticScriptParser.Simple_function_callContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#parameter_list}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

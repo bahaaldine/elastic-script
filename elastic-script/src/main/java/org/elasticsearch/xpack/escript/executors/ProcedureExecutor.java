@@ -455,16 +455,30 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
      * @param listener The ActionListener to handle asynchronous callbacks.
      */
     public void visitFunctionCallAsync(ElasticScriptParser.Function_callContext ctx, ActionListener<Object> listener) {
-        String functionName = ctx.ID().getText();
+        String functionName;
+        List<ElasticScriptParser.ExpressionContext> argContexts;
+        
+        // Handle namespaced function calls (e.g., ARRAY.MAP, STRING.UPPER, K8S.GET_PODS)
+        if (ctx.namespaced_function_call() != null) {
+            ElasticScriptParser.Namespaced_function_callContext nsCtx = ctx.namespaced_function_call();
+            String namespace = nsCtx.namespace_id().getText();
+            String method = nsCtx.ID().getText();
+            // Convert to unified function name: NAMESPACE.METHOD -> NAMESPACE_METHOD
+            functionName = namespace.toUpperCase() + "_" + method.toUpperCase();
+            argContexts = nsCtx.argument_list() != null ? nsCtx.argument_list().expression() : new ArrayList<>();
+        } else {
+            // Simple function call (e.g., MY_FUNCTION)
+            ElasticScriptParser.Simple_function_callContext simpleCtx = ctx.simple_function_call();
+            functionName = simpleCtx.ID().getText();
+            argContexts = simpleCtx.argument_list() != null ? simpleCtx.argument_list().expression() : new ArrayList<>();
+        }
+        
         FunctionDefinition function = context.getFunction(functionName);
 
         if (function == null) {
-            listener.onFailure(new RuntimeException("Unsupported expression"));
+            listener.onFailure(new RuntimeException("Unknown function: " + functionName));
             return;
         }
-
-        List<ElasticScriptParser.ExpressionContext> argContexts =
-            ctx.argument_list() != null ? ctx.argument_list().expression() : new ArrayList<>();
 
         ActionListener<List<Object>> funcCallListener = new ActionListener<List<Object>>() {
             @Override

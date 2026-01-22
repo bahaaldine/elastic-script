@@ -840,6 +840,36 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitFunction_call(ElasticScriptParser.Function_callContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#namespaced_function_call}.
+	 * @param ctx the parse tree
+	 */
+	void enterNamespaced_function_call(ElasticScriptParser.Namespaced_function_callContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#namespaced_function_call}.
+	 * @param ctx the parse tree
+	 */
+	void exitNamespaced_function_call(ElasticScriptParser.Namespaced_function_callContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#namespace_id}.
+	 * @param ctx the parse tree
+	 */
+	void enterNamespace_id(ElasticScriptParser.Namespace_idContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#namespace_id}.
+	 * @param ctx the parse tree
+	 */
+	void exitNamespace_id(ElasticScriptParser.Namespace_idContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#simple_function_call}.
+	 * @param ctx the parse tree
+	 */
+	void enterSimple_function_call(ElasticScriptParser.Simple_function_callContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#simple_function_call}.
+	 * @param ctx the parse tree
+	 */
+	void exitSimple_function_call(ElasticScriptParser.Simple_function_callContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#parameter_list}.
 	 * @param ctx the parse tree
 	 */
