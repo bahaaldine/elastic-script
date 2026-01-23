@@ -400,7 +400,7 @@ Based on comprehensive analysis comparing elastic-script to Oracle PL/SQL:
 | Feature | Priority | Description |
 |---------|----------|-------------|
 | Packages | ✅ Done | Module organization with public/private visibility |
-| GRANT/REVOKE | 🟡 P1 | Fine-grained permissions |
+| GRANT/REVOKE | ✅ Done | Fine-grained permissions with roles and users |
 | Profiler | 🟡 P1 | Performance analysis |
 
 ### Trigger Event Types (Planned)

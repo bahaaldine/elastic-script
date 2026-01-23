@@ -1849,4 +1849,146 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitShowPackageDetail(ElasticScriptParser.ShowPackageDetailContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#permission_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterPermission_statement(ElasticScriptParser.Permission_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#permission_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitPermission_statement(ElasticScriptParser.Permission_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#grant_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterGrant_statement(ElasticScriptParser.Grant_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#grant_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitGrant_statement(ElasticScriptParser.Grant_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#revoke_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterRevoke_statement(ElasticScriptParser.Revoke_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#revoke_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitRevoke_statement(ElasticScriptParser.Revoke_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#privilege_list}.
+	 * @param ctx the parse tree
+	 */
+	void enterPrivilege_list(ElasticScriptParser.Privilege_listContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#privilege_list}.
+	 * @param ctx the parse tree
+	 */
+	void exitPrivilege_list(ElasticScriptParser.Privilege_listContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code executePrivilege}
+	 * labeled alternative in {@link ElasticScriptParser#privilege}.
+	 * @param ctx the parse tree
+	 */
+	void enterExecutePrivilege(ElasticScriptParser.ExecutePrivilegeContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code executePrivilege}
+	 * labeled alternative in {@link ElasticScriptParser#privilege}.
+	 * @param ctx the parse tree
+	 */
+	void exitExecutePrivilege(ElasticScriptParser.ExecutePrivilegeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#object_type}.
+	 * @param ctx the parse tree
+	 */
+	void enterObject_type(ElasticScriptParser.Object_typeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#object_type}.
+	 * @param ctx the parse tree
+	 */
+	void exitObject_type(ElasticScriptParser.Object_typeContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code rolePrincipal}
+	 * labeled alternative in {@link ElasticScriptParser#principal}.
+	 * @param ctx the parse tree
+	 */
+	void enterRolePrincipal(ElasticScriptParser.RolePrincipalContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code rolePrincipal}
+	 * labeled alternative in {@link ElasticScriptParser#principal}.
+	 * @param ctx the parse tree
+	 */
+	void exitRolePrincipal(ElasticScriptParser.RolePrincipalContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code userPrincipal}
+	 * labeled alternative in {@link ElasticScriptParser#principal}.
+	 * @param ctx the parse tree
+	 */
+	void enterUserPrincipal(ElasticScriptParser.UserPrincipalContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code userPrincipal}
+	 * labeled alternative in {@link ElasticScriptParser#principal}.
+	 * @param ctx the parse tree
+	 */
+	void exitUserPrincipal(ElasticScriptParser.UserPrincipalContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#create_role_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterCreate_role_statement(ElasticScriptParser.Create_role_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#create_role_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitCreate_role_statement(ElasticScriptParser.Create_role_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#drop_role_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterDrop_role_statement(ElasticScriptParser.Drop_role_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#drop_role_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitDrop_role_statement(ElasticScriptParser.Drop_role_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showAllPermissions}
+	 * labeled alternative in {@link ElasticScriptParser#show_permissions_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowAllPermissions(ElasticScriptParser.ShowAllPermissionsContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showAllPermissions}
+	 * labeled alternative in {@link ElasticScriptParser#show_permissions_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowAllPermissions(ElasticScriptParser.ShowAllPermissionsContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showPrincipalPermissions}
+	 * labeled alternative in {@link ElasticScriptParser#show_permissions_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowPrincipalPermissions(ElasticScriptParser.ShowPrincipalPermissionsContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showPrincipalPermissions}
+	 * labeled alternative in {@link ElasticScriptParser#show_permissions_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowPrincipalPermissions(ElasticScriptParser.ShowPrincipalPermissionsContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showRoleDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_roles_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowRoleDetail(ElasticScriptParser.ShowRoleDetailContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showRoleDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_roles_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowRoleDetail(ElasticScriptParser.ShowRoleDetailContext ctx);
 }

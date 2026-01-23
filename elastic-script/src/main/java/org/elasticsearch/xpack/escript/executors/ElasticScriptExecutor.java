@@ -53,6 +53,7 @@ import org.elasticsearch.xpack.escript.visitors.ProcedureDefinitionVisitor;
 import org.elasticsearch.xpack.escript.handlers.JobStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.TriggerStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.PackageStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.PermissionStatementHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -299,6 +300,9 @@ public class ElasticScriptExecutor {
                 } else if (programContext.package_statement() != null) {
                     // Handle PACKAGE statements (CREATE PACKAGE, CREATE PACKAGE BODY, DROP PACKAGE, SHOW PACKAGE)
                     handlePackageStatement(programContext.package_statement(), tokens, listener);
+                } else if (programContext.permission_statement() != null) {
+                    // Handle PERMISSION statements (GRANT, REVOKE, CREATE ROLE, DROP ROLE, SHOW PERMISSIONS)
+                    handlePermissionStatement(programContext.permission_statement(), listener);
                 } else {
                     listener.onFailure(new IllegalArgumentException("Unsupported top-level statement"));
                 }
@@ -764,6 +768,43 @@ public class ElasticScriptExecutor {
             }
         } else {
             listener.onFailure(new IllegalArgumentException("Unknown PACKAGE statement type"));
+        }
+    }
+
+    /**
+     * Handles PERMISSION statements (GRANT, REVOKE, CREATE ROLE, DROP ROLE, SHOW PERMISSIONS).
+     */
+    private void handlePermissionStatement(ElasticScriptParser.Permission_statementContext ctx,
+                                          ActionListener<Object> listener) {
+        PermissionStatementHandler handler = new PermissionStatementHandler(client);
+
+        if (ctx.grant_statement() != null) {
+            handler.handleGrant(ctx.grant_statement(), listener);
+        } else if (ctx.revoke_statement() != null) {
+            handler.handleRevoke(ctx.revoke_statement(), listener);
+        } else if (ctx.create_role_statement() != null) {
+            handler.handleCreateRole(ctx.create_role_statement(), listener);
+        } else if (ctx.drop_role_statement() != null) {
+            handler.handleDropRole(ctx.drop_role_statement(), listener);
+        } else if (ctx.show_permissions_statement() != null) {
+            ElasticScriptParser.Show_permissions_statementContext showCtx = ctx.show_permissions_statement();
+            if (showCtx instanceof ElasticScriptParser.ShowAllPermissionsContext) {
+                handler.handleShowAllPermissions(listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowPrincipalPermissionsContext) {
+                handler.handleShowPrincipalPermissions(
+                    (ElasticScriptParser.ShowPrincipalPermissionsContext) showCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown SHOW PERMISSIONS variant"));
+            }
+        } else if (ctx.show_roles_statement() != null) {
+            ElasticScriptParser.Show_roles_statementContext showCtx = ctx.show_roles_statement();
+            if (showCtx instanceof ElasticScriptParser.ShowRoleDetailContext) {
+                handler.handleShowRole((ElasticScriptParser.ShowRoleDetailContext) showCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown SHOW ROLE variant"));
+            }
+        } else {
+            listener.onFailure(new IllegalArgumentException("Unknown PERMISSION statement type"));
         }
     }
 }

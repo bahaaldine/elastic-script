@@ -61,6 +61,18 @@ END_PACKAGE: 'END PACKAGE';
 PRIVATE: 'PRIVATE';
 PUBLIC: 'PUBLIC';
 
+// Permissions (GRANT/REVOKE)
+GRANT: 'GRANT';
+REVOKE: 'REVOKE';
+EXECUTE: 'EXECUTE';
+PRIVILEGES: 'PRIVILEGES';
+ALL_PRIVILEGES: 'ALL PRIVILEGES';
+TO: 'TO';
+OF: 'OF';
+ROLE: 'ROLE';
+USER: 'USER';
+PERMISSIONS: 'PERMISSIONS';
+
 // First-Class Commands (Elasticsearch Operations)
 SEARCH: 'SEARCH';
 REFRESH: 'REFRESH';
@@ -68,6 +80,8 @@ QUERY: 'QUERY';
 MAPPINGS: 'MAPPINGS';
 SETTINGS: 'SETTINGS';
 WHERE_CMD: 'WHERE';
+ESQL_PROCESS_PLACEHOLDER: 'ESQL_PROCESS_PLACEHOLDER';
+ESQL_INTO_PLACEHOLDER: 'ESQL_INTO_PLACEHOLDER';
 
 // Async Execution (Pipe-Driven)
 ON_DONE: 'ON_DONE';
@@ -100,7 +114,6 @@ IF: 'IF';
 THEN: 'THEN';
 END: 'END';
 BEGIN: 'BEGIN';
-EXECUTE: 'EXECUTE';
 IMMEDIATE: 'IMMEDIATE';
 USING: 'USING';
 DECLARE: 'DECLARE';
@@ -293,6 +306,7 @@ program
     | job_statement
     | trigger_statement
     | package_statement
+    | permission_statement
     ;
 
 procedure
@@ -456,11 +470,11 @@ switch_statement
     ;
 
 case_clause
-    : CASE expression ':' statement*
+    : CASE expression COLON statement*
     ;
 
 default_clause
-    : DEFAULT ':' statement*
+    : DEFAULT COLON statement*
     ;
 
 return_statement
@@ -526,11 +540,11 @@ esql_query_content
 
 // Placeholder rules for future implementation
 esql_into_statement
-    : 'ESQL_INTO_PLACEHOLDER' SEMICOLON
+    : ESQL_INTO_PLACEHOLDER SEMICOLON
     ;
 
 esql_process_statement
-    : 'ESQL_PROCESS_PLACEHOLDER' SEMICOLON
+    : ESQL_PROCESS_PLACEHOLDER SEMICOLON
     ;
 
 // =======================
@@ -874,14 +888,14 @@ multiplicativeExpression
     ;
 
 unaryExpr
-    : '-' unaryExpr
+    : MINUS unaryExpr
     | NOT unaryExpr
     | BANG unaryExpr
     | primaryExpression
     ;
 
 arrayLiteral
-    : '[' expressionList? ']'
+    : LBRACKET expressionList? RBRACKET
     ;
 
 expressionList
@@ -889,11 +903,11 @@ expressionList
     ;
 
 documentLiteral
-    : '{' (documentField (',' documentField)*)? '}'
+    : LBRACE (documentField (COMMA documentField)*)? RBRACE
     ;
 
 documentField
-    : STRING ':' expression
+    : STRING COLON expression
     ;
 
 // MAP literal: MAP { 'key' => value, 'key2' => value2 }
@@ -924,7 +938,7 @@ accessExpression
     ;
 
 bracketExpression
-    : '[' expression ']'
+    : LBRACKET expression RBRACKET
     ;
 
 safeNavExpression
@@ -982,13 +996,13 @@ datatype
     ;
 
 array_datatype
-    : ARRAY_TYPE ('OF' (NUMBER_TYPE | STRING_TYPE | DOCUMENT_TYPE | DATE_TYPE | BOOLEAN_TYPE | ARRAY_TYPE | MAP_TYPE ))?
+    : ARRAY_TYPE (OF (NUMBER_TYPE | STRING_TYPE | DOCUMENT_TYPE | DATE_TYPE | BOOLEAN_TYPE | ARRAY_TYPE | MAP_TYPE ))?
     ;
 
 // MAP type with optional key/value type specification
 // Examples: MAP, MAP OF STRING, MAP OF STRING TO NUMBER
 map_datatype
-    : MAP_TYPE 'OF' datatype ('TO' datatype)?
+    : MAP_TYPE OF datatype (TO datatype)?
     ;
 
 persist_clause
@@ -1208,4 +1222,76 @@ drop_package_statement
 // SHOW PACKAGES | SHOW PACKAGE name
 show_packages_statement
     : SHOW PACKAGE ID                                    # showPackageDetail
+    ;
+
+// =======================
+// Permission Rules (GRANT/REVOKE)
+// =======================
+// Manage access to procedures, functions, and packages
+
+permission_statement
+    : grant_statement
+    | revoke_statement
+    | show_permissions_statement
+    | create_role_statement
+    | drop_role_statement
+    | show_roles_statement
+    ;
+
+// GRANT privilege ON object_type object_name TO principal
+// Examples:
+//   GRANT EXECUTE ON PROCEDURE my_proc TO ROLE admin_role
+//   GRANT EXECUTE ON FUNCTION my_func TO USER 'john'
+//   GRANT ALL PRIVILEGES ON PACKAGE my_pkg TO ROLE operators
+grant_statement
+    : GRANT privilege_list ON_KW object_type ID TO principal
+    ;
+
+// REVOKE privilege FROM principal
+// Examples:
+//   REVOKE EXECUTE ON PROCEDURE my_proc FROM ROLE admin_role
+revoke_statement
+    : REVOKE privilege_list ON_KW object_type ID FROM principal
+    ;
+
+privilege_list
+    : privilege (COMMA privilege)*
+    | ALL_PRIVILEGES
+    ;
+
+privilege
+    : EXECUTE                                            # executePrivilege
+    ;
+
+object_type
+    : PROCEDURE
+    | FUNCTION
+    | PACKAGE
+    | JOB
+    | TRIGGER
+    ;
+
+principal
+    : ROLE ID                                            # rolePrincipal
+    | USER STRING                                        # userPrincipal
+    ;
+
+// CREATE ROLE role_name
+create_role_statement
+    : CREATE ROLE ID (DESCRIPTION STRING)?
+    ;
+
+// DROP ROLE role_name
+drop_role_statement
+    : DROP ROLE ID
+    ;
+
+// SHOW PERMISSIONS / SHOW PERMISSIONS FOR principal / SHOW ROLES
+show_permissions_statement
+    : SHOW PERMISSIONS                                   # showAllPermissions
+    | SHOW PERMISSIONS FOR principal                     # showPrincipalPermissions
+    ;
+
+show_roles_statement
+    : SHOW ROLE ID                                       # showRoleDetail
     ;

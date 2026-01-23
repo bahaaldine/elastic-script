@@ -1111,4 +1111,88 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitShowPackageDetail(ElasticScriptParser.ShowPackageDetailContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#permission_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPermission_statement(ElasticScriptParser.Permission_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#grant_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGrant_statement(ElasticScriptParser.Grant_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#revoke_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRevoke_statement(ElasticScriptParser.Revoke_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#privilege_list}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPrivilege_list(ElasticScriptParser.Privilege_listContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code executePrivilege}
+	 * labeled alternative in {@link ElasticScriptParser#privilege}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExecutePrivilege(ElasticScriptParser.ExecutePrivilegeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#object_type}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitObject_type(ElasticScriptParser.Object_typeContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code rolePrincipal}
+	 * labeled alternative in {@link ElasticScriptParser#principal}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRolePrincipal(ElasticScriptParser.RolePrincipalContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code userPrincipal}
+	 * labeled alternative in {@link ElasticScriptParser#principal}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitUserPrincipal(ElasticScriptParser.UserPrincipalContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#create_role_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCreate_role_statement(ElasticScriptParser.Create_role_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#drop_role_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDrop_role_statement(ElasticScriptParser.Drop_role_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code showAllPermissions}
+	 * labeled alternative in {@link ElasticScriptParser#show_permissions_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowAllPermissions(ElasticScriptParser.ShowAllPermissionsContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code showPrincipalPermissions}
+	 * labeled alternative in {@link ElasticScriptParser#show_permissions_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowPrincipalPermissions(ElasticScriptParser.ShowPrincipalPermissionsContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code showRoleDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_roles_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowRoleDetail(ElasticScriptParser.ShowRoleDetailContext ctx);
 }
