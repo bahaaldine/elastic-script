@@ -2095,4 +2095,78 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAnalyzeProfileFor(ElasticScriptParser.AnalyzeProfileForContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#type_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterType_statement(ElasticScriptParser.Type_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#type_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitType_statement(ElasticScriptParser.Type_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#create_type_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterCreate_type_statement(ElasticScriptParser.Create_type_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#create_type_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitCreate_type_statement(ElasticScriptParser.Create_type_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#type_field_list}.
+	 * @param ctx the parse tree
+	 */
+	void enterType_field_list(ElasticScriptParser.Type_field_listContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#type_field_list}.
+	 * @param ctx the parse tree
+	 */
+	void exitType_field_list(ElasticScriptParser.Type_field_listContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#type_field}.
+	 * @param ctx the parse tree
+	 */
+	void enterType_field(ElasticScriptParser.Type_fieldContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#type_field}.
+	 * @param ctx the parse tree
+	 */
+	void exitType_field(ElasticScriptParser.Type_fieldContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#drop_type_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterDrop_type_statement(ElasticScriptParser.Drop_type_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#drop_type_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitDrop_type_statement(ElasticScriptParser.Drop_type_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showAllTypes}
+	 * labeled alternative in {@link ElasticScriptParser#show_types_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowAllTypes(ElasticScriptParser.ShowAllTypesContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showAllTypes}
+	 * labeled alternative in {@link ElasticScriptParser#show_types_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowAllTypes(ElasticScriptParser.ShowAllTypesContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showTypeDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_types_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowTypeDetail(ElasticScriptParser.ShowTypeDetailContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showTypeDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_types_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowTypeDetail(ElasticScriptParser.ShowTypeDetailContext ctx);
 }

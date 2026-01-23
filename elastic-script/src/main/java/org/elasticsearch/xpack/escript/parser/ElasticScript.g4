@@ -79,6 +79,12 @@ PROFILES: 'PROFILES';
 CLEAR: 'CLEAR';
 ANALYZE: 'ANALYZE';
 
+// User-Defined Types
+TYPE: 'TYPE';
+TYPES: 'TYPES';
+RECORD: 'RECORD';
+END_TYPE: 'END TYPE';
+
 // First-Class Commands (Elasticsearch Operations)
 SEARCH: 'SEARCH';
 REFRESH: 'REFRESH';
@@ -314,6 +320,7 @@ program
     | package_statement
     | permission_statement
     | profile_statement
+    | type_statement
     ;
 
 procedure
@@ -1338,4 +1345,40 @@ clear_profile_statement
 analyze_profile_statement
     : ANALYZE PROFILE                                    # analyzeLastProfile
     | ANALYZE PROFILE FOR ID                             # analyzeProfileFor
+    ;
+
+// =======================
+// User-Defined Type Rules
+// =======================
+// Custom record types for complex data structures
+
+type_statement
+    : create_type_statement
+    | drop_type_statement
+    | show_types_statement
+    ;
+
+// CREATE TYPE type_name AS RECORD (field1 TYPE, field2 TYPE, ...) END TYPE
+// Example: CREATE TYPE address_type AS RECORD (street STRING, city STRING, zip STRING) END TYPE
+create_type_statement
+    : CREATE TYPE ID AS RECORD LPAREN type_field_list RPAREN END_TYPE
+    ;
+
+type_field_list
+    : type_field (COMMA type_field)*
+    ;
+
+type_field
+    : ID datatype
+    ;
+
+// DROP TYPE type_name
+drop_type_statement
+    : DROP TYPE ID
+    ;
+
+// SHOW TYPES / SHOW TYPE name
+show_types_statement
+    : SHOW TYPES                                         # showAllTypes
+    | SHOW TYPE ID                                       # showTypeDetail
     ;

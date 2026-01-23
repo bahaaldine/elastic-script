@@ -81,7 +81,7 @@ The table below compares elastic-script to Oracle PL/SQL and identifies missing 
 | **Events** | Triggers | ✅ | ✅ | ✅ Done |
 | | Scheduled jobs | ✅ | ✅ | ✅ Done |
 | **Collections** | Associative arrays | ✅ | ✅ | ✅ Done |
-| | User-defined types | ✅ | ❌ | 🟡 P1 |
+| | User-defined types | ✅ | ✅ | ✅ Done |
 | **Dynamic** | EXECUTE IMMEDIATE | ✅ | ✅ | ✅ Done |
 | | Bind variables | ✅ | ✅ | ✅ Done |
 | **Bulk Ops** | FORALL | ✅ | ✅ | ✅ Done |

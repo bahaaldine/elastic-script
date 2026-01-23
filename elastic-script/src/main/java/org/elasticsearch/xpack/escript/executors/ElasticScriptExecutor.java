@@ -56,6 +56,7 @@ import org.elasticsearch.xpack.escript.handlers.PackageStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.PermissionStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.ProfileStatementHandler;
 import org.elasticsearch.xpack.escript.profiling.ProfileResult;
+import org.elasticsearch.xpack.escript.handlers.TypeStatementHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -308,6 +309,9 @@ public class ElasticScriptExecutor {
                 } else if (programContext.profile_statement() != null) {
                     // Handle PROFILE statements (PROFILE CALL, SHOW PROFILE, CLEAR PROFILE, ANALYZE PROFILE)
                     handleProfileStatement(programContext.profile_statement(), tokens, listener);
+                } else if (programContext.type_statement() != null) {
+                    // Handle TYPE statements (CREATE TYPE, DROP TYPE, SHOW TYPES)
+                    handleTypeStatement(programContext.type_statement(), listener);
                 } else {
                     listener.onFailure(new IllegalArgumentException("Unsupported top-level statement"));
                 }
@@ -894,6 +898,31 @@ public class ElasticScriptExecutor {
             }
         } else {
             listener.onFailure(new IllegalArgumentException("Unknown PROFILE statement type"));
+        }
+    }
+
+    /**
+     * Handles TYPE statements (CREATE TYPE, DROP TYPE, SHOW TYPES).
+     */
+    private void handleTypeStatement(ElasticScriptParser.Type_statementContext ctx,
+                                    ActionListener<Object> listener) {
+        TypeStatementHandler handler = new TypeStatementHandler(client);
+
+        if (ctx.create_type_statement() != null) {
+            handler.handleCreateType(ctx.create_type_statement(), listener);
+        } else if (ctx.drop_type_statement() != null) {
+            handler.handleDropType(ctx.drop_type_statement(), listener);
+        } else if (ctx.show_types_statement() != null) {
+            ElasticScriptParser.Show_types_statementContext showCtx = ctx.show_types_statement();
+            if (showCtx instanceof ElasticScriptParser.ShowAllTypesContext) {
+                handler.handleShowAllTypes(listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowTypeDetailContext) {
+                handler.handleShowTypeDetail((ElasticScriptParser.ShowTypeDetailContext) showCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown SHOW TYPE variant"));
+            }
+        } else {
+            listener.onFailure(new IllegalArgumentException("Unknown TYPE statement type"));
         }
     }
 }

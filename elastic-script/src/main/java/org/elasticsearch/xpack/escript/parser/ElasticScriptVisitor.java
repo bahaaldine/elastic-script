@@ -1256,4 +1256,48 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitAnalyzeProfileFor(ElasticScriptParser.AnalyzeProfileForContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#type_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitType_statement(ElasticScriptParser.Type_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#create_type_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCreate_type_statement(ElasticScriptParser.Create_type_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#type_field_list}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitType_field_list(ElasticScriptParser.Type_field_listContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#type_field}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitType_field(ElasticScriptParser.Type_fieldContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#drop_type_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDrop_type_statement(ElasticScriptParser.Drop_type_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code showAllTypes}
+	 * labeled alternative in {@link ElasticScriptParser#show_types_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowAllTypes(ElasticScriptParser.ShowAllTypesContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code showTypeDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_types_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowTypeDetail(ElasticScriptParser.ShowTypeDetailContext ctx);
 }
