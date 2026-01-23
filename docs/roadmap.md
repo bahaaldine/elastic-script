@@ -75,9 +75,9 @@ The table below compares elastic-script to Oracle PL/SQL and identifies missing 
 | **Cursors** | Explicit cursors | ✅ | ✅ | ✅ Done |
 | | FETCH INTO | ✅ | ✅ | ✅ Done |
 | | BULK COLLECT | ✅ | ✅ | ✅ Done |
-| **Modules** | Packages | ✅ | ❌ | 🟡 P1 |
-| | Package state | ✅ | ❌ | 🟡 P1 |
-| | Public/Private | ✅ | ❌ | 🟡 P1 |
+| **Modules** | Packages | ✅ | ✅ | ✅ Done |
+| | Package state | ✅ | ✅ | ✅ Done |
+| | Public/Private | ✅ | ✅ | ✅ Done |
 | **Events** | Triggers | ✅ | ✅ | ✅ Done |
 | | Scheduled jobs | ✅ | ✅ | ✅ Done |
 | **Collections** | Associative arrays | ✅ | ✅ | ✅ Done |
@@ -546,7 +546,7 @@ SHOW TRIGGERS
 
 ### 3.1 Packages & Modules
 
-**Status:** 🟡 Planned | **Priority:** P1
+**Status:** ✅ Complete | **Priority:** P1
 
 Organize related procedures and functions into packages.
 

@@ -127,6 +127,7 @@ nav:
     - EXECUTE IMMEDIATE: language/execute-immediate.md
     - Cursors: language/cursors.md
     - Bulk Operations: language/bulk-operations.md
+    - Packages: language/packages.md
     - Async Execution: language/async-execution.md
     - Triggers & Scheduling: triggers-and-scheduling.md
   - Functions:

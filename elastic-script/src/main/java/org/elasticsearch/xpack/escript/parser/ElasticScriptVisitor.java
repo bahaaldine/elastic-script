@@ -1038,4 +1038,77 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitShowTriggerRuns(ElasticScriptParser.ShowTriggerRunsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#package_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPackage_statement(ElasticScriptParser.Package_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#create_package_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCreate_package_statement(ElasticScriptParser.Create_package_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#package_spec_item}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPackage_spec_item(ElasticScriptParser.Package_spec_itemContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#package_procedure_spec}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPackage_procedure_spec(ElasticScriptParser.Package_procedure_specContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#package_function_spec}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPackage_function_spec(ElasticScriptParser.Package_function_specContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#package_variable_spec}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPackage_variable_spec(ElasticScriptParser.Package_variable_specContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#create_package_body_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCreate_package_body_statement(ElasticScriptParser.Create_package_body_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#package_body_item}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPackage_body_item(ElasticScriptParser.Package_body_itemContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#package_procedure_impl}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPackage_procedure_impl(ElasticScriptParser.Package_procedure_implContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#package_function_impl}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPackage_function_impl(ElasticScriptParser.Package_function_implContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#drop_package_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDrop_package_statement(ElasticScriptParser.Drop_package_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code showPackageDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_packages_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowPackageDetail(ElasticScriptParser.ShowPackageDetailContext ctx);
 }

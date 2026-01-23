@@ -54,6 +54,13 @@ COLLECT: 'COLLECT';
 SAVE_KW: 'SAVE';
 EXCEPTIONS: 'EXCEPTIONS';
 
+// Packages
+PACKAGE: 'PACKAGE';
+BODY: 'BODY';
+END_PACKAGE: 'END PACKAGE';
+PRIVATE: 'PRIVATE';
+PUBLIC: 'PUBLIC';
+
 // First-Class Commands (Elasticsearch Operations)
 SEARCH: 'SEARCH';
 REFRESH: 'REFRESH';
@@ -285,6 +292,7 @@ program
     | define_intent_statement
     | job_statement
     | trigger_statement
+    | package_statement
     ;
 
 procedure
@@ -1120,4 +1128,84 @@ show_triggers_statement
     : SHOW TRIGGERS                                      # showAllTriggers
     | SHOW TRIGGER ID                                    # showTriggerDetail
     | SHOW TRIGGER RUNS FOR ID                           # showTriggerRuns
+    ;
+
+// =======================
+// Package Rules
+// =======================
+// Packages group related procedures, functions, and variables
+// Similar to PL/SQL packages with specification and body
+
+package_statement
+    : create_package_statement
+    | create_package_body_statement
+    | drop_package_statement
+    | show_packages_statement
+    ;
+
+// CREATE PACKAGE name AS
+//   PROCEDURE proc_name(params);  -- declaration only
+//   FUNCTION func_name(params) RETURNS type;
+//   variable_name TYPE := value;  -- package variable
+// END PACKAGE;
+create_package_statement
+    : CREATE PACKAGE ID AS
+      package_spec_item*
+      END_PACKAGE
+    ;
+
+package_spec_item
+    : package_procedure_spec
+    | package_function_spec
+    | package_variable_spec
+    ;
+
+// Procedure declaration (no body)
+package_procedure_spec
+    : (PUBLIC | PRIVATE)? PROCEDURE ID LPAREN (parameter_list)? RPAREN SEMICOLON
+    ;
+
+// Function declaration (no body)
+package_function_spec
+    : (PUBLIC | PRIVATE)? FUNCTION ID LPAREN (parameter_list)? RPAREN RETURNS datatype SEMICOLON
+    ;
+
+// Package variable
+package_variable_spec
+    : (PUBLIC | PRIVATE)? ID datatype (ASSIGN expression)? SEMICOLON
+    ;
+
+// CREATE PACKAGE BODY name AS
+//   PROCEDURE proc_name(params) BEGIN ... END PROCEDURE;
+//   FUNCTION func_name(params) RETURNS type BEGIN ... END FUNCTION;
+// END PACKAGE;
+create_package_body_statement
+    : CREATE PACKAGE BODY ID AS
+      package_body_item*
+      END_PACKAGE
+    ;
+
+package_body_item
+    : package_procedure_impl
+    | package_function_impl
+    ;
+
+// Procedure implementation
+package_procedure_impl
+    : PROCEDURE ID LPAREN (parameter_list)? RPAREN BEGIN statement+ END PROCEDURE SEMICOLON
+    ;
+
+// Function implementation
+package_function_impl
+    : FUNCTION ID LPAREN (parameter_list)? RPAREN RETURNS datatype AS BEGIN statement+ END FUNCTION SEMICOLON
+    ;
+
+// DROP PACKAGE name
+drop_package_statement
+    : DROP PACKAGE ID
+    ;
+
+// SHOW PACKAGES | SHOW PACKAGE name
+show_packages_statement
+    : SHOW PACKAGE ID                                    # showPackageDetail
     ;

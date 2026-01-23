@@ -52,6 +52,7 @@ import org.elasticsearch.xpack.escript.utils.ActionListenerUtils;
 import org.elasticsearch.xpack.escript.visitors.ProcedureDefinitionVisitor;
 import org.elasticsearch.xpack.escript.handlers.JobStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.TriggerStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.PackageStatementHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -295,6 +296,9 @@ public class ElasticScriptExecutor {
                 } else if (programContext.trigger_statement() != null) {
                     // Handle TRIGGER statements (CREATE TRIGGER, ALTER TRIGGER, DROP TRIGGER, SHOW TRIGGERS)
                     handleTriggerStatement(programContext.trigger_statement(), tokens, listener);
+                } else if (programContext.package_statement() != null) {
+                    // Handle PACKAGE statements (CREATE PACKAGE, CREATE PACKAGE BODY, DROP PACKAGE, SHOW PACKAGE)
+                    handlePackageStatement(programContext.package_statement(), tokens, listener);
                 } else {
                     listener.onFailure(new IllegalArgumentException("Unsupported top-level statement"));
                 }
@@ -729,6 +733,38 @@ public class ElasticScriptExecutor {
             body.append(" ");
         }
         return body.toString().trim();
+    }
+
+    /**
+     * Handles PACKAGE statements (CREATE PACKAGE, CREATE PACKAGE BODY, DROP PACKAGE, SHOW PACKAGE).
+     */
+    private void handlePackageStatement(ElasticScriptParser.Package_statementContext ctx,
+                                        CommonTokenStream tokens,
+                                        ActionListener<Object> listener) {
+        PackageStatementHandler handler = new PackageStatementHandler(client);
+
+        if (ctx.create_package_statement() != null) {
+            ElasticScriptParser.Create_package_statementContext createCtx = ctx.create_package_statement();
+            // Extract the full specification text
+            String rawSpecText = tokens.getText(createCtx.getStart(), createCtx.getStop());
+            handler.handleCreatePackage(createCtx, rawSpecText, listener);
+        } else if (ctx.create_package_body_statement() != null) {
+            ElasticScriptParser.Create_package_body_statementContext bodyCtx = ctx.create_package_body_statement();
+            // Extract the full body text
+            String rawBodyText = tokens.getText(bodyCtx.getStart(), bodyCtx.getStop());
+            handler.handleCreatePackageBody(bodyCtx, rawBodyText, listener);
+        } else if (ctx.drop_package_statement() != null) {
+            handler.handleDropPackage(ctx.drop_package_statement(), listener);
+        } else if (ctx.show_packages_statement() != null) {
+            ElasticScriptParser.Show_packages_statementContext showCtx = ctx.show_packages_statement();
+            if (showCtx instanceof ElasticScriptParser.ShowPackageDetailContext) {
+                handler.handleShowPackage((ElasticScriptParser.ShowPackageDetailContext) showCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown SHOW PACKAGE variant"));
+            }
+        } else {
+            listener.onFailure(new IllegalArgumentException("Unknown PACKAGE statement type"));
+        }
     }
 }
 
