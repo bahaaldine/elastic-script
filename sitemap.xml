@@ -93,6 +93,10 @@
          <lastmod>2026-01-23</lastmod>
     </url>
     <url>
+         <loc>https://bahaaldine.github.io/elastic-script/language/bulk-operations/</loc>
+         <lastmod>2026-01-23</lastmod>
+    </url>
+    <url>
          <loc>https://bahaaldine.github.io/elastic-script/language/control-flow/</loc>
          <lastmod>2026-01-23</lastmod>
     </url>
@@ -134,6 +138,10 @@
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/notebooks/async-execution/</loc>
+         <lastmod>2026-01-23</lastmod>
+    </url>
+    <url>
+         <loc>https://bahaaldine.github.io/elastic-script/notebooks/bulk-operations/</loc>
          <lastmod>2026-01-23</lastmod>
     </url>
     <url>
