@@ -2,35 +2,35 @@
 
 <div class="grid cards" markdown>
 
--   :material-lightning-bolt:{ .lg .middle } __Procedural Power__
+-   :material-robot:{ .lg .middle } __Agent-Native Language__
 
     ---
 
-    Write complex logic with variables, loops, conditionals, and error handling - all inside Elasticsearch.
+    A language designed for AI agents to generate, execute, and debug procedures on Elasticsearch data.
 
-    [:octicons-arrow-right-24: Getting Started](getting-started/installation.md)
+    [:octicons-arrow-right-24: Why Agents?](#why-agents)
+
+-   :material-shield-check:{ .lg .middle } __Transparent & Debuggable__
+
+    ---
+
+    Every agent action is a procedure you can inspect, trace, and understand.
+
+    [:octicons-arrow-right-24: Observability](#full-observability)
 
 -   :material-database:{ .lg .middle } __Native ES|QL Integration__
 
     ---
 
-    Query your data with ES|QL and process results with cursors and loops.
+    Query your data with ES|QL and process results with cursors and bulk operations.
 
     [:octicons-arrow-right-24: Elasticsearch Functions](functions/elasticsearch.md)
 
--   :material-robot:{ .lg .middle } __AI & LLM Built-in__
+-   :material-lightning-bolt:{ .lg .middle } __Distributed & Scalable__
 
     ---
 
-    Summarize logs, classify events, and generate insights with OpenAI or Elasticsearch Inference.
-
-    [:octicons-arrow-right-24: AI Functions](functions/ai-llm.md)
-
--   :material-run-fast:{ .lg .middle } __Async Execution__
-
-    ---
-
-    Chain procedures with `ON_DONE`, `ON_FAIL`, and run tasks in parallel.
+    Runs inside Elasticsearch with async execution, scheduled jobs, and event triggers.
 
     [:octicons-arrow-right-24: Async Guide](language/async-execution.md)
 
@@ -40,7 +40,66 @@
 
 ## What is elastic-script?
 
-**elastic-script** is a procedural scripting language that runs **inside Elasticsearch**. It's designed for:
+**elastic-script** is a **procedural language for AI agents** that runs **inside Elasticsearch**.
+
+Unlike general-purpose code generation where agents produce arbitrary Python, JavaScript, or shell scripts, elastic-script provides a **constrained, purpose-built language** for data operations. When an AI agent uses elastic-script:
+
+- **Actions are transparent** — Every operation is visible, auditable, and logged
+- **Behavior is debuggable** — Procedures can be inspected, traced, and replayed
+- **Capabilities are bounded** — Agents can only do what elastic-script permits
+- **Execution is distributed** — Runs natively in Elasticsearch at scale
+
+---
+
+## Why Agents?
+
+### The Problem with Arbitrary Code Generation
+
+When AI agents generate arbitrary code (Python, SQL, shell scripts), you face:
+
+1. **Security risks** — Unbounded access to file systems, networks, credentials
+2. **Debugging nightmares** — Hard to trace what the agent actually did
+3. **Inconsistent behavior** — Different execution environments, dependencies
+4. **Audit challenges** — No structured record of actions taken
+
+### The elastic-script Solution
+
+elastic-script is **designed from the ground up for AI agents**:
+
+| Challenge | elastic-script Solution |
+|-----------|------------------------|
+| **Security** | Sandboxed execution inside Elasticsearch; no file/network access outside defined functions |
+| **Transparency** | Every procedure is stored, versioned, and inspectable |
+| **Debugging** | Full execution traces, APM integration, structured logging |
+| **Auditing** | Execution history in `.escript_executions` index |
+| **Consistency** | Same language, same runtime, everywhere |
+
+### How It Works
+
+```
+┌─────────────┐     generates      ┌──────────────────┐
+│   AI Agent  │ ─────────────────► │  elastic-script  │
+│  (LLM/MCP)  │                    │    Procedure     │
+└─────────────┘                    └────────┬─────────┘
+                                            │
+                                   executes │
+                                            ▼
+                               ┌────────────────────────┐
+                               │     Elasticsearch      │
+                               │  ┌──────────────────┐  │
+                               │  │  Logs, Metrics,  │  │
+                               │  │  Events, Alerts  │  │
+                               │  └──────────────────┘  │
+                               └────────────────────────┘
+```
+
+The agent generates elastic-script code → the code runs inside Elasticsearch → the user can inspect exactly what happened.
+
+---
+
+## What Can Agents Do?
+
+With elastic-script, AI agents can:
 
 - **Runbook Automation** - Codify operational procedures that respond to alerts
 - **Data Processing** - Transform and enrich data with complex logic
@@ -78,17 +137,54 @@ BEGIN
 END PROCEDURE;
 ```
 
+## The Language
+
+elastic-script is a **procedural language** with familiar SQL-like syntax:
+
+- **Variables** - `DECLARE`, `VAR`, `CONST` with strong typing
+- **Control Flow** - `IF/THEN/ELSE`, `FOR`, `WHILE`, `SWITCH/CASE`
+- **Error Handling** - `TRY/CATCH/FINALLY` with structured exceptions
+- **Functions** - `CREATE FUNCTION` with `IN`, `OUT`, `INOUT` parameters
+- **Cursors** - Stream large result sets with `OPEN`, `FETCH`, `CLOSE`
+- **Bulk Operations** - `FORALL` with `SAVE EXCEPTIONS` for batch processing
+- **Dynamic SQL** - `EXECUTE IMMEDIATE` with bind variables
+
+All designed to be **easy for agents to generate** and **easy for humans to read**.
+
+---
+
 ## Key Features
 
-### 🔧 106 Built-in Functions
+### 🔧 118 Built-in Functions
 
 | Category | Functions |
 |----------|-----------|
 | **String** | `LENGTH`, `SUBSTR`, `UPPER`, `LOWER`, `TRIM`, `REPLACE`, `REGEXP_REPLACE`... |
 | **Array** | `ARRAY_LENGTH`, `ARRAY_APPEND`, `ARRAY_FILTER`, `ARRAY_MAP`, `ARRAY_REDUCE`... |
+| **MAP** | `MAP_GET`, `MAP_PUT`, `MAP_KEYS`, `MAP_VALUES`, `MAP_MERGE`... |
 | **Elasticsearch** | `ESQL_QUERY`, `INDEX_DOCUMENT`, `GET_DOCUMENT`, `REFRESH_INDEX`... |
 | **AI/LLM** | `LLM_COMPLETE`, `LLM_SUMMARIZE`, `LLM_CLASSIFY`, `INFERENCE`... |
 | **Integrations** | `SLACK_SEND`, `PAGERDUTY_TRIGGER`, `K8S_SCALE`, `AWS_LAMBDA_INVOKE`... |
+
+### ⏰ Scheduled Jobs & Triggers
+
+```sql
+-- Run every day at 2 AM
+CREATE JOB daily_cleanup
+SCHEDULE '0 2 * * *'
+AS BEGIN
+    CALL archive_old_logs(30);
+END JOB;
+
+-- React to new documents
+CREATE TRIGGER on_critical_error
+ON INDEX 'logs-*'
+WHEN level = 'ERROR' AND severity = 'critical'
+EVERY 5 SECONDS
+AS BEGIN
+    CALL notify_oncall(@document);
+END TRIGGER;
+```
 
 ### ⚡ Async Execution
 
@@ -109,6 +205,7 @@ PARALLEL [fetch_logs(), fetch_metrics()]
 - Structured logging with execution IDs
 - Elastic APM tracing (optional)
 - Execution state persisted in `.escript_executions`
+- Full procedure history for debugging and auditing
 
 ## Installation
 
