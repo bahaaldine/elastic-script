@@ -35,6 +35,7 @@ Procedures contain statements:
 | `TRY/CATCH` | Error handling |
 | `RETURN` | Return value |
 | `THROW` | Raise errors |
+| `EXECUTE IMMEDIATE` | Dynamic ES\|QL |
 
 ### Expressions
 
@@ -64,6 +65,7 @@ SET len = LENGTH(message);
 | `DATE` | Date/timestamp | `CURRENT_DATE()` |
 | `ARRAY` | List | `[1, 2, 3]`, `['a', 'b']` |
 | `DOCUMENT` | JSON object | `{"key": "value"}` |
+| `MAP` | Associative array | `MAP { 'key' => value }` |
 | `CURSOR` | Query result iterator | `CURSOR FOR FROM ...` |
 
 ## Operators
@@ -148,4 +150,7 @@ Valid top-level queries:
 - [Variables & Types](variables-types.md)
 - [Control Flow](control-flow.md)
 - [Procedures](procedures.md)
+- [User-Defined Functions](functions.md)
+- [Error Handling](error-handling.md)
+- [EXECUTE IMMEDIATE](execute-immediate.md)
 - [Async Execution](async-execution.md)

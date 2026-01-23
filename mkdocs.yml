@@ -122,8 +122,10 @@ nav:
     - Variables & Types: language/variables-types.md
     - Control Flow: language/control-flow.md
     - Procedures: language/procedures.md
-    - Async Execution: language/async-execution.md
+    - User-Defined Functions: language/functions.md
     - Error Handling: language/error-handling.md
+    - EXECUTE IMMEDIATE: language/execute-immediate.md
+    - Async Execution: language/async-execution.md
     - Triggers & Scheduling: triggers-and-scheduling.md
   - Functions:
     - Overview: functions/overview.md
@@ -132,6 +134,7 @@ nav:
     - Array Functions: functions/array.md
     - Date Functions: functions/date.md
     - Document Functions: functions/document.md
+    - MAP Functions: functions/map.md
     - Elasticsearch: functions/elasticsearch.md
     - AI & LLM: functions/ai-llm.md
     - Integrations: functions/integrations.md

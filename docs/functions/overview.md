@@ -1,6 +1,6 @@
 # Functions Overview
 
-elastic-script includes **106 built-in functions** across 12 categories.
+elastic-script includes **118 built-in functions** across 13 categories.
 
 ## Function Categories
 
@@ -11,6 +11,7 @@ elastic-script includes **106 built-in functions** across 12 categories.
 | [Array](array.md) | 18 | List operations |
 | [Date](date.md) | 8 | Date/time handling |
 | [Document](document.md) | 6 | JSON object manipulation |
+| [MAP](map.md) | 12 | Key-value associative arrays |
 | [Elasticsearch](elasticsearch.md) | 5 | ES operations |
 | [AI & LLM](ai-llm.md) | 14 | AI/ML functions |
 | [Integrations](integrations.md) | 26 | External services |
@@ -39,6 +40,18 @@ ARRAY_CONTAINS(arr, val) -- Check membership
 ARRAY_FILTER(arr, fn)    -- Filter elements
 ARRAY_MAP(arr, fn)       -- Transform elements
 ARRAY_JOIN(arr, sep)     -- Join to string
+```
+
+### MAP Functions
+
+```sql
+MAP_GET(map, key)           -- Get value by key
+MAP_PUT(map, key, value)    -- Add/update entry
+MAP_KEYS(map)               -- Get all keys
+MAP_VALUES(map)             -- Get all values
+MAP_SIZE(map)               -- Count entries
+MAP_CONTAINS_KEY(map, key)  -- Check key exists
+MAP_MERGE(map1, map2)       -- Combine maps
 ```
 
 ### Elasticsearch Functions
