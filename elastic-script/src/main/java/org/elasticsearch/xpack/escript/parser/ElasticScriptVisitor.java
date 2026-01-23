@@ -1195,4 +1195,65 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitShowRoleDetail(ElasticScriptParser.ShowRoleDetailContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#profile_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitProfile_statement(ElasticScriptParser.Profile_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#profile_exec_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitProfile_exec_statement(ElasticScriptParser.Profile_exec_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code showAllProfiles}
+	 * labeled alternative in {@link ElasticScriptParser#show_profile_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowAllProfiles(ElasticScriptParser.ShowAllProfilesContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code showLastProfile}
+	 * labeled alternative in {@link ElasticScriptParser#show_profile_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowLastProfile(ElasticScriptParser.ShowLastProfileContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code showProfileFor}
+	 * labeled alternative in {@link ElasticScriptParser#show_profile_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowProfileFor(ElasticScriptParser.ShowProfileForContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code clearAllProfiles}
+	 * labeled alternative in {@link ElasticScriptParser#clear_profile_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClearAllProfiles(ElasticScriptParser.ClearAllProfilesContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code clearProfileFor}
+	 * labeled alternative in {@link ElasticScriptParser#clear_profile_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClearProfileFor(ElasticScriptParser.ClearProfileForContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code analyzeLastProfile}
+	 * labeled alternative in {@link ElasticScriptParser#analyze_profile_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAnalyzeLastProfile(ElasticScriptParser.AnalyzeLastProfileContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code analyzeProfileFor}
+	 * labeled alternative in {@link ElasticScriptParser#analyze_profile_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAnalyzeProfileFor(ElasticScriptParser.AnalyzeProfileForContext ctx);
 }

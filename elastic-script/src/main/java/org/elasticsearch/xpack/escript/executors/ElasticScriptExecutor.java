@@ -54,6 +54,8 @@ import org.elasticsearch.xpack.escript.handlers.JobStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.TriggerStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.PackageStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.PermissionStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.ProfileStatementHandler;
+import org.elasticsearch.xpack.escript.profiling.ProfileResult;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -303,6 +305,9 @@ public class ElasticScriptExecutor {
                 } else if (programContext.permission_statement() != null) {
                     // Handle PERMISSION statements (GRANT, REVOKE, CREATE ROLE, DROP ROLE, SHOW PERMISSIONS)
                     handlePermissionStatement(programContext.permission_statement(), listener);
+                } else if (programContext.profile_statement() != null) {
+                    // Handle PROFILE statements (PROFILE CALL, SHOW PROFILE, CLEAR PROFILE, ANALYZE PROFILE)
+                    handleProfileStatement(programContext.profile_statement(), tokens, listener);
                 } else {
                     listener.onFailure(new IllegalArgumentException("Unsupported top-level statement"));
                 }
@@ -805,6 +810,90 @@ public class ElasticScriptExecutor {
             }
         } else {
             listener.onFailure(new IllegalArgumentException("Unknown PERMISSION statement type"));
+        }
+    }
+
+    /**
+     * Handles PROFILE statements (PROFILE CALL, SHOW PROFILE, CLEAR PROFILE, ANALYZE PROFILE).
+     */
+    private void handleProfileStatement(ElasticScriptParser.Profile_statementContext ctx,
+                                       CommonTokenStream tokens,
+                                       ActionListener<Object> listener) {
+        ProfileStatementHandler handler = new ProfileStatementHandler(client);
+
+        if (ctx.profile_exec_statement() != null) {
+            // PROFILE CALL procedure_name(args)
+            ElasticScriptParser.Profile_exec_statementContext execCtx = ctx.profile_exec_statement();
+            ElasticScriptParser.Call_procedure_statementContext callCtx = execCtx.call_procedure_statement();
+
+            // Get procedure name from call statement
+            String procedureName = callCtx.ID().getText();
+
+            // Execute with profiling - record start time
+            long startTime = System.currentTimeMillis();
+
+            // Re-construct the CALL statement and execute it using the same path
+            String callStatement = tokens.getText(callCtx.getStart(), callCtx.getStop());
+
+            // Execute the call statement using executeProcedure
+            executeProcedure(callStatement, java.util.Collections.emptyMap(), ActionListener.wrap(
+                result -> {
+                    long endTime = System.currentTimeMillis();
+                    long duration = endTime - startTime;
+
+                    // Build a basic profile result
+                    ProfileResult profile = ProfileResult.builder()
+                        .procedureName(procedureName)
+                        .startTime(java.time.Instant.ofEpochMilli(startTime))
+                        .endTime(java.time.Instant.ofEpochMilli(endTime))
+                        .totalDurationMs(duration)
+                        .build();
+
+                    // Store the profile and return the result
+                    handler.storeProfile(profile, ActionListener.wrap(
+                        profileResult -> {
+                            // Return both the procedure result and profile info
+                            java.util.Map<String, Object> response = new java.util.HashMap<>();
+                            response.put("result", result);
+                            response.put("profile", profileResult);
+                            listener.onResponse(response);
+                        },
+                        listener::onFailure
+                    ));
+                },
+                listener::onFailure
+            ));
+        } else if (ctx.show_profile_statement() != null) {
+            ElasticScriptParser.Show_profile_statementContext showCtx = ctx.show_profile_statement();
+            if (showCtx instanceof ElasticScriptParser.ShowAllProfilesContext) {
+                handler.handleShowAllProfiles(listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowLastProfileContext) {
+                handler.handleShowLastProfile(listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowProfileForContext) {
+                handler.handleShowProfileFor((ElasticScriptParser.ShowProfileForContext) showCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown SHOW PROFILE variant"));
+            }
+        } else if (ctx.clear_profile_statement() != null) {
+            ElasticScriptParser.Clear_profile_statementContext clearCtx = ctx.clear_profile_statement();
+            if (clearCtx instanceof ElasticScriptParser.ClearAllProfilesContext) {
+                handler.handleClearAllProfiles(listener);
+            } else if (clearCtx instanceof ElasticScriptParser.ClearProfileForContext) {
+                handler.handleClearProfileFor((ElasticScriptParser.ClearProfileForContext) clearCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown CLEAR PROFILE variant"));
+            }
+        } else if (ctx.analyze_profile_statement() != null) {
+            ElasticScriptParser.Analyze_profile_statementContext analyzeCtx = ctx.analyze_profile_statement();
+            if (analyzeCtx instanceof ElasticScriptParser.AnalyzeLastProfileContext) {
+                handler.handleAnalyzeLastProfile(listener);
+            } else if (analyzeCtx instanceof ElasticScriptParser.AnalyzeProfileForContext) {
+                handler.handleAnalyzeProfileFor((ElasticScriptParser.AnalyzeProfileForContext) analyzeCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown ANALYZE PROFILE variant"));
+            }
+        } else {
+            listener.onFailure(new IllegalArgumentException("Unknown PROFILE statement type"));
         }
     }
 }

@@ -401,7 +401,7 @@ Based on comprehensive analysis comparing elastic-script to Oracle PL/SQL:
 |---------|----------|-------------|
 | Packages | ✅ Done | Module organization with public/private visibility |
 | GRANT/REVOKE | ✅ Done | Fine-grained permissions with roles and users |
-| Profiler | 🟡 P1 | Performance analysis |
+| Profiler | ✅ Done | Performance analysis with timing and recommendations |
 
 ### Trigger Event Types (Planned)
 - `DOCUMENT INSERTED INTO index` - New document indexed

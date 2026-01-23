@@ -1991,4 +1991,108 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitShowRoleDetail(ElasticScriptParser.ShowRoleDetailContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#profile_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterProfile_statement(ElasticScriptParser.Profile_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#profile_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitProfile_statement(ElasticScriptParser.Profile_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#profile_exec_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterProfile_exec_statement(ElasticScriptParser.Profile_exec_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#profile_exec_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitProfile_exec_statement(ElasticScriptParser.Profile_exec_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showAllProfiles}
+	 * labeled alternative in {@link ElasticScriptParser#show_profile_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowAllProfiles(ElasticScriptParser.ShowAllProfilesContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showAllProfiles}
+	 * labeled alternative in {@link ElasticScriptParser#show_profile_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowAllProfiles(ElasticScriptParser.ShowAllProfilesContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showLastProfile}
+	 * labeled alternative in {@link ElasticScriptParser#show_profile_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowLastProfile(ElasticScriptParser.ShowLastProfileContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showLastProfile}
+	 * labeled alternative in {@link ElasticScriptParser#show_profile_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowLastProfile(ElasticScriptParser.ShowLastProfileContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showProfileFor}
+	 * labeled alternative in {@link ElasticScriptParser#show_profile_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowProfileFor(ElasticScriptParser.ShowProfileForContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showProfileFor}
+	 * labeled alternative in {@link ElasticScriptParser#show_profile_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowProfileFor(ElasticScriptParser.ShowProfileForContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code clearAllProfiles}
+	 * labeled alternative in {@link ElasticScriptParser#clear_profile_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterClearAllProfiles(ElasticScriptParser.ClearAllProfilesContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code clearAllProfiles}
+	 * labeled alternative in {@link ElasticScriptParser#clear_profile_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitClearAllProfiles(ElasticScriptParser.ClearAllProfilesContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code clearProfileFor}
+	 * labeled alternative in {@link ElasticScriptParser#clear_profile_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterClearProfileFor(ElasticScriptParser.ClearProfileForContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code clearProfileFor}
+	 * labeled alternative in {@link ElasticScriptParser#clear_profile_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitClearProfileFor(ElasticScriptParser.ClearProfileForContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code analyzeLastProfile}
+	 * labeled alternative in {@link ElasticScriptParser#analyze_profile_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterAnalyzeLastProfile(ElasticScriptParser.AnalyzeLastProfileContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code analyzeLastProfile}
+	 * labeled alternative in {@link ElasticScriptParser#analyze_profile_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitAnalyzeLastProfile(ElasticScriptParser.AnalyzeLastProfileContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code analyzeProfileFor}
+	 * labeled alternative in {@link ElasticScriptParser#analyze_profile_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterAnalyzeProfileFor(ElasticScriptParser.AnalyzeProfileForContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code analyzeProfileFor}
+	 * labeled alternative in {@link ElasticScriptParser#analyze_profile_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitAnalyzeProfileFor(ElasticScriptParser.AnalyzeProfileForContext ctx);
 }

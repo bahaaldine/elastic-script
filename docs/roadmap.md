@@ -88,7 +88,7 @@ The table below compares elastic-script to Oracle PL/SQL and identifies missing 
 | | SAVE EXCEPTIONS | ✅ | ❌ | 🟡 P1 |
 | **Security** | GRANT/REVOKE | ✅ | ✅ | ✅ Done |
 | | AUTHID | ✅ | ❌ | 🟡 P1 |
-| **Debug** | Profiler | ✅ | ❌ | 🟡 P1 |
+| **Debug** | Profiler | ✅ | ✅ | ✅ Done |
 | | Breakpoints | ✅ | ❌ | 🟢 P2 |
 
 ---

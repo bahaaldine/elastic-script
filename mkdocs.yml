@@ -129,6 +129,7 @@ nav:
     - Bulk Operations: language/bulk-operations.md
     - Packages: language/packages.md
     - Security & Permissions: language/security-permissions.md
+    - Profiler: language/profiler.md
     - Async Execution: language/async-execution.md
     - Triggers & Scheduling: triggers-and-scheduling.md
   - Functions:

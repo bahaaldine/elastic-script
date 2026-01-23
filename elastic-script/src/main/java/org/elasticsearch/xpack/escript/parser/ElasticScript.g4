@@ -73,6 +73,12 @@ ROLE: 'ROLE';
 USER: 'USER';
 PERMISSIONS: 'PERMISSIONS';
 
+// Profiler
+PROFILE: 'PROFILE';
+PROFILES: 'PROFILES';
+CLEAR: 'CLEAR';
+ANALYZE: 'ANALYZE';
+
 // First-Class Commands (Elasticsearch Operations)
 SEARCH: 'SEARCH';
 REFRESH: 'REFRESH';
@@ -307,6 +313,7 @@ program
     | trigger_statement
     | package_statement
     | permission_statement
+    | profile_statement
     ;
 
 procedure
@@ -1294,4 +1301,41 @@ show_permissions_statement
 
 show_roles_statement
     : SHOW ROLE ID                                       # showRoleDetail
+    ;
+
+// =======================
+// Profiler Rules
+// =======================
+// Performance profiling for procedures and functions
+
+profile_statement
+    : profile_exec_statement
+    | show_profile_statement
+    | clear_profile_statement
+    | analyze_profile_statement
+    ;
+
+// PROFILE CALL procedure_name(args)
+// Executes procedure and collects timing information
+profile_exec_statement
+    : PROFILE call_procedure_statement
+    ;
+
+// SHOW PROFILE / SHOW PROFILES / SHOW PROFILE FOR procedure_name
+show_profile_statement
+    : SHOW PROFILES                                      # showAllProfiles
+    | SHOW PROFILE                                       # showLastProfile
+    | SHOW PROFILE FOR ID                                # showProfileFor
+    ;
+
+// CLEAR PROFILES / CLEAR PROFILE FOR procedure_name
+clear_profile_statement
+    : CLEAR PROFILES                                     # clearAllProfiles
+    | CLEAR PROFILE FOR ID                               # clearProfileFor
+    ;
+
+// ANALYZE PROFILE - get recommendations
+analyze_profile_statement
+    : ANALYZE PROFILE                                    # analyzeLastProfile
+    | ANALYZE PROFILE FOR ID                             # analyzeProfileFor
     ;
