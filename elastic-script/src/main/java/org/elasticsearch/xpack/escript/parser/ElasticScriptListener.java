@@ -700,6 +700,36 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitCursor_query_content(ElasticScriptParser.Cursor_query_contentContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#open_cursor_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterOpen_cursor_statement(ElasticScriptParser.Open_cursor_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#open_cursor_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitOpen_cursor_statement(ElasticScriptParser.Open_cursor_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#close_cursor_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterClose_cursor_statement(ElasticScriptParser.Close_cursor_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#close_cursor_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitClose_cursor_statement(ElasticScriptParser.Close_cursor_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#fetch_cursor_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterFetch_cursor_statement(ElasticScriptParser.Fetch_cursor_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#fetch_cursor_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitFetch_cursor_statement(ElasticScriptParser.Fetch_cursor_statementContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#variable_declaration_list}.
 	 * @param ctx the parse tree
 	 */
@@ -1283,6 +1313,16 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSimplePrimaryExpression(ElasticScriptParser.SimplePrimaryExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#cursorAttribute}.
+	 * @param ctx the parse tree
+	 */
+	void enterCursorAttribute(ElasticScriptParser.CursorAttributeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#cursorAttribute}.
+	 * @param ctx the parse tree
+	 */
+	void exitCursorAttribute(ElasticScriptParser.CursorAttributeContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#lambdaExpression}.
 	 * @param ctx the parse tree

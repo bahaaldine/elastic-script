@@ -815,6 +815,42 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterOpen_cursor_statement(ElasticScriptParser.Open_cursor_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitOpen_cursor_statement(ElasticScriptParser.Open_cursor_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterClose_cursor_statement(ElasticScriptParser.Close_cursor_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitClose_cursor_statement(ElasticScriptParser.Close_cursor_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFetch_cursor_statement(ElasticScriptParser.Fetch_cursor_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFetch_cursor_statement(ElasticScriptParser.Fetch_cursor_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterVariable_declaration_list(ElasticScriptParser.Variable_declaration_listContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -1494,6 +1530,18 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSimplePrimaryExpression(ElasticScriptParser.SimplePrimaryExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCursorAttribute(ElasticScriptParser.CursorAttributeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCursorAttribute(ElasticScriptParser.CursorAttributeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

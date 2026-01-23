@@ -120,6 +120,12 @@ END_SWITCH: 'END SWITCH';
 PERSIST: 'PERSIST';
 INTO: 'INTO';
 CURSOR: 'CURSOR';
+OPEN_CURSOR: 'OPEN';
+CLOSE_CURSOR: 'CLOSE';
+FETCH: 'FETCH';
+LIMIT: 'LIMIT';
+NOTFOUND: '%NOTFOUND';
+ROWCOUNT: '%ROWCOUNT';
 
 // Data Types
 INT_TYPE: 'INT';
@@ -328,6 +334,9 @@ statement
     | break_statement
     | continue_statement
     | switch_statement
+    | open_cursor_statement
+    | close_cursor_statement
+    | fetch_cursor_statement
     | esql_into_statement
     | esql_process_statement
     | index_command
@@ -614,6 +623,27 @@ cursor_query_content
     : (~SEMICOLON)+  // Match everything until semicolon
     ;
 
+// Cursor operations
+// OPEN cursor_name;
+open_cursor_statement
+    : OPEN_CURSOR ID SEMICOLON
+    ;
+
+// CLOSE cursor_name;
+close_cursor_statement
+    : CLOSE_CURSOR ID SEMICOLON
+    ;
+
+// FETCH cursor_name INTO variable;
+// FETCH cursor_name LIMIT n INTO array_variable;
+fetch_cursor_statement
+    : FETCH ID INTO ID SEMICOLON                          // Fetch single row
+    | FETCH ID LIMIT expression INTO ID SEMICOLON         // Fetch multiple rows
+    ;
+
+// Cursor attributes: cursor_name%NOTFOUND, cursor_name%ROWCOUNT
+// These are handled in expression evaluation as special identifiers
+
 variable_declaration_list
     : variable_declaration (COMMA variable_declaration)*
     ;
@@ -864,6 +894,7 @@ simplePrimaryExpression
     | lambdaExpression
     | call_procedure_statement
     | function_call
+    | cursorAttribute
     | INT
     | FLOAT
     | STRING
@@ -873,6 +904,12 @@ simplePrimaryExpression
     | mapLiteral
     | ID
     | NULL
+    ;
+
+// Cursor attributes: cursor_name%NOTFOUND, cursor_name%ROWCOUNT
+cursorAttribute
+    : ID NOTFOUND     // cursor%NOTFOUND - true when no more rows
+    | ID ROWCOUNT     // cursor%ROWCOUNT - number of rows fetched
     ;
 
 // Lambda expressions: (x) => x * 2  or  (a, b) => a + b

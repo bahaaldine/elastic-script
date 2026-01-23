@@ -72,8 +72,8 @@ The table below compares elastic-script to Oracle PL/SQL and identifies missing 
 | **Functions** | User-defined functions | ✅ | ✅ | ✅ Done |
 | | Function overloading | ✅ | ❌ | 🟢 P2 |
 | | Recursive functions | ✅ | ✅ | ✅ Done |
-| **Cursors** | Explicit cursors | ✅ | ❌ | 🔴 P0 |
-| | FETCH INTO | ✅ | ❌ | 🔴 P0 |
+| **Cursors** | Explicit cursors | ✅ | ✅ | ✅ Done |
+| | FETCH INTO | ✅ | ✅ | ✅ Done |
 | | BULK COLLECT | ✅ | ❌ | 🔴 P0 |
 | **Modules** | Packages | ✅ | ❌ | 🟡 P1 |
 | | Package state | ✅ | ❌ | 🟡 P1 |
@@ -328,7 +328,7 @@ SET my_map = MAP_FROM_ARRAYS(['a', 'b', 'c'], [1, 2, 3]);
 
 ### 2.1 Cursor Management & Streaming
 
-**Status:** 🔴 Not Started | **Priority:** P0
+**Status:** ✅ Complete | **Priority:** P0
 
 Handle large result sets without memory exhaustion.
 

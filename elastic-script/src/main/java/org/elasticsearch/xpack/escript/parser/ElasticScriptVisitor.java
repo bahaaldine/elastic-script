@@ -426,6 +426,24 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCursor_query_content(ElasticScriptParser.Cursor_query_contentContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#open_cursor_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOpen_cursor_statement(ElasticScriptParser.Open_cursor_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#close_cursor_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClose_cursor_statement(ElasticScriptParser.Close_cursor_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#fetch_cursor_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFetch_cursor_statement(ElasticScriptParser.Fetch_cursor_statementContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#variable_declaration_list}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -774,6 +792,12 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSimplePrimaryExpression(ElasticScriptParser.SimplePrimaryExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#cursorAttribute}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCursorAttribute(ElasticScriptParser.CursorAttributeContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#lambdaExpression}.
 	 * @param ctx the parse tree

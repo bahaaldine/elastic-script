@@ -38,6 +38,7 @@ import org.elasticsearch.xpack.escript.handlers.SwitchStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.LoopStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.ParallelStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.PrintStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.CursorStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.ThrowStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.TryCatchStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.ExecuteImmediateStatementHandler;
@@ -95,6 +96,7 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
     private final ExecuteStatementHandler executeHandler;
     private final ExecuteImmediateStatementHandler executeImmediateHandler;
     private final PrintStatementHandler printStatementHandler;
+    private final CursorStatementHandler cursorHandler;
     private final CallProcedureStatementHandler callProcedureStatementHandler;
     private final DefineIntentStatementHandler defineIntentHandler;
     private final IntentStatementHandler intentHandler;
@@ -141,6 +143,7 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
         this.throwHandler = new ThrowStatementHandler(this);
         this.executeImmediateHandler = new ExecuteImmediateStatementHandler(this);
         this.printStatementHandler = new PrintStatementHandler(this);
+        this.cursorHandler = new CursorStatementHandler(this);
         this.callProcedureStatementHandler = new CallProcedureStatementHandler(this);
         this.defineIntentHandler = new DefineIntentStatementHandler(this);
         this.intentHandler = new IntentStatementHandler(this);
@@ -367,6 +370,15 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
         } else if (ctx.esql_process_statement() != null) {
             // Handle ES|QL PROCESS WITH statement
             esqlProcessHandler.handleAsync(ctx.esql_process_statement(), listener);
+        } else if (ctx.open_cursor_statement() != null) {
+            // Handle OPEN cursor;
+            cursorHandler.handleOpenAsync(ctx.open_cursor_statement(), listener);
+        } else if (ctx.close_cursor_statement() != null) {
+            // Handle CLOSE cursor;
+            cursorHandler.handleCloseAsync(ctx.close_cursor_statement(), listener);
+        } else if (ctx.fetch_cursor_statement() != null) {
+            // Handle FETCH cursor INTO variable;
+            cursorHandler.handleFetchAsync(ctx.fetch_cursor_statement(), listener);
         } else if (ctx.index_command() != null) {
             // Handle INDEX command: INDEX document INTO 'index-name';
             firstClassCommandsHandler.handleIndexCommand(ctx.index_command(), listener);

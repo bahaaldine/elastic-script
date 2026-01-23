@@ -258,8 +258,7 @@
    ```
    Should register once at plugin startup, not per-request. Potential significant performance gain.
 5. **Intent System** - Complete DEFINE INTENT functionality
-6. **CURSOR Iteration** - Full FOR loop over CURSOR results
-7. **Error Handling** - Better error messages and stack traces
+6. **Error Handling** - Better error messages and stack traces
 8. **Function Documentation** - Auto-generated docs from `@FunctionSpec` annotations
 
 ### Low Priority
@@ -392,7 +391,7 @@ Based on comprehensive analysis comparing elastic-script to Oracle PL/SQL:
 ### Phase 2: Scale & Performance (Q2-Q3 2026)
 | Feature | Priority | Description |
 |---------|----------|-------------|
-| Cursors | 🔴 P0 | Streaming large result sets |
+| Cursors | ✅ Done | Streaming large result sets (OPEN/CLOSE/FETCH, %NOTFOUND/%ROWCOUNT) |
 | FORALL | 🔴 P0 | Bulk operations with SAVE EXCEPTIONS |
 | CREATE JOB | 🔴 P0 | Scheduled job execution (cron) |
 | CREATE TRIGGER | 🔴 P0 | Event-driven execution |

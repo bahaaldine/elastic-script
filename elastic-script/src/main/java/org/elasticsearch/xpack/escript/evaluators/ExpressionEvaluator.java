@@ -684,6 +684,29 @@ public class ExpressionEvaluator {
             return;
         } else if (ctx.simplePrimaryExpression().NULL() != null) {
             processResult.onResponse(null);
+        } else if (ctx.simplePrimaryExpression().cursorAttribute() != null) {
+            // Handle cursor%NOTFOUND and cursor%ROWCOUNT
+            ElasticScriptParser.CursorAttributeContext attrCtx = ctx.simplePrimaryExpression().cursorAttribute();
+            String cursorName = attrCtx.ID().getText();
+            try {
+                org.elasticsearch.xpack.escript.primitives.CursorDefinition cursor = context.getCursor(cursorName);
+                if (cursor == null) {
+                    listener.onFailure(new RuntimeException("Cursor '" + cursorName + "' not found"));
+                    return;
+                }
+                if (attrCtx.NOTFOUND() != null) {
+                    // cursor%NOTFOUND - true when last fetch returned no rows
+                    processResult.onResponse(cursor.isNotFound());
+                } else if (attrCtx.ROWCOUNT() != null) {
+                    // cursor%ROWCOUNT - number of rows fetched
+                    processResult.onResponse(cursor.getRowCount());
+                } else {
+                    listener.onFailure(new RuntimeException("Unknown cursor attribute"));
+                }
+            } catch (Exception e) {
+                listener.onFailure(e);
+            }
+            return;
         } else if (ctx.simplePrimaryExpression().ID() != null) {
             String id = ctx.simplePrimaryExpression().ID().getText();
             Object var = context.getVariable(id);
