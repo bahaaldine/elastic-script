@@ -80,7 +80,7 @@ public class NamespacedFunctionParserTests extends ESTestCase {
         
         ElasticScriptParser.Namespaced_function_callContext nsCtx = ctx.namespaced_function_call();
         assertEquals("ARRAY", nsCtx.namespace_id().getText());
-        assertEquals("LENGTH", nsCtx.ID().getText());
+        assertEquals("LENGTH", nsCtx.method_name().getText());
     }
 
     public void testNamespacedFunctionCallWithArgs() {
@@ -94,7 +94,7 @@ public class NamespacedFunctionParserTests extends ESTestCase {
         
         ElasticScriptParser.Namespaced_function_callContext nsCtx = ctx.namespaced_function_call();
         assertEquals("STRING", nsCtx.namespace_id().getText());
-        assertEquals("REPLACE", nsCtx.ID().getText());
+        assertEquals("REPLACE", nsCtx.method_name().getText());
         assertNotNull(nsCtx.argument_list());
         assertEquals(3, nsCtx.argument_list().expression().size());
     }
@@ -109,7 +109,7 @@ public class NamespacedFunctionParserTests extends ESTestCase {
             stmt.function_call_statement().function_call().namespaced_function_call();
         assertNotNull(nsCtx);
         assertEquals("ARRAY", nsCtx.namespace_id().getText());
-        assertEquals("MAP", nsCtx.ID().getText());
+        assertEquals("MAP", nsCtx.method_name().getText());
         assertEquals(2, nsCtx.argument_list().expression().size());
     }
 
@@ -123,7 +123,7 @@ public class NamespacedFunctionParserTests extends ESTestCase {
             stmt.function_call_statement().function_call().namespaced_function_call();
         assertNotNull(nsCtx);
         assertEquals("STRING", nsCtx.namespace_id().getText());
-        assertEquals("UPPER", nsCtx.ID().getText());
+        assertEquals("UPPER", nsCtx.method_name().getText());
     }
 
     public void testK8sGetPodsNamespaced() {
@@ -136,7 +136,7 @@ public class NamespacedFunctionParserTests extends ESTestCase {
             stmt.function_call_statement().function_call().namespaced_function_call();
         assertNotNull(nsCtx);
         assertEquals("K8S", nsCtx.namespace_id().getText());
-        assertEquals("GET_PODS", nsCtx.ID().getText());
+        assertEquals("GET_PODS", nsCtx.method_name().getText());
         assertEquals(1, nsCtx.argument_list().expression().size());
     }
 
@@ -150,7 +150,7 @@ public class NamespacedFunctionParserTests extends ESTestCase {
             stmt.function_call_statement().function_call().namespaced_function_call();
         assertNotNull(nsCtx);
         assertEquals("AWS", nsCtx.namespace_id().getText());
-        assertEquals("S3_GET", nsCtx.ID().getText());
+        assertEquals("S3_GET", nsCtx.method_name().getText());
         assertEquals(2, nsCtx.argument_list().expression().size());
     }
 
@@ -164,7 +164,7 @@ public class NamespacedFunctionParserTests extends ESTestCase {
             stmt.function_call_statement().function_call().namespaced_function_call();
         assertNotNull(nsCtx);
         assertEquals("HTTP", nsCtx.namespace_id().getText());
-        assertEquals("GET", nsCtx.ID().getText());
+        assertEquals("GET", nsCtx.method_name().getText());
     }
 
     public void testDocumentKeysNamespaced() {
@@ -177,7 +177,7 @@ public class NamespacedFunctionParserTests extends ESTestCase {
             stmt.function_call_statement().function_call().namespaced_function_call();
         assertNotNull(nsCtx);
         assertEquals("DOCUMENT", nsCtx.namespace_id().getText());
-        assertEquals("KEYS", nsCtx.ID().getText());
+        assertEquals("KEYS", nsCtx.method_name().getText());
     }
 
     public void testDateAddNamespaced() {
@@ -190,7 +190,7 @@ public class NamespacedFunctionParserTests extends ESTestCase {
             stmt.function_call_statement().function_call().namespaced_function_call();
         assertNotNull(nsCtx);
         assertEquals("DATE", nsCtx.namespace_id().getText());
-        assertEquals("ADD", nsCtx.ID().getText());
+        assertEquals("ADD", nsCtx.method_name().getText());
         assertEquals(2, nsCtx.argument_list().expression().size());
     }
 

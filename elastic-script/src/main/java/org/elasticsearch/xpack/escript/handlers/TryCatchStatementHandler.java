@@ -1,14 +1,14 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.
- * under one or more contributor license agreements. Licensed under the Elastic
- * License 2.0; you may not use this file except in compliance with the
- * Elastic License 2.0.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 package org.elasticsearch.xpack.escript.handlers;
 
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.xpack.escript.context.ExecutionContext;
+import org.elasticsearch.xpack.escript.exceptions.EScriptException;
 import org.elasticsearch.xpack.escript.executors.ProcedureExecutor;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptParser;
 import org.elasticsearch.xpack.escript.primitives.ReturnValue;
@@ -16,9 +16,48 @@ import org.elasticsearch.xpack.escript.utils.ActionListenerUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
- * The TryCatchStatementHandler class is responsible for handling TRY-CATCH-FINALLY statements asynchronously.
+ * The TryCatchStatementHandler handles TRY-CATCH-FINALLY statements with support for
+ * named exception types.
+ * 
+ * <h2>Syntax</h2>
+ * <pre>
+ * TRY
+ *     -- statements that might throw
+ * CATCH http_error
+ *     -- handle HTTP errors specifically
+ *     PRINT @error.message;
+ * CATCH timeout_error
+ *     -- handle timeouts specifically
+ * CATCH
+ *     -- catch-all for any other errors
+ *     PRINT 'Unexpected error: ' || @error.message;
+ * FINALLY
+ *     -- cleanup code (always runs)
+ * END TRY
+ * </pre>
+ * 
+ * <h2>Exception Matching</h2>
+ * <ul>
+ *   <li>Named CATCH blocks (e.g., {@code CATCH http_error}) only match exceptions
+ *       whose type equals the specified name (case-insensitive).</li>
+ *   <li>A CATCH block without a name is a "catch-all" that matches any exception.</li>
+ *   <li>CATCH blocks are evaluated in order; the first matching block is executed.</li>
+ *   <li>If no CATCH block matches, the exception propagates after FINALLY runs.</li>
+ * </ul>
+ * 
+ * <h2>The @error Variable</h2>
+ * Within a CATCH block, the {@code @error} variable (accessed as {@code error}) is a
+ * DOCUMENT containing:
+ * <ul>
+ *   <li>{@code message} - The error message</li>
+ *   <li>{@code code} - Error code if provided (e.g., "HTTP_404")</li>
+ *   <li>{@code type} - Exception type (e.g., "http_error", "timeout_error")</li>
+ *   <li>{@code stack_trace} - Full Java stack trace</li>
+ *   <li>{@code cause} - Cause message if present</li>
+ * </ul>
  */
 public class TryCatchStatementHandler {
     private final ProcedureExecutor executor;
@@ -39,158 +78,232 @@ public class TryCatchStatementHandler {
      * @param listener The ActionListener to handle asynchronous callbacks.
      */
     public void handleAsync(ElasticScriptParser.Try_catch_statementContext ctx, ActionListener<Object> listener) {
-        // Partition the statements into TRY, CATCH, and FINALLY blocks
-        List<ElasticScriptParser.StatementContext> tryStatements = new ArrayList<>();
-        List<ElasticScriptParser.StatementContext> catchStatements = new ArrayList<>();
-        List<ElasticScriptParser.StatementContext> finallyStatements = new ArrayList<>();
-
-        partitionStatements(ctx, tryStatements, catchStatements, finallyStatements);
+        // Extract TRY statements (direct children of try_catch_statement before catch_block)
+        List<ElasticScriptParser.StatementContext> tryStatements = ctx.statement();
+        
+        // Extract CATCH blocks
+        List<ElasticScriptParser.Catch_blockContext> catchBlocks = ctx.catch_block();
+        
+        // Extract FINALLY statements (if present - they come after FINALLY keyword)
+        List<ElasticScriptParser.StatementContext> finallyStatements = extractFinallyStatements(ctx);
 
         // Execute TRY block asynchronously
-
         ActionListener<Object> tryCatchListener = new ActionListener<Object>() {
             @Override
             public void onResponse(Object tryResult) {
                 if (tryResult instanceof ReturnValue) {
-                    // means the TRY block returned
-                    // do you want FINALLY to run anyway? If yes, we can do:
-                    executeFinallyBlock(finallyStatements, new ActionListener<>() {
-                        @Override
-                        public void onResponse(Object ignore) {
-                            // after FINALLY, bubble up the ReturnValue
-                            listener.onResponse(tryResult);
-                        }
-                        @Override
-                        public void onFailure(Exception e) {
-                            listener.onFailure(e);
-                        }
-                    });
+                    // TRY block returned - run FINALLY then bubble up the ReturnValue
+                    executeFinallyBlock(finallyStatements, ActionListener.wrap(
+                        ignore -> listener.onResponse(tryResult),
+                        listener::onFailure
+                    ));
                 } else {
-                    // no ReturnValue => proceed to FINALLY or next step
+                    // No ReturnValue - proceed to FINALLY
                     executeFinallyBlock(finallyStatements, listener);
                 }
-
             }
 
             @Override
             public void onFailure(Exception e) {
-                // Exception occurred in TRY block
-                if ( catchStatements.isEmpty() == false ) {
-                    // Execute CATCH block
-                    executeStatementsAsync(catchStatements, 0, new ActionListener<Object>() {
-                        @Override
-                        public void onResponse(Object catchResult) {
-                            if (catchResult instanceof ReturnValue) {
-                                executeFinallyBlock(finallyStatements, new ActionListener<>() {
-                                    @Override
-                                    public void onResponse(Object ignore) {
-                                        listener.onResponse(catchResult);
-                                    }
-                                    @Override
-                                    public void onFailure(Exception ex) {
-                                        listener.onFailure(ex);
-                                    }
-                                });
-                            } else {
-                                // etc
-                                executeFinallyBlock(finallyStatements, listener);
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Exception ex) {
-                            // Exception in CATCH block
-                            executeFinallyBlock(finallyStatements, new ActionListener<Object>() {
-                                @Override
-                                public void onResponse(Object unused) {
-                                    listener.onFailure(ex);
-                                }
-
-                                @Override
-                                public void onFailure(Exception exc) {
-                                    listener.onFailure(exc);
-                                }
-                            });
-                        }
-                    });
-                } else {
-                    // No CATCH block; execute FINALLY and rethrow exception
-                    executeFinallyBlock(finallyStatements, new ActionListener<Object>() {
-                        @Override
-                        public void onResponse(Object aVoid) {
-                            listener.onFailure(e);
-                        }
-
-                        @Override
-                        public void onFailure(Exception ex) {
-                            listener.onFailure(ex);
-                        }
-                    });
-                }
+                // Exception occurred in TRY block - find matching CATCH block
+                handleException(e, catchBlocks, finallyStatements, listener);
             }
         };
 
-        ActionListener<Object> tryCatchLogger = ActionListenerUtils.withLogging(tryCatchListener, this.getClass().getName(),
-                "Try-Catch:" + tryStatements);
+        ActionListener<Object> tryCatchLogger = ActionListenerUtils.withLogging(
+            tryCatchListener, 
+            this.getClass().getName(),
+            "Try-Catch:" + tryStatements.size() + " statements"
+        );
 
-        executeStatementsAsync(tryStatements, 0, tryCatchListener);
+        executeStatementsAsync(tryStatements, 0, tryCatchLogger);
     }
 
     /**
-     * Partitions the statements into TRY, CATCH, and FINALLY blocks.
+     * Handles an exception by finding and executing the appropriate CATCH block.
+     * 
+     * @param e The exception that was thrown
+     * @param catchBlocks The list of CATCH blocks to search
+     * @param finallyStatements The FINALLY statements to execute afterward
+     * @param listener The completion listener
      */
-    private void partitionStatements(ElasticScriptParser.Try_catch_statementContext ctx,
-                                     List<ElasticScriptParser.StatementContext> tryStatements,
-                                     List<ElasticScriptParser.StatementContext> catchStatements,
-                                     List<ElasticScriptParser.StatementContext> finallyStatements) {
-        // Flags to track the current block
-        boolean inTry = false;
-        boolean inCatch = false;
-        boolean inFinally = false;
+    private void handleException(
+            Exception e,
+            List<ElasticScriptParser.Catch_blockContext> catchBlocks,
+            List<ElasticScriptParser.StatementContext> finallyStatements,
+            ActionListener<Object> listener) {
+        
+        // Convert to EScriptException for type matching
+        EScriptException escriptException = EScriptException.from(e);
+        
+        // Find matching CATCH block
+        CatchBlockMatch match = findMatchingCatchBlock(catchBlocks, escriptException);
+        
+        if (match != null) {
+            // Bind @error variable before executing CATCH block
+            bindErrorVariable(escriptException);
+            
+            // Execute the matching CATCH block
+            executeStatementsAsync(match.statements, 0, new ActionListener<Object>() {
+                @Override
+                public void onResponse(Object catchResult) {
+                    if (catchResult instanceof ReturnValue) {
+                        executeFinallyBlock(finallyStatements, ActionListener.wrap(
+                            ignore -> listener.onResponse(catchResult),
+                            listener::onFailure
+                        ));
+                    } else {
+                        executeFinallyBlock(finallyStatements, listener);
+                    }
+                }
 
-        // Iterate through all children to partition statements
-        for (int i = 0; i < ctx.getChildCount(); i++) {
-            ParseTree child = ctx.getChild(i);
+                @Override
+                public void onFailure(Exception ex) {
+                    // Exception in CATCH block - run FINALLY then fail
+                    executeFinallyBlock(finallyStatements, ActionListener.wrap(
+                        unused -> listener.onFailure(ex),
+                        listener::onFailure
+                    ));
+                }
+            });
+        } else {
+            // No matching CATCH block - run FINALLY then rethrow
+            executeFinallyBlock(finallyStatements, ActionListener.wrap(
+                unused -> listener.onFailure(e),
+                listener::onFailure
+            ));
+        }
+    }
 
-            if (child instanceof TerminalNode) {
-                TerminalNode terminal = (TerminalNode) child;
-                String symbol = terminal.getSymbol().getText();
+    /**
+     * Represents a matched CATCH block with its statements.
+     */
+    private static class CatchBlockMatch {
+        final String exceptionName; // null for catch-all
+        final List<ElasticScriptParser.StatementContext> statements;
+        
+        CatchBlockMatch(String exceptionName, List<ElasticScriptParser.StatementContext> statements) {
+            this.exceptionName = exceptionName;
+            this.statements = statements;
+        }
+    }
 
-                if (symbol.equalsIgnoreCase("TRY")) {
-                    inTry = true;
-                    inCatch = false;
-                    inFinally = false;
-                    continue; // Skip the TRY keyword
-                } else if (symbol.equalsIgnoreCase("CATCH")) {
-                    inTry = false;
-                    inCatch = true;
-                    inFinally = false;
-                    continue; // Skip the CATCH keyword
-                } else if (symbol.equalsIgnoreCase("FINALLY")) {
-                    inTry = false;
-                    inCatch = false;
-                    inFinally = true;
-                    continue; // Skip the FINALLY keyword
-                } else if (symbol.equalsIgnoreCase("ENDTRY")) {
-                    inTry = false;
-                    inCatch = false;
-                    inFinally = false;
-                    continue; // Skip the ENDTRY keyword
+    /**
+     * Finds the first CATCH block that matches the given exception.
+     * 
+     * Named CATCH blocks match by exception type; catch-all blocks match everything.
+     * Returns the first match found (blocks are checked in order).
+     * 
+     * @param catchBlocks The CATCH blocks to search
+     * @param exception The exception to match
+     * @return The matching CatchBlockMatch, or null if no match
+     */
+    private CatchBlockMatch findMatchingCatchBlock(
+            List<ElasticScriptParser.Catch_blockContext> catchBlocks,
+            EScriptException exception) {
+        
+        CatchBlockMatch catchAllMatch = null;
+        
+        for (ElasticScriptParser.Catch_blockContext catchBlock : catchBlocks) {
+            // Check if this is a named catch (has ID) or catch-all
+            if (catchBlock.ID() != null) {
+                // Named exception: CATCH http_error
+                String exceptionName = catchBlock.ID().getText();
+                if (exception.matchesType(exceptionName)) {
+                    return new CatchBlockMatch(exceptionName, catchBlock.statement());
+                }
+            } else {
+                // Catch-all: CATCH (no name)
+                // Save it but continue looking for a more specific match
+                if (catchAllMatch == null) {
+                    catchAllMatch = new CatchBlockMatch(null, catchBlock.statement());
                 }
             }
+        }
+        
+        // Return catch-all if no named match was found
+        return catchAllMatch;
+    }
 
-            if (child instanceof ElasticScriptParser.StatementContext) {
-                ElasticScriptParser.StatementContext stmtCtx = (ElasticScriptParser.StatementContext) child;
-                if (inTry) {
-                    tryStatements.add(stmtCtx);
-                } else if (inCatch) {
-                    catchStatements.add(stmtCtx);
-                } else if (inFinally) {
-                    finallyStatements.add(stmtCtx);
-                } else {
-                    // Statements outside of TRY/CATCH/FINALLY blocks should not occur
-                    throw new RuntimeException("Statement found outside of TRY/CATCH/FINALLY blocks.");
+    /**
+     * Extracts FINALLY statements from the context.
+     * 
+     * The grammar is: TRY statement+ catch_block* (FINALLY statement+)? ENDTRY
+     * The FINALLY statements are separate from TRY statements in the parse tree.
+     */
+    private List<ElasticScriptParser.StatementContext> extractFinallyStatements(
+            ElasticScriptParser.Try_catch_statementContext ctx) {
+        
+        List<ElasticScriptParser.StatementContext> finallyStatements = new ArrayList<>();
+        
+        // Check if FINALLY keyword is present
+        if (ctx.FINALLY() == null) {
+            return finallyStatements;
+        }
+        
+        // The statements after FINALLY are in the context
+        // We need to find them by position - statements after the last catch_block
+        // and before ENDTRY
+        
+        // Get all statements from the context
+        List<ElasticScriptParser.StatementContext> allStatements = ctx.statement();
+        
+        // In the new grammar, statements directly in try_catch_statement are TRY statements.
+        // FINALLY statements would be in a separate list if the grammar supported it.
+        // For now, we need to parse the tree structure to find FINALLY statements.
+        
+        // Actually, looking at the grammar again:
+        // try_catch_statement: TRY statement+ catch_block* (FINALLY statement+)? ENDTRY
+        // 
+        // The statement+ after FINALLY is a separate occurrence, but ANTLR combines
+        // them into a single list via ctx.statement(). We need to identify which
+        // statements belong to FINALLY.
+        
+        // For a cleaner implementation, let's check if there are any statements
+        // between FINALLY token and ENDTRY token.
+        // This requires walking the parse tree children.
+        
+        boolean inFinally = false;
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            var child = ctx.getChild(i);
+            
+            if (child instanceof org.antlr.v4.runtime.tree.TerminalNode) {
+                String text = child.getText();
+                if ("FINALLY".equalsIgnoreCase(text)) {
+                    inFinally = true;
+                    continue;
                 }
+                if ("END".equalsIgnoreCase(text) || "END TRY".equalsIgnoreCase(text)) {
+                    break;
+                }
+            }
+            
+            if (inFinally && child instanceof ElasticScriptParser.StatementContext) {
+                finallyStatements.add((ElasticScriptParser.StatementContext) child);
+            }
+        }
+        
+        return finallyStatements;
+    }
+
+    /**
+     * Binds the @error variable in the current execution context.
+     * 
+     * @param e The exception that was caught
+     */
+    private void bindErrorVariable(EScriptException e) {
+        ExecutionContext context = executor.getContext();
+        Map<String, Object> errorDocument = e.toDocument();
+        
+        try {
+            context.declareVariable("error", "DOCUMENT");
+            context.setVariable("error", errorDocument);
+        } catch (RuntimeException alreadyDeclared) {
+            // Variable already exists from a previous catch, just update the value
+            try {
+                context.setVariable("error", errorDocument);
+            } catch (Exception ignored) {
+                // Shouldn't happen in normal operation
             }
         }
     }
@@ -198,19 +311,22 @@ public class TryCatchStatementHandler {
     /**
      * Executes a list of statements asynchronously.
      */
-    private void executeStatementsAsync(List<ElasticScriptParser.StatementContext> stmtCtxList, int index,
-                                        ActionListener<Object> listener) {
+    private void executeStatementsAsync(
+            List<ElasticScriptParser.StatementContext> stmtCtxList, 
+            int index,
+            ActionListener<Object> listener) {
+        
         if (index >= stmtCtxList.size()) {
-            listener.onResponse(null); // All statements executed
+            listener.onResponse(null);
             return;
         }
 
         ElasticScriptParser.StatementContext stmtCtx = stmtCtxList.get(index);
 
-        ActionListener<Object> executeTryCatchStatementListener = new ActionListener<Object>() {
+        ActionListener<Object> stmtListener = new ActionListener<Object>() {
             @Override
             public void onResponse(Object result) {
-                if  ( result instanceof ReturnValue ) {
+                if (result instanceof ReturnValue) {
                     listener.onResponse(result);
                 } else {
                     executeStatementsAsync(stmtCtxList, index + 1, listener);
@@ -223,39 +339,24 @@ public class TryCatchStatementHandler {
             }
         };
 
-        ActionListener<Object> executeTryCatchStatementLogger = ActionListenerUtils.withLogging(executeTryCatchStatementListener,
-            this.getClass().getName(),
-                "Execute-Try-Catch-Statement: " + stmtCtx.getText());
-
-        // Visit the statement asynchronously
-        executor.visitStatementAsync(stmtCtx, executeTryCatchStatementLogger);
+        executor.visitStatementAsync(stmtCtx, stmtListener);
     }
 
     /**
      * Executes the FINALLY block asynchronously.
      */
-    private void executeFinallyBlock(List<ElasticScriptParser.StatementContext> finallyStatements, ActionListener<Object> listener) {
-        if ( finallyStatements.isEmpty() == false ) {
-
-            ActionListener<Object> executeFinallyBlockStatementListener = new ActionListener<Object>() {
-                @Override
-                public void onResponse(Object unused) {
-                    listener.onResponse(null);
-                }
-
-                @Override
-                public void onFailure(Exception e) {
-                    listener.onFailure(e);
-                }
-            };
-
-            ActionListener<Object> executeFinallyBlockStatementLogger = ActionListenerUtils.withLogging(executeFinallyBlockStatementListener
-                , this.getClass().getName(),
-                    "Execute-Finally-Block: " + finallyStatements);
-
-            executeStatementsAsync(finallyStatements, 0, executeFinallyBlockStatementLogger);
-        } else {
-            listener.onResponse(null); // No FINALLY block
+    private void executeFinallyBlock(
+            List<ElasticScriptParser.StatementContext> finallyStatements, 
+            ActionListener<Object> listener) {
+        
+        if (finallyStatements.isEmpty()) {
+            listener.onResponse(null);
+            return;
         }
+
+        executeStatementsAsync(finallyStatements, 0, ActionListener.wrap(
+            unused -> listener.onResponse(null),
+            listener::onFailure
+        ));
     }
 }

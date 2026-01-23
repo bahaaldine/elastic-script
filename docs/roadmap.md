@@ -66,12 +66,12 @@ The table below compares elastic-script to Oracle PL/SQL and identifies missing 
 
 | Category | Feature | PL/SQL | elastic-script | Priority |
 |----------|---------|--------|----------------|----------|
-| **Error Handling** | TRY/CATCH blocks | ✅ | ❌ | 🔴 P0 |
-| | Named exceptions | ✅ | ❌ | 🟡 P1 |
-| | RAISE/THROW | ✅ | ❌ | 🔴 P0 |
-| **Functions** | User-defined functions | ✅ | ❌ | 🔴 P0 |
+| **Error Handling** | TRY/CATCH blocks | ✅ | ✅ | ✅ Done |
+| | Named exceptions | ✅ | ✅ | ✅ Done |
+| | RAISE/THROW | ✅ | ✅ | ✅ Done |
+| **Functions** | User-defined functions | ✅ | ✅ | ✅ Done |
 | | Function overloading | ✅ | ❌ | 🟢 P2 |
-| | Recursive functions | ✅ | ❓ | 🟡 P1 |
+| | Recursive functions | ✅ | ✅ | ✅ Done |
 | **Cursors** | Explicit cursors | ✅ | ❌ | 🔴 P0 |
 | | FETCH INTO | ✅ | ❌ | 🔴 P0 |
 | | BULK COLLECT | ✅ | ❌ | 🔴 P0 |
@@ -82,8 +82,8 @@ The table below compares elastic-script to Oracle PL/SQL and identifies missing 
 | | Scheduled jobs | ✅ | ❌ | 🔴 P0 |
 | **Collections** | Associative arrays | ✅ | ❌ | 🔴 P0 |
 | | User-defined types | ✅ | ❌ | 🟡 P1 |
-| **Dynamic** | EXECUTE IMMEDIATE | ✅ | ❌ | 🔴 P0 |
-| | Bind variables | ✅ | ❌ | 🔴 P0 |
+| **Dynamic** | EXECUTE IMMEDIATE | ✅ | ✅ | ✅ Done |
+| | Bind variables | ✅ | ✅ | ✅ Done |
 | **Bulk Ops** | FORALL | ✅ | ❌ | 🔴 P0 |
 | | SAVE EXCEPTIONS | ✅ | ❌ | 🟡 P1 |
 | **Security** | GRANT/REVOKE | ✅ | ❌ | 🟡 P1 |
@@ -97,7 +97,7 @@ The table below compares elastic-script to Oracle PL/SQL and identifies missing 
 
 ### 1.1 Exception Handling (TRY/CATCH)
 
-**Status:** 🔴 Not Started | **Priority:** P0
+**Status:** ✅ Complete | **Priority:** P0
 
 Full exception handling with named exceptions and propagation.
 
@@ -106,24 +106,51 @@ TRY
     SET result = HTTP_GET('https://api.example.com/data')
     SET parsed = JSON_PARSE(result)
 CATCH http_error
-    PRINT 'HTTP call failed: ' || @error.message
-    CALL log_error(@error)
+    PRINT 'HTTP call failed: ' || error['message']
+    CALL log_error(error)
 CATCH parse_error
     PRINT 'JSON parsing failed'
     SET parsed = {}
+CATCH
+    -- Catch-all for any other errors
+    PRINT 'Unexpected error: ' || error['message']
 FINALLY
     -- Always runs (cleanup)
     CALL close_connections()
 END TRY
+
+-- THROW/RAISE with error codes
+THROW 'Resource not found' WITH CODE 'HTTP_404';
+RAISE error_msg WITH CODE error_code;  -- Expressions supported
 ```
 
-**Key Features:**
+**Implemented Features:**
 
-- Named exception types (`http_error`, `division_error`, `timeout_error`)
-- `@error` binding with `message`, `code`, `stack_trace`
-- `RAISE` statement to throw custom exceptions
-- Exception propagation through procedure calls
-- `FINALLY` block for cleanup (always runs)
+- ✅ Named exception types (`http_error`, `timeout_error`, `division_error`, etc.)
+- ✅ `@error` binding as DOCUMENT with `message`, `code`, `type`, `stack_trace`, `cause`
+- ✅ `THROW` and `RAISE` statements (aliases)
+- ✅ `WITH CODE` clause for error codes
+- ✅ Expression support in THROW/RAISE (not just string literals)
+- ✅ Multiple CATCH blocks with exception type matching
+- ✅ Catch-all CATCH block (no exception name)
+- ✅ `FINALLY` block for cleanup (always runs)
+- ✅ `EScriptException` class with type inference from Java exceptions
+
+**Exception Types:**
+
+| Type | Description |
+|------|-------------|
+| `error` | Generic (catch-all) |
+| `http_error` | HTTP/network errors |
+| `timeout_error` | Timeout errors |
+| `division_error` | Division by zero |
+| `null_reference_error` | Null pointer errors |
+| `type_error` | Type mismatch |
+| `validation_error` | Validation failures |
+| `not_found_error` | Resource not found |
+| `permission_error` | Auth/permission errors |
+| `esql_error` | ES\|QL query errors |
+| `function_error` | Built-in function errors |
 
 ---
 
@@ -169,7 +196,7 @@ SET message = 'Status: ' || calculate_severity(5, 10)
 
 ### 1.3 Dynamic ES|QL (EXECUTE IMMEDIATE)
 
-**Status:** 🔴 Not Started | **Priority:** P0
+**Status:** ✅ Completed | **Priority:** P0
 
 Build and execute queries dynamically at runtime.
 

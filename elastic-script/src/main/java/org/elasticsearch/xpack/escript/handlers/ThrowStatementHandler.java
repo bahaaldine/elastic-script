@@ -1,19 +1,30 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.
- * under one or more contributor license agreements. Licensed under the Elastic
- * License 2.0; you may not use this file except in compliance with the
- * Elastic License 2.0.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 package org.elasticsearch.xpack.escript.handlers;
 
 import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.xpack.escript.exceptions.EScriptException;
 import org.elasticsearch.xpack.escript.executors.ProcedureExecutor;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptParser;
 
 /**
- * The ThrowStatementHandler class is responsible for handling THROW statements
- * within the procedural SQL execution context. It extracts the exception message
- * from a string literal and throws a RuntimeException to propagate the error.
+ * The ThrowStatementHandler class is responsible for handling THROW/RAISE statements
+ * within the procedural SQL execution context.
+ * 
+ * Supported syntax:
+ * <ul>
+ *   <li>{@code THROW 'Error message';} - Simple string message</li>
+ *   <li>{@code THROW error_variable;} - Expression that evaluates to a string</li>
+ *   <li>{@code THROW 'Not found' WITH CODE 'HTTP_404';} - Message with error code</li>
+ *   <li>{@code RAISE 'Error';} - RAISE is an alias for THROW</li>
+ * </ul>
+ * 
+ * The thrown exception is an {@link EScriptException} which provides structured
+ * error information accessible via the @error binding in CATCH blocks.
  */
 public class ThrowStatementHandler {
     private final ProcedureExecutor executor;
@@ -28,43 +39,59 @@ public class ThrowStatementHandler {
     }
 
     /**
-     * Handles the THROW statement asynchronously by extracting the exception message
-     * from a string literal and invoking the listener's onFailure method.
+     * Handles the THROW/RAISE statement asynchronously by evaluating the message expression
+     * and optional error code, then invoking the listener's onFailure method.
      *
-     * @param ctx      The Throw_statementContext representing the THROW statement.
+     * @param ctx      The Throw_statementContext representing the THROW/RAISE statement.
      * @param listener The ActionListener to handle asynchronous callbacks.
      */
     public void handleAsync(ElasticScriptParser.Throw_statementContext ctx, ActionListener<Object> listener) {
-        try {
-            if (ctx.STRING() == null) {
-                listener.onFailure(new RuntimeException("THROW statement requires a string message."));
-                return;
-            }
-
-            // Extract the raw string with quotes
-            String rawMessage = ctx.STRING().getText();
-
-            // Remove the surrounding single quotes and unescape any escaped quotes
-            String exceptionMessage = unescapeString(rawMessage.substring(1, rawMessage.length() - 1));
-
-            // Invoke the listener's onFailure method with the exception
-            listener.onFailure(new RuntimeException(exceptionMessage));
-        } catch (Exception e) {
-            listener.onFailure(e);
+        // Get the expression contexts
+        // Grammar: (THROW | RAISE) expression (WITH CODE expression)? SEMICOLON
+        // expression(0) is the message, expression(1) is the optional code
+        
+        if (ctx.expression() == null || ctx.expression().isEmpty()) {
+            listener.onFailure(new EScriptException("THROW/RAISE statement requires a message expression."));
+            return;
         }
+        
+        // Evaluate the message expression
+        executor.evaluateExpressionAsync(ctx.expression(0), ActionListener.wrap(
+            messageResult -> {
+                String message = convertToString(messageResult);
+                
+                // Check if there's a WITH CODE clause
+                if (ctx.expression().size() > 1) {
+                    // Evaluate the code expression
+                    executor.evaluateExpressionAsync(ctx.expression(1), ActionListener.wrap(
+                        codeResult -> {
+                            String code = convertToString(codeResult);
+                            // Throw with message and code
+                            listener.onFailure(new EScriptException(message, code));
+                        },
+                        e -> listener.onFailure(new EScriptException(
+                            "Failed to evaluate error code expression: " + e.getMessage(), null, EScriptException.TYPE_GENERIC, e))
+                    ));
+                } else {
+                    // Throw with just the message
+                    listener.onFailure(new EScriptException(message));
+                }
+            },
+            e -> listener.onFailure(new EScriptException(
+                "Failed to evaluate error message expression: " + e.getMessage(), null, EScriptException.TYPE_GENERIC, e))
+        ));
     }
-
+    
     /**
-     * Utility method to unescape escaped single quotes in a string.
+     * Converts a value to its string representation.
      *
-     * @param input The input string with potential escaped characters.
-     * @return The unescaped string.
+     * @param value The value to convert
+     * @return The string representation
      */
-    private String unescapeString(String input) {
-        if (input == null) {
-            return null;
+    private String convertToString(Object value) {
+        if (value == null) {
+            return "null";
         }
-        // Replace escaped single quotes with actual single quotes
-        return input.replace("\\'", "'");
+        return value.toString();
     }
 }

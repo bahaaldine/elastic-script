@@ -659,6 +659,10 @@ public class ExpressionEvaluator {
             ElasticScriptParser.DocumentLiteralContext docCtx = ctx.simplePrimaryExpression().documentLiteral();
             evaluateDocumentLiteralAsync(docCtx, processResult);
             return;
+        } else if (ctx.simplePrimaryExpression().mapLiteral() != null) {
+            ElasticScriptParser.MapLiteralContext mapCtx = ctx.simplePrimaryExpression().mapLiteral();
+            evaluateMapLiteralAsync(mapCtx, processResult);
+            return;
         } else if (ctx.simplePrimaryExpression().lambdaExpression() != null) {
             // Create a LambdaExpression object without evaluating the body
             ElasticScriptParser.LambdaExpressionContext lambdaCtx = ctx.simplePrimaryExpression().lambdaExpression();
@@ -872,6 +876,53 @@ public class ExpressionEvaluator {
 
     private String stripQuotes(String quotedString) {
         return quotedString.substring(1, quotedString.length() - 1); // remove surrounding quotes
+    }
+
+    /**
+     * Evaluates a MAP literal: MAP { 'key' => value, 'key2' => value2 }
+     */
+    public void evaluateMapLiteralAsync(ElasticScriptParser.MapLiteralContext ctx, ActionListener<Object> listener) {
+        Map<Object, Object> result = new LinkedHashMap<>();
+        List<ElasticScriptParser.MapEntryContext> entries = ctx.mapEntry();
+
+        if (entries.isEmpty()) {
+            listener.onResponse(result);  // return empty map
+            return;
+        }
+
+        // We need to evaluate entries sequentially to preserve order
+        evaluateMapEntriesAsync(entries, 0, result, listener);
+    }
+
+    private void evaluateMapEntriesAsync(List<ElasticScriptParser.MapEntryContext> entries, 
+                                         int index,
+                                         Map<Object, Object> result,
+                                         ActionListener<Object> listener) {
+        if (index >= entries.size()) {
+            listener.onResponse(result);
+            return;
+        }
+
+        ElasticScriptParser.MapEntryContext entryCtx = entries.get(index);
+        // Each mapEntry has two expressions: key => value
+        ElasticScriptParser.ExpressionContext keyExpr = entryCtx.expression(0);
+        ElasticScriptParser.ExpressionContext valueExpr = entryCtx.expression(1);
+
+        // Evaluate the key first
+        evaluateExpressionAsync(keyExpr, ActionListener.wrap(
+            keyValue -> {
+                // Then evaluate the value
+                evaluateExpressionAsync(valueExpr, ActionListener.wrap(
+                    valueResult -> {
+                        result.put(keyValue, valueResult);
+                        // Process next entry
+                        evaluateMapEntriesAsync(entries, index + 1, result, listener);
+                    },
+                    listener::onFailure
+                ));
+            },
+            listener::onFailure
+        ));
     }
 
     /**

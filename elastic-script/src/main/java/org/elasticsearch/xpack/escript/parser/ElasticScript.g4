@@ -87,6 +87,8 @@ THEN: 'THEN';
 END: 'END';
 BEGIN: 'BEGIN';
 EXECUTE: 'EXECUTE';
+IMMEDIATE: 'IMMEDIATE';
+USING: 'USING';
 DECLARE: 'DECLARE';
 VAR: 'VAR';
 CONST: 'CONST';
@@ -103,8 +105,11 @@ TRY: 'TRY';
 CATCH: 'CATCH';
 FINALLY: 'FINALLY';
 THROW: 'THROW';
+RAISE: 'RAISE';
+CODE: 'CODE';
 ENDTRY: 'END TRY';
 FUNCTION: 'FUNCTION';
+RETURNS: 'RETURNS';
 RETURN: 'RETURN';
 BREAK: 'BREAK';
 CONTINUE: 'CONTINUE';
@@ -124,6 +129,7 @@ DATE_TYPE: 'DATE';
 NUMBER_TYPE: 'NUMBER';
 DOCUMENT_TYPE: 'DOCUMENT';
 ARRAY_TYPE: 'ARRAY';
+MAP_TYPE: 'MAP';
 BOOLEAN_TYPE: 'BOOLEAN';
 
 // Operators
@@ -261,6 +267,8 @@ program
     : create_procedure_statement
     | delete_procedure_statement
     | call_procedure_statement
+    | create_function_statement
+    | delete_function_statement
     | define_intent_statement
     | job_statement
     | trigger_statement
@@ -278,10 +286,30 @@ delete_procedure_statement
     : DELETE PROCEDURE ID SEMICOLON
     ;
 
+// =======================
+// Stored Function Statements
+// =======================
+// CREATE FUNCTION name(params) RETURNS type AS BEGIN ... END FUNCTION
+// Example: CREATE FUNCTION calculate_score(x NUMBER, y NUMBER) RETURNS NUMBER AS
+//          BEGIN RETURN x * 10 + y; END FUNCTION
+
+create_function_statement
+    : CREATE FUNCTION ID LPAREN (parameter_list)? RPAREN RETURNS return_type AS BEGIN statement+ END FUNCTION
+    ;
+
+delete_function_statement
+    : DELETE FUNCTION ID SEMICOLON
+    ;
+
+return_type
+    : datatype
+    ;
+
 statement
     : throw_statement
     | print_statement
     | execute_statement
+    | execute_immediate_statement
     | declare_statement
     | var_statement
     | const_statement
@@ -419,6 +447,31 @@ expression_statement
 
 execute_statement
     : EXECUTE variable_assignment LPAREN esql_query_content RPAREN (persist_clause)? SEMICOLON
+    ;
+
+// =======================
+// EXECUTE IMMEDIATE Statement
+// =======================
+// Executes a dynamically built ES|QL query string at runtime.
+//
+// Syntax:
+//   EXECUTE IMMEDIATE query_expression [INTO var1, var2, ...] [USING bind1, bind2, ...];
+//
+// Examples:
+//   EXECUTE IMMEDIATE 'FROM logs-* | LIMIT 10';
+//   EXECUTE IMMEDIATE query_var INTO result;
+//   EXECUTE IMMEDIATE 'FROM ' || index_name || ' | WHERE status = :1' USING 'error';
+//
+execute_immediate_statement
+    : EXECUTE IMMEDIATE expression (INTO id_list)? (USING expression_list)? SEMICOLON
+    ;
+
+id_list
+    : ID (COMMA ID)*
+    ;
+
+expression_list
+    : expression (COMMA expression)*
     ;
 
 variable_assignment
@@ -627,12 +680,28 @@ array_loop_expression
     : expression
     ;
 
+// TRY-CATCH-FINALLY with optional named exception types
+// Examples:
+//   TRY ... CATCH ... END TRY                          (catch all)
+//   TRY ... CATCH http_error ... END TRY               (named exception)
+//   TRY ... CATCH http_error ... CATCH ... END TRY     (named + catch-all)
 try_catch_statement
-    : TRY statement+ (CATCH statement+)? (FINALLY statement+)? ENDTRY
+    : TRY statement+ catch_block* (FINALLY statement+)? ENDTRY
     ;
 
+catch_block
+    : CATCH ID statement+           // Named exception: CATCH http_error
+    | CATCH statement+              // Catch-all (no exception name)
+    ;
+
+// THROW/RAISE statement for throwing exceptions
+// Examples:
+//   THROW 'Error message';
+//   THROW 'Not found' WITH CODE 'HTTP_404';
+//   THROW error_message;  (expression)
+//   RAISE 'Error';  (RAISE is alias for THROW)
 throw_statement
-    : THROW STRING SEMICOLON
+    : (THROW | RAISE) expression (WITH CODE expression)? SEMICOLON
     ;
 
 function_definition
@@ -650,8 +719,15 @@ function_call
 
 // Namespaced function call: ARRAY.MAP(...), STRING.UPPER(...), K8S.GET_PODS(...)
 // namespace_id allows keywords like ARRAY, STRING, etc. to be used as namespaces
+// method_name allows keywords like MAP to be used as method names
 namespaced_function_call
-    : namespace_id DOT ID LPAREN (argument_list)? RPAREN
+    : namespace_id DOT method_name LPAREN (argument_list)? RPAREN
+    ;
+
+// Method name - allows ID or keywords that might be used as method names
+method_name
+    : ID
+    | MAP_TYPE    // ARRAY.MAP(...) - MAP is a keyword but valid method name
     ;
 
 // Namespace identifier - can be ID or type keywords used as namespace
@@ -662,6 +738,7 @@ namespace_id
     | NUMBER_TYPE      // NUMBER.FORMAT(...)
     | DATE_TYPE        // DATE.ADD(...)
     | DOCUMENT_TYPE    // DOCUMENT.KEYS(...)
+    | MAP_TYPE         // MAP.GET(...), MAP.PUT(...)
     | BOOLEAN_TYPE     // BOOLEAN.PARSE(...)
     ;
 
@@ -742,8 +819,19 @@ expressionList
 documentLiteral
     : '{' (documentField (',' documentField)*)? '}'
     ;
+
 documentField
     : STRING ':' expression
+    ;
+
+// MAP literal: MAP { 'key' => value, 'key2' => value2 }
+// Also supports: MAP {} for empty map
+mapLiteral
+    : MAP_TYPE LBRACE (mapEntry (COMMA mapEntry)*)? RBRACE
+    ;
+
+mapEntry
+    : expression ARROW expression
     ;
 
 pairList
@@ -782,6 +870,7 @@ simplePrimaryExpression
     | BOOLEAN
     | arrayLiteral
     | documentLiteral
+    | mapLiteral
     | ID
     | NULL
     ;
@@ -808,11 +897,19 @@ datatype
     | NUMBER_TYPE
     | DOCUMENT_TYPE
     | BOOLEAN_TYPE
+    | MAP_TYPE
     | array_datatype
+    | map_datatype
     ;
 
 array_datatype
-    : ARRAY_TYPE ('OF' (NUMBER_TYPE | STRING_TYPE | DOCUMENT_TYPE | DATE_TYPE | BOOLEAN_TYPE | ARRAY_TYPE ))?
+    : ARRAY_TYPE ('OF' (NUMBER_TYPE | STRING_TYPE | DOCUMENT_TYPE | DATE_TYPE | BOOLEAN_TYPE | ARRAY_TYPE | MAP_TYPE ))?
+    ;
+
+// MAP type with optional key/value type specification
+// Examples: MAP, MAP OF STRING, MAP OF STRING TO NUMBER
+map_datatype
+    : MAP_TYPE 'OF' datatype ('TO' datatype)?
     ;
 
 persist_clause

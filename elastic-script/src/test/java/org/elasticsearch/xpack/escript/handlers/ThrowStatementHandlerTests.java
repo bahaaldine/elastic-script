@@ -10,30 +10,27 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.client.internal.Client;
+import org.elasticsearch.test.ESTestCase;
 import org.elasticsearch.threadpool.TestThreadPool;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.xpack.escript.executors.ProcedureExecutor;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptLexer;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptParser;
 import org.elasticsearch.xpack.escript.context.ExecutionContext;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-public class ThrowStatementHandlerTests {
+@SuppressWarnings("removal")
+public class ThrowStatementHandlerTests extends ESTestCase {
 
     private ExecutionContext context;
     private ProcedureExecutor executor;
     private ThreadPool threadPool;
 
-    @Before
-    public void setup() {
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
         context = new ExecutionContext();
         threadPool = new TestThreadPool("test-thread-pool");
         Client mockClient = null; // or mock(Client.class);
@@ -43,9 +40,10 @@ public class ThrowStatementHandlerTests {
         executor = new ProcedureExecutor(context, threadPool, mockClient, tokens);
     }
 
-    @After
-    public void tearDown() throws InterruptedException {
-        ThreadPool.terminate(threadPool, 30, TimeUnit.SECONDS);
+    @Override
+    public void tearDown() throws Exception {
+        terminate(threadPool);
+        super.tearDown();
     }
 
     // Helper method to parse a BEGIN ... END block
@@ -214,6 +212,206 @@ public class ThrowStatementHandlerTests {
             @Override
             public void onFailure(Exception e) {
                 assertEquals("Uncaught exception", e.getMessage());
+                latch.countDown();
+            }
+        });
+
+        latch.await();
+    }
+
+    // Test 6: THROW with error code using WITH CODE syntax
+    @Test
+    public void testThrowWithErrorCode() throws InterruptedException {
+        String blockQuery = """
+                PROCEDURE test_throw_with_code()
+                BEGIN
+                    THROW 'Resource not found' WITH CODE 'HTTP_404';
+                END PROCEDURE
+            """;
+        ElasticScriptParser.ProcedureContext blockContext = parseBlock(blockQuery);
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        executor.visitProcedureAsync(blockContext, new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object unused) {
+                fail("Expected an exception due to THROW statement.");
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                assertEquals("Resource not found", e.getMessage());
+                // Verify it's an EScriptException with the code
+                assertTrue("Should be EScriptException", 
+                    e instanceof org.elasticsearch.xpack.escript.exceptions.EScriptException);
+                org.elasticsearch.xpack.escript.exceptions.EScriptException ese = 
+                    (org.elasticsearch.xpack.escript.exceptions.EScriptException) e;
+                assertEquals("HTTP_404", ese.getCode());
+                latch.countDown();
+            }
+        });
+
+        latch.await();
+    }
+
+    // Test 7: RAISE as alias for THROW
+    @Test
+    public void testRaiseAsAliasForThrow() throws InterruptedException {
+        String blockQuery = """
+                PROCEDURE test_raise()
+                BEGIN
+                    RAISE 'Using RAISE instead of THROW';
+                END PROCEDURE
+            """;
+        ElasticScriptParser.ProcedureContext blockContext = parseBlock(blockQuery);
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        executor.visitProcedureAsync(blockContext, new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object unused) {
+                fail("Expected an exception due to RAISE statement.");
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                assertEquals("Using RAISE instead of THROW", e.getMessage());
+                latch.countDown();
+            }
+        });
+
+        latch.await();
+    }
+
+    // Test 8: RAISE with error code
+    @Test
+    public void testRaiseWithErrorCode() throws InterruptedException {
+        String blockQuery = """
+                PROCEDURE test_raise_with_code()
+                BEGIN
+                    RAISE 'Timeout occurred' WITH CODE 'TIMEOUT_001';
+                END PROCEDURE
+            """;
+        ElasticScriptParser.ProcedureContext blockContext = parseBlock(blockQuery);
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        executor.visitProcedureAsync(blockContext, new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object unused) {
+                fail("Expected an exception due to RAISE statement.");
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                assertEquals("Timeout occurred", e.getMessage());
+                assertTrue("Should be EScriptException", 
+                    e instanceof org.elasticsearch.xpack.escript.exceptions.EScriptException);
+                org.elasticsearch.xpack.escript.exceptions.EScriptException ese = 
+                    (org.elasticsearch.xpack.escript.exceptions.EScriptException) e;
+                assertEquals("TIMEOUT_001", ese.getCode());
+                latch.countDown();
+            }
+        });
+
+        latch.await();
+    }
+
+    // Test 9: THROW with expression (variable) for message
+    @Test
+    public void testThrowWithExpressionMessage() throws InterruptedException {
+        String blockQuery = """
+                PROCEDURE test_throw_expression()
+                BEGIN
+                    DECLARE error_msg STRING = 'Dynamic error message';
+                    THROW error_msg;
+                END PROCEDURE
+            """;
+        ElasticScriptParser.ProcedureContext blockContext = parseBlock(blockQuery);
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        executor.visitProcedureAsync(blockContext, new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object unused) {
+                fail("Expected an exception due to THROW statement.");
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                assertEquals("Dynamic error message", e.getMessage());
+                latch.countDown();
+            }
+        });
+
+        latch.await();
+    }
+
+    // Test 10: THROW with concatenated expression for message
+    @Test
+    public void testThrowWithConcatenatedMessage() throws InterruptedException {
+        String blockQuery = """
+                PROCEDURE test_throw_concat()
+                BEGIN
+                    DECLARE item_id STRING = 'ABC123';
+                    THROW 'Item not found: ' || item_id;
+                END PROCEDURE
+            """;
+        ElasticScriptParser.ProcedureContext blockContext = parseBlock(blockQuery);
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        executor.visitProcedureAsync(blockContext, new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object unused) {
+                fail("Expected an exception due to THROW statement.");
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                assertEquals("Item not found: ABC123", e.getMessage());
+                latch.countDown();
+            }
+        });
+
+        latch.await();
+    }
+
+    // Test 11: THROW with expression for both message and code
+    @Test
+    public void testThrowWithExpressionMessageAndCode() throws InterruptedException {
+        String blockQuery = """
+                PROCEDURE test_throw_expr_code()
+                BEGIN
+                    DECLARE err_msg STRING = 'Validation failed';
+                    DECLARE err_code STRING = 'VAL_' || '001';
+                    THROW err_msg WITH CODE err_code;
+                END PROCEDURE
+            """;
+        ElasticScriptParser.ProcedureContext blockContext = parseBlock(blockQuery);
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        executor.visitProcedureAsync(blockContext, new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object unused) {
+                fail("Expected an exception due to THROW statement.");
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                assertEquals("Validation failed", e.getMessage());
+                assertTrue("Should be EScriptException", 
+                    e instanceof org.elasticsearch.xpack.escript.exceptions.EScriptException);
+                org.elasticsearch.xpack.escript.exceptions.EScriptException ese = 
+                    (org.elasticsearch.xpack.escript.exceptions.EScriptException) e;
+                assertEquals("VAL_001", ese.getCode());
                 latch.countDown();
             }
         });

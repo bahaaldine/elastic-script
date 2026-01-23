@@ -16,12 +16,33 @@
 - [x] Procedure creation and storage (`CREATE PROCEDURE ... END PROCEDURE`)
 - [x] Variable declarations (`DECLARE`, `VAR`, `CONST`)
 - [x] Control flow (`IF/THEN/ELSEIF/ELSE`, `FOR` loops, `WHILE` loops)
-- [x] Exception handling (`TRY/CATCH/FINALLY`)
-- [x] Functions with parameters (`IN`, `OUT`, `INOUT` modes)
+- [x] Exception handling (`TRY/CATCH/FINALLY`) with enhancements:
+  - [x] `@error` variable binding in CATCH blocks (message, code, type, stack_trace)
+  - [x] Named exceptions: `CATCH http_error`, `CATCH timeout_error`
+  - [x] Enhanced `THROW`/`RAISE` with expressions and `WITH CODE`
+  - [x] `EScriptException` class with structured error information
+- [x] Inline functions with parameters (`IN`, `OUT`, `INOUT` modes)
+- [x] **User-Defined Functions (NEW)**:
+  - [x] `CREATE FUNCTION name(params) RETURNS type AS BEGIN ... END FUNCTION`
+  - [x] Explicit `RETURNS` clause for return type (NUMBER, STRING, BOOLEAN, DATE, ARRAY, DOCUMENT)
+  - [x] `DELETE FUNCTION name;` to remove stored functions
+  - [x] Functions stored in `.elastic_script_functions` index
+  - [x] Functions callable from expressions and other functions
+  - [x] Auto-loading of stored functions when called
+- [x] **EXECUTE IMMEDIATE (NEW)**:
+  - [x] `EXECUTE IMMEDIATE query_expr [INTO vars] [USING binds];`
+  - [x] Dynamic ES|QL query building at runtime
+  - [x] Bind variables with positional syntax (:1, :2, :3)
+  - [x] INTO clause for result capture
+  - [x] Full ES|QL support for any valid query
 - [x] Case-insensitive booleans (`TRUE`, `true`, `True`)
 - [x] Array literals with single/double quotes (`['a', "b"]`)
 - [x] Null coalescing (`??`) and safe navigation (`?.`)
 - [x] Range operator (`1..10`)
+- [x] MAP type with literal syntax (`MAP { 'key' => value }`)
+- [x] TRY/CATCH/FINALLY exception handling with `@error` document
+- [x] CREATE FUNCTION for stored user-defined functions
+- [x] EXECUTE IMMEDIATE for dynamic ES|QL
 
 ### 2. Pipe-Driven Async Execution Model (NEW)
 - [x] Grammar tokens: `ON_DONE`, `ON_FAIL`, `TRACK`, `TIMEOUT`, `FINALLY`
@@ -36,7 +57,7 @@
 - [x] Unit tests for async syntax parsing
 - [x] Unit tests for continuation bindings
 
-### 3. Built-in Functions (106 functions across 12 categories)
+### 3. Built-in Functions (118 functions across 13 categories)
 
 #### String Functions (18)
 - `LENGTH`, `SUBSTR`, `UPPER`, `LOWER`, `TRIM`, `LTRIM`, `RTRIM`
@@ -62,6 +83,12 @@
 #### Document Functions (6)
 - `DOCUMENT_GET`, `DOCUMENT_KEYS`, `DOCUMENT_VALUES`
 - `DOCUMENT_CONTAINS`, `DOCUMENT_MERGE`, `DOCUMENT_REMOVE`
+
+#### MAP Functions (12)
+- `MAP_GET`, `MAP_GET_OR_DEFAULT`, `MAP_PUT`, `MAP_REMOVE`
+- `MAP_KEYS`, `MAP_VALUES`, `MAP_SIZE`
+- `MAP_CONTAINS_KEY`, `MAP_CONTAINS_VALUE`
+- `MAP_MERGE`, `MAP_FROM_ARRAYS`, `MAP_ENTRIES`
 
 #### Elasticsearch Functions (5)
 - `ESQL_QUERY` - Execute ES|QL queries
@@ -267,7 +294,11 @@ elastic-script/
 │   ├── 02-esql-integration.ipynb
 │   ├── 03-ai-observability.ipynb
 │   ├── 04-async-execution.ipynb
-│   └── 05-runbook-integrations.ipynb
+│   ├── 05-runbook-integrations.ipynb
+│   ├── 12-exception-handling.ipynb    # TRY/CATCH/FINALLY
+│   ├── 13-user-defined-functions.ipynb # CREATE FUNCTION
+│   ├── 14-execute-immediate.ipynb      # Dynamic ES|QL
+│   └── 15-map-type.ipynb               # MAP associative arrays
 ├── tests/e2e/                         # E2E test framework
 │   ├── README.md                      # E2E documentation
 │   ├── run_notebook_tests.py          # Programmatic notebook execution
@@ -353,10 +384,10 @@ Based on comprehensive analysis comparing elastic-script to Oracle PL/SQL:
 ### Phase 1: Core Completeness (Q1-Q2 2026)
 | Feature | Priority | Description |
 |---------|----------|-------------|
-| TRY/CATCH | 🔴 P0 | Exception handling with named exceptions |
-| CREATE FUNCTION | 🔴 P0 | User-defined functions (vs procedures) |
-| EXECUTE IMMEDIATE | 🔴 P0 | Dynamic ES|QL building |
-| MAP type | 🔴 P0 | Associative arrays (key-value) |
+| TRY/CATCH | ✅ Done | Exception handling with named exceptions |
+| CREATE FUNCTION | ✅ Done | User-defined functions (vs procedures) |
+| EXECUTE IMMEDIATE | ✅ Done | Dynamic ES|QL building |
+| MAP type | ✅ Done | Associative arrays (key-value) with 12 functions |
 
 ### Phase 2: Scale & Performance (Q2-Q3 2026)
 | Feature | Priority | Description |
@@ -382,4 +413,4 @@ Based on comprehensive analysis comparing elastic-script to Oracle PL/SQL:
 
 See `docs/roadmap.md` for full details.
 
-*Last updated: January 11, 2026*
+*Last updated: January 22, 2026*

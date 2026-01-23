@@ -35,6 +35,7 @@ import org.elasticsearch.xpack.escript.functions.builtin.datatypes.ArrayBuiltInF
 import org.elasticsearch.xpack.escript.functions.builtin.datatypes.DateBuiltInFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.datatypes.NumberBuiltInFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.datatypes.StringBuiltInFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.datatypes.MapBuiltInFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.inference.InferenceFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.OpenAIFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.S3Functions;
@@ -207,6 +208,7 @@ public class ElasticScriptExecutor {
                                 ArrayBuiltInFunctions.registerAll(executionContext);
                                 DateBuiltInFunctions.registerAll(executionContext);
                                 DocumentBuiltInFunctions.registerAll(executionContext);
+                                MapBuiltInFunctions.registerAll(executionContext);
                                 OpenAIFunctions.registerAll(executionContext);
                                 SlackFunctions.registerAll(executionContext);
                                 S3Functions.registerAll(executionContext);
@@ -266,6 +268,27 @@ public class ElasticScriptExecutor {
                     org.elasticsearch.xpack.escript.handlers.DefineIntentStatementHandler handler = 
                         new org.elasticsearch.xpack.escript.handlers.DefineIntentStatementHandler(tempExecutor);
                     handler.handleAsync(intentCtx, listener);
+                } else if (programContext.create_function_statement() != null) {
+                    // Handle CREATE FUNCTION statement
+                    ElasticScriptParser.Create_function_statementContext createFuncCtx = programContext.create_function_statement();
+                    String functionId = createFuncCtx.ID().getText();
+                    
+                    // Extract the full function text including CREATE keyword
+                    Token start = createFuncCtx.getStart();
+                    Token stop = createFuncCtx.getStop();
+                    String rawFunctionText = tokens.getText(start, stop);
+                    
+                    // Extract return type
+                    String returnType = createFuncCtx.return_type().getText().toUpperCase();
+                    
+                    LOGGER.debug("Storing function {} with return type {}", functionId, returnType);
+                    storeFunctionAsync(functionId, rawFunctionText, returnType, listener);
+                } else if (programContext.delete_function_statement() != null) {
+                    // Handle DELETE FUNCTION statement
+                    ElasticScriptParser.Delete_function_statementContext deleteFuncCtx = programContext.delete_function_statement();
+                    String functionId = deleteFuncCtx.ID().getText();
+                    LOGGER.debug("Deleting function {}", functionId);
+                    deleteFunctionAsync(functionId, listener);
                 } else if (programContext.job_statement() != null) {
                     // Handle JOB statements (CREATE JOB, ALTER JOB, DROP JOB, SHOW JOBS)
                     handleJobStatement(programContext.job_statement(), tokens, listener);
@@ -288,7 +311,7 @@ public class ElasticScriptExecutor {
     private String getFunctionName(ElasticScriptParser.Function_callContext ctx) {
         if (ctx.namespaced_function_call() != null) {
             ElasticScriptParser.Namespaced_function_callContext nsCtx = ctx.namespaced_function_call();
-            return nsCtx.namespace_id().getText().toUpperCase() + "_" + nsCtx.ID().getText().toUpperCase();
+            return nsCtx.namespace_id().getText().toUpperCase() + "_" + nsCtx.method_name().getText().toUpperCase();
         } else {
             return ctx.simple_function_call().ID().getText();
         }
@@ -455,6 +478,128 @@ public class ElasticScriptExecutor {
      */
     public void getProcedureAsync(String id, ActionListener<Map<String, Object>> listener) {
         client.prepareGet(".elastic_script_procedures", id)
+            .execute(ActionListener.wrap(
+                resp -> {
+                    if (resp.isExists()) {
+                        listener.onResponse(resp.getSource());
+                    } else {
+                        listener.onResponse(null);
+                    }
+                },
+                listener::onFailure
+            ));
+    }
+
+    // =======================
+    // Stored Function Management
+    // =======================
+
+    private static final String FUNCTIONS_INDEX = ".elastic_script_functions";
+
+    /**
+     * Asynchronously stores a user-defined function into the .elastic_script_functions index.
+     *
+     * @param id           The function ID (name)
+     * @param functionText The full function definition text
+     * @param returnType   The declared return type
+     * @param listener     The ActionListener to notify on completion
+     */
+    public void storeFunctionAsync(String id, String functionText, String returnType, ActionListener<Object> listener) {
+        LOGGER.debug("Storing function {}", functionText);
+
+        // Parse the function to extract parameters
+        ElasticScriptLexer lexer = new ElasticScriptLexer(CharStreams.fromString(functionText));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        ElasticScriptParser parser = new ElasticScriptParser(tokens);
+        parser.removeErrorListeners();
+        parser.addErrorListener(new ElasticScriptErrorListener());
+        ElasticScriptParser.Create_function_statementContext funcCtx = parser.create_function_statement();
+
+        List<Map<String, Object>> parameters = new ArrayList<>();
+        if (funcCtx != null && funcCtx.parameter_list() != null) {
+            for (var paramCtx : funcCtx.parameter_list().parameter()) {
+                String paramName = paramCtx.ID().getText();
+                String paramType = paramCtx.datatype().getText().toUpperCase();
+                String paramMode = "IN"; // Default mode
+                if (paramCtx.IN() != null) paramMode = "IN";
+                if (paramCtx.OUT() != null) paramMode = "OUT";
+                if (paramCtx.INOUT() != null) paramMode = "INOUT";
+                parameters.add(Map.of("name", paramName, "type", paramType, "mode", paramMode));
+            }
+        }
+
+        GetIndexRequest request = new GetIndexRequest(TimeValue.timeValueSeconds(30)).indices(FUNCTIONS_INDEX);
+        client.admin().indices().getIndex(request, ActionListener.wrap(
+            getIndexResponse -> {
+                indexFunctionDocument(id, functionText, returnType, parameters, listener);
+            },
+            error -> {
+                if (ExceptionsHelper.unwrapCause(error) instanceof IndexNotFoundException) {
+                    LOGGER.debug("Index {} does not exist, creating it ...", FUNCTIONS_INDEX);
+                    CreateIndexRequest createRequest = new CreateIndexRequest(FUNCTIONS_INDEX);
+                    client.admin().indices().create(createRequest, ActionListener.wrap(
+                        createResponse -> indexFunctionDocument(id, functionText, returnType, parameters, listener),
+                        listener::onFailure
+                    ));
+                } else {
+                    listener.onFailure(error);
+                }
+            }
+        ));
+    }
+
+    private void indexFunctionDocument(String id, String functionText, String returnType,
+                                       List<Map<String, Object>> parameters, ActionListener<Object> listener) {
+        client.prepareIndex(FUNCTIONS_INDEX)
+            .setId(id)
+            .setSource(Map.of(
+                "function", functionText,
+                "return_type", returnType,
+                "parameters", parameters
+            ))
+            .execute(ActionListener.wrap(
+                resp -> {
+                    Map<String, Object> resultMap = Map.of(
+                        "id", resp.getId(),
+                        "index", resp.getIndex(),
+                        "result", resp.getResult().getLowercase(),
+                        "return_type", returnType
+                    );
+                    listener.onResponse(resultMap);
+                },
+                listener::onFailure
+            ));
+    }
+
+    /**
+     * Asynchronously deletes a stored function by ID.
+     *
+     * @param id       The function ID
+     * @param listener The ActionListener to notify on completion
+     */
+    public void deleteFunctionAsync(String id, ActionListener<Object> listener) {
+        client.prepareDelete(FUNCTIONS_INDEX, id)
+            .execute(ActionListener.wrap(
+                resp -> {
+                    Map<String, Object> resultMap = Map.of(
+                        "id", resp.getId(),
+                        "index", resp.getIndex(),
+                        "result", resp.getResult().getLowercase()
+                    );
+                    listener.onResponse(resultMap);
+                },
+                listener::onFailure
+            ));
+    }
+
+    /**
+     * Asynchronously retrieves a stored function by ID.
+     *
+     * @param id       The function ID
+     * @param listener The ActionListener to notify with the function source or null
+     */
+    public void getFunctionAsync(String id, ActionListener<Map<String, Object>> listener) {
+        client.prepareGet(FUNCTIONS_INDEX, id)
             .execute(ActionListener.wrap(
                 resp -> {
                     if (resp.isExists()) {

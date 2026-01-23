@@ -54,6 +54,36 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitDelete_procedure_statement(ElasticScriptParser.Delete_procedure_statementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#create_function_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterCreate_function_statement(ElasticScriptParser.Create_function_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#create_function_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitCreate_function_statement(ElasticScriptParser.Create_function_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#delete_function_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterDelete_function_statement(ElasticScriptParser.Delete_function_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#delete_function_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitDelete_function_statement(ElasticScriptParser.Delete_function_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#return_type}.
+	 * @param ctx the parse tree
+	 */
+	void enterReturn_type(ElasticScriptParser.Return_typeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#return_type}.
+	 * @param ctx the parse tree
+	 */
+	void exitReturn_type(ElasticScriptParser.Return_typeContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#statement}.
 	 * @param ctx the parse tree
 	 */
@@ -409,6 +439,36 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExecute_statement(ElasticScriptParser.Execute_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#execute_immediate_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterExecute_immediate_statement(ElasticScriptParser.Execute_immediate_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#execute_immediate_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitExecute_immediate_statement(ElasticScriptParser.Execute_immediate_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#id_list}.
+	 * @param ctx the parse tree
+	 */
+	void enterId_list(ElasticScriptParser.Id_listContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#id_list}.
+	 * @param ctx the parse tree
+	 */
+	void exitId_list(ElasticScriptParser.Id_listContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#expression_list}.
+	 * @param ctx the parse tree
+	 */
+	void enterExpression_list(ElasticScriptParser.Expression_listContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#expression_list}.
+	 * @param ctx the parse tree
+	 */
+	void exitExpression_list(ElasticScriptParser.Expression_listContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#variable_assignment}.
 	 * @param ctx the parse tree
@@ -800,6 +860,16 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitTry_catch_statement(ElasticScriptParser.Try_catch_statementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#catch_block}.
+	 * @param ctx the parse tree
+	 */
+	void enterCatch_block(ElasticScriptParser.Catch_blockContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#catch_block}.
+	 * @param ctx the parse tree
+	 */
+	void exitCatch_block(ElasticScriptParser.Catch_blockContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#throw_statement}.
 	 * @param ctx the parse tree
 	 */
@@ -849,6 +919,16 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitNamespaced_function_call(ElasticScriptParser.Namespaced_function_callContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#method_name}.
+	 * @param ctx the parse tree
+	 */
+	void enterMethod_name(ElasticScriptParser.Method_nameContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#method_name}.
+	 * @param ctx the parse tree
+	 */
+	void exitMethod_name(ElasticScriptParser.Method_nameContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#namespace_id}.
 	 * @param ctx the parse tree
@@ -1114,6 +1194,26 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitDocumentField(ElasticScriptParser.DocumentFieldContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#mapLiteral}.
+	 * @param ctx the parse tree
+	 */
+	void enterMapLiteral(ElasticScriptParser.MapLiteralContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#mapLiteral}.
+	 * @param ctx the parse tree
+	 */
+	void exitMapLiteral(ElasticScriptParser.MapLiteralContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#mapEntry}.
+	 * @param ctx the parse tree
+	 */
+	void enterMapEntry(ElasticScriptParser.MapEntryContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#mapEntry}.
+	 * @param ctx the parse tree
+	 */
+	void exitMapEntry(ElasticScriptParser.MapEntryContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#pairList}.
 	 * @param ctx the parse tree
 	 */
@@ -1233,6 +1333,16 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitArray_datatype(ElasticScriptParser.Array_datatypeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#map_datatype}.
+	 * @param ctx the parse tree
+	 */
+	void enterMap_datatype(ElasticScriptParser.Map_datatypeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#map_datatype}.
+	 * @param ctx the parse tree
+	 */
+	void exitMap_datatype(ElasticScriptParser.Map_datatypeContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#persist_clause}.
 	 * @param ctx the parse tree

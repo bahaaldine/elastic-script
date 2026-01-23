@@ -175,4 +175,122 @@ public class TryCatchStatementHandlerTests extends ESTestCase {
 
         latch.await();
     }
+
+    // Test 5: @error variable binding in CATCH block
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testErrorVariableBindingInCatch() throws InterruptedException {
+        String blockQuery = """
+            PROCEDURE test_error_binding()
+            BEGIN
+                DECLARE error_msg STRING;
+                TRY
+                    THROW 'Test error message';
+                CATCH
+                    SET error_msg = error['message'];
+                END TRY
+            END PROCEDURE
+            """;
+        ElasticScriptParser.ProcedureContext blockContext = parseBlock(blockQuery);
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        executor.visitProcedureAsync(blockContext, new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object unused) {
+                // Check that @error.message was captured
+                Object errorMsg = context.getVariable("error_msg");
+                assertNotNull("error_msg should be set from @error.message", errorMsg);
+                assertEquals("Test error message", errorMsg.toString());
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                fail("Execution failed: " + e.getMessage());
+                latch.countDown();
+            }
+        });
+
+        latch.await();
+    }
+
+    // Test 6: @error variable contains structured error document
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testErrorVariableIsDocument() throws InterruptedException {
+        String blockQuery = """
+            PROCEDURE test_error_document()
+            BEGIN
+                DECLARE err_doc DOCUMENT;
+                TRY
+                    THROW 'Structured error' WITH CODE 'ERR_001';
+                CATCH
+                    SET err_doc = error;
+                END TRY
+            END PROCEDURE
+            """;
+        ElasticScriptParser.ProcedureContext blockContext = parseBlock(blockQuery);
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        executor.visitProcedureAsync(blockContext, new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object unused) {
+                Object errDoc = context.getVariable("err_doc");
+                assertNotNull("err_doc should be set from @error", errDoc);
+                assertTrue("err_doc should be a Map", errDoc instanceof java.util.Map);
+                
+                java.util.Map<String, Object> errorMap = (java.util.Map<String, Object>) errDoc;
+                assertEquals("Structured error", errorMap.get("message"));
+                assertEquals("ERR_001", errorMap.get("code"));
+                assertNotNull("type should be present", errorMap.get("type"));
+                assertNotNull("stack_trace should be present", errorMap.get("stack_trace"));
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                fail("Execution failed: " + e.getMessage());
+                latch.countDown();
+            }
+        });
+
+        latch.await();
+    }
+
+    // Test 7: Multiple CATCH blocks - catch-all works
+    @Test
+    public void testMultipleCatchBlocksCatchAll() throws InterruptedException {
+        String blockQuery = """
+            PROCEDURE test_catch_all()
+            BEGIN
+                DECLARE result STRING;
+                TRY
+                    THROW 'Generic error';
+                CATCH
+                    SET result = 'caught';
+                END TRY
+            END PROCEDURE
+            """;
+        ElasticScriptParser.ProcedureContext blockContext = parseBlock(blockQuery);
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        executor.visitProcedureAsync(blockContext, new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object unused) {
+                assertEquals("caught", context.getVariable("result"));
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                fail("Execution failed: " + e.getMessage());
+                latch.countDown();
+            }
+        });
+
+        latch.await();
+    }
 }

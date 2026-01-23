@@ -160,9 +160,31 @@ public class FunctionDefinitionHandler {
     public void executeFunctionAsync(String functionName, List<Object> arguments, ActionListener<Object> listener) {
         FunctionDefinition function = executor.getContext().getFunction(functionName);
         if (function == null) {
-            listener.onFailure(new RuntimeException("Function '" + functionName + "' is not defined."));
+            // Try to load the function from the stored functions index
+            executor.getStoredFunctionAsync(functionName, ActionListener.wrap(
+                storedFunction -> {
+                    if (storedFunction == null) {
+                        listener.onFailure(new RuntimeException("Function '" + functionName + "' is not defined."));
+                    } else {
+                        // Register the stored function in the context for future calls
+                        executor.getContext().declareFunction(functionName, storedFunction);
+                        // Now execute it
+                        executeLoadedFunctionAsync(storedFunction, functionName, arguments, listener);
+                    }
+                },
+                listener::onFailure
+            ));
             return;
         }
+        
+        executeLoadedFunctionAsync(function, functionName, arguments, listener);
+    }
+    
+    /**
+     * Executes an already-loaded function with the given arguments.
+     */
+    private void executeLoadedFunctionAsync(FunctionDefinition function, String functionName, 
+                                            List<Object> arguments, ActionListener<Object> listener) {
 
         List<Parameter> parameters = function.getParameters();
         if (parameters.size() != arguments.size()) {

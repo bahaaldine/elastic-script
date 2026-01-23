@@ -41,6 +41,24 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDelete_procedure_statement(ElasticScriptParser.Delete_procedure_statementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#create_function_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCreate_function_statement(ElasticScriptParser.Create_function_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#delete_function_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDelete_function_statement(ElasticScriptParser.Delete_function_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#return_type}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitReturn_type(ElasticScriptParser.Return_typeContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -251,6 +269,24 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitExecute_statement(ElasticScriptParser.Execute_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#execute_immediate_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExecute_immediate_statement(ElasticScriptParser.Execute_immediate_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#id_list}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitId_list(ElasticScriptParser.Id_listContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#expression_list}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExpression_list(ElasticScriptParser.Expression_listContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#variable_assignment}.
 	 * @param ctx the parse tree
@@ -486,6 +522,12 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTry_catch_statement(ElasticScriptParser.Try_catch_statementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#catch_block}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCatch_block(ElasticScriptParser.Catch_blockContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#throw_statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -515,6 +557,12 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitNamespaced_function_call(ElasticScriptParser.Namespaced_function_callContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#method_name}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMethod_name(ElasticScriptParser.Method_nameContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#namespace_id}.
 	 * @param ctx the parse tree
@@ -673,6 +721,18 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDocumentField(ElasticScriptParser.DocumentFieldContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#mapLiteral}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMapLiteral(ElasticScriptParser.MapLiteralContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#mapEntry}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMapEntry(ElasticScriptParser.MapEntryContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#pairList}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -744,6 +804,12 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitArray_datatype(ElasticScriptParser.Array_datatypeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#map_datatype}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMap_datatype(ElasticScriptParser.Map_datatypeContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#persist_clause}.
 	 * @param ctx the parse tree

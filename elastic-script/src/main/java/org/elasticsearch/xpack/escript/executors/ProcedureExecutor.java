@@ -40,6 +40,7 @@ import org.elasticsearch.xpack.escript.handlers.ParallelStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.PrintStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.ThrowStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.TryCatchStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.ExecuteImmediateStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.DefineIntentStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.IntentStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.EsqlIntoStatementHandler;
@@ -54,6 +55,7 @@ import org.elasticsearch.xpack.escript.context.ExecutionContext;
 import org.elasticsearch.xpack.escript.functions.FunctionDefinition;
 import org.elasticsearch.xpack.escript.primitives.ReturnValue;
 import org.elasticsearch.xpack.escript.procedure.StoredProcedureDefinition;
+import org.elasticsearch.xpack.escript.functions.StoredFunctionDefinition;
 import org.elasticsearch.xpack.escript.utils.ActionListenerUtils;
 
 import org.elasticsearch.xpack.core.esql.action.ColumnInfo;
@@ -91,6 +93,7 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
     private final TryCatchStatementHandler tryCatchHandler;
     private final ThrowStatementHandler throwHandler;
     private final ExecuteStatementHandler executeHandler;
+    private final ExecuteImmediateStatementHandler executeImmediateHandler;
     private final PrintStatementHandler printStatementHandler;
     private final CallProcedureStatementHandler callProcedureStatementHandler;
     private final DefineIntentStatementHandler defineIntentHandler;
@@ -136,6 +139,7 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
         this.functionDefHandler = new FunctionDefinitionHandler(this);
         this.tryCatchHandler = new TryCatchStatementHandler(this);
         this.throwHandler = new ThrowStatementHandler(this);
+        this.executeImmediateHandler = new ExecuteImmediateStatementHandler(this);
         this.printStatementHandler = new PrintStatementHandler(this);
         this.callProcedureStatementHandler = new CallProcedureStatementHandler(this);
         this.defineIntentHandler = new DefineIntentStatementHandler(this);
@@ -297,6 +301,8 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
             throwHandler.handleAsync(ctx.throw_statement(), listener);
         } else if (ctx.execute_statement() != null) {
             executeHandler.handleAsync(ctx.execute_statement(), listener);
+        } else if (ctx.execute_immediate_statement() != null) {
+            executeImmediateHandler.handleAsync(ctx.execute_immediate_statement(), listener);
         } else if (ctx.print_statement() != null) {
             printStatementHandler.execute(ctx.print_statement(), listener);
         }  else if (ctx.call_procedure_statement() != null) {
@@ -462,7 +468,7 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
         if (ctx.namespaced_function_call() != null) {
             ElasticScriptParser.Namespaced_function_callContext nsCtx = ctx.namespaced_function_call();
             String namespace = nsCtx.namespace_id().getText();
-            String method = nsCtx.ID().getText();
+            String method = nsCtx.method_name().getText();
             // Convert to unified function name: NAMESPACE.METHOD -> NAMESPACE_METHOD
             functionName = namespace.toUpperCase() + "_" + method.toUpperCase();
             argContexts = nsCtx.argument_list() != null ? nsCtx.argument_list().expression() : new ArrayList<>();
@@ -630,6 +636,64 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
                     }
                 } else {
                     listener.onResponse(null); // Procedure not found
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                listener.onFailure(e);
+            }
+        });
+    }
+
+    /**
+     * Loads a stored function from the .elastic_script_functions index and registers it in the context.
+     *
+     * @param functionName The name of the stored function to load.
+     * @param listener     The ActionListener to notify with the function definition or null.
+     */
+    public void getStoredFunctionAsync(String functionName, ActionListener<FunctionDefinition> listener) {
+        if (client == null) {
+            listener.onResponse(null);
+            return;
+        }
+        
+        GetRequest getRequest = new GetRequest(".elastic_script_functions", functionName);
+
+        this.client.get(getRequest, new ActionListener<>() {
+            @Override
+            public void onResponse(GetResponse response) {
+                if (response.isExists()) {
+                    try {
+                        Map<String, Object> source = response.getSourceAsMap();
+                        String name = response.getId();
+                        @SuppressWarnings("unchecked")
+                        List<Map<String, Object>> rawParams = (List<Map<String, Object>>) source.get("parameters");
+                        List<Parameter> parameters = rawParams.stream()
+                            .map(param -> new Parameter(
+                                (String) param.get("name"),
+                                (String) param.get("type"),
+                                ParameterMode.valueOf(((String) param.getOrDefault("mode", "IN")).toUpperCase())))
+                            .toList();
+
+                        String functionText = (String) source.get("function");
+                        String returnType = (String) source.get("return_type");
+                        
+                        // Parse the stored function to get the body
+                        ElasticScriptLexer lexer = new ElasticScriptLexer(CharStreams.fromString(functionText));
+                        CommonTokenStream tokens = new CommonTokenStream(lexer);
+                        ElasticScriptParser parser = new ElasticScriptParser(tokens);
+                        ElasticScriptParser.Create_function_statementContext funcCtx = parser.create_function_statement();
+                        List<ElasticScriptParser.StatementContext> body = funcCtx.statement();
+
+                        // Create a StoredFunctionDefinition
+                        StoredFunctionDefinition function = new StoredFunctionDefinition(name, parameters, body, returnType);
+                        listener.onResponse(function);
+                    } catch (Exception e) {
+                        listener.onFailure(e);
+                    }
+                } else {
+                    listener.onResponse(null); // Function not found
                 }
             }
 
