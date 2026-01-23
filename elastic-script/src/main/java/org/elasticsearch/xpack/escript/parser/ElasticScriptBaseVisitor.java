@@ -38,6 +38,13 @@ public class ElasticScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> imp
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitAuthid_clause(ElasticScriptParser.Authid_clauseContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitCreate_procedure_statement(ElasticScriptParser.Create_procedure_statementContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

@@ -20,6 +20,27 @@ Procedures are:
 - Stored in the `.elastic_script_procedures` index
 - Called with `CALL procedure_name(args)`
 - Persistent across Elasticsearch restarts
+- Support `AUTHID DEFINER` or `AUTHID CURRENT_USER` for security context
+
+#### AUTHID - Security Context
+
+Control whose privileges a procedure runs with:
+
+```sql
+-- Run with definer's privileges (default)
+CREATE PROCEDURE admin_proc()
+AUTHID DEFINER
+BEGIN
+    -- Has definer's permissions
+END PROCEDURE;
+
+-- Run with caller's privileges
+CREATE PROCEDURE user_proc()
+AUTHID CURRENT_USER
+BEGIN
+    -- Has invoker's permissions
+END PROCEDURE;
+```
 
 ### Statements
 

@@ -85,6 +85,11 @@ TYPES: 'TYPES';
 RECORD: 'RECORD';
 END_TYPE: 'END TYPE';
 
+// AUTHID (Definer/Invoker Rights)
+AUTHID: 'AUTHID';
+DEFINER: 'DEFINER';
+INVOKER: 'CURRENT_USER';
+
 // First-Class Commands (Elasticsearch Operations)
 SEARCH: 'SEARCH';
 REFRESH: 'REFRESH';
@@ -324,7 +329,14 @@ program
     ;
 
 procedure
-    : PROCEDURE ID LPAREN (parameter_list)? RPAREN BEGIN statement+ END PROCEDURE
+    : PROCEDURE ID LPAREN (parameter_list)? RPAREN authid_clause? BEGIN statement+ END PROCEDURE
+    ;
+
+// AUTHID clause specifies the privileges under which a stored procedure executes
+// AUTHID DEFINER - execute with definer's privileges (default)
+// AUTHID CURRENT_USER - execute with invoker's privileges
+authid_clause
+    : AUTHID (DEFINER | INVOKER)
     ;
 
 create_procedure_statement
@@ -343,7 +355,7 @@ delete_procedure_statement
 //          BEGIN RETURN x * 10 + y; END FUNCTION
 
 create_function_statement
-    : CREATE FUNCTION ID LPAREN (parameter_list)? RPAREN RETURNS return_type AS BEGIN statement+ END FUNCTION
+    : CREATE FUNCTION ID LPAREN (parameter_list)? RPAREN RETURNS return_type authid_clause? AS BEGIN statement+ END FUNCTION
     ;
 
 delete_function_statement

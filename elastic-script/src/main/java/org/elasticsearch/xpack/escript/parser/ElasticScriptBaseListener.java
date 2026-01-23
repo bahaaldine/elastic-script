@@ -47,6 +47,18 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterAuthid_clause(ElasticScriptParser.Authid_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAuthid_clause(ElasticScriptParser.Authid_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterCreate_procedure_statement(ElasticScriptParser.Create_procedure_statementContext ctx) { }
 	/**
 	 * {@inheritDoc}

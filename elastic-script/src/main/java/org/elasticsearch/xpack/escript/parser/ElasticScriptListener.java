@@ -34,6 +34,16 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitProcedure(ElasticScriptParser.ProcedureContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#authid_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterAuthid_clause(ElasticScriptParser.Authid_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#authid_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitAuthid_clause(ElasticScriptParser.Authid_clauseContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#create_procedure_statement}.
 	 * @param ctx the parse tree
 	 */

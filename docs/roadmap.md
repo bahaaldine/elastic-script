@@ -85,9 +85,9 @@ The table below compares elastic-script to Oracle PL/SQL and identifies missing 
 | **Dynamic** | EXECUTE IMMEDIATE | ✅ | ✅ | ✅ Done |
 | | Bind variables | ✅ | ✅ | ✅ Done |
 | **Bulk Ops** | FORALL | ✅ | ✅ | ✅ Done |
-| | SAVE EXCEPTIONS | ✅ | ❌ | 🟡 P1 |
+| | SAVE EXCEPTIONS | ✅ | ✅ | ✅ Done |
 | **Security** | GRANT/REVOKE | ✅ | ✅ | ✅ Done |
-| | AUTHID | ✅ | ❌ | 🟡 P1 |
+| | AUTHID | ✅ | ✅ | ✅ Done |
 | **Debug** | Profiler | ✅ | ✅ | ✅ Done |
 | | Breakpoints | ✅ | ❌ | 🟢 P2 |
 

@@ -29,6 +29,12 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitProcedure(ElasticScriptParser.ProcedureContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#authid_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAuthid_clause(ElasticScriptParser.Authid_clauseContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#create_procedure_statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
