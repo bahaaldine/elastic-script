@@ -13,7 +13,7 @@ Current status and future direction for elastic-script — a procedural language
 - [x] **Data Types** - STRING, NUMBER, BOOLEAN, ARRAY, DOCUMENT, DATE
 - [x] **Functions with Parameters** - IN/OUT/INOUT parameter modes
 
-### Built-in Functions (106 total)
+### Built-in Functions (118 total)
 - [x] **String Functions** (18) - LENGTH, SUBSTR, REPLACE, REGEXP_*, etc.
 - [x] **Number Functions** (11) - ABS, ROUND, SQRT, LOG, etc.
 - [x] **Array Functions** (18) - ARRAY_LENGTH, APPEND, FILTER, MAP, etc.
@@ -80,7 +80,7 @@ The table below compares elastic-script to Oracle PL/SQL and identifies missing 
 | | Public/Private | ✅ | ❌ | 🟡 P1 |
 | **Events** | Triggers | ✅ | ❌ | 🔴 P0 |
 | | Scheduled jobs | ✅ | ❌ | 🔴 P0 |
-| **Collections** | Associative arrays | ✅ | ❌ | 🔴 P0 |
+| **Collections** | Associative arrays | ✅ | ✅ | ✅ Done |
 | | User-defined types | ✅ | ❌ | 🟡 P1 |
 | **Dynamic** | EXECUTE IMMEDIATE | ✅ | ✅ | ✅ Done |
 | | Bind variables | ✅ | ✅ | ✅ Done |
@@ -156,7 +156,7 @@ RAISE error_msg WITH CODE error_code;  -- Expressions supported
 
 ### 1.2 User-Defined Functions (CREATE FUNCTION)
 
-**Status:** 🔴 Not Started | **Priority:** P0
+**Status:** ✅ Complete | **Priority:** P0
 
 Distinguish functions (return values) from procedures (side effects).
 
@@ -191,6 +191,16 @@ SET message = 'Status: ' || calculate_severity(5, 10)
 | Use in expressions | No | Yes |
 | Side effects | Expected | Discouraged |
 | Call syntax | `CALL proc()` | `func()` in expressions |
+
+**Implemented Features:**
+
+- ✅ `CREATE FUNCTION ... RETURNS type AS BEGIN ... END FUNCTION` syntax
+- ✅ `DELETE FUNCTION function_name` to remove stored functions
+- ✅ Functions stored in `.elastic_script_functions` index
+- ✅ Automatic loading of stored functions on first call
+- ✅ `StoredFunctionDefinition` class for persistent function representation
+- ✅ RETURN statement with expression support
+- ✅ All parameter modes (IN, OUT, INOUT)
 
 ---
 
@@ -230,39 +240,87 @@ EXECUTE IMMEDIATE
 - Query validation before execution
 - Clear error messages for syntax errors
 
+**Implemented Features:**
+
+- ✅ `EXECUTE IMMEDIATE expression` syntax
+- ✅ `INTO variable` clause to capture results
+- ✅ `INTO var1, var2, var3` for multiple column capture
+- ✅ `USING expr1, expr2` for bind variables (`:1`, `:2`, etc.)
+- ✅ String and numeric bind variable substitution
+- ✅ Auto-declaration of variables with inferred types
+- ✅ Expression evaluation for dynamic query building
+
 ---
 
 ### 1.4 Associative Arrays (MAP Type)
 
-**Status:** 🔴 Not Started | **Priority:** P0
+**Status:** ✅ Complete | **Priority:** P0
 
 Key-value data structures for counting, grouping, and caching.
 
 ```sql
--- Declare a map
-DECLARE error_counts MAP<STRING, NUMBER> = {}
-DECLARE cache MAP<STRING, DOCUMENT> = {}
+-- MAP literal syntax
+DECLARE config MAP = MAP { 'host' => 'localhost', 'port' => 9200 };
 
--- Add/update entries
-SET error_counts['api-service'] = 42
-SET error_counts['db-service'] = (error_counts['db-service'] ?? 0) + 1
+-- Create empty map
+DECLARE counts MAP = MAP {};
+
+-- Add/update entries with MAP_PUT (returns new map)
+SET counts = MAP_PUT(counts, 'api-service', 42);
+SET counts = MAP_PUT(counts, 'db-service', 
+    MAP_GET_OR_DEFAULT(counts, 'db-service', 0) + 1);
+
+-- Get values
+DECLARE val = MAP_GET(config, 'host');
+DECLARE port = MAP_GET_OR_DEFAULT(config, 'timeout', 30);
 
 -- Check existence
-IF error_counts.CONTAINS('api-service') THEN
-    PRINT 'API has ' || error_counts['api-service'] || ' errors'
+IF MAP_CONTAINS_KEY(counts, 'api-service') THEN
+    PRINT 'API has ' || MAP_GET(counts, 'api-service') || ' errors';
 END IF
 
--- Iterate over map
-FOR service, count IN error_counts LOOP
-    IF count > 10 THEN
-        CALL alert_team(service, count)
+-- Get keys and values as arrays
+DECLARE keys ARRAY = MAP_KEYS(counts);
+DECLARE values ARRAY = MAP_VALUES(counts);
+
+-- Iterate over keys
+DECLARE i NUMBER;
+FOR i IN 1..ARRAY_LENGTH(keys) LOOP
+    DECLARE k STRING = keys[i];
+    IF MAP_GET(counts, k) > 10 THEN
+        CALL alert_team(k, MAP_GET(counts, k));
     END IF
 END LOOP
 
--- Map methods
-PRINT 'Services with errors: ' || error_counts.KEYS()
-PRINT 'Total errors: ' || ARRAY_SUM(error_counts.VALUES())
+-- Merge maps
+SET config = MAP_MERGE(defaults, overrides);
+
+-- Create from arrays
+SET my_map = MAP_FROM_ARRAYS(['a', 'b', 'c'], [1, 2, 3]);
 ```
+
+**Implemented Features:**
+
+- ✅ `MAP` type declaration
+- ✅ MAP literal syntax: `MAP { 'key' => value, ... }`
+- ✅ Bracket access for values: `map['key']`
+- ✅ Nested map support
+- ✅ 12 built-in MAP functions:
+
+| Function | Description |
+|----------|-------------|
+| `MAP_GET(map, key)` | Get value by key |
+| `MAP_GET_OR_DEFAULT(map, key, default)` | Get with fallback |
+| `MAP_PUT(map, key, value)` | Return new map with key added |
+| `MAP_REMOVE(map, key)` | Return new map without key |
+| `MAP_KEYS(map)` | Get all keys as array |
+| `MAP_VALUES(map)` | Get all values as array |
+| `MAP_SIZE(map)` | Count entries |
+| `MAP_CONTAINS_KEY(map, key)` | Check if key exists |
+| `MAP_CONTAINS_VALUE(map, value)` | Check if value exists |
+| `MAP_MERGE(map1, map2)` | Merge two maps |
+| `MAP_FROM_ARRAYS(keys, values)` | Create from parallel arrays |
+| `MAP_ENTRIES(map)` | Get array of {key, value} docs |
 
 ---
 
