@@ -47,6 +47,13 @@ MINUTES: 'MINUTES';
 HOUR: 'HOUR';
 HOURS: 'HOURS';
 
+// Bulk Operations
+FORALL: 'FORALL';
+BULK_KW: 'BULK';
+COLLECT: 'COLLECT';
+SAVE_KW: 'SAVE';
+EXCEPTIONS: 'EXCEPTIONS';
+
 // First-Class Commands (Elasticsearch Operations)
 SEARCH: 'SEARCH';
 REFRESH: 'REFRESH';
@@ -337,6 +344,8 @@ statement
     | open_cursor_statement
     | close_cursor_statement
     | fetch_cursor_statement
+    | forall_statement
+    | bulk_collect_statement
     | esql_into_statement
     | esql_process_statement
     | index_command
@@ -643,6 +652,31 @@ fetch_cursor_statement
 
 // Cursor attributes: cursor_name%NOTFOUND, cursor_name%ROWCOUNT
 // These are handled in expression evaluation as special identifiers
+
+// =======================
+// Bulk Operations
+// =======================
+
+// FORALL element IN collection statement [SAVE EXCEPTIONS]
+// Executes statement for each element in collection with optional error continuation
+forall_statement
+    : FORALL ID IN expression forall_action (save_exceptions_clause)? SEMICOLON
+    ;
+
+forall_action
+    : call_procedure_statement                               // FORALL x IN arr CALL process(x)
+    | function_call                                          // FORALL x IN arr INDEX_DOCUMENT('idx', x)
+    ;
+
+save_exceptions_clause
+    : SAVE_KW EXCEPTIONS
+    ;
+
+// BULK COLLECT INTO variable FROM esql_query
+// Collects all results from ES|QL query into a single array
+bulk_collect_statement
+    : BULK_KW COLLECT INTO ID FROM esql_binding_query SEMICOLON
+    ;
 
 variable_declaration_list
     : variable_declaration (COMMA variable_declaration)*

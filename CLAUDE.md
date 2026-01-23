@@ -392,9 +392,9 @@ Based on comprehensive analysis comparing elastic-script to Oracle PL/SQL:
 | Feature | Priority | Description |
 |---------|----------|-------------|
 | Cursors | ✅ Done | Streaming large result sets (OPEN/CLOSE/FETCH, %NOTFOUND/%ROWCOUNT) |
-| FORALL | 🔴 P0 | Bulk operations with SAVE EXCEPTIONS |
-| CREATE JOB | 🔴 P0 | Scheduled job execution (cron) |
-| CREATE TRIGGER | 🔴 P0 | Event-driven execution |
+| CREATE JOB | ✅ Done | Scheduled job execution (cron) |
+| CREATE TRIGGER | ✅ Done | Event-driven execution |
+| FORALL/BULK COLLECT | ✅ Done | Bulk operations with SAVE EXCEPTIONS |
 
 ### Phase 3: Enterprise (Q3-Q4 2026)
 | Feature | Priority | Description |

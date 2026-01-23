@@ -730,6 +730,46 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitFetch_cursor_statement(ElasticScriptParser.Fetch_cursor_statementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#forall_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterForall_statement(ElasticScriptParser.Forall_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#forall_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitForall_statement(ElasticScriptParser.Forall_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#forall_action}.
+	 * @param ctx the parse tree
+	 */
+	void enterForall_action(ElasticScriptParser.Forall_actionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#forall_action}.
+	 * @param ctx the parse tree
+	 */
+	void exitForall_action(ElasticScriptParser.Forall_actionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#save_exceptions_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterSave_exceptions_clause(ElasticScriptParser.Save_exceptions_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#save_exceptions_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitSave_exceptions_clause(ElasticScriptParser.Save_exceptions_clauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#bulk_collect_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterBulk_collect_statement(ElasticScriptParser.Bulk_collect_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#bulk_collect_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitBulk_collect_statement(ElasticScriptParser.Bulk_collect_statementContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#variable_declaration_list}.
 	 * @param ctx the parse tree
 	 */

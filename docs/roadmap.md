@@ -74,17 +74,17 @@ The table below compares elastic-script to Oracle PL/SQL and identifies missing 
 | | Recursive functions | ✅ | ✅ | ✅ Done |
 | **Cursors** | Explicit cursors | ✅ | ✅ | ✅ Done |
 | | FETCH INTO | ✅ | ✅ | ✅ Done |
-| | BULK COLLECT | ✅ | ❌ | 🔴 P0 |
+| | BULK COLLECT | ✅ | ✅ | ✅ Done |
 | **Modules** | Packages | ✅ | ❌ | 🟡 P1 |
 | | Package state | ✅ | ❌ | 🟡 P1 |
 | | Public/Private | ✅ | ❌ | 🟡 P1 |
-| **Events** | Triggers | ✅ | ❌ | 🔴 P0 |
-| | Scheduled jobs | ✅ | ❌ | 🔴 P0 |
+| **Events** | Triggers | ✅ | ✅ | ✅ Done |
+| | Scheduled jobs | ✅ | ✅ | ✅ Done |
 | **Collections** | Associative arrays | ✅ | ✅ | ✅ Done |
 | | User-defined types | ✅ | ❌ | 🟡 P1 |
 | **Dynamic** | EXECUTE IMMEDIATE | ✅ | ✅ | ✅ Done |
 | | Bind variables | ✅ | ✅ | ✅ Done |
-| **Bulk Ops** | FORALL | ✅ | ❌ | 🔴 P0 |
+| **Bulk Ops** | FORALL | ✅ | ✅ | ✅ Done |
 | | SAVE EXCEPTIONS | ✅ | ❌ | 🟡 P1 |
 | **Security** | GRANT/REVOKE | ✅ | ❌ | 🟡 P1 |
 | | AUTHID | ✅ | ❌ | 🟡 P1 |
@@ -378,7 +378,7 @@ CLOSE log_cursor
 
 ### 2.2 Bulk Operations (FORALL)
 
-**Status:** 🔴 Not Started | **Priority:** P0
+**Status:** ✅ Complete | **Priority:** P0
 
 Efficient batch processing with error handling.
 
@@ -413,7 +413,7 @@ FORALL doc IN transformed_docs
 
 ### 2.3 Scheduled Jobs (CREATE JOB)
 
-**Status:** 🔴 Not Started | **Priority:** P0
+**Status:** ✅ Complete | **Priority:** P0
 
 Built-in job scheduling with cron syntax.
 
@@ -467,7 +467,7 @@ SELECT * FROM @job_runs
 
 ### 2.4 Triggers & Event-Driven Execution
 
-**Status:** 🔴 Not Started | **Priority:** P0
+**Status:** ✅ Complete | **Priority:** P0
 
 React to Elasticsearch events automatically.
 

@@ -444,6 +444,30 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFetch_cursor_statement(ElasticScriptParser.Fetch_cursor_statementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#forall_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitForall_statement(ElasticScriptParser.Forall_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#forall_action}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitForall_action(ElasticScriptParser.Forall_actionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#save_exceptions_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSave_exceptions_clause(ElasticScriptParser.Save_exceptions_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#bulk_collect_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBulk_collect_statement(ElasticScriptParser.Bulk_collect_statementContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#variable_declaration_list}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
