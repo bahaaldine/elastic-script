@@ -403,6 +403,8 @@ Based on comprehensive analysis comparing elastic-script to Oracle PL/SQL:
 | GRANT/REVOKE | ✅ Done | Fine-grained permissions with roles and users |
 | Profiler | ✅ Done | Performance analysis with timing and recommendations |
 | User-Defined Types | ✅ Done | Custom record types with named fields |
+| AUTHID | ✅ Done | Invoker/definer rights for procedures and functions |
+| SAVE EXCEPTIONS | ✅ Done | Error collection in FORALL bulk operations |
 
 ### Trigger Event Types (Planned)
 - `DOCUMENT INSERTED INTO index` - New document indexed
