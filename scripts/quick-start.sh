@@ -1055,10 +1055,10 @@ elasticsearch.hosts: ["http://localhost:9200"]
 elasticsearch.username: "elastic-admin"
 elasticsearch.password: "elastic-password"
 
-# Required encryption keys for saved objects
-xpack.encryptedSavedObjects.encryptionKey: "elastic-script-dev-key-32-chars!"
-xpack.reporting.encryptionKey: "elastic-script-reporting-key32!"
-xpack.security.encryptionKey: "elastic-script-security-key32!!"
+# Required encryption keys for saved objects (must be exactly 32 characters)
+xpack.encryptedSavedObjects.encryptionKey: "escript-dev-key-0123456789abcdef"
+xpack.reporting.encryptionKey: "escript-rep-key-0123456789abcdef"
+xpack.security.encryptionKey: "escript-sec-key-0123456789abcdef"
 
 # Telemetry
 telemetry.enabled: false
