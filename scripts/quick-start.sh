@@ -25,8 +25,8 @@ EDOT_AGENT_PATH="$PROJECT_ROOT/elastic-otel-javaagent.jar"
 EDOT_AGENT_VERSION="1.3.0"
 EDOT_AGENT_URL="https://repo1.maven.org/maven2/co/elastic/otel/elastic-otel-javaagent/${EDOT_AGENT_VERSION}/elastic-otel-javaagent-${EDOT_AGENT_VERSION}.jar"
 
-# Kibana configuration
-KIBANA_VERSION="8.17.0"
+# Kibana configuration - use snapshot to match ES main branch
+KIBANA_VERSION="9.0.0-SNAPSHOT"
 
 # Colors for output
 RED='\033[0;31m'
@@ -957,7 +957,8 @@ download_kibana() {
     esac
     
     local KIBANA_FILENAME="kibana-${KIBANA_VERSION}-${OS}-${ARCH}"
-    local KIBANA_URL="https://artifacts.elastic.co/downloads/kibana/${KIBANA_FILENAME}.${EXT}"
+    # Use snapshot builds to match ES main branch
+    local KIBANA_URL="https://snapshots.elastic.co/downloads/kibana/${KIBANA_FILENAME}.${EXT}"
     KIBANA_DIR="$PROJECT_ROOT/${KIBANA_FILENAME}"
     
     if [ -d "$KIBANA_DIR" ]; then
