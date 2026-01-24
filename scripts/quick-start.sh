@@ -904,16 +904,29 @@ stop_all() {
 # KIBANA SUPPORT (for APM/Observability)
 # =========================================================================
 
-KIBANA_DIR="$PROJECT_ROOT/kibana-${KIBANA_VERSION}"
+# Detect platform for Kibana directory name
+detect_kibana_dir() {
+    local OS=""
+    local ARCH=""
+    
+    case "$(uname -s)" in
+        Darwin) OS="darwin" ;;
+        Linux) OS="linux" ;;
+        *) OS="linux" ;;
+    esac
+    
+    case "$(uname -m)" in
+        x86_64) ARCH="x86_64" ;;
+        arm64|aarch64) ARCH="aarch64" ;;
+        *) ARCH="x86_64" ;;
+    esac
+    
+    echo "$PROJECT_ROOT/kibana-${KIBANA_VERSION}-${OS}-${ARCH}"
+}
 
 # Download and configure Kibana
 download_kibana() {
     print_header "Setting up Kibana ${KIBANA_VERSION}"
-    
-    if [ -d "$KIBANA_DIR" ]; then
-        print_success "Kibana already downloaded"
-        return 0
-    fi
     
     local OS=""
     local ARCH=""
@@ -945,6 +958,12 @@ download_kibana() {
     
     local KIBANA_FILENAME="kibana-${KIBANA_VERSION}-${OS}-${ARCH}"
     local KIBANA_URL="https://artifacts.elastic.co/downloads/kibana/${KIBANA_FILENAME}.${EXT}"
+    KIBANA_DIR="$PROJECT_ROOT/${KIBANA_FILENAME}"
+    
+    if [ -d "$KIBANA_DIR" ]; then
+        print_success "Kibana already downloaded at $KIBANA_DIR"
+        return 0
+    fi
     
     print_step "Downloading Kibana from ${KIBANA_URL}..."
     
@@ -953,8 +972,7 @@ download_kibana() {
     if curl -L -o "${KIBANA_FILENAME}.${EXT}" "$KIBANA_URL"; then
         print_step "Extracting Kibana..."
         tar -xzf "${KIBANA_FILENAME}.${EXT}"
-        mv "${KIBANA_FILENAME}" "kibana-${KIBANA_VERSION}"
-        rm "${KIBANA_FILENAME}.${EXT}"
+        rm -f "${KIBANA_FILENAME}.${EXT}"
         print_success "Kibana extracted to $KIBANA_DIR"
     else
         print_error "Failed to download Kibana. Check network connection."
@@ -969,7 +987,12 @@ download_kibana() {
 
 # Configure Kibana for elastic-script development
 configure_kibana() {
-    print_step "Configuring Kibana..."
+    # Ensure KIBANA_DIR is set
+    if [ -z "$KIBANA_DIR" ]; then
+        KIBANA_DIR="$(detect_kibana_dir)"
+    fi
+    
+    print_step "Configuring Kibana at $KIBANA_DIR..."
     
     local KIBANA_YML="$KIBANA_DIR/config/kibana.yml"
     
@@ -1009,6 +1032,11 @@ EOF
 
 # Start Kibana in background
 start_kibana_background() {
+    # Ensure KIBANA_DIR is set
+    if [ -z "$KIBANA_DIR" ]; then
+        KIBANA_DIR="$(detect_kibana_dir)"
+    fi
+    
     if [ ! -d "$KIBANA_DIR" ]; then
         download_kibana
         if [ $? -ne 0 ]; then
