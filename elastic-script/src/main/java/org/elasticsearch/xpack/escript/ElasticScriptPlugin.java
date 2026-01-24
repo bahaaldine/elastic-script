@@ -9,6 +9,8 @@ package org.elasticsearch.xpack.escript;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.client.internal.Client;
+import org.elasticsearch.cluster.ClusterChangedEvent;
+import org.elasticsearch.cluster.ClusterStateListener;
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.cluster.node.DiscoveryNodes;
 import org.elasticsearch.cluster.service.ClusterService;
@@ -34,6 +36,8 @@ import org.elasticsearch.xpack.escript.actions.TransportElasticScriptAction;
 import org.elasticsearch.xpack.escript.scheduling.LeaderElectionService;
 import org.elasticsearch.xpack.escript.scheduling.JobSchedulerService;
 import org.elasticsearch.xpack.escript.scheduling.TriggerPollingService;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -68,26 +72,29 @@ public class ElasticScriptPlugin extends Plugin implements ActionPlugin {
         jobSchedulerService = new JobSchedulerService(client, threadPool, elasticScriptExecutor, leaderElectionService);
         triggerPollingService = new TriggerPollingService(client, threadPool, elasticScriptExecutor, leaderElectionService);
         
-        // Schedule service startup for after node initialization
-        // This ensures cluster state is available when services start
-        threadPool.generic().execute(() -> {
-            try {
-                // Small delay to ensure node is fully initialized
-                Thread.sleep(1000);
-                LOGGER.info("Starting elastic-script scheduling services");
-                leaderElectionService.start();
-                jobSchedulerService.start();
-                triggerPollingService.start();
-                LOGGER.info("Elastic-script scheduling services started");
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                LOGGER.warn("Interrupted while starting scheduling services");
-            } catch (Exception e) {
-                LOGGER.error("Failed to start scheduling services", e);
+        // Use a ClusterStateListener to start services only after cluster state is initialized
+        final AtomicBoolean servicesStarted = new AtomicBoolean(false);
+        clusterService.addListener(new ClusterStateListener() {
+            @Override
+            public void clusterChanged(ClusterChangedEvent event) {
+                // Only start once, and only after local node is available
+                if (servicesStarted.compareAndSet(false, true)) {
+                    LOGGER.info("Cluster state initialized, starting elastic-script scheduling services");
+                    try {
+                        leaderElectionService.start();
+                        jobSchedulerService.start();
+                        triggerPollingService.start();
+                        LOGGER.info("Elastic-script scheduling services started");
+                    } catch (Exception e) {
+                        LOGGER.error("Failed to start scheduling services", e);
+                    }
+                    // Remove listener after starting
+                    clusterService.removeListener(this);
+                }
             }
         });
         
-        LOGGER.info("Elastic-script scheduling services initialized (starting in background)");
+        LOGGER.info("Elastic-script scheduling services initialized (will start after cluster state is ready)");
 
         // Return lifecycle components for proper shutdown
         List<Object> components = new ArrayList<>();
