@@ -994,10 +994,16 @@ configure_kibana() {
     
     print_step "Configuring Kibana at $KIBANA_DIR..."
     
-    local KIBANA_YML="$KIBANA_DIR/config/kibana.yml"
+    local KIBANA_CONFIG_DIR="$KIBANA_DIR/config"
+    local KIBANA_YML="$KIBANA_CONFIG_DIR/kibana.yml"
     
-    # Backup original config
-    if [ ! -f "${KIBANA_YML}.original" ]; then
+    # Create config directory if it doesn't exist
+    if [ ! -d "$KIBANA_CONFIG_DIR" ]; then
+        mkdir -p "$KIBANA_CONFIG_DIR"
+    fi
+    
+    # Backup original config if it exists
+    if [ -f "$KIBANA_YML" ] && [ ! -f "${KIBANA_YML}.original" ]; then
         cp "$KIBANA_YML" "${KIBANA_YML}.original"
     fi
     
