@@ -68,12 +68,26 @@ public class ElasticScriptPlugin extends Plugin implements ActionPlugin {
         jobSchedulerService = new JobSchedulerService(client, threadPool, elasticScriptExecutor, leaderElectionService);
         triggerPollingService = new TriggerPollingService(client, threadPool, elasticScriptExecutor, leaderElectionService);
         
-        // Start the services (they will wait for leader election)
-        leaderElectionService.start();
-        jobSchedulerService.start();
-        triggerPollingService.start();
+        // Schedule service startup for after node initialization
+        // This ensures cluster state is available when services start
+        threadPool.generic().execute(() -> {
+            try {
+                // Small delay to ensure node is fully initialized
+                Thread.sleep(1000);
+                LOGGER.info("Starting elastic-script scheduling services");
+                leaderElectionService.start();
+                jobSchedulerService.start();
+                triggerPollingService.start();
+                LOGGER.info("Elastic-script scheduling services started");
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                LOGGER.warn("Interrupted while starting scheduling services");
+            } catch (Exception e) {
+                LOGGER.error("Failed to start scheduling services", e);
+            }
+        });
         
-        LOGGER.info("Elastic-script scheduling services initialized");
+        LOGGER.info("Elastic-script scheduling services initialized (starting in background)");
 
         // Return lifecycle components for proper shutdown
         List<Object> components = new ArrayList<>();

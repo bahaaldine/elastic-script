@@ -49,7 +49,8 @@ public class LeaderElectionService extends AbstractLifecycleComponent {
 
     private final Client client;
     private final ThreadPool threadPool;
-    private final String nodeId;
+    private final ClusterService clusterService;
+    private String nodeId;  // Lazily initialized in doStart()
     private final AtomicBoolean isLeader = new AtomicBoolean(false);
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     
@@ -64,7 +65,9 @@ public class LeaderElectionService extends AbstractLifecycleComponent {
     public LeaderElectionService(Client client, ThreadPool threadPool, ClusterService clusterService) {
         this.client = client;
         this.threadPool = threadPool;
-        this.nodeId = clusterService.localNode().getId();
+        this.clusterService = clusterService;
+        // Note: Don't call clusterService.localNode() here - cluster state not yet initialized
+        // Node ID will be obtained lazily in doStart()
     }
 
     /**
@@ -73,6 +76,7 @@ public class LeaderElectionService extends AbstractLifecycleComponent {
     public LeaderElectionService(Client client, ThreadPool threadPool, String nodeId) {
         this.client = client;
         this.threadPool = threadPool;
+        this.clusterService = null;
         this.nodeId = nodeId;
     }
 
@@ -90,6 +94,11 @@ public class LeaderElectionService extends AbstractLifecycleComponent {
 
     @Override
     protected void doStart() {
+        // Lazily get the node ID now that cluster state is initialized
+        if (nodeId == null && clusterService != null) {
+            this.nodeId = clusterService.localNode().getId();
+        }
+        
         LOGGER.info("Starting leader election service for node {}", nodeId);
         isRunning.set(true);
         
