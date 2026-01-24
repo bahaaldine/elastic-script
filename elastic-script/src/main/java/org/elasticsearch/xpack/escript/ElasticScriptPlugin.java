@@ -37,11 +37,10 @@ import org.elasticsearch.xpack.escript.scheduling.LeaderElectionService;
 import org.elasticsearch.xpack.escript.scheduling.JobSchedulerService;
 import org.elasticsearch.xpack.escript.scheduling.TriggerPollingService;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -73,6 +72,7 @@ public class ElasticScriptPlugin extends Plugin implements ActionPlugin {
         triggerPollingService = new TriggerPollingService(client, threadPool, elasticScriptExecutor, leaderElectionService);
         
         // Use a ClusterStateListener to start services only after cluster state is initialized
+        // IMPORTANT: Do NOT return these as lifecycle components - ES would start them too early
         final AtomicBoolean servicesStarted = new AtomicBoolean(false);
         clusterService.addListener(new ClusterStateListener() {
             @Override
@@ -96,12 +96,9 @@ public class ElasticScriptPlugin extends Plugin implements ActionPlugin {
         
         LOGGER.info("Elastic-script scheduling services initialized (will start after cluster state is ready)");
 
-        // Return lifecycle components for proper shutdown
-        List<Object> components = new ArrayList<>();
-        components.add(leaderElectionService);
-        components.add(jobSchedulerService);
-        components.add(triggerPollingService);
-        return components;
+        // Don't return scheduling services as lifecycle components - we manage them ourselves
+        // via ClusterStateListener. ES would try to start them too early otherwise.
+        return List.of();
     }
 
     public ThreadPool getThreadPool() {
@@ -131,5 +128,32 @@ public class ElasticScriptPlugin extends Plugin implements ActionPlugin {
         return List.of(
             new ActionHandler(ElasticScriptAction.INSTANCE, TransportElasticScriptAction.class)
         );
+    }
+
+    @Override
+    public void close() throws IOException {
+        LOGGER.info("Closing elastic-script plugin");
+        // Stop scheduling services if they were started
+        if (triggerPollingService != null) {
+            try {
+                triggerPollingService.stop();
+            } catch (Exception e) {
+                LOGGER.warn("Error stopping TriggerPollingService", e);
+            }
+        }
+        if (jobSchedulerService != null) {
+            try {
+                jobSchedulerService.stop();
+            } catch (Exception e) {
+                LOGGER.warn("Error stopping JobSchedulerService", e);
+            }
+        }
+        if (leaderElectionService != null) {
+            try {
+                leaderElectionService.stop();
+            } catch (Exception e) {
+                LOGGER.warn("Error stopping LeaderElectionService", e);
+            }
+        }
     }
 }
