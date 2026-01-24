@@ -922,7 +922,19 @@ detect_kibana_dir() {
         *) ARCH="x86_64" ;;
     esac
     
-    echo "$PROJECT_ROOT/kibana-${KIBANA_VERSION}-${OS}-${ARCH}"
+    # Try both possible directory names (with and without OS/arch suffix)
+    local FULL_NAME="$PROJECT_ROOT/kibana-${KIBANA_VERSION}-${OS}-${ARCH}"
+    local SHORT_NAME="$PROJECT_ROOT/kibana-${KIBANA_VERSION}"
+    
+    # Check for bin/kibana to verify it's a valid Kibana directory
+    if [ -f "$SHORT_NAME/bin/kibana" ]; then
+        echo "$SHORT_NAME"
+    elif [ -f "$FULL_NAME/bin/kibana" ]; then
+        echo "$FULL_NAME"
+    else
+        # Return the expected full name (download will create it)
+        echo "$FULL_NAME"
+    fi
 }
 
 # Download and configure Kibana
@@ -975,7 +987,29 @@ download_kibana() {
         print_step "Extracting Kibana..."
         tar -xzf "${KIBANA_FILENAME}.${EXT}"
         rm -f "${KIBANA_FILENAME}.${EXT}"
-        print_success "Kibana extracted to $KIBANA_DIR"
+        
+        # The archive may extract to a different directory name (without OS/arch suffix)
+        # Detect the actual extracted directory
+        local EXTRACTED_DIR=""
+        for dir in kibana-${KIBANA_VERSION} ${KIBANA_FILENAME}; do
+            if [ -d "$PROJECT_ROOT/$dir" ] && [ -f "$PROJECT_ROOT/$dir/bin/kibana" ]; then
+                EXTRACTED_DIR="$dir"
+                break
+            fi
+        done
+        
+        if [ -z "$EXTRACTED_DIR" ]; then
+            print_error "Could not find extracted Kibana directory"
+            return 1
+        fi
+        
+        # If extracted dir is different from expected, update KIBANA_DIR
+        if [ "$EXTRACTED_DIR" != "${KIBANA_FILENAME}" ]; then
+            KIBANA_DIR="$PROJECT_ROOT/$EXTRACTED_DIR"
+            print_success "Kibana extracted to $KIBANA_DIR"
+        else
+            print_success "Kibana extracted to $KIBANA_DIR"
+        fi
     else
         print_error "Failed to download Kibana. Check network connection."
         return 1
