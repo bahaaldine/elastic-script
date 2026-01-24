@@ -18,10 +18,15 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 ES_DIR="$PROJECT_ROOT/elasticsearch"
 NOTEBOOKS_DIR="$PROJECT_ROOT/notebooks"
 
-# OpenTelemetry configuration
-OTEL_ENABLED=false
-OTEL_AGENT_PATH="$PROJECT_ROOT/opentelemetry-javaagent.jar"
-OTEL_AGENT_URL="https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar"
+# Elastic Distribution of OpenTelemetry (EDOT) configuration
+# EDOT is enabled by default for distributed tracing
+EDOT_ENABLED=true
+EDOT_AGENT_PATH="$PROJECT_ROOT/elastic-otel-javaagent.jar"
+EDOT_AGENT_VERSION="1.3.0"
+EDOT_AGENT_URL="https://repo1.maven.org/maven2/co/elastic/otel/elastic-otel-javaagent/${EDOT_AGENT_VERSION}/elastic-otel-javaagent-${EDOT_AGENT_VERSION}.jar"
+
+# Kibana configuration
+KIBANA_VERSION="8.17.0"
 
 # Colors for output
 RED='\033[0;31m'
@@ -199,37 +204,39 @@ start_elasticsearch() {
 }
 
 # Start Elasticsearch in background
-# Setup OpenTelemetry agent
-setup_otel() {
-    print_header "Setting up OpenTelemetry Tracing"
+# Setup Elastic Distribution of OpenTelemetry (EDOT) agent
+setup_edot() {
+    print_header "Setting up Elastic OpenTelemetry (EDOT) Tracing"
     
-    # Download OTEL agent if not present
-    if [ ! -f "$OTEL_AGENT_PATH" ]; then
-        print_step "Downloading OpenTelemetry Java agent..."
-        curl -L -o "$OTEL_AGENT_PATH" "$OTEL_AGENT_URL"
-        print_success "Downloaded OTEL agent to $OTEL_AGENT_PATH"
+    # Download EDOT agent if not present
+    if [ ! -f "$EDOT_AGENT_PATH" ]; then
+        print_step "Downloading EDOT Java agent v${EDOT_AGENT_VERSION}..."
+        curl -L -o "$EDOT_AGENT_PATH" "$EDOT_AGENT_URL"
+        if [ $? -eq 0 ]; then
+            print_success "Downloaded EDOT agent to $EDOT_AGENT_PATH"
+        else
+            print_error "Failed to download EDOT agent"
+            EDOT_ENABLED=false
+            return 1
+        fi
     else
-        print_step "OTEL agent already present at $OTEL_AGENT_PATH"
+        print_step "EDOT agent already present at $EDOT_AGENT_PATH"
     fi
     
-    # Set default OTEL environment if not configured
-    if [ -z "$OTEL_SERVICE_NAME" ]; then
-        export OTEL_SERVICE_NAME="elasticsearch"
-    fi
-    if [ -z "$OTEL_TRACES_EXPORTER" ]; then
-        export OTEL_TRACES_EXPORTER="otlp"
-    fi
-    if [ -z "$OTEL_EXPORTER_OTLP_ENDPOINT" ]; then
-        export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
-    fi
+    # Configure EDOT to send traces to local Elasticsearch APM
+    # When Kibana is running, traces are visible in Observability > APM
+    export OTEL_SERVICE_NAME="${OTEL_SERVICE_NAME:-elastic-script}"
+    export OTEL_EXPORTER_OTLP_ENDPOINT="${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:9200}"
+    export OTEL_EXPORTER_OTLP_PROTOCOL="${OTEL_EXPORTER_OTLP_PROTOCOL:-http/protobuf}"
+    export ELASTIC_OTEL_JAVA_EXPERIMENTAL_SPAN_STACKTRACE_MIN_DURATION="${ELASTIC_OTEL_JAVA_EXPERIMENTAL_SPAN_STACKTRACE_MIN_DURATION:-5ms}"
     
-    print_step "OTEL Configuration:"
+    print_step "EDOT Configuration:"
     echo "  OTEL_SERVICE_NAME=$OTEL_SERVICE_NAME"
-    echo "  OTEL_TRACES_EXPORTER=$OTEL_TRACES_EXPORTER"
     echo "  OTEL_EXPORTER_OTLP_ENDPOINT=$OTEL_EXPORTER_OTLP_ENDPOINT"
+    echo "  OTEL_EXPORTER_OTLP_PROTOCOL=$OTEL_EXPORTER_OTLP_PROTOCOL"
     
-    OTEL_ENABLED=true
-    print_success "OpenTelemetry tracing enabled"
+    EDOT_ENABLED=true
+    print_success "EDOT tracing enabled - traces will appear in Kibana APM"
 }
 
 start_elasticsearch_background() {
@@ -246,40 +253,28 @@ start_elasticsearch_background() {
     print_step "Starting Elasticsearch in background..."
     
     # Build environment variables
-    local ENV_VARS=""
-    if [ -n "$OPENAI_API_KEY" ]; then
-        ENV_VARS="OPENAI_API_KEY=$OPENAI_API_KEY"
-        print_step "Starting with OPENAI_API_KEY configured"
-    fi
-    
-    # Add OTEL agent if enabled
-    local GRADLE_OPTS=""
-    if [ "$OTEL_ENABLED" = true ] && [ -f "$OTEL_AGENT_PATH" ]; then
-        GRADLE_OPTS="-javaagent:$OTEL_AGENT_PATH"
-        print_step "Starting with OpenTelemetry agent enabled"
-    fi
-    
     print_step "Stopping Gradle daemon to ensure environment is inherited..."
     ./gradlew --stop > /dev/null 2>&1 || true
     
-    # Start with combined options
-    if [ -n "$ENV_VARS" ] && [ -n "$GRADLE_OPTS" ]; then
-        OPENAI_API_KEY="$OPENAI_API_KEY" ES_JAVA_OPTS="$GRADLE_OPTS" \
-            OTEL_SERVICE_NAME="$OTEL_SERVICE_NAME" \
-            OTEL_TRACES_EXPORTER="$OTEL_TRACES_EXPORTER" \
-            OTEL_EXPORTER_OTLP_ENDPOINT="$OTEL_EXPORTER_OTLP_ENDPOINT" \
-            nohup ./gradlew :run --no-daemon > "$PROJECT_ROOT/elasticsearch.log" 2>&1 &
-    elif [ -n "$GRADLE_OPTS" ]; then
-        ES_JAVA_OPTS="$GRADLE_OPTS" \
-            OTEL_SERVICE_NAME="$OTEL_SERVICE_NAME" \
-            OTEL_TRACES_EXPORTER="$OTEL_TRACES_EXPORTER" \
-            OTEL_EXPORTER_OTLP_ENDPOINT="$OTEL_EXPORTER_OTLP_ENDPOINT" \
-            nohup ./gradlew :run --no-daemon > "$PROJECT_ROOT/elasticsearch.log" 2>&1 &
-    elif [ -n "$ENV_VARS" ]; then
-        OPENAI_API_KEY="$OPENAI_API_KEY" nohup ./gradlew :run --no-daemon > "$PROJECT_ROOT/elasticsearch.log" 2>&1 &
-    else
-        nohup ./gradlew :run > "$PROJECT_ROOT/elasticsearch.log" 2>&1 &
+    # Build Java options for EDOT agent
+    local JAVA_OPTS=""
+    if [ "$EDOT_ENABLED" = true ] && [ -f "$EDOT_AGENT_PATH" ]; then
+        JAVA_OPTS="-javaagent:$EDOT_AGENT_PATH"
+        print_step "Starting with EDOT Java agent enabled"
     fi
+    
+    # Configure environment
+    if [ -n "$OPENAI_API_KEY" ]; then
+        print_step "Starting with OPENAI_API_KEY configured"
+    fi
+    
+    # Start Elasticsearch with all configurations
+    OPENAI_API_KEY="${OPENAI_API_KEY:-}" \
+        ES_JAVA_OPTS="${JAVA_OPTS}" \
+        OTEL_SERVICE_NAME="${OTEL_SERVICE_NAME:-elastic-script}" \
+        OTEL_EXPORTER_OTLP_ENDPOINT="${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:9200}" \
+        OTEL_EXPORTER_OTLP_PROTOCOL="${OTEL_EXPORTER_OTLP_PROTOCOL:-http/protobuf}" \
+        nohup ./gradlew :run --no-daemon > "$PROJECT_ROOT/elasticsearch.log" 2>&1 &
     ES_PID=$!
     echo $ES_PID > "$PROJECT_ROOT/.es_pid"
     
@@ -853,7 +848,7 @@ show_help() {
     echo "  --load-data       Load sample data into Elasticsearch"
     echo "  --notebooks       Start Jupyter notebooks"
     echo "  --kibana          Start Kibana (for APM/observability)"
-    echo "  --otel            Enable OpenTelemetry tracing (downloads OTEL agent)"
+    echo "  --no-otel         Disable EDOT tracing (enabled by default)"
     echo "  --stop            Stop all (Elasticsearch, Kibana, Jupyter)"
     echo "  --stop-notebooks  Stop only Jupyter notebooks"
     echo "  --stop-kibana     Stop only Kibana"
@@ -909,12 +904,11 @@ stop_all() {
 # KIBANA SUPPORT (for APM/Observability)
 # =========================================================================
 
-KIBANA_VERSION="9.0.1-SNAPSHOT"
 KIBANA_DIR="$PROJECT_ROOT/kibana-${KIBANA_VERSION}"
 
-# Download Kibana if not present
+# Download and configure Kibana
 download_kibana() {
-    print_header "Setting up Kibana"
+    print_header "Setting up Kibana ${KIBANA_VERSION}"
     
     if [ -d "$KIBANA_DIR" ]; then
         print_success "Kibana already downloaded"
@@ -923,29 +917,94 @@ download_kibana() {
     
     local OS=""
     local ARCH=""
+    local EXT=""
     
     case "$(uname -s)" in
-        Darwin) OS="darwin" ;;
-        Linux) OS="linux" ;;
-        *) print_error "Unsupported OS"; return 1 ;;
+        Darwin) 
+            OS="darwin" 
+            EXT="tar.gz"
+            ;;
+        Linux) 
+            OS="linux" 
+            EXT="tar.gz"
+            ;;
+        *) 
+            print_error "Unsupported OS: $(uname -s)"
+            return 1 
+            ;;
     esac
     
     case "$(uname -m)" in
         x86_64) ARCH="x86_64" ;;
         arm64|aarch64) ARCH="aarch64" ;;
-        *) print_error "Unsupported architecture"; return 1 ;;
+        *) 
+            print_error "Unsupported architecture: $(uname -m)"
+            return 1 
+            ;;
     esac
     
-    # For now, we'll use a local build approach
-    # In production, you'd download from Elastic
-    print_warning "Kibana auto-download not yet implemented."
-    print_step "For APM/observability, you can manually:"
-    echo "  1. Download Kibana matching your ES version"
-    echo "  2. Configure kibana.yml with elasticsearch.hosts: ['http://localhost:9200']"
-    echo "  3. Run: ./bin/kibana"
-    echo ""
-    print_step "For now, logging is available in elasticsearch.log"
-    return 1
+    local KIBANA_FILENAME="kibana-${KIBANA_VERSION}-${OS}-${ARCH}"
+    local KIBANA_URL="https://artifacts.elastic.co/downloads/kibana/${KIBANA_FILENAME}.${EXT}"
+    
+    print_step "Downloading Kibana from ${KIBANA_URL}..."
+    
+    cd "$PROJECT_ROOT"
+    
+    if curl -L -o "${KIBANA_FILENAME}.${EXT}" "$KIBANA_URL"; then
+        print_step "Extracting Kibana..."
+        tar -xzf "${KIBANA_FILENAME}.${EXT}"
+        mv "${KIBANA_FILENAME}" "kibana-${KIBANA_VERSION}"
+        rm "${KIBANA_FILENAME}.${EXT}"
+        print_success "Kibana extracted to $KIBANA_DIR"
+    else
+        print_error "Failed to download Kibana. Check network connection."
+        return 1
+    fi
+    
+    # Configure Kibana
+    configure_kibana
+    
+    return 0
+}
+
+# Configure Kibana for elastic-script development
+configure_kibana() {
+    print_step "Configuring Kibana..."
+    
+    local KIBANA_YML="$KIBANA_DIR/config/kibana.yml"
+    
+    # Backup original config
+    if [ ! -f "${KIBANA_YML}.original" ]; then
+        cp "$KIBANA_YML" "${KIBANA_YML}.original"
+    fi
+    
+    # Create new config
+    cat > "$KIBANA_YML" << 'EOF'
+# elastic-script development configuration
+server.host: "0.0.0.0"
+server.port: 5601
+server.name: "elastic-script-kibana"
+
+# Elasticsearch connection
+elasticsearch.hosts: ["http://localhost:9200"]
+elasticsearch.username: "elastic-admin"
+elasticsearch.password: "elastic-password"
+
+# Disable security for development
+xpack.security.enabled: false
+xpack.encryptedSavedObjects.encryptionKey: "elastic-script-dev-key-32-chars!"
+
+# Enable APM
+xpack.apm.enabled: true
+
+# Telemetry
+telemetry.enabled: false
+
+# Logging
+logging.root.level: info
+EOF
+    
+    print_success "Kibana configured for elastic-script development"
 }
 
 # Start Kibana in background
@@ -1089,8 +1148,9 @@ case "${1:-}" in
     --kibana)
         start_kibana_background
         ;;
-    --otel)
-        setup_otel
+    --no-otel)
+        EDOT_ENABLED=false
+        print_step "EDOT tracing disabled"
         ;;
     --stop-notebooks)
         stop_notebooks
@@ -1119,36 +1179,72 @@ case "${1:-}" in
             if [[ ! $REPLY =~ ^[Nn]$ ]]; then
                 print_examples
                 setup_notebooks
+                
+                # Start Kibana if not running
+                if ! curl -s http://localhost:5601/api/status > /dev/null 2>&1; then
+                    download_kibana && start_kibana_background
+                fi
+                
                 echo ""
-                print_header "🚀 Launching Jupyter Notebooks"
+                print_header "🚀 Launching Jupyter Notebooks & Kibana"
                 cd "$NOTEBOOKS_DIR"
                 python3 -m notebook --notebook-dir="$NOTEBOOKS_DIR" &
                 JUPYTER_PID=$!
                 echo ""
                 print_success "Jupyter started at http://localhost:8888"
+                print_success "Kibana available at http://localhost:5601"
+                print_success "View traces at http://localhost:5601/app/apm"
                 echo ""
-                echo "Press Enter to continue (Jupyter runs in background)..."
+                
+                # Open both in browser
+                sleep 2
+                if command -v open &> /dev/null; then
+                    open "http://localhost:8888"
+                    open "http://localhost:5601/app/apm"
+                elif command -v xdg-open &> /dev/null; then
+                    xdg-open "http://localhost:8888"
+                    xdg-open "http://localhost:5601/app/apm"
+                fi
+                
+                echo "Press Enter to continue (services run in background)..."
                 read
             fi
         else
             echo "This will:"
             echo "  1. Check prerequisites"
-            echo "  2. Configure OpenAI API key (optional, for AI features)"
-            echo "  3. Build the plugin"
-            echo "  4. Start Elasticsearch"
-            echo "  5. Load sample data"
-            echo "  6. Show examples & start Jupyter notebooks"
+            echo "  2. Download EDOT Java agent (for distributed tracing)"
+            echo "  3. Configure OpenAI API key (optional, for AI features)"
+            echo "  4. Build the plugin"
+            echo "  5. Download and configure Kibana (for APM/observability)"
+            echo "  6. Start Elasticsearch with EDOT tracing"
+            echo "  7. Start Kibana"
+            echo "  8. Load sample data"
+            echo "  9. Start Jupyter notebooks"
+            echo "  10. Open both Jupyter and Kibana APM in browser"
             echo ""
             read -p "Continue? [Y/n] " -n 1 -r
             echo
             if [[ ! $REPLY =~ ^[Nn]$ ]]; then
                 check_prerequisites
+                
+                # Setup EDOT (enabled by default)
+                setup_edot
+                
                 prompt_openai_key
                 build_plugin
+                
+                # Download and configure Kibana
+                download_kibana
+                
                 start_elasticsearch_background
+                
+                # Start Kibana
+                start_kibana_background
+                
                 load_sample_data
                 print_examples
                 setup_notebooks
+                
                 echo ""
                 print_header "🚀 Launching Jupyter Notebooks"
                 cd "$NOTEBOOKS_DIR"
@@ -1156,9 +1252,33 @@ case "${1:-}" in
                 JUPYTER_PID=$!
                 echo ""
                 print_success "Jupyter started at http://localhost:8888"
+                print_success "Kibana available at http://localhost:5601"
+                print_success "View traces at http://localhost:5601/app/apm"
                 echo ""
-                echo "Press Enter to continue (Jupyter runs in background)..."
-                read
+                
+                # Open both in browser
+                sleep 2
+                if command -v open &> /dev/null; then
+                    open "http://localhost:8888"
+                    open "http://localhost:5601/app/apm"
+                elif command -v xdg-open &> /dev/null; then
+                    xdg-open "http://localhost:8888"
+                    xdg-open "http://localhost:5601/app/apm"
+                fi
+                
+                echo ""
+                print_header "✅ Setup Complete!"
+                echo ""
+                echo "Services running:"
+                echo "  • Elasticsearch: http://localhost:9200"
+                echo "  • Kibana:        http://localhost:5601"
+                echo "  • Kibana APM:    http://localhost:5601/app/apm"
+                echo "  • Jupyter:       http://localhost:8888"
+                echo ""
+                echo "EDOT tracing is enabled - run procedures to see traces in Kibana APM."
+                echo ""
+                echo "To stop all services: ./scripts/quick-start.sh --stop"
+                echo ""
             fi
         fi
         ;;

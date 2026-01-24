@@ -1,83 +1,82 @@
 # OpenTelemetry Tracing
 
-elastic-script provides native OpenTelemetry (OTEL) support for distributed tracing. This enables you to trace procedure executions across your infrastructure using standard observability tools.
+elastic-script provides native OpenTelemetry support using the **Elastic Distribution of OpenTelemetry (EDOT)** Java agent. Tracing is **enabled by default** - just run quick-start.sh and traces will appear in Kibana APM.
 
 ## Quick Start
 
-### 1. Download the OTEL Java Agent
+The quickest way to get started is to run the full setup:
 
 ```bash
-curl -L -o opentelemetry-javaagent.jar \
-  https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+./scripts/quick-start.sh
 ```
 
-### 2. Configure Environment Variables
+This will:
+1. Download the EDOT Java agent
+2. Build Elasticsearch with elastic-script
+3. Download and configure Kibana
+4. Start everything with tracing enabled
+5. Open Jupyter notebooks and Kibana APM in your browser
+
+View traces at: **http://localhost:5601/app/apm**
+
+## Elastic Distribution of OpenTelemetry (EDOT)
+
+elastic-script uses EDOT, Elastic's distribution of OpenTelemetry that provides:
+- Optimized performance for Elastic backends
+- Pre-configured for Elastic APM
+- Full compatibility with OpenTelemetry standards
+
+Reference: [EDOT Java Setup](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/java/setup)
+
+## Manual Configuration
+
+If you need to customize the EDOT configuration:
 
 ```bash
-# Service identification
-export OTEL_SERVICE_NAME=elasticsearch
+# Download EDOT agent manually
+curl -L -o elastic-otel-javaagent.jar \
+  https://repo1.maven.org/maven2/co/elastic/otel/elastic-otel-javaagent/1.3.0/elastic-otel-javaagent-1.3.0.jar
 
-# Exporter configuration (OTLP is the standard)
-export OTEL_TRACES_EXPORTER=otlp
-export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+# Configure environment
+export OTEL_SERVICE_NAME=elastic-script
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:9200
+export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
 
-# Optional: Resource attributes
-export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production,service.version=1.0.0"
-```
-
-### 3. Start Elasticsearch with the Agent
-
-```bash
-ES_JAVA_OPTS="-javaagent:/path/to/opentelemetry-javaagent.jar" ./bin/elasticsearch
-```
-
-Or with quick-start.sh:
-
-```bash
-./scripts/quick-start.sh --otel
+# Start with agent
+ES_JAVA_OPTS="-javaagent:elastic-otel-javaagent.jar" ./bin/elasticsearch
 ```
 
 ## Backend Options
 
-### Jaeger (Open Source)
+### Kibana APM (Default)
+
+When using quick-start.sh, traces are automatically sent to the local Elasticsearch and visible in Kibana APM:
+
+```
+http://localhost:5601/app/apm
+```
+
+### Elastic Cloud
+
+For Elastic Cloud deployments:
 
 ```bash
-# Run Jaeger all-in-one
-docker run -d --name jaeger \
-  -p 16686:16686 \
-  -p 4317:4317 \
-  jaegertracing/all-in-one:latest
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://<your-cloud-id>.apm.us-east-1.aws.elastic.cloud
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=ApiKey YOUR_API_KEY"
+```
 
-# Configure OTEL
+### Other OTEL Backends
+
+EDOT is compatible with any OpenTelemetry backend:
+
+**Jaeger:**
+```bash
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
-
-# View traces at http://localhost:16686
 ```
 
-### Elastic APM (via OTLP)
-
-```bash
-export OTEL_EXPORTER_OTLP_ENDPOINT=https://your-apm-server:8200
-export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer YOUR_SECRET_TOKEN"
-```
-
-### Grafana Tempo
-
+**Grafana Tempo:**
 ```bash
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
-```
-
-### Zipkin
-
-```bash
-export OTEL_TRACES_EXPORTER=zipkin
-export OTEL_EXPORTER_ZIPKIN_ENDPOINT=http://localhost:9411/api/v2/spans
-```
-
-### Console (Development)
-
-```bash
-export OTEL_TRACES_EXPORTER=console
 ```
 
 ## Trace Structure
