@@ -10,62 +10,179 @@ package org.elasticsearch.xpack.escript.tracing;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.lang.reflect.Method;
 import java.util.UUID;
 
 /**
- * APM tracing utilities for elastic-script.
+ * OpenTelemetry-compliant tracing for elastic-script.
  * 
- * This class provides a lightweight abstraction for APM tracing that can work with
- * or without the Elastic APM agent. When the APM agent is not present, tracing
- * operations are no-ops.
+ * This tracer provides distributed tracing using OpenTelemetry standards via reflection,
+ * enabling zero-dependency integration with the OTEL Java agent for auto-instrumentation.
  * 
- * Tracing Hierarchy:
- * - Transaction: One per procedure execution
- * - Spans: Nested for statements, function calls, external calls
+ * <h2>Quick Start with OTEL Java Agent</h2>
+ * <pre>
+ * # 1. Download the OTEL Java agent
+ * curl -L -o opentelemetry-javaagent.jar \
+ *   https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
  * 
- * To enable full APM tracing, add the Elastic APM Java agent to the classpath
- * and configure it to point to your APM server.
+ * # 2. Configure environment variables
+ * export OTEL_SERVICE_NAME=elasticsearch
+ * export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+ * export OTEL_TRACES_EXPORTER=otlp
+ * 
+ * # 3. Start Elasticsearch with the agent
+ * ES_JAVA_OPTS="-javaagent:/path/to/opentelemetry-javaagent.jar" ./bin/elasticsearch
+ * </pre>
+ * 
+ * <h2>Sending Traces to Jaeger</h2>
+ * <pre>
+ * # Run Jaeger (all-in-one)
+ * docker run -d --name jaeger \
+ *   -p 16686:16686 \
+ *   -p 4317:4317 \
+ *   jaegertracing/all-in-one:latest
+ * 
+ * # View traces at http://localhost:16686
+ * </pre>
+ * 
+ * <h2>Sending Traces to Elastic APM via OTEL</h2>
+ * <pre>
+ * export OTEL_EXPORTER_OTLP_ENDPOINT=https://your-apm-server:8200
+ * export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer YOUR_SECRET_TOKEN"
+ * </pre>
+ * 
+ * <h2>Tracing Hierarchy</h2>
+ * <ul>
+ *   <li>Root Span: Procedure execution (escript.procedure.execute)</li>
+ *   <li>Child Spans: Statements, function calls, ESQL queries, external calls</li>
+ * </ul>
+ * 
+ * <h2>Semantic Conventions</h2>
+ * Uses OpenTelemetry semantic conventions for:
+ * <ul>
+ *   <li>db.* - Database operations (ESQL queries)</li>
+ *   <li>http.* - External HTTP calls</li>
+ *   <li>code.* - Code execution context</li>
+ * </ul>
  */
 public final class EScriptTracer {
 
     private static final Logger LOGGER = LogManager.getLogger(EScriptTracer.class);
     
-    // Flag to check if APM is available at runtime
-    private static final boolean APM_AVAILABLE = isApmAvailable();
+    // OTEL availability flag
+    private static final boolean OTEL_AVAILABLE = isOtelAvailable();
     
+    // Cached reflection objects for performance
+    private static Object globalOpenTelemetry;
+    private static Method getTracerMethod;
+    private static Method spanBuilderMethod;
+    private static Method setAttributeStringMethod;
+    private static Method setAttributeLongMethod;
+    private static Method startSpanMethod;
+    private static Method endSpanMethod;
+    private static Method makeCurrentMethod;
+    private static Method closeScopeMethod;
+    private static Method recordExceptionMethod;
+    private static Method setStatusMethod;
+    private static Object statusCodeOk;
+    private static Object statusCodeError;
+    private static Object spanKindInternal;
+    private static Object spanKindClient;
+    
+    static {
+        if (OTEL_AVAILABLE) {
+            initializeOtelReflection();
+        }
+    }
+
     private EScriptTracer() {
         // Utility class
     }
 
     /**
-     * Check if Elastic APM agent is available on the classpath.
+     * Check if OpenTelemetry is available on the classpath (via OTEL Java agent).
      */
-    private static boolean isApmAvailable() {
+    private static boolean isOtelAvailable() {
         try {
-            Class.forName("co.elastic.apm.api.ElasticApm");
-            LOGGER.info("Elastic APM agent detected - tracing enabled");
+            Class.forName("io.opentelemetry.api.GlobalOpenTelemetry");
+            LOGGER.info("OpenTelemetry detected - distributed tracing enabled");
             return true;
         } catch (ClassNotFoundException e) {
-            LOGGER.debug("Elastic APM agent not found - tracing disabled");
+            LOGGER.debug("OpenTelemetry not found - tracing disabled. " +
+                "Attach the OTEL Java agent for distributed tracing support.");
             return false;
         }
     }
 
     /**
+     * Initialize reflection objects for OTEL API access.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static void initializeOtelReflection() {
+        try {
+            // GlobalOpenTelemetry
+            Class<?> globalOtelClass = Class.forName("io.opentelemetry.api.GlobalOpenTelemetry");
+            Method getMethod = globalOtelClass.getMethod("get");
+            globalOpenTelemetry = getMethod.invoke(null);
+            
+            // Tracer
+            Class<?> otelClass = Class.forName("io.opentelemetry.api.OpenTelemetry");
+            getTracerMethod = otelClass.getMethod("getTracer", String.class, String.class);
+            
+            // SpanBuilder
+            Class<?> tracerClass = Class.forName("io.opentelemetry.api.trace.Tracer");
+            spanBuilderMethod = tracerClass.getMethod("spanBuilder", String.class);
+            
+            Class<?> spanBuilderClass = Class.forName("io.opentelemetry.api.trace.SpanBuilder");
+            Class<?> spanKindClass = Class.forName("io.opentelemetry.api.trace.SpanKind");
+            Method setSpanKindMethod = spanBuilderClass.getMethod("setSpanKind", spanKindClass);
+            setAttributeStringMethod = spanBuilderClass.getMethod("setAttribute", String.class, String.class);
+            
+            // Get AttributeKey for long attributes
+            Class<?> attributeKeyClass = Class.forName("io.opentelemetry.api.common.AttributeKey");
+            Method longKeyMethod = attributeKeyClass.getMethod("longKey", String.class);
+            
+            startSpanMethod = spanBuilderClass.getMethod("startSpan");
+            
+            // Span
+            Class<?> spanClass = Class.forName("io.opentelemetry.api.trace.Span");
+            endSpanMethod = spanClass.getMethod("end");
+            makeCurrentMethod = spanClass.getMethod("makeCurrent");
+            recordExceptionMethod = spanClass.getMethod("recordException", Throwable.class);
+            
+            // StatusCode
+            Class<?> statusCodeClass = Class.forName("io.opentelemetry.api.trace.StatusCode");
+            statusCodeOk = Enum.valueOf((Class<Enum>) statusCodeClass, "OK");
+            statusCodeError = Enum.valueOf((Class<Enum>) statusCodeClass, "ERROR");
+            setStatusMethod = spanClass.getMethod("setStatus", statusCodeClass, String.class);
+            
+            // SpanKind
+            spanKindInternal = Enum.valueOf((Class<Enum>) spanKindClass, "INTERNAL");
+            spanKindClient = Enum.valueOf((Class<Enum>) spanKindClass, "CLIENT");
+            
+            // Scope
+            Class<?> scopeClass = Class.forName("io.opentelemetry.context.Scope");
+            closeScopeMethod = scopeClass.getMethod("close");
+            
+            LOGGER.debug("OpenTelemetry reflection initialized successfully");
+        } catch (Exception e) {
+            LOGGER.warn("Failed to initialize OpenTelemetry reflection: {}", e.getMessage());
+        }
+    }
+
+    /**
      * Generate a new execution ID for correlation.
-     * Format: 8 character hex string (e.g., "a1b2c3d4")
      */
     public static String generateExecutionId() {
         return UUID.randomUUID().toString().substring(0, 8);
     }
 
     /**
-     * Start a new transaction for procedure execution.
-     * Returns a TracingContext that should be ended when the procedure completes.
+     * Start a new root span for procedure execution.
      */
     public static TracingContext startProcedure(String executionId, String procedureName) {
-        if (APM_AVAILABLE) {
-            return ApmTracingContext.startTransaction(executionId, procedureName);
+        if (OTEL_AVAILABLE) {
+            return OtelTracingContext.start(executionId, procedureName);
         }
         return new NoOpTracingContext(executionId, procedureName);
     }
@@ -74,8 +191,13 @@ public final class EScriptTracer {
      * Start a span for a statement execution.
      */
     public static SpanContext startStatement(String executionId, String statementType, String details) {
-        if (APM_AVAILABLE) {
-            return ApmSpanContext.startSpan(executionId, "statement", statementType, details);
+        if (OTEL_AVAILABLE) {
+            return OtelSpanContext.start(
+                "escript.statement." + statementType.toLowerCase(),
+                executionId,
+                "escript.statement.type", statementType,
+                false
+            );
         }
         return NoOpSpanContext.INSTANCE;
     }
@@ -84,9 +206,13 @@ public final class EScriptTracer {
      * Start a span for a function call.
      */
     public static SpanContext startFunctionCall(String executionId, String functionName, int argCount) {
-        if (APM_AVAILABLE) {
-            return ApmSpanContext.startSpan(executionId, "function", functionName, 
-                functionName + "() with " + argCount + " args");
+        if (OTEL_AVAILABLE) {
+            return OtelSpanContext.start(
+                "escript.function." + functionName.toLowerCase(),
+                executionId,
+                "escript.function.name", functionName,
+                false
+            );
         }
         return NoOpSpanContext.INSTANCE;
     }
@@ -95,8 +221,13 @@ public final class EScriptTracer {
      * Start a span for an ESQL query.
      */
     public static SpanContext startEsqlQuery(String executionId, String query) {
-        if (APM_AVAILABLE) {
-            return ApmSpanContext.startDbSpan(executionId, "elasticsearch", "esql", query);
+        if (OTEL_AVAILABLE) {
+            String truncated = query.length() > 200 ? query.substring(0, 200) + "..." : query;
+            return OtelSpanContext.startDb(
+                "ESQL: " + truncated,
+                executionId,
+                "elasticsearch", "esql", query
+            );
         }
         return NoOpSpanContext.INSTANCE;
     }
@@ -105,9 +236,13 @@ public final class EScriptTracer {
      * Start a span for an external HTTP call.
      */
     public static SpanContext startExternalCall(String executionId, String serviceName, 
-                                                  String method, String url) {
-        if (APM_AVAILABLE) {
-            return ApmSpanContext.startExternalSpan(executionId, serviceName, method, url);
+                                                 String method, String url) {
+        if (OTEL_AVAILABLE) {
+            return OtelSpanContext.startHttp(
+                method + " " + extractHost(url),
+                executionId,
+                method, url, serviceName
+            );
         }
         return NoOpSpanContext.INSTANCE;
     }
@@ -116,20 +251,36 @@ public final class EScriptTracer {
      * Start a span for a loop iteration.
      */
     public static SpanContext startLoopIteration(String executionId, String loopType, int iteration) {
-        if (APM_AVAILABLE) {
-            return ApmSpanContext.startSpan(executionId, "loop", loopType, 
-                loopType + " iteration " + iteration);
+        if (OTEL_AVAILABLE) {
+            return OtelSpanContext.start(
+                "escript.loop." + loopType.toLowerCase() + "[" + iteration + "]",
+                executionId,
+                "escript.loop.type", loopType,
+                false
+            );
+        }
+        return NoOpSpanContext.INSTANCE;
+    }
+
+    /**
+     * Start a span for an async operation.
+     */
+    public static SpanContext startAsyncOperation(String executionId, String operationType, String details) {
+        if (OTEL_AVAILABLE) {
+            return OtelSpanContext.start(
+                "escript.async." + operationType.toLowerCase(),
+                executionId,
+                "escript.async.type", operationType,
+                false
+            );
         }
         return NoOpSpanContext.INSTANCE;
     }
 
     // ========================================================================
-    // TRACING CONTEXT INTERFACES
+    // INTERFACES
     // ========================================================================
 
-    /**
-     * Context for a transaction (procedure execution).
-     */
     public interface TracingContext extends AutoCloseable {
         String getExecutionId();
         void setLabel(String key, String value);
@@ -141,9 +292,6 @@ public final class EScriptTracer {
         default void close() { end(); }
     }
 
-    /**
-     * Context for a span (sub-operation).
-     */
     public interface SpanContext extends AutoCloseable {
         void setLabel(String key, String value);
         void setLabel(String key, long value);
@@ -154,12 +302,9 @@ public final class EScriptTracer {
     }
 
     // ========================================================================
-    // NO-OP IMPLEMENTATIONS (when APM is not available)
+    // NO-OP IMPLEMENTATIONS
     // ========================================================================
 
-    /**
-     * No-op implementation of TracingContext.
-     */
     private static class NoOpTracingContext implements TracingContext {
         private final String executionId;
         private final String procedureName;
@@ -177,9 +322,6 @@ public final class EScriptTracer {
         @Override public void end() { }
     }
 
-    /**
-     * No-op implementation of SpanContext.
-     */
     private static class NoOpSpanContext implements SpanContext {
         static final NoOpSpanContext INSTANCE = new NoOpSpanContext();
         
@@ -190,53 +332,51 @@ public final class EScriptTracer {
     }
 
     // ========================================================================
-    // APM IMPLEMENTATIONS (when APM agent is available)
+    // OTEL IMPLEMENTATIONS (via reflection)
     // ========================================================================
 
-    /**
-     * APM-backed implementation of TracingContext.
-     * Uses reflection to avoid compile-time dependency on APM classes.
-     */
-    private static class ApmTracingContext implements TracingContext {
+    private static class OtelTracingContext implements TracingContext {
         private final String executionId;
-        private Object transaction; // co.elastic.apm.api.Transaction
+        private final String procedureName;
+        private final Object span;
+        private final Object scope;
 
-        private ApmTracingContext(String executionId, Object transaction) {
+        private OtelTracingContext(String executionId, String procedureName, Object span, Object scope) {
             this.executionId = executionId;
-            this.transaction = transaction;
+            this.procedureName = procedureName;
+            this.span = span;
+            this.scope = scope;
         }
 
-        static TracingContext startTransaction(String executionId, String procedureName) {
+        static TracingContext start(String executionId, String procedureName) {
             try {
-                Class<?> elasticApmClass = Class.forName("co.elastic.apm.api.ElasticApm");
-                Object transaction = elasticApmClass.getMethod("startTransaction").invoke(null);
+                Object tracer = getTracerMethod.invoke(globalOpenTelemetry, "elastic-script", "1.0.0");
+                Object spanBuilder = spanBuilderMethod.invoke(tracer, "escript.procedure.execute " + procedureName);
                 
-                // Set transaction name and type
-                Class<?> txClass = transaction.getClass();
-                txClass.getMethod("setName", String.class).invoke(transaction, procedureName);
-                txClass.getMethod("setType", String.class).invoke(transaction, "escript");
-                txClass.getMethod("addLabel", String.class, String.class)
-                    .invoke(transaction, "execution.id", executionId);
-                txClass.getMethod("addLabel", String.class, String.class)
-                    .invoke(transaction, "procedure.name", procedureName);
+                // Set attributes
+                setAttributeStringMethod.invoke(spanBuilder, "escript.execution.id", executionId);
+                setAttributeStringMethod.invoke(spanBuilder, "escript.procedure.name", procedureName);
+                setAttributeStringMethod.invoke(spanBuilder, "code.function", procedureName);
+                setAttributeStringMethod.invoke(spanBuilder, "code.namespace", "escript");
                 
-                return new ApmTracingContext(executionId, transaction);
+                Object span = startSpanMethod.invoke(spanBuilder);
+                Object scope = makeCurrentMethod.invoke(span);
+                
+                LOGGER.debug("Started OTEL trace: {} (execution={})", procedureName, executionId);
+                return new OtelTracingContext(executionId, procedureName, span, scope);
             } catch (Exception e) {
-                LOGGER.debug("Failed to start APM transaction: {}", e.getMessage());
+                LOGGER.trace("Failed to start OTEL trace: {}", e.getMessage());
                 return new NoOpTracingContext(executionId, procedureName);
             }
         }
 
-        @Override
-        public String getExecutionId() {
-            return executionId;
-        }
+        @Override public String getExecutionId() { return executionId; }
 
         @Override
         public void setLabel(String key, String value) {
             try {
-                transaction.getClass().getMethod("addLabel", String.class, String.class)
-                    .invoke(transaction, key, value);
+                span.getClass().getMethod("setAttribute", String.class, String.class)
+                    .invoke(span, key, value);
             } catch (Exception e) {
                 LOGGER.trace("Failed to set label: {}", e.getMessage());
             }
@@ -245,18 +385,23 @@ public final class EScriptTracer {
         @Override
         public void setLabel(String key, long value) {
             try {
-                transaction.getClass().getMethod("addLabel", String.class, Number.class)
-                    .invoke(transaction, key, value);
+                Class<?> attributeKeyClass = Class.forName("io.opentelemetry.api.common.AttributeKey");
+                Method longKeyMethod = attributeKeyClass.getMethod("longKey", String.class);
+                Object attrKey = longKeyMethod.invoke(null, key);
+                span.getClass().getMethod("setAttribute", attributeKeyClass, Object.class)
+                    .invoke(span, attrKey, value);
             } catch (Exception e) {
-                LOGGER.trace("Failed to set label: {}", e.getMessage());
+                LOGGER.trace("Failed to set long label: {}", e.getMessage());
             }
         }
 
         @Override
         public void setResult(String result) {
             try {
-                transaction.getClass().getMethod("setResult", String.class)
-                    .invoke(transaction, result);
+                setLabel("escript.result", result);
+                if ("success".equalsIgnoreCase(result)) {
+                    setStatusMethod.invoke(span, statusCodeOk, "");
+                }
             } catch (Exception e) {
                 LOGGER.trace("Failed to set result: {}", e.getMessage());
             }
@@ -265,8 +410,8 @@ public final class EScriptTracer {
         @Override
         public void captureException(Exception e) {
             try {
-                transaction.getClass().getMethod("captureException", Throwable.class)
-                    .invoke(transaction, e);
+                recordExceptionMethod.invoke(span, e);
+                setStatusMethod.invoke(span, statusCodeError, e.getMessage());
             } catch (Exception ex) {
                 LOGGER.trace("Failed to capture exception: {}", ex.getMessage());
             }
@@ -275,87 +420,78 @@ public final class EScriptTracer {
         @Override
         public void end() {
             try {
-                transaction.getClass().getMethod("end").invoke(transaction);
+                closeScopeMethod.invoke(scope);
+                endSpanMethod.invoke(span);
+                LOGGER.debug("Ended OTEL trace: {} (execution={})", procedureName, executionId);
             } catch (Exception e) {
-                LOGGER.trace("Failed to end transaction: {}", e.getMessage());
+                LOGGER.trace("Failed to end trace: {}", e.getMessage());
             }
         }
     }
 
-    /**
-     * APM-backed implementation of SpanContext.
-     */
-    private static class ApmSpanContext implements SpanContext {
-        private Object span; // co.elastic.apm.api.Span
+    private static class OtelSpanContext implements SpanContext {
+        private final Object span;
+        private final Object scope;
 
-        private ApmSpanContext(Object span) {
+        private OtelSpanContext(Object span, Object scope) {
             this.span = span;
+            this.scope = scope;
         }
 
-        static SpanContext startSpan(String executionId, String type, String subtype, String name) {
+        static SpanContext start(String name, String executionId, String attrKey, String attrValue, boolean isClient) {
             try {
-                Class<?> elasticApmClass = Class.forName("co.elastic.apm.api.ElasticApm");
-                Object currentSpan = elasticApmClass.getMethod("currentSpan").invoke(null);
-                Object newSpan = currentSpan.getClass()
-                    .getMethod("startSpan", String.class, String.class, String.class)
-                    .invoke(currentSpan, type, subtype, "execute");
+                Object tracer = getTracerMethod.invoke(globalOpenTelemetry, "elastic-script", "1.0.0");
+                Object spanBuilder = spanBuilderMethod.invoke(tracer, name);
                 
-                newSpan.getClass().getMethod("setName", String.class).invoke(newSpan, name);
-                newSpan.getClass().getMethod("addLabel", String.class, String.class)
-                    .invoke(newSpan, "execution.id", executionId);
+                setAttributeStringMethod.invoke(spanBuilder, "escript.execution.id", executionId);
+                setAttributeStringMethod.invoke(spanBuilder, attrKey, attrValue);
                 
-                return new ApmSpanContext(newSpan);
+                Object span = startSpanMethod.invoke(spanBuilder);
+                Object scope = makeCurrentMethod.invoke(span);
+                
+                return new OtelSpanContext(span, scope);
             } catch (Exception e) {
                 LOGGER.trace("Failed to start span: {}", e.getMessage());
                 return NoOpSpanContext.INSTANCE;
             }
         }
 
-        static SpanContext startDbSpan(String executionId, String dbType, String dbAction, String statement) {
+        static SpanContext startDb(String name, String executionId, String dbSystem, String dbOp, String statement) {
             try {
-                Class<?> elasticApmClass = Class.forName("co.elastic.apm.api.ElasticApm");
-                Object currentSpan = elasticApmClass.getMethod("currentSpan").invoke(null);
-                Object newSpan = currentSpan.getClass()
-                    .getMethod("startSpan", String.class, String.class, String.class)
-                    .invoke(currentSpan, "db", dbType, dbAction);
+                Object tracer = getTracerMethod.invoke(globalOpenTelemetry, "elastic-script", "1.0.0");
+                Object spanBuilder = spanBuilderMethod.invoke(tracer, name);
                 
-                String truncatedStatement = statement.length() > 200 
-                    ? statement.substring(0, 200) + "..." : statement;
-                newSpan.getClass().getMethod("setName", String.class)
-                    .invoke(newSpan, "ESQL: " + truncatedStatement);
-                newSpan.getClass().getMethod("addLabel", String.class, String.class)
-                    .invoke(newSpan, "db.statement", statement);
-                newSpan.getClass().getMethod("addLabel", String.class, String.class)
-                    .invoke(newSpan, "execution.id", executionId);
+                setAttributeStringMethod.invoke(spanBuilder, "escript.execution.id", executionId);
+                setAttributeStringMethod.invoke(spanBuilder, "db.system", dbSystem);
+                setAttributeStringMethod.invoke(spanBuilder, "db.operation", dbOp);
+                setAttributeStringMethod.invoke(spanBuilder, "db.statement", statement);
                 
-                return new ApmSpanContext(newSpan);
+                Object span = startSpanMethod.invoke(spanBuilder);
+                Object scope = makeCurrentMethod.invoke(span);
+                
+                return new OtelSpanContext(span, scope);
             } catch (Exception e) {
                 LOGGER.trace("Failed to start db span: {}", e.getMessage());
                 return NoOpSpanContext.INSTANCE;
             }
         }
 
-        static SpanContext startExternalSpan(String executionId, String serviceName, 
-                                              String method, String url) {
+        static SpanContext startHttp(String name, String executionId, String method, String url, String service) {
             try {
-                Class<?> elasticApmClass = Class.forName("co.elastic.apm.api.ElasticApm");
-                Object currentSpan = elasticApmClass.getMethod("currentSpan").invoke(null);
-                Object newSpan = currentSpan.getClass()
-                    .getMethod("startSpan", String.class, String.class, String.class)
-                    .invoke(currentSpan, "external", "http", serviceName);
+                Object tracer = getTracerMethod.invoke(globalOpenTelemetry, "elastic-script", "1.0.0");
+                Object spanBuilder = spanBuilderMethod.invoke(tracer, name);
                 
-                newSpan.getClass().getMethod("setName", String.class)
-                    .invoke(newSpan, method + " " + extractHost(url));
-                newSpan.getClass().getMethod("addLabel", String.class, String.class)
-                    .invoke(newSpan, "http.method", method);
-                newSpan.getClass().getMethod("addLabel", String.class, String.class)
-                    .invoke(newSpan, "http.url", url);
-                newSpan.getClass().getMethod("addLabel", String.class, String.class)
-                    .invoke(newSpan, "execution.id", executionId);
+                setAttributeStringMethod.invoke(spanBuilder, "escript.execution.id", executionId);
+                setAttributeStringMethod.invoke(spanBuilder, "http.method", method);
+                setAttributeStringMethod.invoke(spanBuilder, "http.url", url);
+                setAttributeStringMethod.invoke(spanBuilder, "peer.service", service);
                 
-                return new ApmSpanContext(newSpan);
+                Object span = startSpanMethod.invoke(spanBuilder);
+                Object scope = makeCurrentMethod.invoke(span);
+                
+                return new OtelSpanContext(span, scope);
             } catch (Exception e) {
-                LOGGER.trace("Failed to start external span: {}", e.getMessage());
+                LOGGER.trace("Failed to start http span: {}", e.getMessage());
                 return NoOpSpanContext.INSTANCE;
             }
         }
@@ -363,7 +499,7 @@ public final class EScriptTracer {
         @Override
         public void setLabel(String key, String value) {
             try {
-                span.getClass().getMethod("addLabel", String.class, String.class)
+                span.getClass().getMethod("setAttribute", String.class, String.class)
                     .invoke(span, key, value);
             } catch (Exception e) {
                 LOGGER.trace("Failed to set label: {}", e.getMessage());
@@ -373,18 +509,21 @@ public final class EScriptTracer {
         @Override
         public void setLabel(String key, long value) {
             try {
-                span.getClass().getMethod("addLabel", String.class, Number.class)
-                    .invoke(span, key, value);
+                Class<?> attributeKeyClass = Class.forName("io.opentelemetry.api.common.AttributeKey");
+                Method longKeyMethod = attributeKeyClass.getMethod("longKey", String.class);
+                Object attrKey = longKeyMethod.invoke(null, key);
+                span.getClass().getMethod("setAttribute", attributeKeyClass, Object.class)
+                    .invoke(span, attrKey, value);
             } catch (Exception e) {
-                LOGGER.trace("Failed to set label: {}", e.getMessage());
+                LOGGER.trace("Failed to set long label: {}", e.getMessage());
             }
         }
 
         @Override
         public void captureException(Exception e) {
             try {
-                span.getClass().getMethod("captureException", Throwable.class)
-                    .invoke(span, e);
+                recordExceptionMethod.invoke(span, e);
+                setStatusMethod.invoke(span, statusCodeError, e.getMessage());
             } catch (Exception ex) {
                 LOGGER.trace("Failed to capture exception: {}", ex.getMessage());
             }
@@ -393,20 +532,17 @@ public final class EScriptTracer {
         @Override
         public void end() {
             try {
-                span.getClass().getMethod("end").invoke(span);
+                closeScopeMethod.invoke(scope);
+                endSpanMethod.invoke(span);
             } catch (Exception e) {
                 LOGGER.trace("Failed to end span: {}", e.getMessage());
             }
         }
     }
 
-    /**
-     * Extract hostname from URL for span naming.
-     */
     private static String extractHost(String url) {
         try {
             if (url == null) return "unknown";
-            // Simple extraction - remove protocol and path
             String withoutProtocol = url.replaceFirst("^https?://", "");
             int slashIndex = withoutProtocol.indexOf('/');
             if (slashIndex > 0) {

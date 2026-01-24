@@ -18,6 +18,11 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 ES_DIR="$PROJECT_ROOT/elasticsearch"
 NOTEBOOKS_DIR="$PROJECT_ROOT/notebooks"
 
+# OpenTelemetry configuration
+OTEL_ENABLED=false
+OTEL_AGENT_PATH="$PROJECT_ROOT/opentelemetry-javaagent.jar"
+OTEL_AGENT_URL="https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar"
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -194,6 +199,39 @@ start_elasticsearch() {
 }
 
 # Start Elasticsearch in background
+# Setup OpenTelemetry agent
+setup_otel() {
+    print_header "Setting up OpenTelemetry Tracing"
+    
+    # Download OTEL agent if not present
+    if [ ! -f "$OTEL_AGENT_PATH" ]; then
+        print_step "Downloading OpenTelemetry Java agent..."
+        curl -L -o "$OTEL_AGENT_PATH" "$OTEL_AGENT_URL"
+        print_success "Downloaded OTEL agent to $OTEL_AGENT_PATH"
+    else
+        print_step "OTEL agent already present at $OTEL_AGENT_PATH"
+    fi
+    
+    # Set default OTEL environment if not configured
+    if [ -z "$OTEL_SERVICE_NAME" ]; then
+        export OTEL_SERVICE_NAME="elasticsearch"
+    fi
+    if [ -z "$OTEL_TRACES_EXPORTER" ]; then
+        export OTEL_TRACES_EXPORTER="otlp"
+    fi
+    if [ -z "$OTEL_EXPORTER_OTLP_ENDPOINT" ]; then
+        export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+    fi
+    
+    print_step "OTEL Configuration:"
+    echo "  OTEL_SERVICE_NAME=$OTEL_SERVICE_NAME"
+    echo "  OTEL_TRACES_EXPORTER=$OTEL_TRACES_EXPORTER"
+    echo "  OTEL_EXPORTER_OTLP_ENDPOINT=$OTEL_EXPORTER_OTLP_ENDPOINT"
+    
+    OTEL_ENABLED=true
+    print_success "OpenTelemetry tracing enabled"
+}
+
 start_elasticsearch_background() {
     print_header "Starting Elasticsearch in Background"
     
@@ -207,11 +245,37 @@ start_elasticsearch_background() {
     
     print_step "Starting Elasticsearch in background..."
     
-    # Build the command with optional OPENAI_API_KEY
+    # Build environment variables
+    local ENV_VARS=""
     if [ -n "$OPENAI_API_KEY" ]; then
-        print_step "Stopping Gradle daemon to ensure environment is inherited..."
-        ./gradlew --stop > /dev/null 2>&1 || true
+        ENV_VARS="OPENAI_API_KEY=$OPENAI_API_KEY"
         print_step "Starting with OPENAI_API_KEY configured"
+    fi
+    
+    # Add OTEL agent if enabled
+    local GRADLE_OPTS=""
+    if [ "$OTEL_ENABLED" = true ] && [ -f "$OTEL_AGENT_PATH" ]; then
+        GRADLE_OPTS="-javaagent:$OTEL_AGENT_PATH"
+        print_step "Starting with OpenTelemetry agent enabled"
+    fi
+    
+    print_step "Stopping Gradle daemon to ensure environment is inherited..."
+    ./gradlew --stop > /dev/null 2>&1 || true
+    
+    # Start with combined options
+    if [ -n "$ENV_VARS" ] && [ -n "$GRADLE_OPTS" ]; then
+        OPENAI_API_KEY="$OPENAI_API_KEY" ES_JAVA_OPTS="$GRADLE_OPTS" \
+            OTEL_SERVICE_NAME="$OTEL_SERVICE_NAME" \
+            OTEL_TRACES_EXPORTER="$OTEL_TRACES_EXPORTER" \
+            OTEL_EXPORTER_OTLP_ENDPOINT="$OTEL_EXPORTER_OTLP_ENDPOINT" \
+            nohup ./gradlew :run --no-daemon > "$PROJECT_ROOT/elasticsearch.log" 2>&1 &
+    elif [ -n "$GRADLE_OPTS" ]; then
+        ES_JAVA_OPTS="$GRADLE_OPTS" \
+            OTEL_SERVICE_NAME="$OTEL_SERVICE_NAME" \
+            OTEL_TRACES_EXPORTER="$OTEL_TRACES_EXPORTER" \
+            OTEL_EXPORTER_OTLP_ENDPOINT="$OTEL_EXPORTER_OTLP_ENDPOINT" \
+            nohup ./gradlew :run --no-daemon > "$PROJECT_ROOT/elasticsearch.log" 2>&1 &
+    elif [ -n "$ENV_VARS" ]; then
         OPENAI_API_KEY="$OPENAI_API_KEY" nohup ./gradlew :run --no-daemon > "$PROJECT_ROOT/elasticsearch.log" 2>&1 &
     else
         nohup ./gradlew :run > "$PROJECT_ROOT/elasticsearch.log" 2>&1 &
@@ -789,6 +853,7 @@ show_help() {
     echo "  --load-data       Load sample data into Elasticsearch"
     echo "  --notebooks       Start Jupyter notebooks"
     echo "  --kibana          Start Kibana (for APM/observability)"
+    echo "  --otel            Enable OpenTelemetry tracing (downloads OTEL agent)"
     echo "  --stop            Stop all (Elasticsearch, Kibana, Jupyter)"
     echo "  --stop-notebooks  Stop only Jupyter notebooks"
     echo "  --stop-kibana     Stop only Kibana"
@@ -1023,6 +1088,9 @@ case "${1:-}" in
         ;;
     --kibana)
         start_kibana_background
+        ;;
+    --otel)
+        setup_otel
         ;;
     --stop-notebooks)
         stop_notebooks

@@ -235,7 +235,11 @@
      - ✅ 04-async-execution.ipynb (1 cell skipped - STATUS storage bug)
      - ✅ 05-runbook-integrations.ipynb
 2. **Complete Observability Integration** - API response with PRINT output, execution metadata
-3. **APM Agent Testing** - Attach Elastic APM agent to verify tracing
+3. ~~**APM Agent Testing**~~ ✅ Complete - Replaced with OpenTelemetry support
+   - OTEL-compliant tracer via reflection (no compile-time deps)
+   - Works with OTEL Java agent auto-instrumentation
+   - `./scripts/quick-start.sh --otel` to enable
+   - Supports Jaeger, Elastic APM (OTLP), Tempo, Zipkin
 4. **Kibana APM Visualization** (For Later) - Full distributed tracing in Kibana:
    - Each async step becomes a span
    - Visible in Kibana APM UI with timeline visualization

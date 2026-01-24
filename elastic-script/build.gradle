@@ -39,6 +39,10 @@ tasks.withType(JavaCompile).configureEach {
 
 dependencies {
   compileOnly 'commons-logging:commons-logging:1.2'
+  
+  // OpenTelemetry tracing is supported via reflection at runtime
+  // The OTEL Java agent provides the implementation when attached
+  // No compile-time dependency needed - works with auto-instrumentation
 
   testImplementation "org.apache.logging.log4j:log4j-core:${versions.log4j}"
   testImplementation "org.apache.logging.log4j:log4j-api:${versions.log4j}"
