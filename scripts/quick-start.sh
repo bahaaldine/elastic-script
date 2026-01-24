@@ -1055,12 +1055,10 @@ elasticsearch.hosts: ["http://localhost:9200"]
 elasticsearch.username: "elastic-admin"
 elasticsearch.password: "elastic-password"
 
-# Disable security for development
-xpack.security.enabled: false
+# Required encryption keys for saved objects
 xpack.encryptedSavedObjects.encryptionKey: "elastic-script-dev-key-32-chars!"
-
-# Enable APM
-xpack.apm.enabled: true
+xpack.reporting.encryptionKey: "elastic-script-reporting-key32!"
+xpack.security.encryptionKey: "elastic-script-security-key32!!"
 
 # Telemetry
 telemetry.enabled: false
