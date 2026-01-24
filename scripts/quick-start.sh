@@ -25,8 +25,8 @@ EDOT_AGENT_PATH="$PROJECT_ROOT/elastic-otel-javaagent.jar"
 EDOT_AGENT_VERSION="1.3.0"
 EDOT_AGENT_URL="https://repo1.maven.org/maven2/co/elastic/otel/elastic-otel-javaagent/${EDOT_AGENT_VERSION}/elastic-otel-javaagent-${EDOT_AGENT_VERSION}.jar"
 
-# Kibana configuration - use snapshot to match ES main branch
-KIBANA_VERSION="9.0.0-SNAPSHOT"
+# Kibana configuration - must match Elasticsearch version exactly
+KIBANA_VERSION="9.4.0-SNAPSHOT"
 
 # Colors for output
 RED='\033[0;31m'
