@@ -19,8 +19,9 @@ ES_DIR="$PROJECT_ROOT/elasticsearch"
 NOTEBOOKS_DIR="$PROJECT_ROOT/notebooks"
 
 # Elastic Distribution of OpenTelemetry (EDOT) configuration
-# EDOT is enabled by default for distributed tracing
-EDOT_ENABLED=true
+# NOTE: EDOT is disabled for now as ES_JAVA_OPTS doesn't work with Gradle :run
+# TODO: Integrate EDOT properly with testclusters or production ES
+EDOT_ENABLED=false
 EDOT_AGENT_PATH="$PROJECT_ROOT/elastic-otel-javaagent.jar"
 EDOT_AGENT_VERSION="1.3.0"
 EDOT_AGENT_URL="https://repo1.maven.org/maven2/co/elastic/otel/elastic-otel-javaagent/${EDOT_AGENT_VERSION}/elastic-otel-javaagent-${EDOT_AGENT_VERSION}.jar"
@@ -1247,24 +1248,19 @@ case "${1:-}" in
         else
             echo "This will:"
             echo "  1. Check prerequisites"
-            echo "  2. Download EDOT Java agent (for distributed tracing)"
-            echo "  3. Configure OpenAI API key (optional, for AI features)"
-            echo "  4. Build the plugin"
-            echo "  5. Download and configure Kibana (for APM/observability)"
-            echo "  6. Start Elasticsearch with EDOT tracing"
-            echo "  7. Start Kibana"
-            echo "  8. Load sample data"
-            echo "  9. Start Jupyter notebooks"
-            echo "  10. Open both Jupyter and Kibana APM in browser"
+            echo "  2. Configure OpenAI API key (optional, for AI features)"
+            echo "  3. Build the plugin"
+            echo "  4. Download and configure Kibana"
+            echo "  5. Start Elasticsearch"
+            echo "  6. Start Kibana"
+            echo "  7. Load sample data"
+            echo "  8. Start Jupyter notebooks"
+            echo "  9. Open both Jupyter and Kibana in browser"
             echo ""
             read -p "Continue? [Y/n] " -n 1 -r
             echo
             if [[ ! $REPLY =~ ^[Nn]$ ]]; then
                 check_prerequisites
-                
-                # Setup EDOT (enabled by default)
-                setup_edot
-                
                 prompt_openai_key
                 build_plugin
                 
