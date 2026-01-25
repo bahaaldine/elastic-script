@@ -197,7 +197,12 @@
   - `_display_output()` for captured PRINT statements
   - Ready for API response enhancements
 - [ ] Full PRINT capture in API response (requires deeper integration)
-- [ ] APM agent attachment and testing
+- [x] **OTEL Collector Integration (NEW)**
+  - OTEL Collector auto-download and setup in quick-start.sh
+  - Receives OTLP traces on ports 4317 (gRPC) and 4318 (HTTP)
+  - Exports traces to Elasticsearch APM indices
+  - ES telemetry enabled automatically (`telemetry.tracing.enabled`)
+  - Traces visible in Kibana APM: http://localhost:5601/app/apm
 
 ---
 
@@ -235,16 +240,16 @@
      - ✅ 04-async-execution.ipynb (1 cell skipped - STATUS storage bug)
      - ✅ 05-runbook-integrations.ipynb
 2. **Complete Observability Integration** - API response with PRINT output, execution metadata
-3. ~~**APM Agent Testing**~~ ✅ Complete - EDOT (Elastic Distribution of OpenTelemetry) integrated
-   - EDOT Java agent downloaded and configured by default
-   - Kibana downloaded, configured, and started automatically
-   - Traces visible in Kibana APM at http://localhost:5601/app/apm
-   - Use `--no-otel` flag to disable if needed
-4. **Kibana APM Visualization** (For Later) - Full distributed tracing in Kibana:
-   - Each async step becomes a span
-   - Visible in Kibana APM UI with timeline visualization
-   - No log pollution - production-grade debugging
-   - See `EScriptTracer.java` for implementation ready to go
+3. ~~**APM/Tracing Integration**~~ ✅ Complete - OTEL Collector-based tracing
+   - OTEL Collector downloaded and started automatically by quick-start.sh
+   - Receives OTLP on ports 4317 (gRPC) and 4318 (HTTP)
+   - Traces exported to Elasticsearch and visible in Kibana APM
+   - ES telemetry enabled by default (`telemetry.tracing.enabled: true`)
+   - View traces at http://localhost:5601/app/apm
+4. **Instrument elastic-script procedures** (For Later) - Auto-trace procedure execution:
+   - Wire `EScriptTracer` to send spans to OTEL Collector
+   - Each procedure call creates a trace automatically
+   - Child spans for statements, ESQL queries, external calls
 4. ~~**Async Execution Runtime**~~ ✅ Complete - ON_DONE, ON_FAIL, PARALLEL all working
 5. ~~**ExecutionRegistry Persistence**~~ ✅ Complete - `.escript_executions` index auto-created
 6. **Multi-Node Distributed Execution** (For Later) - Test async execution across multiple ES nodes:
@@ -307,6 +312,9 @@ elastic-script/
 │   ├── run_notebook_tests.py          # Programmatic notebook execution
 │   ├── run_tests.sh                   # Shell wrapper
 │   └── requirements.txt               # nbclient, nbformat
+├── otel-collector/                    # OpenTelemetry Collector
+│   ├── config.yaml                    # Collector configuration
+│   └── .gitignore                     # Ignores binary and logs
 └── CLAUDE.md                          # This file
 ```
 
@@ -336,6 +344,17 @@ curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
 curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
   -H "Content-Type: application/json" \
   -d '{"query": "CALL hello()"}'
+```
+
+### Send Traces via OTEL
+```bash
+# Traces are collected via OTEL Collector on localhost:4318
+# Any OTEL-instrumented app can send traces:
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+export OTEL_SERVICE_NAME=my-service
+
+# View traces in Kibana APM:
+# http://localhost:5601/app/apm
 ```
 
 ### Regenerate ANTLR Parser
