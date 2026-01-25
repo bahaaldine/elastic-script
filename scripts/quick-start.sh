@@ -198,9 +198,9 @@ start_elasticsearch() {
     # Pass OPENAI_API_KEY if set
     if [ -n "$OPENAI_API_KEY" ]; then
         ./gradlew --stop > /dev/null 2>&1 || true
-        OPENAI_API_KEY="$OPENAI_API_KEY" ./gradlew :run --no-daemon
+        OPENAI_API_KEY="$OPENAI_API_KEY" ./gradlew :run --no-daemon --offline
     else
-        ./gradlew :run
+        ./gradlew :run --offline
     fi
 }
 
@@ -275,7 +275,7 @@ start_elasticsearch_background() {
         OTEL_SERVICE_NAME="${OTEL_SERVICE_NAME:-elastic-script}" \
         OTEL_EXPORTER_OTLP_ENDPOINT="${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:9200}" \
         OTEL_EXPORTER_OTLP_PROTOCOL="${OTEL_EXPORTER_OTLP_PROTOCOL:-http/protobuf}" \
-        nohup ./gradlew :run --no-daemon > "$PROJECT_ROOT/elasticsearch.log" 2>&1 &
+        nohup ./gradlew :run --no-daemon --offline > "$PROJECT_ROOT/elasticsearch.log" 2>&1 &
     ES_PID=$!
     echo $ES_PID > "$PROJECT_ROOT/.es_pid"
     
