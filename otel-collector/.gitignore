@@ -1,0 +1,4 @@
+otelcol-contrib
+collector.log
+collector.pid
+*.tar.gz

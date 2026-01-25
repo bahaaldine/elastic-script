@@ -1,0 +1,51 @@
+# OTEL Collector Configuration for elastic-script
+# This collector receives OTLP traces/metrics/logs and exports to Elasticsearch
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+
+exporters:
+  elasticsearch/traces:
+    endpoints: ["http://localhost:9200"]
+    user: elastic-admin
+    password: elastic-password
+    traces_index: traces-apm-default
+    mapping:
+      mode: ecs
+  elasticsearch/metrics:
+    endpoints: ["http://localhost:9200"]
+    user: elastic-admin
+    password: elastic-password
+    mapping:
+      mode: ecs
+  elasticsearch/logs:
+    endpoints: ["http://localhost:9200"]
+    user: elastic-admin
+    password: elastic-password
+    mapping:
+      mode: ecs
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [elasticsearch/traces]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [elasticsearch/metrics]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [elasticsearch/logs]

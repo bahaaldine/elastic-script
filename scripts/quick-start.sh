@@ -29,6 +29,14 @@ EDOT_AGENT_URL="https://repo1.maven.org/maven2/co/elastic/otel/elastic-otel-java
 # Kibana configuration - must match Elasticsearch version exactly
 KIBANA_VERSION="9.4.0-SNAPSHOT"
 
+# OpenTelemetry Collector configuration
+OTEL_COLLECTOR_VERSION="0.116.0"
+OTEL_COLLECTOR_DIR="$PROJECT_ROOT/otel-collector"
+OTEL_COLLECTOR_BINARY="$OTEL_COLLECTOR_DIR/otelcol-contrib"
+OTEL_COLLECTOR_CONFIG="$OTEL_COLLECTOR_DIR/config.yaml"
+OTEL_COLLECTOR_LOG="$OTEL_COLLECTOR_DIR/collector.log"
+OTEL_COLLECTOR_PID="$OTEL_COLLECTOR_DIR/collector.pid"
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -842,19 +850,24 @@ show_help() {
     echo "Usage: ./scripts/quick-start.sh [OPTION]"
     echo ""
     echo "Options:"
-    echo "  (no option)       Full setup: build, start ES, load data, start notebooks"
+    echo "  (no option)       Full setup: build, start ES, OTEL, Kibana, notebooks"
     echo "  --build           Just build the plugin"
     echo "  --start           Start Elasticsearch (foreground)"
     echo "  --start-bg        Start Elasticsearch (background)"
     echo "  --load-data       Load sample data into Elasticsearch"
     echo "  --notebooks       Start Jupyter notebooks"
     echo "  --kibana          Start Kibana (for APM/observability)"
-    echo "  --no-otel         Disable EDOT tracing (enabled by default)"
-    echo "  --stop            Stop all (Elasticsearch, Kibana, Jupyter)"
+    echo "  --otel            Start OTEL Collector (for distributed tracing)"
+    echo "  --stop            Stop all (ES, OTEL, Kibana, Jupyter)"
     echo "  --stop-notebooks  Stop only Jupyter notebooks"
     echo "  --stop-kibana     Stop only Kibana"
+    echo "  --stop-otel       Stop only OTEL Collector"
     echo "  --status          Check service status"
     echo "  --help            Show this help"
+    echo ""
+    echo "Distributed Tracing:"
+    echo "  Traces are collected via OTEL Collector (ports 4317/4318)"
+    echo "  View traces in Kibana APM: http://localhost:5601/app/apm"
     echo ""
 }
 
@@ -897,6 +910,7 @@ stop_notebooks() {
 # Stop everything
 stop_all() {
     stop_notebooks
+    stop_otel_collector
     stop_kibana
     stop_elasticsearch
 }
@@ -1136,6 +1150,188 @@ stop_kibana() {
     fi
 }
 
+# =============================================================================
+# OpenTelemetry Collector Setup
+# =============================================================================
+
+# Download OTEL Collector
+download_otel_collector() {
+    print_header "Setting up OpenTelemetry Collector"
+    
+    mkdir -p "$OTEL_COLLECTOR_DIR"
+    
+    if [ -f "$OTEL_COLLECTOR_BINARY" ]; then
+        print_success "OTEL Collector already downloaded"
+        return 0
+    fi
+    
+    # Detect platform
+    case "$(uname -s)" in
+        Darwin) OS="darwin" ;;
+        Linux)  OS="linux" ;;
+        *)      print_error "Unsupported OS"; return 1 ;;
+    esac
+    
+    case "$(uname -m)" in
+        arm64|aarch64) ARCH="arm64" ;;
+        x86_64|amd64)  ARCH="amd64" ;;
+        *)             print_error "Unsupported architecture"; return 1 ;;
+    esac
+    
+    local URL="https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v${OTEL_COLLECTOR_VERSION}/otelcol-contrib_${OTEL_COLLECTOR_VERSION}_${OS}_${ARCH}.tar.gz"
+    
+    print_step "Downloading OTEL Collector v${OTEL_COLLECTOR_VERSION}..."
+    curl -sL "$URL" -o /tmp/otelcol.tar.gz
+    
+    if [ $? -ne 0 ]; then
+        print_error "Failed to download OTEL Collector"
+        return 1
+    fi
+    
+    tar -xzf /tmp/otelcol.tar.gz -C "$OTEL_COLLECTOR_DIR"
+    rm /tmp/otelcol.tar.gz
+    
+    print_success "OTEL Collector downloaded"
+}
+
+# Configure OTEL Collector
+configure_otel_collector() {
+    print_step "Configuring OTEL Collector..."
+    
+    mkdir -p "$OTEL_COLLECTOR_DIR"
+    
+    cat > "$OTEL_COLLECTOR_CONFIG" << 'EOF'
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+
+exporters:
+  elasticsearch/traces:
+    endpoints: ["http://localhost:9200"]
+    user: elastic-admin
+    password: elastic-password
+    traces_index: traces-apm-default
+    mapping:
+      mode: ecs
+  elasticsearch/metrics:
+    endpoints: ["http://localhost:9200"]
+    user: elastic-admin
+    password: elastic-password
+    mapping:
+      mode: ecs
+  elasticsearch/logs:
+    endpoints: ["http://localhost:9200"]
+    user: elastic-admin
+    password: elastic-password
+    mapping:
+      mode: ecs
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [elasticsearch/traces]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [elasticsearch/metrics]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [elasticsearch/logs]
+EOF
+    
+    print_success "OTEL Collector configured"
+}
+
+# Start OTEL Collector
+start_otel_collector() {
+    # Download if not present
+    if [ ! -f "$OTEL_COLLECTOR_BINARY" ]; then
+        download_otel_collector
+        if [ $? -ne 0 ]; then
+            return 1
+        fi
+    fi
+    
+    # Configure
+    if [ ! -f "$OTEL_COLLECTOR_CONFIG" ]; then
+        configure_otel_collector
+    fi
+    
+    # Check if already running
+    if curl -s http://localhost:4318 > /dev/null 2>&1; then
+        print_warning "OTEL Collector already running on port 4318"
+        return 0
+    fi
+    
+    # Stop any existing
+    pkill -f otelcol-contrib 2>/dev/null || true
+    sleep 1
+    
+    print_step "Starting OTEL Collector..."
+    
+    nohup "$OTEL_COLLECTOR_BINARY" --config="$OTEL_COLLECTOR_CONFIG" > "$OTEL_COLLECTOR_LOG" 2>&1 &
+    OTEL_PID=$!
+    echo $OTEL_PID > "$OTEL_COLLECTOR_PID"
+    
+    # Wait for startup
+    sleep 2
+    
+    if kill -0 $OTEL_PID 2>/dev/null; then
+        print_success "OTEL Collector started (ports 4317/4318)"
+        return 0
+    else
+        print_error "OTEL Collector failed to start. Check $OTEL_COLLECTOR_LOG"
+        return 1
+    fi
+}
+
+# Stop OTEL Collector
+stop_otel_collector() {
+    print_step "Stopping OTEL Collector..."
+    
+    if [ -f "$OTEL_COLLECTOR_PID" ]; then
+        PID=$(cat "$OTEL_COLLECTOR_PID")
+        if kill -0 $PID 2>/dev/null; then
+            kill $PID
+            rm "$OTEL_COLLECTOR_PID"
+            print_success "OTEL Collector stopped"
+        else
+            rm "$OTEL_COLLECTOR_PID"
+        fi
+    fi
+    
+    pkill -f otelcol-contrib 2>/dev/null || true
+}
+
+# Enable ES telemetry settings
+enable_telemetry() {
+    print_step "Enabling Elasticsearch telemetry..."
+    
+    curl -s -u elastic-admin:elastic-password -X PUT "localhost:9200/_cluster/settings" \
+        -H "Content-Type: application/json" -d '{
+        "persistent": {
+            "telemetry.tracing.enabled": true,
+            "telemetry.metrics.enabled": true
+        }
+    }' > /dev/null 2>&1
+    
+    print_success "Telemetry enabled"
+}
+
+# =============================================================================
+
 # Check status
 check_status() {
     print_header "Checking Status"
@@ -1155,6 +1351,15 @@ check_status() {
     echo "Kibana (port 5601):"
     if curl -s http://localhost:5601/api/status > /dev/null 2>&1; then
         print_success "Running at http://localhost:5601"
+    else
+        print_warning "Not running"
+    fi
+    
+    # OTEL Collector
+    echo ""
+    echo "OTEL Collector (ports 4317/4318):"
+    if pgrep -f otelcol-contrib > /dev/null 2>&1; then
+        print_success "Running (gRPC: 4317, HTTP: 4318)"
     else
         print_warning "Not running"
     fi
@@ -1226,6 +1431,12 @@ case "${1:-}" in
     --stop-kibana)
         stop_kibana
         ;;
+    --otel)
+        start_otel_collector
+        ;;
+    --stop-otel)
+        stop_otel_collector
+        ;;
     --stop)
         stop_all
         ;;
@@ -1248,6 +1459,14 @@ case "${1:-}" in
                 print_examples
                 setup_notebooks
                 
+                # Start OTEL Collector if not running
+                if ! pgrep -f otelcol-contrib > /dev/null 2>&1; then
+                    start_otel_collector
+                fi
+                
+                # Enable telemetry
+                enable_telemetry
+                
                 # Start Kibana if not running
                 if ! curl -s http://localhost:5601/api/status > /dev/null 2>&1; then
                     download_kibana && start_kibana_background
@@ -1261,6 +1480,7 @@ case "${1:-}" in
                 echo ""
                 print_success "Jupyter started at http://localhost:8888"
                 print_success "Kibana available at http://localhost:5601"
+                print_success "OTEL Collector ready at localhost:4317/4318"
                 print_success "View traces at http://localhost:5601/app/apm"
                 echo ""
                 
@@ -1282,12 +1502,13 @@ case "${1:-}" in
             echo "  1. Check prerequisites"
             echo "  2. Configure OpenAI API key (optional, for AI features)"
             echo "  3. Build the plugin"
-            echo "  4. Download and configure Kibana"
+            echo "  4. Download and configure Kibana & OTEL Collector"
             echo "  5. Start Elasticsearch"
-            echo "  6. Start Kibana"
-            echo "  7. Load sample data"
-            echo "  8. Start Jupyter notebooks"
-            echo "  9. Open both Jupyter and Kibana in browser"
+            echo "  6. Start OTEL Collector (for distributed tracing)"
+            echo "  7. Start Kibana"
+            echo "  8. Load sample data"
+            echo "  9. Start Jupyter notebooks"
+            echo "  10. Open Jupyter and Kibana APM in browser"
             echo ""
             read -p "Continue? [Y/n] " -n 1 -r
             echo
@@ -1300,6 +1521,12 @@ case "${1:-}" in
                 download_kibana
                 
                 start_elasticsearch_background
+                
+                # Start OTEL Collector for tracing
+                start_otel_collector
+                
+                # Enable ES telemetry
+                enable_telemetry
                 
                 # Start Kibana
                 start_kibana_background
@@ -1316,6 +1543,7 @@ case "${1:-}" in
                 echo ""
                 print_success "Jupyter started at http://localhost:8888"
                 print_success "Kibana available at http://localhost:5601"
+                print_success "OTEL Collector ready at localhost:4317/4318"
                 print_success "View traces at http://localhost:5601/app/apm"
                 echo ""
                 
@@ -1333,12 +1561,13 @@ case "${1:-}" in
                 print_header "✅ Setup Complete!"
                 echo ""
                 echo "Services running:"
-                echo "  • Elasticsearch: http://localhost:9200"
-                echo "  • Kibana:        http://localhost:5601"
-                echo "  • Kibana APM:    http://localhost:5601/app/apm"
-                echo "  • Jupyter:       http://localhost:8888"
+                echo "  • Elasticsearch:   http://localhost:9200"
+                echo "  • Kibana:          http://localhost:5601"
+                echo "  • Kibana APM:      http://localhost:5601/app/apm"
+                echo "  • OTEL Collector:  localhost:4317 (gRPC), localhost:4318 (HTTP)"
+                echo "  • Jupyter:         http://localhost:8888"
                 echo ""
-                echo "EDOT tracing is enabled - run procedures to see traces in Kibana APM."
+                echo "Distributed tracing is enabled! Send traces via OTEL to localhost:4318"
                 echo ""
                 echo "To stop all services: ./scripts/quick-start.sh --stop"
                 echo ""
