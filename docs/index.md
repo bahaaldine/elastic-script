@@ -202,10 +202,13 @@ PARALLEL [fetch_logs(), fetch_metrics()]
 
 ### 🔍 Full Observability
 
+- **Distributed Tracing** via integrated OTEL Collector (out of the box)
 - Structured logging with execution IDs
-- Elastic APM tracing (optional)
+- Traces visible in Kibana APM at http://localhost:5601/app/apm
 - Execution state persisted in `.escript_executions`
 - Full procedure history for debugging and auditing
+
+[:octicons-arrow-right-24: OpenTelemetry Tracing](observability/opentelemetry.md)
 
 ## Installation
 
@@ -216,6 +219,13 @@ PARALLEL [fetch_logs(), fetch_metrics()]
     cd elastic-script
     ./scripts/quick-start.sh
     ```
+    
+    This starts **everything**:
+    
+    - Elasticsearch on port 9200
+    - OTEL Collector on ports 4317/4318 (for distributed tracing)
+    - Kibana on port 5601 (view traces at /app/apm)
+    - Jupyter on port 8888
 
 === "Manual Setup"
 

@@ -1,178 +1,342 @@
-# OpenTelemetry Tracing
+# OpenTelemetry Distributed Tracing
 
-elastic-script provides native OpenTelemetry support using the **Elastic Distribution of OpenTelemetry (EDOT)** Java agent. Tracing is **enabled by default** - just run quick-start.sh and traces will appear in Kibana APM.
+elastic-script provides **out-of-the-box distributed tracing** via an integrated OpenTelemetry Collector. Tracing is enabled by default—just run `quick-start.sh` and traces appear in Kibana APM automatically.
 
 ## Quick Start
 
-The quickest way to get started is to run the full setup:
-
 ```bash
+# One command to rule them all
 ./scripts/quick-start.sh
 ```
 
-This will:
-1. Download the EDOT Java agent
-2. Build Elasticsearch with elastic-script
-3. Download and configure Kibana
-4. Start everything with tracing enabled
-5. Open Jupyter notebooks and Kibana APM in your browser
+This starts:
+- **Elasticsearch** on port 9200
+- **OTEL Collector** on ports 4317 (gRPC) and 4318 (HTTP)
+- **Kibana** on port 5601
+- **Jupyter** on port 8888
 
 View traces at: **http://localhost:5601/app/apm**
 
-## Elastic Distribution of OpenTelemetry (EDOT)
+---
 
-elastic-script uses EDOT, Elastic's distribution of OpenTelemetry that provides:
-- Optimized performance for Elastic backends
-- Pre-configured for Elastic APM
-- Full compatibility with OpenTelemetry standards
+## Architecture
 
-Reference: [EDOT Java Setup](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/java/setup)
+```
+┌─────────────────────┐     OTLP      ┌─────────────────┐     ES API    ┌───────────────┐
+│  Your Application   │──────────────▶│  OTEL Collector │──────────────▶│ Elasticsearch │
+│  (any language)     │  :4317/:4318  │  (otelcol)      │               │    :9200      │
+└─────────────────────┘               └─────────────────┘               └───────────────┘
+                                                                               │
+                                                                               ▼
+                                                                        ┌───────────────┐
+                                                                        │ Kibana APM    │
+                                                                        │    :5601      │
+                                                                        └───────────────┘
+```
 
-## Manual Configuration
+The OTEL Collector:
+- Receives traces via OTLP (gRPC on 4317, HTTP on 4318)
+- Batches and processes spans
+- Exports to Elasticsearch in ECS format
+- Works with any OTEL-instrumented application
 
-If you need to customize the EDOT configuration:
+---
+
+## Sending Traces from Your Application
+
+### Environment Variables (Any Language)
+
+Configure any OTEL-instrumented application to send traces:
 
 ```bash
-# Download EDOT agent manually
-curl -L -o elastic-otel-javaagent.jar \
-  https://repo1.maven.org/maven2/co/elastic/otel/elastic-otel-javaagent/1.3.0/elastic-otel-javaagent-1.3.0.jar
-
-# Configure environment
-export OTEL_SERVICE_NAME=elastic-script
-export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:9200
-export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
-
-# Start with agent
-ES_JAVA_OPTS="-javaagent:elastic-otel-javaagent.jar" ./bin/elasticsearch
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+export OTEL_SERVICE_NAME=my-service
+export OTEL_TRACES_EXPORTER=otlp
 ```
 
-## Backend Options
-
-### Kibana APM (Default)
-
-When using quick-start.sh, traces are automatically sent to the local Elasticsearch and visible in Kibana APM:
-
-```
-http://localhost:5601/app/apm
-```
-
-### Elastic Cloud
-
-For Elastic Cloud deployments:
+### Python Example
 
 ```bash
-export OTEL_EXPORTER_OTLP_ENDPOINT=https://<your-cloud-id>.apm.us-east-1.aws.elastic.cloud
-export OTEL_EXPORTER_OTLP_HEADERS="Authorization=ApiKey YOUR_API_KEY"
+pip install opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp
 ```
 
-### Other OTEL Backends
+```python
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 
-EDOT is compatible with any OpenTelemetry backend:
+# Configure
+trace.set_tracer_provider(TracerProvider())
+tracer = trace.get_tracer("my-service")
 
-**Jaeger:**
-```bash
-export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+# Export to OTEL Collector
+exporter = OTLPSpanExporter(endpoint="http://localhost:4318/v1/traces")
+trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(exporter))
+
+# Use
+with tracer.start_as_current_span("my-operation"):
+    # your code here
+    pass
 ```
 
-**Grafana Tempo:**
-```bash
-export OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
-```
-
-## Trace Structure
-
-elastic-script creates the following span hierarchy:
-
-```
-escript.procedure.execute <procedure_name>
-├── escript.statement.declare
-├── escript.statement.set
-├── escript.function.esql_query
-│   └── ESQL: FROM logs-* | WHERE ...
-├── escript.loop.for[0]
-│   └── escript.function.index_document
-├── escript.loop.for[1]
-│   └── escript.function.index_document
-└── escript.statement.return
-```
-
-## Semantic Attributes
-
-### Procedure Spans
-
-| Attribute | Description |
-|-----------|-------------|
-| `escript.execution.id` | Unique execution identifier |
-| `escript.procedure.name` | Name of the procedure |
-| `code.function` | Procedure name |
-| `code.namespace` | Always "escript" |
-
-### Database Spans (ESQL)
-
-| Attribute | Description |
-|-----------|-------------|
-| `db.system` | "elasticsearch" |
-| `db.operation` | "esql" |
-| `db.statement` | The full ESQL query |
-
-### HTTP Spans (External Calls)
-
-| Attribute | Description |
-|-----------|-------------|
-| `http.method` | GET, POST, etc. |
-| `http.url` | Target URL |
-| `peer.service` | Service name |
-
-### Loop Spans
-
-| Attribute | Description |
-|-----------|-------------|
-| `escript.loop.type` | FOR, WHILE, FORALL |
-| `escript.loop.iteration` | Current iteration number |
-
-## Example: Complete Setup with Jaeger
+### JavaScript/Node.js Example
 
 ```bash
-# 1. Start Jaeger
-docker run -d --name jaeger \
-  -p 16686:16686 \
-  -p 4317:4317 \
-  jaegertracing/all-in-one:latest
+npm install @opentelemetry/api @opentelemetry/sdk-node @opentelemetry/exporter-trace-otlp-http
+```
 
-# 2. Download OTEL agent
+```javascript
+const { NodeSDK } = require('@opentelemetry/sdk-node');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+
+const sdk = new NodeSDK({
+  serviceName: 'my-service',
+  traceExporter: new OTLPTraceExporter({
+    url: 'http://localhost:4318/v1/traces',
+  }),
+});
+
+sdk.start();
+```
+
+### Java Example
+
+```bash
+# Download OTEL Java agent
 curl -L -o opentelemetry-javaagent.jar \
   https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
-
-# 3. Set environment
-export OTEL_SERVICE_NAME=elasticsearch
-export OTEL_TRACES_EXPORTER=otlp
-export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
-
-# 4. Start Elasticsearch
-ES_JAVA_OPTS="-javaagent:$(pwd)/opentelemetry-javaagent.jar" \
-  ./scripts/quick-start.sh
-
-# 5. Execute a procedure
-curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
-  -H "Content-Type: application/json" \
-  -d '{"query": "CALL my_procedure()"}'
-
-# 6. View traces at http://localhost:16686
 ```
 
-## Trace Correlation
+```bash
+# Run your Java app with auto-instrumentation
+java -javaagent:opentelemetry-javaagent.jar \
+  -Dotel.service.name=my-service \
+  -Dotel.exporter.otlp.endpoint=http://localhost:4318 \
+  -jar my-app.jar
+```
 
-Every procedure execution receives a unique `execution.id` that appears in:
+### Go Example
 
-- All related spans
-- Log messages (when DEBUG logging is enabled)
-- API responses
+```go
+import (
+    "go.opentelemetry.io/otel"
+    "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+    "go.opentelemetry.io/otel/sdk/trace"
+)
 
-This enables end-to-end correlation across distributed systems.
+exporter, _ := otlptracehttp.New(ctx,
+    otlptracehttp.WithEndpoint("localhost:4318"),
+    otlptracehttp.WithInsecure(),
+)
+
+tp := trace.NewTracerProvider(trace.WithBatcher(exporter))
+otel.SetTracerProvider(tp)
+```
+
+### cURL Test (Manual Trace)
+
+```bash
+curl -X POST http://localhost:4318/v1/traces \
+  -H "Content-Type: application/json" \
+  -d '{
+    "resourceSpans": [{
+      "resource": {
+        "attributes": [{"key": "service.name", "value": {"stringValue": "test-service"}}]
+      },
+      "scopeSpans": [{
+        "scope": {"name": "test"},
+        "spans": [{
+          "traceId": "5B8EFFF798038103D269B633813FC60C",
+          "spanId": "EEE19B7EC3C1B174",
+          "name": "test-span",
+          "startTimeUnixNano": "'$(date +%s)000000000'",
+          "endTimeUnixNano": "'$(date +%s)000000001'",
+          "kind": 1
+        }]
+      }]
+    }]
+  }'
+```
+
+---
+
+## OTEL Collector Configuration
+
+The collector configuration is at `otel-collector/config.yaml`:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+
+exporters:
+  elasticsearch/traces:
+    endpoints: ["http://localhost:9200"]
+    user: elastic-admin
+    password: elastic-password
+    traces_index: traces-apm-default
+    mapping:
+      mode: ecs
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [elasticsearch/traces]
+```
+
+### Customizing the Configuration
+
+You can modify `otel-collector/config.yaml` to:
+
+1. **Add more exporters** (e.g., Jaeger, Zipkin, Grafana Tempo)
+2. **Add processors** (e.g., filtering, sampling, attribute modification)
+3. **Configure authentication** for Elasticsearch
+4. **Enable metrics and logs** collection
+
+Example with multiple backends:
+
+```yaml
+exporters:
+  elasticsearch/traces:
+    endpoints: ["http://localhost:9200"]
+    user: elastic-admin
+    password: elastic-password
+    mapping:
+      mode: ecs
+  
+  jaeger:
+    endpoint: jaeger:14250
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [elasticsearch/traces, jaeger]
+```
+
+---
+
+## CLI Commands
+
+### Start OTEL Collector Only
+
+```bash
+./scripts/quick-start.sh --otel
+```
+
+### Stop OTEL Collector
+
+```bash
+./scripts/quick-start.sh --stop-otel
+```
+
+### Check Status
+
+```bash
+./scripts/quick-start.sh --status
+```
+
+Output:
+```
+Elasticsearch (port 9200):
+✓ Running
+
+OTEL Collector (ports 4317/4318):
+✓ Running (gRPC: 4317, HTTP: 4318)
+
+Kibana (port 5601):
+✓ Running at http://localhost:5601
+
+Jupyter (port 8888):
+✓ Running at http://localhost:8888
+```
+
+### Stop All Services
+
+```bash
+./scripts/quick-start.sh --stop
+```
+
+---
+
+## Viewing Traces in Kibana APM
+
+1. Open Kibana: **http://localhost:5601**
+2. Login: `elastic-admin` / `elastic-password`
+3. Navigate to **Observability → APM**
+4. Select your service from the services list
+5. Click on a transaction to see the trace waterfall
+
+### Key Views
+
+| View | URL | Description |
+|------|-----|-------------|
+| Services | `/app/apm/services` | All instrumented services |
+| Transactions | `/app/apm/services/{service}/transactions` | Transaction breakdown |
+| Traces | `/app/apm/traces` | Full distributed traces |
+| Dependencies | `/app/apm/services/{service}/dependencies` | Service map |
+
+---
+
+## Trace Attributes (Semantic Conventions)
+
+### Standard OTEL Attributes
+
+| Attribute | Description |
+|-----------|-------------|
+| `service.name` | Name of the service |
+| `service.version` | Version of the service |
+| `trace.id` | Unique trace identifier |
+| `span.id` | Unique span identifier |
+| `parent.id` | Parent span ID (for child spans) |
+
+### Database Spans
+
+| Attribute | Description |
+|-----------|-------------|
+| `db.system` | Database type (e.g., "elasticsearch") |
+| `db.operation` | Operation type (e.g., "esql") |
+| `db.statement` | Query text |
+
+### HTTP Spans
+
+| Attribute | Description |
+|-----------|-------------|
+| `http.method` | HTTP method (GET, POST, etc.) |
+| `http.url` | Full URL |
+| `http.status_code` | Response status code |
+| `http.response_content_length` | Response size |
+
+### elastic-script Specific Attributes
+
+| Attribute | Description |
+|-----------|-------------|
+| `escript.execution.id` | Unique procedure execution ID |
+| `escript.procedure.name` | Procedure name |
+| `escript.function.name` | Built-in function name |
+| `escript.loop.type` | Loop type (FOR, WHILE, FORALL) |
+| `escript.loop.iteration` | Current loop iteration |
+
+---
 
 ## Sampling Configuration
 
-For high-volume production environments:
+For high-volume production environments, configure sampling:
 
 ```bash
 # Sample 10% of traces
@@ -183,38 +347,142 @@ export OTEL_TRACES_SAMPLER_ARG=0.1
 export OTEL_TRACES_SAMPLER=parentbased_always_on
 ```
 
+Or configure in the collector:
+
+```yaml
+processors:
+  probabilistic_sampler:
+    sampling_percentage: 10
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [probabilistic_sampler, batch]
+      exporters: [elasticsearch/traces]
+```
+
+---
+
+## Sending Traces to Elastic Cloud
+
+To send traces to Elastic Cloud instead of local Elasticsearch:
+
+1. Get your Cloud ID and API key from Elastic Cloud console
+2. Update `otel-collector/config.yaml`:
+
+```yaml
+exporters:
+  elasticsearch/cloud:
+    endpoints: ["https://YOUR_CLOUD_ID.es.us-central1.gcp.cloud.es.io:443"]
+    api_key: "YOUR_API_KEY"
+    mapping:
+      mode: ecs
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [elasticsearch/cloud]
+```
+
+---
+
 ## Troubleshooting
 
 ### No Traces Appearing
 
-1. Verify the agent is loaded:
+1. **Check if collector is running:**
    ```bash
-   # Check Elasticsearch logs for:
-   # "OpenTelemetry detected - distributed tracing enabled"
+   ./scripts/quick-start.sh --status
    ```
 
-2. Test OTLP connectivity:
+2. **Check collector logs:**
    ```bash
-   curl -v http://localhost:4317
+   cat otel-collector/collector.log
    ```
 
-3. Enable debug logging:
+3. **Test OTLP endpoint:**
    ```bash
-   export OTEL_LOG_LEVEL=debug
+   curl -v http://localhost:4318/v1/traces
+   # Should return 405 (Method Not Allowed) - means it's listening
    ```
 
-### High Overhead
-
-1. Reduce sampling rate
-2. Use batch exporter (default)
-3. Increase batch size:
+4. **Verify Elasticsearch indices:**
    ```bash
-   export OTEL_BSP_MAX_EXPORT_BATCH_SIZE=1024
+   curl -u elastic-admin:elastic-password http://localhost:9200/_cat/indices?v | grep traces
    ```
+
+### Traces Not Showing in Kibana
+
+1. **Check data stream exists:**
+   ```bash
+   curl -u elastic-admin:elastic-password http://localhost:9200/_data_stream/traces-*
+   ```
+
+2. **Check for recent documents:**
+   ```bash
+   curl -u elastic-admin:elastic-password \
+     "http://localhost:9200/traces-*/_search?size=1&sort=@timestamp:desc"
+   ```
+
+3. **Refresh Kibana index pattern:**
+   - Go to Stack Management → Data Views
+   - Create or refresh the APM data view
+
+### High Latency
+
+1. **Increase batch size:**
+   ```yaml
+   processors:
+     batch:
+       timeout: 5s
+       send_batch_size: 2048
+   ```
+
+2. **Use gRPC instead of HTTP:**
+   ```bash
+   export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+   export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+   ```
+
+### Collector Crashes
+
+1. **Check memory:**
+   ```yaml
+   processors:
+     memory_limiter:
+       limit_mib: 512
+       spike_limit_mib: 128
+       check_interval: 1s
+   ```
+
+2. **Enable debug logging:**
+   ```yaml
+   service:
+     telemetry:
+       logs:
+         level: debug
+   ```
+
+---
+
+## Files and Locations
+
+| File | Description |
+|------|-------------|
+| `otel-collector/config.yaml` | Collector configuration |
+| `otel-collector/otelcol-contrib` | Collector binary (auto-downloaded) |
+| `otel-collector/collector.log` | Collector logs |
+| `otel-collector/collector.pid` | Collector process ID |
+
+---
 
 ## See Also
 
 - [OpenTelemetry Documentation](https://opentelemetry.io/docs/)
-- [OTEL Java Agent Releases](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases)
-- [Jaeger Documentation](https://www.jaegertracing.io/docs/)
+- [OTEL Collector Configuration](https://opentelemetry.io/docs/collector/configuration/)
+- [Elasticsearch OTEL Exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/elasticsearchexporter)
+- [Kibana APM Documentation](https://www.elastic.co/guide/en/kibana/current/apm-getting-started.html)
 - [Elastic APM OTLP Integration](https://www.elastic.co/guide/en/apm/guide/current/open-telemetry.html)

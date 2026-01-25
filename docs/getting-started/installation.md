@@ -30,9 +30,20 @@ This will:
 1. ✅ Check prerequisites
 2. ✅ Build the elastic-script plugin
 3. ✅ Start Elasticsearch with the plugin
-4. ✅ Load sample data (360 documents across 6 indices)
-5. ✅ Set up Jupyter notebooks
-6. ✅ Print curl examples
+4. ✅ Start OTEL Collector for distributed tracing
+5. ✅ Start Kibana for visualization
+6. ✅ Load sample data (360 documents across 6 indices)
+7. ✅ Set up Jupyter notebooks
+8. ✅ Open Jupyter and Kibana APM in your browser
+
+**Services started:**
+
+| Service | URL/Port | Description |
+|---------|----------|-------------|
+| Elasticsearch | http://localhost:9200 | Data store and query engine |
+| OTEL Collector | localhost:4317, :4318 | Receives OTLP traces |
+| Kibana | http://localhost:5601 | Visualization and APM |
+| Jupyter | http://localhost:8888 | Interactive notebooks |
 
 !!! tip "OpenAI API Key"
     The script will prompt for your OpenAI API key (optional).
@@ -123,14 +134,13 @@ The quick-start script loads sample data into these indices:
 ## Stopping Services
 
 ```bash
-# Stop everything
+# Stop everything (ES, OTEL, Kibana, Jupyter)
 ./scripts/quick-start.sh --stop
 
-# Stop only Jupyter
+# Stop individual services
 ./scripts/quick-start.sh --stop-notebooks
-
-# Stop only Kibana (if running)
 ./scripts/quick-start.sh --stop-kibana
+./scripts/quick-start.sh --stop-otel
 ```
 
 ## Check Status
@@ -139,8 +149,24 @@ The quick-start script loads sample data into these indices:
 ./scripts/quick-start.sh --status
 ```
 
+Output:
+```
+Elasticsearch (port 9200):
+✓ Running
+
+OTEL Collector (ports 4317/4318):
+✓ Running (gRPC: 4317, HTTP: 4318)
+
+Kibana (port 5601):
+✓ Running at http://localhost:5601
+
+Jupyter (port 8888):
+✓ Running at http://localhost:8888
+```
+
 ## Next Steps
 
 - [Quick Start Guide](quick-start.md) - Your first procedure
 - [Jupyter Setup](jupyter-setup.md) - Interactive development
 - [Language Overview](../language/overview.md) - Learn the syntax
+- [OpenTelemetry Tracing](../observability/opentelemetry.md) - Distributed tracing

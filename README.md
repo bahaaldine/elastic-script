@@ -43,8 +43,17 @@ cd elastic-script
 1. ✅ Checks prerequisites (Java 21+, Python 3.8+)
 2. ✅ Builds the elastic-script plugin
 3. ✅ Starts Elasticsearch with the plugin
-4. ✅ Loads sample data (logs, metrics)
-5. ✅ Launches Jupyter with interactive notebooks
+4. ✅ Starts OTEL Collector for distributed tracing (ports 4317/4318)
+5. ✅ Starts Kibana for visualization (port 5601)
+6. ✅ Loads sample data (logs, metrics)
+7. ✅ Launches Jupyter with interactive notebooks
+8. ✅ Opens Jupyter and Kibana APM in your browser
+
+**Services available:**
+- Elasticsearch: http://localhost:9200
+- Kibana APM: http://localhost:5601/app/apm
+- OTEL Collector: localhost:4317 (gRPC), localhost:4318 (HTTP)
+- Jupyter: http://localhost:8888
 
 **Try your first procedure:**
 ```sql
@@ -59,6 +68,21 @@ CALL hello_elastic()  -- Returns: "Welcome to elastic-script!"
 ```
 
 See the [notebooks/](notebooks/) directory for interactive tutorials.
+
+### 📊 Distributed Tracing (Out of the Box)
+
+Traces from any OTEL-instrumented application automatically appear in Kibana APM:
+
+```bash
+# Configure your app to send traces
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+export OTEL_SERVICE_NAME=my-service
+
+# View traces in Kibana APM
+open http://localhost:5601/app/apm
+```
+
+See [docs/observability/opentelemetry.md](docs/observability/opentelemetry.md) for full tracing documentation.
 
 ---
 

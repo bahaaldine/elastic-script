@@ -156,8 +156,24 @@ BEGIN
 END PROCEDURE;
 ```
 
+## Distributed Tracing
+
+Traces are collected automatically via the OTEL Collector. Any OTEL-instrumented app can send traces:
+
+```bash
+# Configure your app
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+export OTEL_SERVICE_NAME=my-service
+
+# View traces in Kibana APM
+open http://localhost:5601/app/apm
+```
+
+See [OpenTelemetry Tracing](../observability/opentelemetry.md) for complete documentation.
+
 ## Next Steps
 
 - [Jupyter Setup](jupyter-setup.md) - Interactive development
 - [Language Overview](../language/overview.md) - Full syntax guide
-- [Function Reference](../functions/overview.md) - All 106 functions
+- [Function Reference](../functions/overview.md) - All 118 functions
+- [OpenTelemetry Tracing](../observability/opentelemetry.md) - Distributed tracing
