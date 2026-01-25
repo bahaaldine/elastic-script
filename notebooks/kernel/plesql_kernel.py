@@ -4,11 +4,15 @@ PL|ESQL Jupyter Kernel
 A custom Jupyter kernel for elastic-script (PL|ESQL).
 
 Sends code to Elasticsearch's _escript endpoint and displays results.
+Automatically sends traces to OTEL Collector for observability.
 """
 
 import json
 import logging
 import sys
+import time
+import uuid
+import re
 import requests
 from ipykernel.kernelbase import Kernel
 
@@ -19,6 +23,93 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)]
 )
 logger = logging.getLogger('plesql_kernel')
+
+
+# =============================================================================
+# OpenTelemetry Tracing (lightweight, no SDK dependency)
+# =============================================================================
+
+class OTLPTracer:
+    """Lightweight OTLP tracer that sends traces directly via HTTP."""
+    
+    def __init__(self, endpoint="http://localhost:4318", service_name="elastic-script"):
+        self.endpoint = f"{endpoint}/v1/traces"
+        self.service_name = service_name
+        self.enabled = True
+    
+    def _generate_trace_id(self):
+        """Generate a 32-character hex trace ID."""
+        return uuid.uuid4().hex
+    
+    def _generate_span_id(self):
+        """Generate a 16-character hex span ID."""
+        return uuid.uuid4().hex[:16]
+    
+    def send_span(self, name, duration_ms, attributes=None, status_ok=True):
+        """Send a single span to the OTEL Collector."""
+        if not self.enabled:
+            return
+        
+        try:
+            trace_id = self._generate_trace_id()
+            span_id = self._generate_span_id()
+            end_time_ns = int(time.time() * 1e9)
+            start_time_ns = end_time_ns - int(duration_ms * 1e6)
+            
+            # Build attributes
+            span_attributes = []
+            if attributes:
+                for key, value in attributes.items():
+                    if isinstance(value, str):
+                        span_attributes.append({"key": key, "value": {"stringValue": value}})
+                    elif isinstance(value, (int, float)):
+                        span_attributes.append({"key": key, "value": {"intValue": str(int(value))}})
+                    elif isinstance(value, bool):
+                        span_attributes.append({"key": key, "value": {"boolValue": value}})
+            
+            payload = {
+                "resourceSpans": [{
+                    "resource": {
+                        "attributes": [
+                            {"key": "service.name", "value": {"stringValue": self.service_name}},
+                            {"key": "service.version", "value": {"stringValue": "1.0.0"}}
+                        ]
+                    },
+                    "scopeSpans": [{
+                        "scope": {"name": "plesql.kernel", "version": "1.0"},
+                        "spans": [{
+                            "traceId": trace_id,
+                            "spanId": span_id,
+                            "name": name,
+                            "kind": 1,  # INTERNAL
+                            "startTimeUnixNano": str(start_time_ns),
+                            "endTimeUnixNano": str(end_time_ns),
+                            "attributes": span_attributes,
+                            "status": {"code": 1 if status_ok else 2}  # 1=OK, 2=ERROR
+                        }]
+                    }]
+                }]
+            }
+            
+            response = requests.post(
+                self.endpoint,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=2
+            )
+            
+            if response.status_code == 200:
+                logger.debug(f"Sent trace: {name} (trace_id={trace_id[:8]}...)")
+            else:
+                logger.debug(f"Failed to send trace: {response.status_code}")
+                
+        except Exception as e:
+            # Don't fail execution if tracing fails
+            logger.debug(f"Tracing error (non-fatal): {e}")
+
+
+# Global tracer instance
+_tracer = OTLPTracer()
 
 
 class PlesqlKernel(Kernel):
@@ -64,6 +155,12 @@ class PlesqlKernel(Kernel):
         
         logger.info(f"Sending request to {self.es_endpoint}")
         
+        # Extract procedure/function name for tracing
+        span_name = self._extract_span_name(code)
+        start_time = time.time()
+        status_ok = True
+        error_msg = None
+        
         try:
             response = requests.post(
                 self.es_endpoint, 
@@ -95,9 +192,13 @@ class PlesqlKernel(Kernel):
             logger.error(f"Connection error: {e}")
             self._send_error("Connection Error: Cannot connect to Elasticsearch at localhost:9200\n"
                            "Make sure Elasticsearch is running: ./scripts/quick-start.sh --start")
+            status_ok = False
+            error_msg = "Connection error"
         except requests.exceptions.Timeout:
             logger.error("Request timed out")
             self._send_error("Timeout: Procedure took too long to execute")
+            status_ok = False
+            error_msg = "Timeout"
         except requests.exceptions.HTTPError as e:
             logger.error(f"HTTP error: {e.response.status_code} - {e.response.text[:200]}")
             try:
@@ -106,11 +207,64 @@ class PlesqlKernel(Kernel):
             except:
                 error_msg = str(e)
             self._send_error(f"Elasticsearch Error: {error_msg}")
+            status_ok = False
         except Exception as e:
             logger.exception(f"Unexpected error: {e}")
             self._send_error(f"Error: {str(e)}")
+            status_ok = False
+            error_msg = str(e)
+        
+        # Send trace to OTEL Collector
+        duration_ms = (time.time() - start_time) * 1000
+        trace_attributes = {
+            "escript.statement": span_name,
+            "escript.execution.cell": self.execution_count,
+            "db.system": "elasticsearch",
+            "db.operation": "escript"
+        }
+        if error_msg:
+            trace_attributes["error.message"] = error_msg[:200]
+        
+        _tracer.send_span(
+            name=f"escript: {span_name}",
+            duration_ms=duration_ms,
+            attributes=trace_attributes,
+            status_ok=status_ok
+        )
         
         return self._success_response()
+    
+    def _extract_span_name(self, code):
+        """Extract a meaningful name from the code for the span."""
+        code_upper = code.upper().strip()
+        
+        # Try to extract procedure name from CALL
+        call_match = re.search(r'CALL\s+(\w+)', code_upper)
+        if call_match:
+            return f"CALL {call_match.group(1)}"
+        
+        # Try to extract procedure name from CREATE PROCEDURE
+        create_proc_match = re.search(r'CREATE\s+PROCEDURE\s+(\w+)', code_upper)
+        if create_proc_match:
+            return f"CREATE PROCEDURE {create_proc_match.group(1)}"
+        
+        # Try to extract function name from CREATE FUNCTION
+        create_func_match = re.search(r'CREATE\s+FUNCTION\s+(\w+)', code_upper)
+        if create_func_match:
+            return f"CREATE FUNCTION {create_func_match.group(1)}"
+        
+        # Try to detect other statement types
+        if code_upper.startswith('DECLARE'):
+            return "DECLARE"
+        if code_upper.startswith('SET'):
+            return "SET"
+        if code_upper.startswith('PRINT'):
+            return "PRINT"
+        if 'ESQL_QUERY' in code_upper:
+            return "ESQL_QUERY"
+        
+        # Fallback: first 30 chars
+        return code[:30].replace('\n', ' ').strip()
     
     def _display_result(self, result):
         """Display the result in the notebook."""
