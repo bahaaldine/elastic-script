@@ -19,6 +19,54 @@ View traces at: **http://localhost:5601/app/apm**
 
 ---
 
+## Automatic Jupyter Notebook Tracing
+
+**Every notebook cell you execute is automatically traced!** The PL|ESQL Jupyter kernel includes built-in OTEL tracing that sends spans to the collector for each cell execution.
+
+### What Gets Traced
+
+- **Procedure calls**: `CALL my_procedure()` → span named `escript: CALL MY_PROCEDURE`
+- **Procedure creation**: `CREATE PROCEDURE ...` → span named `escript: CREATE PROCEDURE name`
+- **Function creation**: `CREATE FUNCTION ...` → span named `escript: CREATE FUNCTION name`
+- **ESQL queries**: Cells containing `ESQL_QUERY` → span named `escript: ESQL_QUERY`
+- **All other statements**: First 30 characters of the code
+
+### Trace Attributes
+
+Each kernel trace includes:
+
+| Attribute | Description |
+|-----------|-------------|
+| `service.name` | `elastic-script` |
+| `escript.statement` | The statement type (e.g., "CALL HELLO_WORLD") |
+| `escript.execution.cell` | Notebook cell execution count |
+| `db.system` | `elasticsearch` |
+| `db.operation` | `escript` |
+| `error.message` | Error details (if execution failed) |
+
+### Viewing Notebook Traces
+
+1. Run notebook cells in Jupyter
+2. Open Kibana APM: http://localhost:5601/app/apm
+3. Look for service: **elastic-script**
+4. Click on transactions to see individual cell executions
+
+### Kernel Installation
+
+The kernel is automatically installed/updated when you run `quick-start.sh`. This ensures you always have the latest tracing features. The kernel detects your platform:
+
+- **macOS**: `~/Library/Jupyter/kernels/plesql_kernel/`
+- **Linux**: `~/.local/share/jupyter/kernels/plesql_kernel/`
+
+To manually reinstall the kernel:
+```bash
+cd notebooks/kernel && bash install.sh
+```
+
+**Note**: After updating the kernel, restart your Jupyter kernel (Kernel → Restart) to pick up changes.
+
+---
+
 ## Architecture
 
 ```
@@ -412,6 +460,31 @@ service:
 4. **Verify Elasticsearch indices:**
    ```bash
    curl -u elastic-admin:elastic-password http://localhost:9200/_cat/indices?v | grep traces
+   ```
+
+### Notebook Cells Not Producing Traces
+
+1. **Reinstall the kernel** (the installed kernel may be outdated):
+   ```bash
+   cd notebooks/kernel && bash install.sh
+   ```
+
+2. **Restart your Jupyter kernel**: In the notebook, go to Kernel → Restart
+
+3. **Verify the kernel has tracing code:**
+   ```bash
+   # macOS
+   grep -c "OTLPTracer" ~/Library/Jupyter/kernels/plesql_kernel/plesql_kernel.py
+   # Should return 2 (meaning tracing code is present)
+   
+   # Linux
+   grep -c "OTLPTracer" ~/.local/share/jupyter/kernels/plesql_kernel/plesql_kernel.py
+   ```
+
+4. **Check trace count before and after:**
+   ```bash
+   curl -s -u elastic-admin:elastic-password "http://localhost:9200/traces-apm-default/_count"
+   # Run a notebook cell, then check again - count should increase
    ```
 
 ### Traces Not Showing in Kibana
