@@ -70,10 +70,17 @@ cd notebooks/kernel && bash install.sh
 ## Architecture
 
 ```
-┌─────────────────────┐     OTLP      ┌─────────────────┐     ES API    ┌───────────────┐
-│  Your Application   │──────────────▶│  OTEL Collector │──────────────▶│ Elasticsearch │
-│  (any language)     │  :4317/:4318  │  (otelcol)      │               │    :9200      │
-└─────────────────────┘               └─────────────────┘               └───────────────┘
+┌─────────────────────┐     OTLP      ┌─────────────────┐    OTLP/HTTP   ┌────────────────┐
+│  Jupyter Kernel     │──────────────▶│  OTEL Collector │──────────────▶│   APM Server   │
+│  (plesql_kernel)    │  :4317/:4318  │  (otelcol)      │     :8200     │   (apm-server) │
+└─────────────────────┘               └─────────────────┘               └────────────────┘
+                                                                               │
+                                                                               │ ES API
+                                                                               ▼
+                                                                        ┌───────────────┐
+                                                                        │ Elasticsearch │
+                                                                        │    :9200      │
+                                                                        └───────────────┘
                                                                                │
                                                                                ▼
                                                                         ┌───────────────┐
@@ -82,11 +89,22 @@ cd notebooks/kernel && bash install.sh
                                                                         └───────────────┘
 ```
 
-The OTEL Collector:
-- Receives traces via OTLP (gRPC on 4317, HTTP on 4318)
-- Batches and processes spans
-- Exports to Elasticsearch in ECS format
-- Works with any OTEL-instrumented application
+**Components:**
+
+1. **OTEL Collector** (ports 4317/4318):
+   - Receives traces via OTLP (gRPC on 4317, HTTP on 4318)
+   - Batches and processes spans
+   - Forwards traces to APM Server via OTLP/HTTP
+
+2. **APM Server** (port 8200):
+   - Receives OTLP traces from the collector
+   - Converts to proper Elastic APM format
+   - Indexes into Elasticsearch with correct mappings
+   - Creates service metrics and transaction summaries
+
+3. **Kibana APM** (/app/apm):
+   - Full APM UI with service map, transactions, traces
+   - Works with any OTEL-instrumented application
 
 ---
 
@@ -303,6 +321,9 @@ Output:
 ```
 Elasticsearch (port 9200):
 ✓ Running
+
+APM Server (port 8200):
+✓ Running (OTLP: http://localhost:8200)
 
 OTEL Collector (ports 4317/4318):
 ✓ Running (gRPC: 4317, HTTP: 4318)
