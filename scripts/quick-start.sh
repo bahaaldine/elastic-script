@@ -812,17 +812,13 @@ setup_notebooks() {
     
     cd "$NOTEBOOKS_DIR"
     
-    # Check if kernel exists
-    if jupyter kernelspec list 2>/dev/null | grep -q plesql; then
-        print_success "PL|ESQL kernel already installed"
+    # Always install/update the kernel to get latest features (like tracing)
+    print_step "Installing/updating PL|ESQL Jupyter kernel..."
+    if [ -f "kernel/install.sh" ]; then
+        bash kernel/install.sh
+        print_success "Kernel installed/updated!"
     else
-        print_step "Installing PL|ESQL Jupyter kernel..."
-        if [ -f "kernel/install.sh" ]; then
-            bash kernel/install.sh
-            print_success "Kernel installed!"
-        else
-            print_warning "Kernel install script not found. Manual setup needed."
-        fi
+        print_warning "Kernel install script not found. Manual setup needed."
     fi
 }
 

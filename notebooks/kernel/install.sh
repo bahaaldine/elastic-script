@@ -6,9 +6,19 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-KERNEL_DIR="$HOME/.local/share/jupyter/kernels/plesql"
+
+# Detect kernel directory (macOS vs Linux)
+if [ -d "$HOME/Library/Jupyter/kernels" ]; then
+    # macOS
+    KERNEL_DIR="$HOME/Library/Jupyter/kernels/plesql_kernel"
+else
+    # Linux
+    KERNEL_DIR="$HOME/.local/share/jupyter/kernels/plesql_kernel"
+fi
 
 echo "Installing PL|ESQL Jupyter Kernel..."
+echo "  Source: $SCRIPT_DIR"
+echo "  Target: $KERNEL_DIR"
 
 # Install Python dependencies
 pip install jupyter ipykernel requests pandas --quiet
@@ -16,9 +26,9 @@ pip install jupyter ipykernel requests pandas --quiet
 # Create kernel directory
 mkdir -p "$KERNEL_DIR"
 
-# Copy kernel files
-cp "$SCRIPT_DIR/plesql_kernel.py" "$KERNEL_DIR/"
-cp "$SCRIPT_DIR/kernel.json" "$KERNEL_DIR/"
+# Copy kernel files (always overwrite to get updates)
+cp -f "$SCRIPT_DIR/plesql_kernel.py" "$KERNEL_DIR/"
+cp -f "$SCRIPT_DIR/kernel.json" "$KERNEL_DIR/"
 
 # Update kernel.json to use absolute path
 python3 -c "
