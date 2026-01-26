@@ -1347,15 +1347,20 @@ download_apm_server() {
     OS=$(uname -s | tr '[:upper:]' '[:lower:]')
     ARCH=$(uname -m)
     
-    case "$ARCH" in
-        x86_64) ARCH="x86_64" ;;
-        aarch64|arm64) ARCH="aarch64" ;;
-        *) print_error "Unsupported architecture: $ARCH"; return 1 ;;
-    esac
-    
     case "$OS" in
-        darwin) OS_NAME="darwin" ;;
-        linux) OS_NAME="linux" ;;
+        darwin)
+            OS_NAME="darwin"
+            # APM Server doesn't have darwin-aarch64 builds, use x86_64 (runs via Rosetta)
+            ARCH="x86_64"
+            ;;
+        linux)
+            OS_NAME="linux"
+            case "$ARCH" in
+                x86_64) ARCH="x86_64" ;;
+                aarch64|arm64) ARCH="aarch64" ;;
+                *) print_error "Unsupported architecture: $ARCH"; return 1 ;;
+            esac
+            ;;
         *) print_error "Unsupported OS: $OS"; return 1 ;;
     esac
     
@@ -1364,14 +1369,28 @@ download_apm_server() {
     
     echo "  URL: $DOWNLOAD_URL"
     
-    if curl -L -o "$TARBALL" "$DOWNLOAD_URL" 2>/dev/null; then
+    # Download with progress
+    if curl -L --fail -o "$TARBALL" "$DOWNLOAD_URL" 2>&1; then
+        # Verify download succeeded (file exists and has content)
+        if [ ! -s "$TARBALL" ]; then
+            print_error "Download failed - empty file"
+            rm -f "$TARBALL"
+            return 1
+        fi
+        
         print_step "Extracting APM Server..."
-        tar -xzf "$TARBALL" -C "$APM_SERVER_DIR" --strip-components=1
-        rm "$TARBALL"
-        chmod +x "$APM_SERVER_BINARY"
-        print_success "APM Server downloaded successfully"
+        if tar -xzf "$TARBALL" -C "$APM_SERVER_DIR" --strip-components=1; then
+            rm "$TARBALL"
+            chmod +x "$APM_SERVER_BINARY"
+            print_success "APM Server downloaded successfully"
+        else
+            print_error "Failed to extract APM Server"
+            rm -f "$TARBALL"
+            return 1
+        fi
     else
-        print_error "Failed to download APM Server"
+        print_error "Failed to download APM Server from $DOWNLOAD_URL"
+        rm -f "$TARBALL"
         return 1
     fi
 }
