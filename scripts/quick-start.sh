@@ -37,6 +37,15 @@ OTEL_COLLECTOR_CONFIG="$OTEL_COLLECTOR_DIR/config.yaml"
 OTEL_COLLECTOR_LOG="$OTEL_COLLECTOR_DIR/collector.log"
 OTEL_COLLECTOR_PID="$OTEL_COLLECTOR_DIR/collector.pid"
 
+# APM Server configuration (for OTLP trace ingestion)
+APM_SERVER_VERSION="8.17.0"
+APM_SERVER_DIR="$PROJECT_ROOT/apm-server"
+APM_SERVER_BINARY="$APM_SERVER_DIR/apm-server"
+APM_SERVER_CONFIG="$APM_SERVER_DIR/apm-server.yml"
+APM_SERVER_LOG="$APM_SERVER_DIR/apm-server.log"
+APM_SERVER_PID="$APM_SERVER_DIR/apm-server.pid"
+APM_SERVER_PORT=8200
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -907,6 +916,7 @@ stop_notebooks() {
 stop_all() {
     stop_notebooks
     stop_otel_collector
+    stop_apm_server
     stop_kibana
     stop_elasticsearch
 }
@@ -1196,6 +1206,8 @@ configure_otel_collector() {
     
     mkdir -p "$OTEL_COLLECTOR_DIR"
     
+    # Collector sends traces to APM Server via OTLP/HTTP (for proper Kibana APM integration)
+    # and metrics/logs directly to Elasticsearch
     cat > "$OTEL_COLLECTOR_CONFIG" << 'EOF'
 receivers:
   otlp:
@@ -1211,32 +1223,35 @@ processors:
     send_batch_size: 1024
 
 exporters:
-  elasticsearch/traces:
-    endpoints: ["http://localhost:9200"]
-    user: elastic-admin
-    password: elastic-password
-    traces_index: traces-apm-default
-    mapping:
-      mode: ecs
+  # Traces go to APM Server via OTLP/HTTP for proper Kibana APM integration
+  otlphttp/apm:
+    endpoint: http://localhost:8200
+    tls:
+      insecure: true
+  # Metrics go directly to ES native OTLP endpoint
   elasticsearch/metrics:
     endpoints: ["http://localhost:9200"]
     user: elastic-admin
     password: elastic-password
     mapping:
       mode: ecs
+  # Logs go directly to ES
   elasticsearch/logs:
     endpoints: ["http://localhost:9200"]
     user: elastic-admin
     password: elastic-password
     mapping:
       mode: ecs
+  # Debug exporter for troubleshooting (set to basic to reduce noise)
+  debug:
+    verbosity: basic
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [elasticsearch/traces]
+      exporters: [otlphttp/apm, debug]
     metrics:
       receivers: [otlp]
       processors: [batch]
@@ -1247,7 +1262,7 @@ service:
       exporters: [elasticsearch/logs]
 EOF
     
-    print_success "OTEL Collector configured"
+    print_success "OTEL Collector configured (traces -> APM Server -> Kibana APM)"
 }
 
 # Start OTEL Collector
@@ -1311,6 +1326,149 @@ stop_otel_collector() {
     pkill -f otelcol-contrib 2>/dev/null || true
 }
 
+# =============================================================================
+# APM Server (for OTLP trace ingestion into Kibana APM)
+# =============================================================================
+
+# Download APM Server
+download_apm_server() {
+    print_header "Setting up APM Server"
+    
+    mkdir -p "$APM_SERVER_DIR"
+    
+    if [ -f "$APM_SERVER_BINARY" ]; then
+        print_success "APM Server already downloaded"
+        return 0
+    fi
+    
+    print_step "Downloading APM Server ${APM_SERVER_VERSION}..."
+    
+    # Detect OS and architecture
+    OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+    ARCH=$(uname -m)
+    
+    case "$ARCH" in
+        x86_64) ARCH="x86_64" ;;
+        aarch64|arm64) ARCH="aarch64" ;;
+        *) print_error "Unsupported architecture: $ARCH"; return 1 ;;
+    esac
+    
+    case "$OS" in
+        darwin) OS_NAME="darwin" ;;
+        linux) OS_NAME="linux" ;;
+        *) print_error "Unsupported OS: $OS"; return 1 ;;
+    esac
+    
+    DOWNLOAD_URL="https://artifacts.elastic.co/downloads/apm-server/apm-server-${APM_SERVER_VERSION}-${OS_NAME}-${ARCH}.tar.gz"
+    TARBALL="$APM_SERVER_DIR/apm-server.tar.gz"
+    
+    echo "  URL: $DOWNLOAD_URL"
+    
+    if curl -L -o "$TARBALL" "$DOWNLOAD_URL" 2>/dev/null; then
+        print_step "Extracting APM Server..."
+        tar -xzf "$TARBALL" -C "$APM_SERVER_DIR" --strip-components=1
+        rm "$TARBALL"
+        chmod +x "$APM_SERVER_BINARY"
+        print_success "APM Server downloaded successfully"
+    else
+        print_error "Failed to download APM Server"
+        return 1
+    fi
+}
+
+# Configure APM Server
+configure_apm_server() {
+    print_step "Configuring APM Server..."
+    
+    cat > "$APM_SERVER_CONFIG" << 'EOF'
+# APM Server Configuration for elastic-script
+# Accepts OTLP traces and forwards to Elasticsearch
+
+apm-server:
+  host: "0.0.0.0:8200"
+  
+  # Enable OTLP support
+  auth:
+    anonymous:
+      enabled: true
+      allow_agent: ["otlp/"]
+      allow_service: []
+
+output.elasticsearch:
+  hosts: ["localhost:9200"]
+  username: "elastic-admin"
+  password: "elastic-password"
+
+# Disable self-monitoring for simplicity
+monitoring:
+  enabled: false
+
+# Logging
+logging:
+  level: info
+  to_files: false
+EOF
+    
+    print_success "APM Server configured"
+}
+
+# Start APM Server
+start_apm_server() {
+    # Download if not present
+    if [ ! -f "$APM_SERVER_BINARY" ]; then
+        download_apm_server
+        if [ $? -ne 0 ]; then
+            return 1
+        fi
+    fi
+    
+    # Configure
+    configure_apm_server
+    
+    # Check if already running
+    if pgrep -f "apm-server" > /dev/null 2>&1; then
+        print_success "APM Server already running"
+        return 0
+    fi
+    
+    print_step "Starting APM Server on port ${APM_SERVER_PORT}..."
+    
+    cd "$APM_SERVER_DIR"
+    nohup ./apm-server -c apm-server.yml > "$APM_SERVER_LOG" 2>&1 &
+    APM_PID=$!
+    echo $APM_PID > "$APM_SERVER_PID"
+    
+    # Wait for startup
+    sleep 3
+    
+    if kill -0 $APM_PID 2>/dev/null; then
+        print_success "APM Server started (PID: $APM_PID)"
+        echo "  OTLP endpoint: http://localhost:${APM_SERVER_PORT}"
+        return 0
+    else
+        print_error "APM Server failed to start. Check $APM_SERVER_LOG"
+        return 1
+    fi
+}
+
+# Stop APM Server
+stop_apm_server() {
+    print_step "Stopping APM Server..."
+    
+    if [ -f "$APM_SERVER_PID" ]; then
+        PID=$(cat "$APM_SERVER_PID")
+        if kill -0 $PID 2>/dev/null; then
+            kill $PID
+            rm "$APM_SERVER_PID"
+            print_success "APM Server stopped"
+        else
+            rm "$APM_SERVER_PID"
+        fi
+    fi
+    
+    pkill -f "apm-server" 2>/dev/null || true
+}
+
 # Enable ES telemetry settings
 enable_telemetry() {
     print_step "Enabling Elasticsearch telemetry..."
@@ -1347,6 +1505,15 @@ check_status() {
     echo "Kibana (port 5601):"
     if curl -s http://localhost:5601/api/status > /dev/null 2>&1; then
         print_success "Running at http://localhost:5601"
+    else
+        print_warning "Not running"
+    fi
+    
+    # APM Server
+    echo ""
+    echo "APM Server (port 8200):"
+    if pgrep -f "apm-server" > /dev/null 2>&1; then
+        print_success "Running (OTLP: http://localhost:8200)"
     else
         print_warning "Not running"
     fi
@@ -1518,7 +1685,10 @@ case "${1:-}" in
                 
                 start_elasticsearch_background
                 
-                # Start OTEL Collector for tracing
+                # Start APM Server for trace ingestion
+                start_apm_server
+                
+                # Start OTEL Collector for tracing (sends to APM Server)
                 start_otel_collector
                 
                 # Enable ES telemetry

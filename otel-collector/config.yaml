@@ -1,5 +1,6 @@
 # OTEL Collector Configuration for elastic-script
-# This collector receives OTLP traces/metrics/logs and exports to Elasticsearch
+# Traces are forwarded to APM Server via OTLP/HTTP for proper Kibana APM integration
+# Metrics and logs go directly to Elasticsearch
 
 receivers:
   otlp:
@@ -15,32 +16,35 @@ processors:
     send_batch_size: 1024
 
 exporters:
-  elasticsearch/traces:
-    endpoints: ["http://localhost:9200"]
-    user: elastic-admin
-    password: elastic-password
-    traces_index: traces-apm-default
-    mapping:
-      mode: ecs
+  # Traces go to APM Server via OTLP/HTTP for proper Kibana APM integration
+  otlphttp/apm:
+    endpoint: http://localhost:8200
+    tls:
+      insecure: true
+  # Metrics go directly to ES native OTLP endpoint
   elasticsearch/metrics:
     endpoints: ["http://localhost:9200"]
     user: elastic-admin
     password: elastic-password
     mapping:
       mode: ecs
+  # Logs go directly to ES
   elasticsearch/logs:
     endpoints: ["http://localhost:9200"]
     user: elastic-admin
     password: elastic-password
     mapping:
       mode: ecs
+  # Debug exporter for troubleshooting (set to basic to reduce noise)
+  debug:
+    verbosity: basic
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [elasticsearch/traces]
+      exporters: [otlphttp/apm, debug]
     metrics:
       receivers: [otlp]
       processors: [batch]
