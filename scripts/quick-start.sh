@@ -136,17 +136,26 @@ check_prerequisites() {
     # Check if elasticsearch folder exists and has content
     if [ ! -d "$ES_DIR" ] || [ ! -f "$ES_DIR/gradlew" ]; then
         print_step "Elasticsearch submodule not initialized. Setting it up..."
+        echo "    (This may take a few minutes - the Elasticsearch repo is large)"
         cd "$PROJECT_ROOT"
         git submodule init
-        git submodule update
+        
+        # Use --progress to show download status (otherwise appears hung)
+        # Use --depth 1 for faster clone (only need current commit, not full history)
+        git submodule update --progress --depth 1
         
         # Verify it worked
         if [ ! -f "$ES_DIR/gradlew" ]; then
             print_error "Failed to initialize Elasticsearch submodule"
             echo ""
-            echo "  Try manually running:"
+            echo "  The Elasticsearch repo is large (~500MB). Try manually:"
+            echo "    cd $PROJECT_ROOT"
             echo "    git submodule init"
-            echo "    git submodule update"
+            echo "    git submodule update --progress --depth 1"
+            echo ""
+            echo "  Or if that fails, try a direct clone:"
+            echo "    rm -rf elasticsearch"
+            echo "    git clone --depth 1 https://github.com/elastic/elasticsearch.git"
             echo ""
             exit 1
         fi
