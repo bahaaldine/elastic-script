@@ -45,16 +45,34 @@ The test runner uses `nbclient` to:
 3. Check for errors in cell outputs
 4. Report pass/fail for each notebook
 
-## Test Results
+## Test Results (Updated: 2026-02-06)
 
-| Notebook | Status | Requirements |
-|----------|--------|--------------|
-| 01-getting-started | ✅ Pass | ES running |
-| 02-esql-integration | ❌ | Sample data loaded |
-| 03-ai-observability | ❌ | OpenAI API key |
-| 04-async-execution | ❌ | Investigation needed |
-| 05-runbook-integrations | ✅ Pass | ES running |
-| 00-complete-reference | ❌ | Sample data + OpenAI |
+| Notebook | Status | Notes |
+|----------|--------|-------|
+| 00-complete-reference | ❌ FAILED | Uses features not yet implemented |
+| 01-getting-started | ✅ PASSED | Core language features |
+| 02-esql-integration | ✅ PASSED | ES|QL queries |
+| 03-ai-observability | ⏭️ SKIP | Requires OpenAI API key |
+| 04-async-execution | ✅ PASSED | Async procedures |
+| 05-runbook-integrations | ✅ PASSED | HTTP/webhook functions |
+| 06-scheduled-jobs | ⏭️ SKIP | Future feature |
+| 07-event-triggers | ⏭️ SKIP | Future feature |
+| 08-esql-augmentation | ⏭️ SKIP | Future feature |
+| 09-esql-binding | ⏭️ SKIP | Future feature |
+| 10-first-class-commands | ❌ FAILED | SEARCH command not implemented |
+| 11-namespaced-functions | ❌ FAILED | Namespace syntax not implemented |
+| 12-exception-handling | ✅ PASSED | TRY/CATCH/FINALLY |
+| 13-user-defined-functions | ✅ PASSED | CREATE FUNCTION |
+| 14-execute-immediate | ✅ PASSED | Dynamic SQL |
+| 15-map-type | ✅ PASSED | MAP data type |
+| 16-cursors | ❌ FAILED | Cursor iteration not complete |
+| 17-bulk-operations | ✅ PASSED | FORALL bulk operations |
+| 18-packages | ❌ FAILED | Packages not implemented |
+| 19-security-permissions | ✅ PASSED | GRANT/REVOKE syntax |
+| 20-profiler | ❌ FAILED | Profiler not implemented |
+| 21-user-defined-types | ✅ PASSED | CREATE TYPE |
+
+**Summary: 12 PASSED, 6 FAILED, 4 SKIPPED**
 
 ## Running with Sample Data
 
