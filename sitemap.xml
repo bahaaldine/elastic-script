@@ -2,202 +2,202 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/roadmap/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/triggers-and-scheduling/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/development/architecture/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/development/contributing/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/development/testing/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/examples/data-pipeline/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/examples/incident-response/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/examples/log-analysis/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/functions/ai-llm/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/functions/array/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/functions/date/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/functions/document/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/functions/elasticsearch/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/functions/integrations/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/functions/map/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/functions/number/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/functions/overview/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/functions/string/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/getting-started/installation/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/getting-started/jupyter-setup/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/getting-started/quick-start/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/language/async-execution/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/language/bulk-operations/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/language/control-flow/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/language/cursors/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/language/error-handling/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/language/execute-immediate/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/language/functions/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/language/overview/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/language/packages/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/language/procedures/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/language/profiler/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/language/security-permissions/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/language/user-defined-types/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/language/variables-types/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/notebooks/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/notebooks/ai-observability/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/notebooks/async-execution/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/notebooks/bulk-operations/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/notebooks/complete-reference/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/notebooks/cursors/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/notebooks/esql-integration/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/notebooks/event-triggers/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/notebooks/first-class-commands/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/notebooks/getting-started/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/notebooks/namespaced-functions/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/notebooks/runbook-integrations/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/notebooks/scheduled-jobs/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/elastic-script/observability/opentelemetry/</loc>
-         <lastmod>2026-01-26</lastmod>
+         <lastmod>2026-02-06</lastmod>
     </url>
 </urlset>
