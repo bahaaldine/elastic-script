@@ -30,26 +30,26 @@ Current status and future direction for elastic-script — a procedural language
 - [x] **Execution Control** - `EXECUTION('name') | STATUS/CANCEL/RETRY`
 - [x] **State Persistence** - Execution state stored in `.escript_executions`
 
-### First-Class Commands (NEW)
-- [x] **INDEX Command** - `INDEX document INTO 'index-name';`
-- [x] **DELETE Command** - `DELETE FROM 'index-name' WHERE id;`
-- [x] **SEARCH Command** - `SEARCH 'index-name' QUERY {...};`
-- [x] **REFRESH Command** - `REFRESH 'index-name';`
-- [x] **CREATE INDEX Command** - `CREATE INDEX 'name' WITH MAPPINGS {...};`
+### First-Class Commands
+- [ ] **INDEX Command** - `INDEX document INTO 'index-name';` (Planned)
+- [ ] **DELETE Command** - `DELETE FROM 'index-name' WHERE id;` (Planned)
+- [ ] **SEARCH Command** - `SEARCH 'index-name' QUERY {...};` (Planned)
+- [ ] **REFRESH Command** - `REFRESH 'index-name';` (Planned)
+- [ ] **CREATE INDEX Command** - `CREATE INDEX 'name' WITH MAPPINGS {...};` (Planned)
 
-### Type-Aware ES|QL Binding (NEW)
-- [x] **ARRAY Binding** - `DECLARE errors ARRAY FROM FROM logs-* | WHERE level = 'ERROR';`
-- [x] **DOCUMENT Binding** - `DECLARE user DOCUMENT FROM FROM users | WHERE id = 'john' | LIMIT 1;`
-- [x] **NUMBER Binding** - `DECLARE count NUMBER FROM FROM logs-* | STATS count = COUNT(*);`
-- [x] **STRING Binding** - `DECLARE name STRING FROM FROM config | KEEP value | LIMIT 1;`
-- [x] **DATE Binding** - `DECLARE last_login DATE FROM FROM users | KEEP login_time | LIMIT 1;`
-- [x] **BOOLEAN Binding** - `DECLARE has_errors BOOLEAN FROM FROM logs | STATS has = COUNT(*) > 0;`
+### Type-Aware ES|QL Binding
+- [ ] **ARRAY Binding** - `DECLARE errors ARRAY FROM FROM logs-* | WHERE level = 'ERROR';` (Planned)
+- [ ] **DOCUMENT Binding** - `DECLARE user DOCUMENT FROM FROM users | WHERE id = 'john' | LIMIT 1;` (Planned)
+- [ ] **NUMBER Binding** - `DECLARE count NUMBER FROM FROM logs-* | STATS count = COUNT(*);` (Planned)
+- [ ] **STRING Binding** - `DECLARE name STRING FROM FROM config | KEEP value | LIMIT 1;` (Planned)
+- [ ] **DATE Binding** - `DECLARE last_login DATE FROM FROM users | KEEP login_time | LIMIT 1;` (Planned)
+- [ ] **BOOLEAN Binding** - `DECLARE has_errors BOOLEAN FROM FROM logs | STATS has = COUNT(*) > 0;` (Planned)
 
-### Type-Namespaced Functions (NEW)
-- [x] **Namespaced Syntax** - `NAMESPACE.METHOD()` for organized function calls
-- [x] **Type Namespaces** - `ARRAY.MAP()`, `STRING.UPPER()`, `DOCUMENT.KEYS()`, `DATE.ADD()`
-- [x] **Extension Namespaces** - `K8S.GET_PODS()`, `AWS.S3_GET()`, `HTTP.GET()`
-- [x] **Keyword Support** - Type keywords (ARRAY, STRING, etc.) work as namespace identifiers
+### Type-Namespaced Functions
+- [ ] **Namespaced Syntax** - `NAMESPACE.METHOD()` for organized function calls (Planned)
+- [ ] **Type Namespaces** - `ARRAY.MAP()`, `STRING.UPPER()`, `DOCUMENT.KEYS()`, `DATE.ADD()` (Planned)
+- [ ] **Extension Namespaces** - `K8S.GET_PODS()`, `AWS.S3_GET()`, `HTTP.GET()` (Planned)
+- [ ] **Keyword Support** - Type keywords (ARRAY, STRING, etc.) work as namespace identifiers (Planned)
 
 ### Developer Experience
 - [x] **Quick Start Script** - `./scripts/quick-start.sh` for one-command setup
@@ -64,32 +64,34 @@ Current status and future direction for elastic-script — a procedural language
 
 The table below compares elastic-script to Oracle PL/SQL and identifies missing features:
 
-| Category | Feature | PL/SQL | elastic-script | Priority |
-|----------|---------|--------|----------------|----------|
+| Category | Feature | PL/SQL | elastic-script | Status |
+|----------|---------|--------|----------------|--------|
 | **Error Handling** | TRY/CATCH blocks | ✅ | ✅ | ✅ Done |
 | | Named exceptions | ✅ | ✅ | ✅ Done |
 | | RAISE/THROW | ✅ | ✅ | ✅ Done |
 | **Functions** | User-defined functions | ✅ | ✅ | ✅ Done |
-| | Function overloading | ✅ | ❌ | 🟢 P2 |
+| | Function overloading | ✅ | ❌ | 🔵 P2 |
 | | Recursive functions | ✅ | ✅ | ✅ Done |
-| **Cursors** | Explicit cursors | ✅ | ✅ | ✅ Done |
-| | FETCH INTO | ✅ | ✅ | ✅ Done |
+| **Cursors** | Explicit cursors | ✅ | 🔄 | 🟡 Partial |
+| | FETCH INTO | ✅ | 🔄 | 🟡 Partial |
 | | BULK COLLECT | ✅ | ✅ | ✅ Done |
-| **Modules** | Packages | ✅ | ✅ | ✅ Done |
-| | Package state | ✅ | ✅ | ✅ Done |
-| | Public/Private | ✅ | ✅ | ✅ Done |
-| **Events** | Triggers | ✅ | ✅ | ✅ Done |
-| | Scheduled jobs | ✅ | ✅ | ✅ Done |
-| **Collections** | Associative arrays | ✅ | ✅ | ✅ Done |
+| **Modules** | Packages | ✅ | 🔄 | 🟡 Partial |
+| | Package state | ✅ | ❌ | 🔴 P1 |
+| | Public/Private | ✅ | ❌ | 🔴 P1 |
+| **Events** | Triggers | ✅ | 📋 | 🔵 Planned |
+| | Scheduled jobs | ✅ | 📋 | 🔵 Planned |
+| **Collections** | Associative arrays (MAP) | ✅ | ✅ | ✅ Done |
 | | User-defined types | ✅ | ✅ | ✅ Done |
 | **Dynamic** | EXECUTE IMMEDIATE | ✅ | ✅ | ✅ Done |
 | | Bind variables | ✅ | ✅ | ✅ Done |
 | **Bulk Ops** | FORALL | ✅ | ✅ | ✅ Done |
 | | SAVE EXCEPTIONS | ✅ | ✅ | ✅ Done |
 | **Security** | GRANT/REVOKE | ✅ | ✅ | ✅ Done |
-| | AUTHID | ✅ | ✅ | ✅ Done |
-| **Debug** | Profiler | ✅ | ✅ | ✅ Done |
-| | Breakpoints | ✅ | ❌ | 🟢 P2 |
+| | AUTHID | ✅ | 📋 | 🔵 Planned |
+| **Debug** | Profiler | ✅ | 🔄 | 🟡 Partial |
+| | Breakpoints | ✅ | ❌ | 🔵 P2 |
+
+**Legend:** ✅ Done | 🟡 Partial | 📋 Planned | 🔴 High Priority | 🔵 Lower Priority
 
 ---
 
@@ -328,7 +330,7 @@ SET my_map = MAP_FROM_ARRAYS(['a', 'b', 'c'], [1, 2, 3]);
 
 ### 2.1 Cursor Management & Streaming
 
-**Status:** ✅ Complete | **Priority:** P0
+**Status:** 🟡 Partial | **Priority:** P0
 
 Handle large result sets without memory exhaustion.
 
@@ -413,7 +415,7 @@ FORALL doc IN transformed_docs
 
 ### 2.3 Scheduled Jobs (CREATE JOB)
 
-**Status:** ✅ Complete | **Priority:** P0
+**Status:** 📋 Planned | **Priority:** P0
 
 Built-in job scheduling with cron syntax.
 
@@ -467,7 +469,7 @@ SELECT * FROM @job_runs
 
 ### 2.4 Triggers & Event-Driven Execution
 
-**Status:** ✅ Complete | **Priority:** P0
+**Status:** 📋 Planned | **Priority:** P0
 
 React to Elasticsearch events automatically.
 
@@ -546,7 +548,7 @@ SHOW TRIGGERS
 
 ### 3.1 Packages & Modules
 
-**Status:** ✅ Complete | **Priority:** P1
+**Status:** 🟡 Partial | **Priority:** P1
 
 Organize related procedures and functions into packages.
 
