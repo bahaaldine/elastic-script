@@ -33,16 +33,24 @@ View traces at: **http://localhost:5601/app/apm**
 
 ### Trace Attributes
 
-Each kernel trace includes:
+Each kernel trace includes comprehensive attributes following OTEL semantic conventions:
 
-| Attribute | Description |
-|-----------|-------------|
-| `service.name` | `elastic-script` |
-| `escript.statement` | The statement type (e.g., "CALL HELLO_WORLD") |
-| `escript.execution.cell` | Notebook cell execution count |
-| `db.system` | `elasticsearch` |
-| `db.operation` | `escript` |
-| `error.message` | Error details (if execution failed) |
+| Attribute | Description | Example |
+|-----------|-------------|---------|
+| `service.name` | Service identifier | `elastic-script` |
+| `service.version` | Kernel version | `1.0.0` |
+| `db.system` | Database type | `elasticsearch` |
+| `db.operation` | Operation type | `execute` |
+| `db.statement` | Full query (truncated to 500 chars) | `CREATE PROCEDURE...` |
+| `escript.statement.type` | Statement type | `CALL`, `CREATE PROCEDURE` |
+| `escript.statement.name` | Full statement name | `CALL MY_PROCEDURE` |
+| `escript.execution.cell_number` | Notebook cell number | `5` |
+| `escript.execution.duration_ms` | Execution time | `123.45` |
+| `escript.execution.status` | Result status | `ok` or `error` |
+| `escript.code.length` | Query character count | `256` |
+| `escript.code.lines` | Query line count | `12` |
+| `error.type` | Error classification | `ExecutionError` |
+| `error.message` | Error details (if failed) | `Procedure not found` |
 
 ### Viewing Notebook Traces
 

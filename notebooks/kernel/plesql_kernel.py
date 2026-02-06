@@ -56,16 +56,21 @@ class OTLPTracer:
             end_time_ns = int(time.time() * 1e9)
             start_time_ns = end_time_ns - int(duration_ms * 1e6)
             
-            # Build attributes
+            # Build attributes following OTEL attribute value types
             span_attributes = []
             if attributes:
                 for key, value in attributes.items():
-                    if isinstance(value, str):
-                        span_attributes.append({"key": key, "value": {"stringValue": value}})
-                    elif isinstance(value, (int, float)):
-                        span_attributes.append({"key": key, "value": {"intValue": str(int(value))}})
-                    elif isinstance(value, bool):
+                    if isinstance(value, bool):  # Check bool first (bool is subclass of int)
                         span_attributes.append({"key": key, "value": {"boolValue": value}})
+                    elif isinstance(value, int):
+                        span_attributes.append({"key": key, "value": {"intValue": str(value)}})
+                    elif isinstance(value, float):
+                        span_attributes.append({"key": key, "value": {"doubleValue": value}})
+                    elif isinstance(value, str):
+                        span_attributes.append({"key": key, "value": {"stringValue": value}})
+                    elif isinstance(value, list):
+                        # Array of strings
+                        span_attributes.append({"key": key, "value": {"arrayValue": {"values": [{"stringValue": str(v)} for v in value]}}})
             
             payload = {
                 "resourceSpans": [{
@@ -216,14 +221,29 @@ class PlesqlKernel(Kernel):
         
         # Send trace to OTEL Collector
         duration_ms = (time.time() - start_time) * 1000
+        
+        # Build comprehensive trace attributes following OTEL semantic conventions
         trace_attributes = {
-            "escript.statement": span_name,
-            "escript.execution.cell": self.execution_count,
+            # OTEL DB semantic conventions
             "db.system": "elasticsearch",
-            "db.operation": "escript"
+            "db.operation": "execute",
+            "db.statement": code[:500] if len(code) <= 500 else code[:497] + "...",
+            
+            # elastic-script specific attributes
+            "escript.statement.type": span_name.split()[0] if ' ' in span_name else span_name,
+            "escript.statement.name": span_name,
+            "escript.execution.cell_number": self.execution_count,
+            "escript.execution.duration_ms": round(duration_ms, 2),
+            "escript.execution.status": "ok" if status_ok else "error",
+            
+            # Code metrics
+            "escript.code.length": len(code),
+            "escript.code.lines": code.count('\n') + 1,
         }
+        
         if error_msg:
-            trace_attributes["error.message"] = error_msg[:200]
+            trace_attributes["error.type"] = "ExecutionError"
+            trace_attributes["error.message"] = error_msg[:500]
         
         _tracer.send_span(
             name=f"escript: {span_name}",
@@ -244,24 +264,49 @@ class PlesqlKernel(Kernel):
             return f"CALL {call_match.group(1)}"
         
         # Try to extract procedure name from CREATE PROCEDURE
-        create_proc_match = re.search(r'CREATE\s+PROCEDURE\s+(\w+)', code_upper)
+        create_proc_match = re.search(r'CREATE\s+(?:OR\s+REPLACE\s+)?PROCEDURE\s+(\w+)', code_upper)
         if create_proc_match:
             return f"CREATE PROCEDURE {create_proc_match.group(1)}"
         
         # Try to extract function name from CREATE FUNCTION
-        create_func_match = re.search(r'CREATE\s+FUNCTION\s+(\w+)', code_upper)
+        create_func_match = re.search(r'CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+(\w+)', code_upper)
         if create_func_match:
             return f"CREATE FUNCTION {create_func_match.group(1)}"
         
-        # Try to detect other statement types
-        if code_upper.startswith('DECLARE'):
-            return "DECLARE"
-        if code_upper.startswith('SET'):
-            return "SET"
-        if code_upper.startswith('PRINT'):
-            return "PRINT"
+        # Try to detect statement types with patterns
+        patterns = [
+            (r'^DECLARE\s+(\w+)', 'DECLARE'),
+            (r'^SET\s+(\w+)', 'SET'),
+            (r'^PRINT\b', 'PRINT'),
+            (r'^IF\b', 'IF'),
+            (r'^FOR\b', 'FOR'),
+            (r'^WHILE\b', 'WHILE'),
+            (r'^TRY\b', 'TRY'),
+            (r'^BEGIN\b', 'BEGIN'),
+            (r'^DROP\s+PROCEDURE\s+(\w+)', 'DROP PROCEDURE'),
+            (r'^DROP\s+FUNCTION\s+(\w+)', 'DROP FUNCTION'),
+            (r'^DEFINE\s+INTENT\s+(\w+)', 'DEFINE INTENT'),
+            (r'^ASYNC\b', 'ASYNC'),
+            (r'^PARALLEL\b', 'PARALLEL'),
+            (r'^EXECUTION\b', 'EXECUTION'),
+        ]
+        
+        for pattern, name in patterns:
+            match = re.search(pattern, code_upper)
+            if match:
+                if match.lastindex:  # Has a capture group
+                    return f"{name} {match.group(1)}"
+                return name
+        
+        # Check for function calls
         if 'ESQL_QUERY' in code_upper:
             return "ESQL_QUERY"
+        if 'LLM_' in code_upper:
+            llm_match = re.search(r'(LLM_\w+)', code_upper)
+            if llm_match:
+                return llm_match.group(1)
+        if 'INFERENCE' in code_upper:
+            return "INFERENCE"
         
         # Fallback: first 30 chars
         return code[:30].replace('\n', ' ').strip()
