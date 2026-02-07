@@ -28,6 +28,7 @@ import org.elasticsearch.xpack.escript.handlers.ElasticScriptErrorListener;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptLexer;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptParser;
 import org.elasticsearch.xpack.escript.context.ExecutionContext;
+import org.elasticsearch.xpack.escript.primitives.ExecutionResult;
 import org.elasticsearch.xpack.escript.procedure.ProcedureDefinition;
 import org.elasticsearch.xpack.escript.utils.ActionListenerUtils;
 import org.elasticsearch.xpack.escript.visitors.ProcedureDefinitionVisitor;
@@ -189,7 +190,12 @@ public class ElasticScriptExecutor {
                                 // Register all built-in functions using cached registry
                                 functionRegistry.registerAll(executionContext, procedureExecutor);
 
-                                ActionListener<Object> execListener = ActionListenerUtils.withLogging(listener,
+                                // Create a listener that wraps results with ExecutionResult
+                                ActionListener<Object> enrichingListener = createEnrichingListener(
+                                    listener, executionContext, 
+                                    programContext.call_procedure_statement().ID().getText());
+                                
+                                ActionListener<Object> execListener = ActionListenerUtils.withLogging(enrichingListener,
                                     this.getClass().getName(), "ExecuteStoredProcedure-" + procedureContent);
 
                                 procedureExecutor.visitProcedureAsync(procCtx, execListener);
@@ -881,6 +887,44 @@ public class ElasticScriptExecutor {
         } else {
             listener.onFailure(new IllegalArgumentException("Unknown TYPE statement type"));
         }
+    }
+    
+    /**
+     * Creates an ActionListener that wraps the raw result with ExecutionResult.
+     * This includes PRINT output, execution ID, and timing metadata.
+     * 
+     * @param originalListener The original listener to delegate to
+     * @param context The ExecutionContext containing PRINT output and metadata
+     * @param procedureName The name of the procedure being executed
+     * @return A listener that enriches results with ExecutionResult
+     */
+    private ActionListener<Object> createEnrichingListener(
+            ActionListener<Object> originalListener, 
+            ExecutionContext context, 
+            String procedureName) {
+        return new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object result) {
+                try {
+                    // Create an enriched result with PRINT output and metadata
+                    ExecutionResult enrichedResult = ExecutionResult.from(
+                        result,
+                        context.getExecutionId(),
+                        context.getPrintOutput(),
+                        context.getStartTimeMs(),
+                        procedureName
+                    );
+                    originalListener.onResponse(enrichedResult);
+                } catch (Exception e) {
+                    originalListener.onFailure(e);
+                }
+            }
+            
+            @Override
+            public void onFailure(Exception e) {
+                originalListener.onFailure(e);
+            }
+        };
     }
 }
 

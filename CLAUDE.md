@@ -264,8 +264,13 @@
    - Client-dependent functions (~20): cached per Client instance
    - Executor-dependent functions (ESQL_QUERY): registered per request (required for variable substitution)
    - Reduces per-request overhead from ~106 registrations to ~1
-5. **Intent System** - Complete DEFINE INTENT functionality
-6. **Error Handling** - Better error messages and stack traces
+5. ~~**Complete Observability**~~ ✅ Complete
+   - Created `ExecutionResult` class to wrap procedure results with metadata
+   - API response now includes PRINT output in `output` array field
+   - Execution metadata in `_meta`: execution_id, duration_ms, procedure_name
+   - Full unit test coverage for ExecutionResult
+6. **Intent System** - Complete DEFINE INTENT functionality
+7. **Error Handling** - Better error messages and stack traces
 8. **Function Documentation** - Auto-generated docs from `@FunctionSpec` annotations
 
 ### Low Priority

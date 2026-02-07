@@ -19,6 +19,7 @@ import org.elasticsearch.xcontent.XContentBuilder;
 import org.elasticsearch.xcontent.XContentFactory;
 import org.elasticsearch.xcontent.XContentParser;
 import org.elasticsearch.xpack.escript.executors.ElasticScriptExecutor;
+import org.elasticsearch.xpack.escript.primitives.ExecutionResult;
 import org.elasticsearch.xpack.escript.primitives.ReturnValue;
 
 import java.io.IOException;
@@ -29,7 +30,20 @@ import java.util.HashMap;
 import static org.elasticsearch.rest.RestRequest.Method.POST;
 
 /**
- * Example RestTestRunProcedureAction that handles an asynchronous Elastic Script request.
+ * REST action for executing Elastic Script procedures.
+ * 
+ * Response format when executing a procedure:
+ * <pre>
+ * {
+ *   "result": [the return value],
+ *   "output": ["print line 1", "print line 2"],
+ *   "_meta": {
+ *     "execution_id": "abc123",
+ *     "duration_ms": 42,
+ *     "procedure_name": "my_proc"
+ *   }
+ * }
+ * </pre>
  */
 public class RestRunEScriptAction extends BaseRestHandler {
 
@@ -89,51 +103,52 @@ public class RestRunEScriptAction extends BaseRestHandler {
         final Map<String, Object> finalArgs = args;
 
         return channel -> {
-            // call the async method
             elasticScriptExecutor.executeProcedure(finalQuery, finalArgs, new ActionListener<>() {
                 @Override
                 public void onResponse(Object result) {
                     try {
-                        // Handle null result (procedure without RETURN statement)
-                        Object finalValue = result;
-                        if (result == null) {
-                            LOGGER.debug("Result is null (no RETURN statement)");
-                        } else {
-                            LOGGER.debug("Object instance type: {}", result.getClass().getName());
-                            // If 'result' is a ReturnValue, extract the .getValue() from it
-                            if (result instanceof ReturnValue) {
-                                LOGGER.debug("This is a ReturnValue, extracting getValue()");
-                                finalValue = ((ReturnValue) result).getValue();
-                            }
-                        }
-
-                        LOGGER.debug("Actual finalValue after extraction: {}", finalValue);
-
-                        // Build the JSON response
                         XContentBuilder builder = XContentFactory.jsonBuilder();
                         builder.startObject();
-
-                        // If it's some recognized type (String, List, Map, etc.), you can do direct field
-                        // If you might have a custom object, you can fallback to .toString():
-                        if (finalValue == null) {
-                            // e.g. we can store null
-                            builder.nullField("result");
-                        } else if (finalValue instanceof String) {
-                            builder.field("result", (String) finalValue);
-                        } else if (finalValue instanceof Map) {
-                            // If it’s a map of <String, Object>, XContentBuilder can handle it
-                            builder.field("result", finalValue);
-                        } else if (finalValue instanceof List) {
-                            // If it’s a List of recognized subtypes (String, Map, etc.)
-                            builder.field("result", finalValue);
+                        
+                        // Check if this is an enriched ExecutionResult
+                        if (result instanceof ExecutionResult) {
+                            ExecutionResult execResult = (ExecutionResult) result;
+                            Object finalValue = execResult.getResult();
+                            
+                            // Add the result field
+                            addResultField(builder, finalValue);
+                            
+                            // Add PRINT output if present
+                            if (execResult.hasPrintOutput()) {
+                                builder.field("output", execResult.getPrintOutput());
+                            }
+                            
+                            // Add metadata
+                            builder.startObject("_meta");
+                            if (execResult.getExecutionId() != null) {
+                                builder.field("execution_id", execResult.getExecutionId());
+                            }
+                            builder.field("duration_ms", execResult.getDurationMs());
+                            if (execResult.getProcedureName() != null) {
+                                builder.field("procedure_name", execResult.getProcedureName());
+                            }
+                            builder.endObject();
                         } else {
-                            // fallback: store toString
-                            builder.field("result", finalValue.toString());
+                            // Handle legacy/non-enriched results (CREATE PROCEDURE, etc.)
+                            Object finalValue = result;
+                            if (result == null) {
+                                LOGGER.debug("Result is null (no RETURN statement)");
+                            } else {
+                                LOGGER.debug("Object instance type: {}", result.getClass().getName());
+                                if (result instanceof ReturnValue) {
+                                    LOGGER.debug("This is a ReturnValue, extracting getValue()");
+                                    finalValue = ((ReturnValue) result).getValue();
+                                }
+                            }
+                            addResultField(builder, finalValue);
                         }
 
                         builder.endObject();
-
-                        // Send success with the builder
                         channel.sendResponse(new RestResponse(RestStatus.OK, builder));
 
                     } catch (Exception e) {
@@ -143,11 +158,9 @@ public class RestRunEScriptAction extends BaseRestHandler {
 
                 @Override
                 public void onFailure(Exception e) {
-                    // Log the full stack trace for debugging
                     LOGGER.error("Elastic-script execution failed: {}", e.getMessage());
                     LOGGER.error("Stack trace:", e);
                     
-                    // Build a detailed error response
                     try {
                         XContentBuilder errorBuilder = XContentFactory.jsonBuilder();
                         errorBuilder.startObject();
@@ -160,6 +173,24 @@ public class RestRunEScriptAction extends BaseRestHandler {
                         channel.sendResponse(new RestResponse(RestStatus.INTERNAL_SERVER_ERROR, errorBuilder));
                     } catch (Exception jsonError) {
                         channel.sendResponse(new RestResponse(RestStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
+                    }
+                }
+                
+                private void addResultField(XContentBuilder builder, Object value) throws IOException {
+                    if (value == null) {
+                        builder.nullField("result");
+                    } else if (value instanceof String) {
+                        builder.field("result", (String) value);
+                    } else if (value instanceof Map) {
+                        builder.field("result", value);
+                    } else if (value instanceof List) {
+                        builder.field("result", value);
+                    } else if (value instanceof Number) {
+                        builder.field("result", value);
+                    } else if (value instanceof Boolean) {
+                        builder.field("result", value);
+                    } else {
+                        builder.field("result", value.toString());
                     }
                 }
             });
