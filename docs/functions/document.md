@@ -1,193 +1,181 @@
 # Document Functions
 
-Functions for working with document (object/map) data types.
+## Quick Reference
 
-## Overview
+| Function | Description |
+|----------|-------------|
+| [`DOCUMENT_CONTAINS`](#document-contains) | Returns true if the document contains the given key. |
+| [`DOCUMENT_GET`](#document-get) | Returns the value for a given key in the document. |
+| [`DOCUMENT_KEYS`](#document-keys) | Returns the list of keys in the given document. |
+| [`DOCUMENT_MERGE`](#document-merge) | Returns a new document that is the result of merging two doc... |
+| [`DOCUMENT_REMOVE`](#document-remove) | Returns a new document with the specified key removed. |
+| [`DOCUMENT_VALUES`](#document-values) | Returns the list of values in the given document. |
 
-Documents in elastic-script are key-value maps similar to JSON objects. They're commonly used when working with Elasticsearch documents.
+---
 
-## Function Reference
+## Function Details
 
-### DOCUMENT_GET
+### DOCUMENT_CONTAINS
 
-Gets a value from a document by key.
-
-```sql
-DECLARE doc DOCUMENT = {"name": "John", "age": 30};
-DECLARE name STRING = DOCUMENT_GET(doc, 'name');
--- Returns: 'John'
+```
+DOCUMENT_CONTAINS(doc DOCUMENT, key STRING) -> BOOLEAN
 ```
 
-**Syntax:** `DOCUMENT_GET(document, key)`
+Returns true if the document contains the given key.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| document | DOCUMENT | Input document |
-| key | STRING | Key to retrieve |
+| Name | Type | Description |
+|------|------|-------------|
+| `doc` | DOCUMENT | The input document. |
+| `key` | STRING | The key to check in the document. |
 
-**Returns:** Value at the specified key, or NULL if not found
+**Returns:** `BOOLEAN`
+ - True if the document contains the key, false otherwise.
+
+
+**Examples:**
+
+```sql
+DOCUMENT_CONTAINS({\
+:1,\
+```
+
+---
+
+### DOCUMENT_GET
+
+```
+DOCUMENT_GET(doc DOCUMENT, key STRING) -> ANY
+```
+
+Returns the value for a given key in the document.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `doc` | DOCUMENT | The input document. |
+| `key` | STRING | The key to retrieve from the document. |
+
+**Returns:** `ANY`
+ - The value associated with the given key.
+
+
+**Examples:**
+
+```sql
+DOCUMENT_GET({\
+:1,\
+```
 
 ---
 
 ### DOCUMENT_KEYS
 
-Returns all keys in a document.
-
-```sql
-DECLARE doc DOCUMENT = {"name": "John", "age": 30, "city": "NYC"};
-DECLARE keys ARRAY = DOCUMENT_KEYS(doc);
--- Returns: ['name', 'age', 'city']
+```
+DOCUMENT_KEYS(doc DOCUMENT) -> ARRAY OF STRING
 ```
 
-**Syntax:** `DOCUMENT_KEYS(document)`
+Returns the list of keys in the given document.
 
-**Returns:** ARRAY - Array of key names
+**Parameters:**
 
----
+| Name | Type | Description |
+|------|------|-------------|
+| `doc` | DOCUMENT | The input document. |
 
-### DOCUMENT_VALUES
+**Returns:** `ARRAY OF STRING`
+ - An array of keys from the document.
 
-Returns all values in a document.
 
-```sql
-DECLARE doc DOCUMENT = {"a": 1, "b": 2, "c": 3};
-DECLARE values ARRAY = DOCUMENT_VALUES(doc);
--- Returns: [1, 2, 3]
-```
-
-**Syntax:** `DOCUMENT_VALUES(document)`
-
-**Returns:** ARRAY - Array of values
-
----
-
-### DOCUMENT_CONTAINS
-
-Checks if a document contains a key.
+**Examples:**
 
 ```sql
-DECLARE doc DOCUMENT = {"name": "John"};
-DECLARE has_name BOOLEAN = DOCUMENT_CONTAINS(doc, 'name');
--- Returns: true
-DECLARE has_email BOOLEAN = DOCUMENT_CONTAINS(doc, 'email');
--- Returns: false
+DOCUMENT_KEYS({\
+:1,\
 ```
-
-**Syntax:** `DOCUMENT_CONTAINS(document, key)`
-
-**Returns:** BOOLEAN
 
 ---
 
 ### DOCUMENT_MERGE
 
-Merges two documents into one.
-
-```sql
-DECLARE doc1 DOCUMENT = {"a": 1, "b": 2};
-DECLARE doc2 DOCUMENT = {"c": 3, "d": 4};
-DECLARE merged DOCUMENT = DOCUMENT_MERGE(doc1, doc2);
--- Returns: {"a": 1, "b": 2, "c": 3, "d": 4}
+```
+DOCUMENT_MERGE(doc1 DOCUMENT, doc2 DOCUMENT) -> DOCUMENT
 ```
 
-**Syntax:** `DOCUMENT_MERGE(document1, document2)`
+Returns a new document that is the result of merging two documents.
 
-!!! note "Conflict Resolution"
-    When both documents contain the same key, the value from `document2` takes precedence.
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `doc1` | DOCUMENT | The first document. |
+| `doc2` | DOCUMENT | The second document. |
+
+**Returns:** `DOCUMENT`
+ - A new document containing all keys and values from both documents.
+
+
+**Examples:**
+
+```sql
+DOCUMENT_MERGE({\
+```
 
 ---
 
 ### DOCUMENT_REMOVE
 
-Removes a key from a document.
-
-```sql
-DECLARE doc DOCUMENT = {"a": 1, "b": 2, "c": 3};
-DECLARE result DOCUMENT = DOCUMENT_REMOVE(doc, 'b');
--- Returns: {"a": 1, "c": 3}
+```
+DOCUMENT_REMOVE(doc DOCUMENT, key STRING) -> DOCUMENT
 ```
 
-**Syntax:** `DOCUMENT_REMOVE(document, key)`
+Returns a new document with the specified key removed.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `doc` | DOCUMENT | The input document. |
+| `key` | STRING | The key to remove from the document. |
+
+**Returns:** `DOCUMENT`
+ - A new document without the specified key.
+
+
+**Examples:**
+
+```sql
+DOCUMENT_REMOVE({\
+:1,\
+```
 
 ---
 
-## Working with Elasticsearch Documents
+### DOCUMENT_VALUES
 
-When querying Elasticsearch, results come back as documents:
-
-```sql
-CREATE PROCEDURE analyze_log(log_id STRING)
-BEGIN
-    -- Get a document from Elasticsearch
-    DECLARE log DOCUMENT = ES_GET('logs-sample', log_id);
-    
-    -- Access fields
-    DECLARE level STRING = DOCUMENT_GET(log, 'level');
-    DECLARE message STRING = DOCUMENT_GET(log, 'message');
-    DECLARE timestamp DATE = DOCUMENT_GET(log, '@timestamp');
-    
-    -- Check for specific fields
-    IF DOCUMENT_CONTAINS(log, 'error') THEN
-        PRINT 'Error details: ' || DOCUMENT_GET(log, 'error');
-    END IF;
-    
-    RETURN log;
-END PROCEDURE;
+```
+DOCUMENT_VALUES(doc DOCUMENT) -> ARRAY
 ```
 
-## Nested Document Access
+Returns the list of values in the given document.
 
-For nested documents, chain `DOCUMENT_GET` calls:
+**Parameters:**
 
-```sql
-DECLARE doc DOCUMENT = {
-    "user": {
-        "name": "John",
-        "address": {
-            "city": "NYC"
-        }
-    }
-};
+| Name | Type | Description |
+|------|------|-------------|
+| `doc` | DOCUMENT | The input document. |
 
-DECLARE user DOCUMENT = DOCUMENT_GET(doc, 'user');
-DECLARE name STRING = DOCUMENT_GET(user, 'name');
-DECLARE address DOCUMENT = DOCUMENT_GET(user, 'address');
-DECLARE city STRING = DOCUMENT_GET(address, 'city');
-```
+**Returns:** `ARRAY`
+ - An array of values from the document.
 
-## Example: Transform Document
+
+**Examples:**
 
 ```sql
-CREATE PROCEDURE transform_log(log DOCUMENT)
-BEGIN
-    -- Create new document with transformed fields
-    DECLARE result DOCUMENT = {};
-    
-    -- Copy and transform fields
-    SET result = DOCUMENT_MERGE(result, {
-        "timestamp": DOCUMENT_GET(log, '@timestamp'),
-        "severity": UPPER(DOCUMENT_GET(log, 'level')),
-        "service": DOCUMENT_GET(log, 'service.name'),
-        "message": DOCUMENT_GET(log, 'message')
-    });
-    
-    RETURN result;
-END PROCEDURE;
+DOCUMENT_VALUES({\
+:1,\
 ```
 
-## Example: Iterate Document Keys
-
-```sql
-CREATE PROCEDURE print_document(doc DOCUMENT)
-BEGIN
-    DECLARE keys ARRAY = DOCUMENT_KEYS(doc);
-    
-    FOR i IN 0..(ARRAY_LENGTH(keys)-1) LOOP
-        DECLARE key STRING = keys[i];
-        DECLARE value STRING = DOCUMENT_GET(doc, key);
-        PRINT key || ': ' || value;
-    END LOOP;
-END PROCEDURE;
-```
+---

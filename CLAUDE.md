@@ -288,7 +288,12 @@
    - Enhanced `EScriptException` with location and stack info
    - `getFormattedMessage()` includes location context
    - `toDocument()` includes line, column, procedure, stack trace
-9. **Function Documentation** - Auto-generated docs from `@FunctionSpec` annotations
+9. ~~**Function Documentation**~~ ✅ Complete
+   - `scripts/generate-function-docs.py` - Python script to extract @FunctionSpec
+   - Auto-generates markdown docs organized by category
+   - 100 functions documented across 8 categories
+   - Output: `docs/functions/` with README.md index
+   - Run: `python3 scripts/generate-function-docs.py`
 
 ### Low Priority
 8. **Performance Optimization** - Batch operations, connection pooling

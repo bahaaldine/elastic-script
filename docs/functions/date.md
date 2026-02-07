@@ -1,177 +1,422 @@
 # Date Functions
 
-Functions for working with dates and timestamps.
+## Quick Reference
 
-## Function Reference
+| Function | Description |
+|----------|-------------|
+| [`CURRENT_DATE`](#current-date) | Returns the current date with time set to midnight. |
+| [`CURRENT_DATE`](#current-date) | Returns the current date with time set to midnight. |
+| [`CURRENT_TIMESTAMP`](#current-timestamp) | Returns the current date and time. |
+| [`CURRENT_TIMESTAMP`](#current-timestamp) | Returns the current date and time. |
+| [`DATEDIFF`](#datediff) | Returns the difference in days between two dates. |
+| [`DATEDIFF`](#datediff) | Returns the difference in days between two dates. |
+| [`DATE_ADD`](#date-add) | Adds a given number of days to a date. |
+| [`DATE_ADD`](#date-add) | Adds a given number of days to a date. |
+| [`DATE_SUB`](#date-sub) | Subtracts a given number of days from a date. |
+| [`DATE_SUB`](#date-sub) | Subtracts a given number of days from a date. |
+| [`EXTRACT_DAY`](#extract-day) | Extracts the day of month from a date. |
+| [`EXTRACT_DAY`](#extract-day) | Extracts the day of month from a date. |
+| [`EXTRACT_MONTH`](#extract-month) | Extracts the month (1-12) from a date. |
+| [`EXTRACT_MONTH`](#extract-month) | Extracts the month (1-12) from a date. |
+| [`EXTRACT_YEAR`](#extract-year) | Extracts the year component from a date. |
+| [`EXTRACT_YEAR`](#extract-year) | Extracts the year component from a date. |
+
+---
+
+## Function Details
 
 ### CURRENT_DATE
 
-Returns the current date.
-
-```sql
-DECLARE today DATE = CURRENT_DATE();
--- Returns: 2026-01-09
+```
+CURRENT_DATE() -> DATE
 ```
 
-**Syntax:** `CURRENT_DATE()`
+Returns the current date with time set to midnight.
+
+**Returns:** `DATE`
+ - The current date with time zeroed.
+
+
+**Examples:**
+
+```sql
+CURRENT_DATE() -> 2024-05-10
+```
+
+---
+
+### CURRENT_DATE
+
+```
+CURRENT_DATE() -> DATE
+```
+
+Returns the current date with time set to midnight.
+
+**Returns:** `DATE`
+ - The current date with time zeroed.
+
+
+**Examples:**
+
+```sql
+CURRENT_DATE() -> 2024-05-10
+```
 
 ---
 
 ### CURRENT_TIMESTAMP
 
-Returns the current date and time.
-
-```sql
-DECLARE now DATE = CURRENT_TIMESTAMP();
--- Returns: 2026-01-09T15:30:00Z
+```
+CURRENT_TIMESTAMP() -> DATE
 ```
 
-**Syntax:** `CURRENT_TIMESTAMP()`
+Returns the current date and time.
+
+**Returns:** `DATE`
+ - The current date and time.
+
+
+**Examples:**
+
+```sql
+CURRENT_TIMESTAMP() -> 2024-05-10T12:34:56
+```
+
+---
+
+### CURRENT_TIMESTAMP
+
+```
+CURRENT_TIMESTAMP() -> DATE
+```
+
+Returns the current date and time.
+
+**Returns:** `DATE`
+ - The current date and time.
+
+
+**Examples:**
+
+```sql
+CURRENT_TIMESTAMP() -> 2024-05-10T12:34:56
+```
+
+---
+
+### DATEDIFF
+
+```
+DATEDIFF(date1 DATE, date2 DATE) -> NUMBER
+```
+
+Returns the difference in days between two dates.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `date1` | DATE | The first date. |
+| `date2` | DATE | The second date. |
+
+**Returns:** `NUMBER`
+ - Number of days between date1 and date2.
+
+
+**Examples:**
+
+```sql
+DATEDIFF('2024-05-13', '2024-05-10') -> 3
+```
+
+---
+
+### DATEDIFF
+
+```
+DATEDIFF(date1 DATE, date2 DATE) -> NUMBER
+```
+
+Returns the difference in days between two dates.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `date1` | DATE | The first date. |
+| `date2` | DATE | The second date. |
+
+**Returns:** `NUMBER`
+ - Number of days between date1 and date2.
+
+
+**Examples:**
+
+```sql
+DATEDIFF('2024-05-13', '2024-05-10') -> 3
+```
 
 ---
 
 ### DATE_ADD
 
-Adds days to a date.
-
-```sql
-DECLARE today DATE = CURRENT_DATE();
-DECLARE next_week DATE = DATE_ADD(today, 7);
--- Adds 7 days
+```
+DATE_ADD(date DATE, days NUMBER) -> DATE
 ```
 
-**Syntax:** `DATE_ADD(date, days)`
+Adds a given number of days to a date.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| date | DATE | Starting date |
-| days | NUMBER | Number of days to add |
+| Name | Type | Description |
+|------|------|-------------|
+| `date` | DATE | The original date. |
+| `days` | NUMBER | Number of days to add. |
+
+**Returns:** `DATE`
+ - The resulting date after addition.
+
+
+**Examples:**
+
+```sql
+DATE_ADD('2024-05-10', 3) -> 2024-05-13
+```
+
+---
+
+### DATE_ADD
+
+```
+DATE_ADD(date DATE, days NUMBER) -> DATE
+```
+
+Adds a given number of days to a date.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `date` | DATE | The original date. |
+| `days` | NUMBER | Number of days to add. |
+
+**Returns:** `DATE`
+ - The resulting date after addition.
+
+
+**Examples:**
+
+```sql
+DATE_ADD('2024-05-10', 3) -> 2024-05-13
+```
 
 ---
 
 ### DATE_SUB
 
-Subtracts days from a date.
-
-```sql
-DECLARE today DATE = CURRENT_DATE();
-DECLARE last_week DATE = DATE_SUB(today, 7);
--- Subtracts 7 days
+```
+DATE_SUB(date DATE, days NUMBER) -> DATE
 ```
 
-**Syntax:** `DATE_SUB(date, days)`
+Subtracts a given number of days from a date.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `date` | DATE | The original date. |
+| `days` | NUMBER | Number of days to subtract. |
+
+**Returns:** `DATE`
+ - The resulting date after subtraction.
+
+
+**Examples:**
+
+```sql
+DATE_SUB('2024-05-10', 2) -> 2024-05-08
+```
 
 ---
 
-### EXTRACT_YEAR
+### DATE_SUB
 
-Extracts the year from a date.
-
-```sql
-DECLARE now DATE = CURRENT_TIMESTAMP();
-DECLARE year NUMBER = EXTRACT_YEAR(now);
--- Returns: 2026
+```
+DATE_SUB(date DATE, days NUMBER) -> DATE
 ```
 
-**Syntax:** `EXTRACT_YEAR(date)`
+Subtracts a given number of days from a date.
 
----
+**Parameters:**
 
-### EXTRACT_MONTH
+| Name | Type | Description |
+|------|------|-------------|
+| `date` | DATE | The original date. |
+| `days` | NUMBER | Number of days to subtract. |
 
-Extracts the month from a date (1-12).
+**Returns:** `DATE`
+ - The resulting date after subtraction.
+
+
+**Examples:**
 
 ```sql
-DECLARE now DATE = CURRENT_TIMESTAMP();
-DECLARE month NUMBER = EXTRACT_MONTH(now);
--- Returns: 1 (January)
+DATE_SUB('2024-05-10', 2) -> 2024-05-08
 ```
-
-**Syntax:** `EXTRACT_MONTH(date)`
 
 ---
 
 ### EXTRACT_DAY
 
-Extracts the day of month from a date (1-31).
-
-```sql
-DECLARE now DATE = CURRENT_TIMESTAMP();
-DECLARE day NUMBER = EXTRACT_DAY(now);
--- Returns: 9
+```
+EXTRACT_DAY(date DATE) -> NUMBER
 ```
 
-**Syntax:** `EXTRACT_DAY(date)`
+Extracts the day of month from a date.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `date` | DATE | The date to extract from. |
+
+**Returns:** `NUMBER`
+ - The day of the month.
+
+
+**Examples:**
+
+```sql
+EXTRACT_DAY('2024-05-10') -> 10
+```
 
 ---
 
-### DATE_DIFF
+### EXTRACT_DAY
 
-Calculates the difference between two dates in days.
-
-```sql
-DECLARE start_date DATE = DATE_SUB(CURRENT_DATE(), 30);
-DECLARE end_date DATE = CURRENT_DATE();
-DECLARE days_between NUMBER = DATE_DIFF(end_date, start_date);
--- Returns: 30
+```
+EXTRACT_DAY(date DATE) -> NUMBER
 ```
 
-**Syntax:** `DATE_DIFF(date1, date2)`
+Extracts the day of month from a date.
 
-**Returns:** NUMBER - Days between dates (date1 - date2)
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `date` | DATE | The date to extract from. |
+
+**Returns:** `NUMBER`
+ - The day of the month.
+
+
+**Examples:**
+
+```sql
+EXTRACT_DAY('2024-05-10') -> 10
+```
 
 ---
 
-## Example: Date-Based Filtering
+### EXTRACT_MONTH
 
-```sql
-CREATE PROCEDURE get_recent_logs(days_back NUMBER)
-BEGIN
-    DECLARE cutoff DATE = DATE_SUB(CURRENT_DATE(), days_back);
-    
-    DECLARE logs CURSOR FOR ESQL_QUERY('
-        FROM logs-* 
-        | WHERE @timestamp >= "' || cutoff || '"
-        | LIMIT 100
-    ');
-    
-    FOR log IN logs LOOP
-        PRINT DOCUMENT_GET(log, 'message');
-    END LOOP;
-END PROCEDURE;
+```
+EXTRACT_MONTH(date DATE) -> NUMBER
 ```
 
-## Example: Generate Date Range
+Extracts the month (1-12) from a date.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `date` | DATE | The date to extract from. |
+
+**Returns:** `NUMBER`
+
+
+**Examples:**
 
 ```sql
-CREATE PROCEDURE date_range(start_date DATE, num_days NUMBER)
-BEGIN
-    DECLARE dates ARRAY = [];
-    
-    FOR i IN 0..(num_days-1) LOOP
-        DECLARE d DATE = DATE_ADD(start_date, i);
-        SET dates = ARRAY_APPEND(dates, d);
-    END LOOP;
-    
-    RETURN dates;
-END PROCEDURE;
+EXTRACT_MONTH('2024-05-10') -> 5
 ```
 
-## Working with Timestamps
+---
 
-Dates and timestamps are interchangeable in most contexts:
+### EXTRACT_MONTH
+
+```
+EXTRACT_MONTH(date DATE) -> NUMBER
+```
+
+Extracts the month (1-12) from a date.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `date` | DATE | The date to extract from. |
+
+**Returns:** `NUMBER`
+
+
+**Examples:**
 
 ```sql
-DECLARE event_time DATE = CURRENT_TIMESTAMP();
-
--- Extract components
-PRINT 'Year: ' || EXTRACT_YEAR(event_time);
-PRINT 'Month: ' || EXTRACT_MONTH(event_time);
-PRINT 'Day: ' || EXTRACT_DAY(event_time);
+EXTRACT_MONTH('2024-05-10') -> 5
 ```
 
-!!! note "Timezone Handling"
-    All dates and timestamps are in UTC by default. Timezone conversion 
-    should be handled at the application layer if needed.
+---
+
+### EXTRACT_YEAR
+
+```
+EXTRACT_YEAR(date DATE) -> NUMBER
+```
+
+Extracts the year component from a date.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `date` | DATE | The date to extract from. |
+
+**Returns:** `NUMBER`
+ - The year component.
+
+
+**Examples:**
+
+```sql
+EXTRACT_YEAR('2024-05-10') -> 2024
+```
+
+---
+
+### EXTRACT_YEAR
+
+```
+EXTRACT_YEAR(date DATE) -> NUMBER
+```
+
+Extracts the year component from a date.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `date` | DATE | The date to extract from. |
+
+**Returns:** `NUMBER`
+ - The year component.
+
+
+**Examples:**
+
+```sql
+EXTRACT_YEAR('2024-05-10') -> 2024
+```
+
+---

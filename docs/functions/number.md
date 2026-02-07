@@ -1,203 +1,317 @@
 # Number Functions
 
-Mathematical and numeric operations.
+## Quick Reference
 
-## Function Reference
+| Function | Description |
+|----------|-------------|
+| [`ABS`](#abs) | Returns the absolute value of a number. |
+| [`CEIL`](#ceil) | Returns the smallest integer value greater than or equal to ... |
+| [`EXP`](#exp) | Returns the exponential of the number. |
+| [`FLOOR`](#floor) | Returns the largest integer value less than or equal to the ... |
+| [`LOG`](#log) | Returns the natural logarithm, or with base if provided. |
+| [`MOD`](#mod) | Returns the remainder of the division of the first argument ... |
+| [`POWER`](#power) | Raises the first argument to the power of the second. |
+| [`ROUND`](#round) | Rounds the number. If only one argument is given, then the s... |
+| [`SIGN`](#sign) | Returns 1 if positive, -1 if negative, and 0 if zero. |
+| [`SQRT`](#sqrt) | Returns the square root of the number. |
+| [`TRUNC`](#trunc) | Truncates a number. If only one argument is provided, scale ... |
+
+---
+
+## Function Details
 
 ### ABS
 
-Returns the absolute value of a number.
-
-```sql
-DECLARE result NUMBER = ABS(-42);
--- Returns: 42
+```
+ABS(input NUMBER) -> NUMBER
 ```
 
-**Syntax:** `ABS(number)`
+Returns the absolute value of a number.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `input` | NUMBER | Input number |
+
+**Returns:** `NUMBER`
+ - Absolute value of the input
+
+
+**Examples:**
+
+```sql
+ABS(-5) => 5
+```
 
 ---
 
 ### CEIL
 
-Rounds up to the nearest integer.
-
-```sql
-DECLARE result NUMBER = CEIL(4.2);
--- Returns: 5
+```
+CEIL(input NUMBER) -> NUMBER
 ```
 
-**Syntax:** `CEIL(number)`
-
----
-
-### FLOOR
-
-Rounds down to the nearest integer.
-
-```sql
-DECLARE result NUMBER = FLOOR(4.8);
--- Returns: 4
-```
-
-**Syntax:** `FLOOR(number)`
-
----
-
-### ROUND
-
-Rounds to a specified number of decimal places.
-
-```sql
-DECLARE result NUMBER = ROUND(3.14159, 2);
--- Returns: 3.14
-```
-
-**Syntax:** `ROUND(number, decimals)`
+Returns the smallest integer value greater than or equal to the number.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| number | NUMBER | Value to round |
-| decimals | NUMBER | Number of decimal places (default: 0) |
+| Name | Type | Description |
+|------|------|-------------|
+| `input` | NUMBER | Input number |
 
----
+**Returns:** `NUMBER`
+ - Ceiling value of the input
 
-### TRUNC
 
-Truncates to a specified number of decimal places.
-
-```sql
-DECLARE result NUMBER = TRUNC(3.14159, 2);
--- Returns: 3.14
-```
-
-**Syntax:** `TRUNC(number, decimals)`
-
-!!! note "TRUNC vs ROUND"
-    `TRUNC` always removes digits toward zero, while `ROUND` uses standard rounding rules.
-
----
-
-### MOD
-
-Returns the remainder of division.
+**Examples:**
 
 ```sql
-DECLARE result NUMBER = MOD(17, 5);
--- Returns: 2
+CEIL(4.3) => 5.0
 ```
-
-**Syntax:** `MOD(dividend, divisor)`
-
----
-
-### POWER
-
-Raises a number to a power.
-
-```sql
-DECLARE result NUMBER = POWER(2, 10);
--- Returns: 1024
-```
-
-**Syntax:** `POWER(base, exponent)`
-
----
-
-### SQRT
-
-Returns the square root.
-
-```sql
-DECLARE result NUMBER = SQRT(144);
--- Returns: 12
-```
-
-**Syntax:** `SQRT(number)`
 
 ---
 
 ### EXP
 
-Returns e raised to a power.
-
-```sql
-DECLARE result NUMBER = EXP(1);
--- Returns: 2.718281828...
+```
+EXP(input NUMBER) -> NUMBER
 ```
 
-**Syntax:** `EXP(number)`
+Returns the exponential of the number.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `input` | NUMBER | Input number |
+
+**Returns:** `NUMBER`
+ - Exponential value of the input
+
+
+**Examples:**
+
+```sql
+EXP(1) => 2.718281828459045
+```
+
+---
+
+### FLOOR
+
+```
+FLOOR(input NUMBER) -> NUMBER
+```
+
+Returns the largest integer value less than or equal to the number.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `input` | NUMBER | Input number |
+
+**Returns:** `NUMBER`
+ - Floor value of the input
+
+
+**Examples:**
+
+```sql
+FLOOR(4.7) => 4.0
+```
 
 ---
 
 ### LOG
 
-Returns the logarithm of a number.
-
-```sql
-DECLARE result NUMBER = LOG(100, 10);
--- Returns: 2 (log base 10 of 100)
+```
+LOG(input NUMBER, base NUMBER) -> NUMBER
 ```
 
-**Syntax:** `LOG(number, base)`
+Returns the natural logarithm, or with base if provided.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| number | NUMBER | Value to take logarithm of |
-| base | NUMBER | Logarithm base |
+| Name | Type | Description |
+|------|------|-------------|
+| `input` | NUMBER | Input number |
+| `base` | NUMBER | Logarithm base (optional) |
+
+**Returns:** `NUMBER`
+ - Logarithm value
+
+
+**Examples:**
+
+```sql
+LOG(10) => 2.302585092994046
+LOG(8, 2) => 3.0
+```
+
+---
+
+### MOD
+
+```
+MOD(a NUMBER, b NUMBER) -> NUMBER
+```
+
+Returns the remainder of the division of the first argument by the second.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `a` | NUMBER | Dividend |
+| `b` | NUMBER | Divisor |
+
+**Returns:** `NUMBER`
+ - Remainder after division
+
+
+**Examples:**
+
+```sql
+MOD(10, 3) => 1.0
+```
+
+---
+
+### POWER
+
+```
+POWER(base NUMBER, exponent NUMBER) -> NUMBER
+```
+
+Raises the first argument to the power of the second.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `base` | NUMBER | Base number |
+| `exponent` | NUMBER | Exponent |
+
+**Returns:** `NUMBER`
+ - Result of base raised to the exponent
+
+
+**Examples:**
+
+```sql
+POWER(2, 3) => 8.0
+```
+
+---
+
+### ROUND
+
+```
+ROUND(input NUMBER, scale NUMBER) -> NUMBER
+```
+
+Rounds the number. If only one argument is given, then the second parameter is ignored.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `input` | NUMBER | Input number |
+| `scale` | NUMBER | Number of decimal places to round to (optional) |
+
+**Returns:** `NUMBER`
+ - Rounded value of the input
+
+
+**Examples:**
+
+```sql
+ROUND(4.567) => 5.0
+ROUND(4.567, 2) => 4.57
+```
 
 ---
 
 ### SIGN
 
-Returns the sign of a number (-1, 0, or 1).
-
-```sql
-DECLARE result NUMBER = SIGN(-42);
--- Returns: -1
+```
+SIGN(input NUMBER) -> NUMBER
 ```
 
-**Syntax:** `SIGN(number)`
+Returns 1 if positive, -1 if negative, and 0 if zero.
 
-**Returns:**
+**Parameters:**
 
-| Value | Meaning |
-|-------|---------|
-| -1 | Negative number |
-| 0 | Zero |
-| 1 | Positive number |
+| Name | Type | Description |
+|------|------|-------------|
+| `input` | NUMBER | Input number |
+
+**Returns:** `NUMBER`
+ - Sign of the input
+
+
+**Examples:**
+
+```sql
+SIGN(10) => 1
+SIGN(-5) => -1
+SIGN(0) => 0
+```
 
 ---
 
-## Arithmetic Operators
+### SQRT
 
-Standard arithmetic operators are available:
-
-```sql
-DECLARE a NUMBER = 10 + 5;   -- Addition: 15
-DECLARE b NUMBER = 10 - 5;   -- Subtraction: 5
-DECLARE c NUMBER = 10 * 5;   -- Multiplication: 50
-DECLARE d NUMBER = 10 / 5;   -- Division: 2
+```
+SQRT(input NUMBER) -> NUMBER
 ```
 
-## Example: Calculate Statistics
+Returns the square root of the number.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `input` | NUMBER | Input number |
+
+**Returns:** `NUMBER`
+ - Square root of the input
+
+
+**Examples:**
 
 ```sql
-CREATE PROCEDURE calculate_stats(values ARRAY)
-BEGIN
-    DECLARE sum NUMBER = 0;
-    DECLARE count NUMBER = ARRAY_LENGTH(values);
-    
-    FOR i IN 0..(count-1) LOOP
-        SET sum = sum + values[i];
-    END LOOP;
-    
-    DECLARE mean NUMBER = sum / count;
-    PRINT 'Mean: ' || ROUND(mean, 2);
-    
-    RETURN mean;
-END PROCEDURE;
+SQRT(9) => 3.0
 ```
+
+---
+
+### TRUNC
+
+```
+TRUNC(input NUMBER, scale NUMBER) -> NUMBER
+```
+
+Truncates a number. If only one argument is provided, scale is ignored.
+
+**Parameters:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `input` | NUMBER | Input number |
+| `scale` | NUMBER | Number of decimal places to truncate to (optional) |
+
+**Returns:** `NUMBER`
+ - Truncated value of the input
+
+
+**Examples:**
+
+```sql
+TRUNC(4.567) => 4.0
+TRUNC(4.567, 2) => 4.56
+```
+
+---
