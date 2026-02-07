@@ -269,8 +269,14 @@
    - API response now includes PRINT output in `output` array field
    - Execution metadata in `_meta`: execution_id, duration_ms, procedure_name
    - Full unit test coverage for ExecutionResult
-6. **Intent System** - Complete DEFINE INTENT functionality
-7. **Error Handling** - Better error messages and stack traces
+6. ~~**Instrument Procedures with EScriptTracer**~~ ✅ Complete
+   - Added OTEL tracing to ProcedureExecutor.visitProcedureAsync()
+   - Added statement-level tracing in visitStatementAsync()
+   - Added determineStatementType() for granular span names
+   - Traces capture execution ID, procedure name, statement count
+   - Errors automatically captured in spans
+7. **Intent System** - Complete DEFINE INTENT functionality
+8. **Error Handling** - Better error messages and stack traces
 8. **Function Documentation** - Auto-generated docs from `@FunctionSpec` annotations
 
 ### Low Priority

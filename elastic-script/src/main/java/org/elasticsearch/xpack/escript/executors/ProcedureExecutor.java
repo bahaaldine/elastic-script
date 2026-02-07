@@ -60,6 +60,7 @@ import org.elasticsearch.xpack.escript.primitives.ReturnValue;
 import org.elasticsearch.xpack.escript.procedure.StoredProcedureDefinition;
 import org.elasticsearch.xpack.escript.functions.StoredFunctionDefinition;
 import org.elasticsearch.xpack.escript.utils.ActionListenerUtils;
+import org.elasticsearch.xpack.escript.tracing.EScriptTracer;
 
 import org.elasticsearch.xpack.core.esql.action.ColumnInfo;
 import org.elasticsearch.xpack.esql.action.EsqlQueryAction;
@@ -221,13 +222,39 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
 
     /**
      * Asynchronously visits the entire procedure and executes each statement.
+     * Starts an OTEL trace span for the procedure execution if OTEL is available.
      *
      * @param ctx      The ProcedureContext representing the entire procedure.
      * @param listener The ActionListener to notify upon completion or failure.
      */
     public void visitProcedureAsync(ElasticScriptParser.ProcedureContext ctx, ActionListener<Object> listener) {
+        // Extract procedure name for tracing
+        String procedureName = ctx.ID() != null ? ctx.ID().getText() : "anonymous";
+        String executionId = context.getExecutionId();
+        
+        // Start OTEL trace for procedure execution
+        EScriptTracer.TracingContext tracingContext = EScriptTracer.startProcedure(executionId, procedureName);
+        tracingContext.setLabel("escript.statement.count", ctx.statement().size());
+        
+        // Create a listener that ends the trace on completion
+        ActionListener<Object> tracingListener = new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object result) {
+                tracingContext.setResult("success");
+                tracingContext.end();
+                listener.onResponse(result);
+            }
+            
+            @Override
+            public void onFailure(Exception e) {
+                tracingContext.captureException(e);
+                tracingContext.end();
+                listener.onFailure(e);
+            }
+        };
+        
         // Start asynchronous execution of the procedure.
-        executeProcedureAsync(ctx, listener);
+        executeProcedureAsync(ctx, tracingListener);
     }
 
     /**
@@ -278,6 +305,7 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
 
     /**
      * Visits a statement asynchronously and delegates handling to the appropriate handler.
+     * Creates an OTEL span for the statement if tracing is enabled.
      *
      * @param ctx      The StatementContext.
      * @param listener The ActionListener for asynchronous callbacks.
@@ -287,55 +315,78 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
         
         // Log statement execution at TRACE level (very verbose)
         EScriptLogger.statementExec(executionId, "STATEMENT", ctx.getText());
+        
+        // Determine statement type for tracing
+        String statementType = determineStatementType(ctx);
+        
+        // Start OTEL span for this statement
+        EScriptTracer.SpanContext spanContext = EScriptTracer.startStatement(executionId, statementType, 
+            ctx.getText().length() > 100 ? ctx.getText().substring(0, 100) + "..." : ctx.getText());
+        
+        // Wrap listener to end span on completion
+        ActionListener<Object> tracedListener = new ActionListener<Object>() {
+            @Override
+            public void onResponse(Object result) {
+                spanContext.end();
+                listener.onResponse(result);
+            }
+            
+            @Override
+            public void onFailure(Exception e) {
+                spanContext.captureException(e);
+                spanContext.end();
+                listener.onFailure(e);
+            }
+        };
 
         if (ctx.declare_statement() != null) {
-            declareHandler.handleAsync(ctx.declare_statement(), listener);
+            declareHandler.handleAsync(ctx.declare_statement(), tracedListener);
         } else if (ctx.var_statement() != null) {
-            varHandler.handleAsync(ctx.var_statement(), listener);
+            varHandler.handleAsync(ctx.var_statement(), tracedListener);
         } else if (ctx.const_statement() != null) {
-            constHandler.handleAsync(ctx.const_statement(), listener);
+            constHandler.handleAsync(ctx.const_statement(), tracedListener);
         } else if (ctx.assignment_statement() != null) {
-            assignmentHandler.handleAsync(ctx.assignment_statement(), listener);
+            assignmentHandler.handleAsync(ctx.assignment_statement(), tracedListener);
         } else if (ctx.if_statement() != null) {
-            ifHandler.handleAsync(ctx.if_statement(), listener);
+            ifHandler.handleAsync(ctx.if_statement(), tracedListener);
         } else if (ctx.switch_statement() != null) {
-            switchHandler.handleAsync(ctx.switch_statement(), listener);
+            switchHandler.handleAsync(ctx.switch_statement(), tracedListener);
         } else if (ctx.loop_statement() != null) {
-            loopHandler.handleAsync(ctx.loop_statement(), listener);
+            loopHandler.handleAsync(ctx.loop_statement(), tracedListener);
         } else if (ctx.function_definition() != null) {
-            functionDefHandler.handleAsync(ctx.function_definition(), listener);
+            functionDefHandler.handleAsync(ctx.function_definition(), tracedListener);
         } else if (ctx.try_catch_statement() != null) {
-            tryCatchHandler.handleAsync(ctx.try_catch_statement(), listener);
+            tryCatchHandler.handleAsync(ctx.try_catch_statement(), tracedListener);
         } else if (ctx.throw_statement() != null) {
-            throwHandler.handleAsync(ctx.throw_statement(), listener);
+            throwHandler.handleAsync(ctx.throw_statement(), tracedListener);
         } else if (ctx.execute_statement() != null) {
-            executeHandler.handleAsync(ctx.execute_statement(), listener);
+            executeHandler.handleAsync(ctx.execute_statement(), tracedListener);
         } else if (ctx.execute_immediate_statement() != null) {
-            executeImmediateHandler.handleAsync(ctx.execute_immediate_statement(), listener);
+            executeImmediateHandler.handleAsync(ctx.execute_immediate_statement(), tracedListener);
         } else if (ctx.print_statement() != null) {
-            printStatementHandler.execute(ctx.print_statement(), listener);
+            printStatementHandler.execute(ctx.print_statement(), tracedListener);
         }  else if (ctx.call_procedure_statement() != null) {
-            callProcedureStatementHandler.handleAsync(ctx.call_procedure_statement(), listener);
+            callProcedureStatementHandler.handleAsync(ctx.call_procedure_statement(), tracedListener);
         } else if (ctx.intent_statement() != null) {
-            intentHandler.handleAsync(ctx.intent_statement(), listener);
+            intentHandler.handleAsync(ctx.intent_statement(), tracedListener);
         } else if (ctx.return_statement() != null) {
-            visitReturn_statementAsync(ctx.return_statement(), listener);
+            visitReturn_statementAsync(ctx.return_statement(), tracedListener);
         } else if (ctx.break_statement() != null) {
             // Handle break statement.
-            listener.onFailure(new BreakException("Break encountered"));
+            tracedListener.onFailure(new BreakException("Break encountered"));
         } else if (ctx.continue_statement() != null) {
             // Handle continue statement.
-            listener.onFailure(new ContinueException("Continue encountered"));
+            tracedListener.onFailure(new ContinueException("Continue encountered"));
         } else if (ctx.expression_statement() != null) {
             // Evaluate the expression asynchronously and ignore the result.
             ActionListener<Object> exprListener = new ActionListener<Object>() {
                 @Override
                 public void onResponse(Object value) {
-                    listener.onResponse(value);
+                    tracedListener.onResponse(value);
                 }
                 @Override
                 public void onFailure(Exception e) {
-                    listener.onFailure(e);
+                    tracedListener.onFailure(e);
                 }
             };
 
@@ -349,11 +400,11 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
             ActionListener<Object> funcCallListener = new ActionListener<Object>() {
                 @Override
                 public void onResponse(Object result) {
-                    listener.onResponse(null); // Function call completed.
+                    tracedListener.onResponse(null); // Function call completed.
                 }
                 @Override
                 public void onFailure(Exception e) {
-                    listener.onFailure(e);
+                    tracedListener.onFailure(e);
                 }
             };
 
@@ -363,51 +414,51 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
             visitFunctionCallAsync(ctx.function_call_statement().function_call(), funcCallLogger);
         } else if (ctx.async_procedure_statement() != null) {
             // Handle async procedure with pipe continuations
-            asyncProcedureHandler.handleAsync(ctx.async_procedure_statement(), listener);
+            asyncProcedureHandler.handleAsync(ctx.async_procedure_statement(), tracedListener);
         } else if (ctx.execution_control_statement() != null) {
             // Handle execution control (STATUS, CANCEL, RETRY, WAIT)
-            executionControlHandler.handleAsync(ctx.execution_control_statement(), listener);
+            executionControlHandler.handleAsync(ctx.execution_control_statement(), tracedListener);
         } else if (ctx.parallel_statement() != null) {
             // Handle parallel execution
-            parallelHandler.handleAsync(ctx.parallel_statement(), listener);
+            parallelHandler.handleAsync(ctx.parallel_statement(), tracedListener);
         } else if (ctx.esql_into_statement() != null) {
             // Handle ES|QL INTO statement
-            esqlIntoHandler.handleAsync(ctx.esql_into_statement(), listener);
+            esqlIntoHandler.handleAsync(ctx.esql_into_statement(), tracedListener);
         } else if (ctx.esql_process_statement() != null) {
             // Handle ES|QL PROCESS WITH statement
-            esqlProcessHandler.handleAsync(ctx.esql_process_statement(), listener);
+            esqlProcessHandler.handleAsync(ctx.esql_process_statement(), tracedListener);
         } else if (ctx.open_cursor_statement() != null) {
             // Handle OPEN cursor;
-            cursorHandler.handleOpenAsync(ctx.open_cursor_statement(), listener);
+            cursorHandler.handleOpenAsync(ctx.open_cursor_statement(), tracedListener);
         } else if (ctx.close_cursor_statement() != null) {
             // Handle CLOSE cursor;
-            cursorHandler.handleCloseAsync(ctx.close_cursor_statement(), listener);
+            cursorHandler.handleCloseAsync(ctx.close_cursor_statement(), tracedListener);
         } else if (ctx.fetch_cursor_statement() != null) {
             // Handle FETCH cursor INTO variable;
-            cursorHandler.handleFetchAsync(ctx.fetch_cursor_statement(), listener);
+            cursorHandler.handleFetchAsync(ctx.fetch_cursor_statement(), tracedListener);
         } else if (ctx.forall_statement() != null) {
             // Handle FORALL element IN collection action [SAVE EXCEPTIONS];
-            forallHandler.handleAsync(ctx.forall_statement(), listener);
+            forallHandler.handleAsync(ctx.forall_statement(), tracedListener);
         } else if (ctx.bulk_collect_statement() != null) {
             // Handle BULK COLLECT INTO variable FROM query;
-            bulkCollectHandler.handleAsync(ctx.bulk_collect_statement(), listener);
+            bulkCollectHandler.handleAsync(ctx.bulk_collect_statement(), tracedListener);
         } else if (ctx.index_command() != null) {
             // Handle INDEX command: INDEX document INTO 'index-name';
-            firstClassCommandsHandler.handleIndexCommand(ctx.index_command(), listener);
+            firstClassCommandsHandler.handleIndexCommand(ctx.index_command(), tracedListener);
         } else if (ctx.delete_command() != null) {
             // Handle DELETE command: DELETE FROM 'index-name' WHERE condition;
-            firstClassCommandsHandler.handleDeleteCommand(ctx.delete_command(), listener);
+            firstClassCommandsHandler.handleDeleteCommand(ctx.delete_command(), tracedListener);
         } else if (ctx.search_command() != null) {
             // Handle SEARCH command: SEARCH 'index-name' QUERY {...};
-            firstClassCommandsHandler.handleSearchCommand(ctx.search_command(), listener);
+            firstClassCommandsHandler.handleSearchCommand(ctx.search_command(), tracedListener);
         } else if (ctx.refresh_command() != null) {
             // Handle REFRESH command: REFRESH 'index-name';
-            firstClassCommandsHandler.handleRefreshCommand(ctx.refresh_command(), listener);
+            firstClassCommandsHandler.handleRefreshCommand(ctx.refresh_command(), tracedListener);
         } else if (ctx.create_index_command() != null) {
             // Handle CREATE INDEX command: CREATE INDEX 'name' WITH {...};
-            firstClassCommandsHandler.handleCreateIndexCommand(ctx.create_index_command(), listener);
+            firstClassCommandsHandler.handleCreateIndexCommand(ctx.create_index_command(), tracedListener);
         } else {
-            listener.onResponse(null);
+            tracedListener.onResponse(null);
         }
     }
 
@@ -1223,5 +1274,45 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
             result.add(rowMap);
         }
         return result;
+    }
+    
+    /**
+     * Determines the statement type for tracing purposes.
+     * Returns a short uppercase identifier for the statement type.
+     */
+    private String determineStatementType(ElasticScriptParser.StatementContext ctx) {
+        if (ctx.declare_statement() != null) return "DECLARE";
+        if (ctx.var_statement() != null) return "VAR";
+        if (ctx.const_statement() != null) return "CONST";
+        if (ctx.assignment_statement() != null) return "ASSIGN";
+        if (ctx.if_statement() != null) return "IF";
+        if (ctx.switch_statement() != null) return "SWITCH";
+        if (ctx.loop_statement() != null) return "LOOP";
+        if (ctx.function_definition() != null) return "FUNCTION_DEF";
+        if (ctx.try_catch_statement() != null) return "TRY_CATCH";
+        if (ctx.throw_statement() != null) return "THROW";
+        if (ctx.execute_statement() != null) return "EXECUTE";
+        if (ctx.execute_immediate_statement() != null) return "EXECUTE_IMMEDIATE";
+        if (ctx.print_statement() != null) return "PRINT";
+        if (ctx.call_procedure_statement() != null) return "CALL";
+        if (ctx.intent_statement() != null) return "INTENT";
+        if (ctx.return_statement() != null) return "RETURN";
+        if (ctx.break_statement() != null) return "BREAK";
+        if (ctx.continue_statement() != null) return "CONTINUE";
+        if (ctx.expression_statement() != null) return "EXPRESSION";
+        if (ctx.function_call_statement() != null) return "FUNCTION_CALL";
+        if (ctx.open_cursor_statement() != null) return "OPEN_CURSOR";
+        if (ctx.fetch_cursor_statement() != null) return "FETCH_CURSOR";
+        if (ctx.close_cursor_statement() != null) return "CLOSE_CURSOR";
+        if (ctx.forall_statement() != null) return "FORALL";
+        if (ctx.bulk_collect_statement() != null) return "BULK_COLLECT";
+        if (ctx.async_procedure_statement() != null) return "ASYNC";
+        if (ctx.parallel_statement() != null) return "PARALLEL";
+        if (ctx.execution_control_statement() != null) return "EXECUTION_CONTROL";
+        if (ctx.esql_into_statement() != null) return "ESQL_INTO";
+        if (ctx.esql_process_statement() != null) return "ESQL_PROCESS";
+        if (ctx.index_command() != null) return "INDEX";
+        if (ctx.search_command() != null) return "SEARCH";
+        return "UNKNOWN";
     }
 }
