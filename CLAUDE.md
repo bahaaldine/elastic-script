@@ -232,13 +232,15 @@
    - `tests/e2e/run_tests.sh` - Shell wrapper with setup options
    - `tests/e2e/skip_cells.json` - Configuration for known issues
    - Uses `nbclient` to execute Jupyter notebooks as tests
-   - **Current results: 6/6 pass (100%)**
+   - **Current results: 8/8 pass (100%)**
      - ✅ 00-complete-reference.ipynb
      - ✅ 01-getting-started.ipynb
      - ✅ 02-esql-integration.ipynb
      - ⏭️ 03-ai-observability.ipynb (skipped - requires OpenAI key)
      - ✅ 04-async-execution.ipynb (1 cell skipped - STATUS storage bug)
      - ✅ 05-runbook-integrations.ipynb
+     - ✅ 06-scheduled-jobs.ipynb (1 cell skipped - real-time execution)
+     - ✅ 07-event-triggers.ipynb (2 cells skipped - real-time execution)
 2. **Complete Observability Integration** - API response with PRINT output, execution metadata
 3. ~~**APM/Tracing Integration**~~ ✅ Complete - OTEL Collector-based tracing
    - OTEL Collector downloaded and started automatically by quick-start.sh
@@ -300,6 +302,27 @@
 9. **Security** - API key management, RBAC integration
 10. **Monitoring** - Execution metrics, slow query logging
 
+### Recently Verified Features ✅
+11. ~~**Scheduled Jobs (CREATE JOB)**~~ ✅ Complete
+    - `CREATE JOB name SCHEDULE 'cron' AS BEGIN ... END JOB`
+    - `ALTER JOB name ENABLE/DISABLE` or `ALTER JOB name SCHEDULE 'cron'`
+    - `DROP JOB name`, `SHOW JOBS`, `SHOW JOB name`, `SHOW JOB RUNS FOR name`
+    - JobSchedulerService runs on leader node with leader election
+    - CronParser supports standard cron + aliases (@hourly, @daily, etc.)
+    - Notebook: `06-scheduled-jobs.ipynb`
+12. ~~**Event Triggers (CREATE TRIGGER)**~~ ✅ Complete
+    - `CREATE TRIGGER name ON INDEX 'pattern' WHEN condition EVERY interval AS BEGIN ... END TRIGGER`
+    - `ALTER TRIGGER name ENABLE/DISABLE` or `ALTER TRIGGER name EVERY interval`
+    - `DROP TRIGGER name`, `SHOW TRIGGERS`, `SHOW TRIGGER name`, `SHOW TRIGGER RUNS FOR name`
+    - TriggerPollingService polls for new documents and fires when conditions match
+    - Checkpoint-based processing ensures documents processed exactly once
+    - Notebook: `07-event-triggers.ipynb` (uses `==` for comparisons, `documents`/`document_count` variables)
+13. ~~**Package System**~~ ✅ Complete
+    - `CREATE PACKAGE name AS ... END PACKAGE` with PUBLIC/PRIVATE visibility
+    - `CREATE PACKAGE BODY name AS ... END PACKAGE` for implementations
+    - `DROP PACKAGE name`, `SHOW PACKAGE name`
+    - Supports procedures, functions, and variables with visibility modifiers
+
 ---
 
 ## 📁 Key Files & Locations
@@ -325,6 +348,8 @@ elastic-script/
 │   ├── 00-complete-reference.ipynb   # All functions showcase
 │   ├── 01-getting-started.ipynb
 │   ├── 02-esql-integration.ipynb
+│   ├── 06-scheduled-jobs.ipynb       # CREATE JOB with cron scheduling
+│   ├── 07-event-triggers.ipynb       # CREATE TRIGGER with polling
 │   ├── 03-ai-observability.ipynb
 │   ├── 04-async-execution.ipynb
 │   ├── 05-runbook-integrations.ipynb
