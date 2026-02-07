@@ -132,6 +132,7 @@ nav:
     - Profiler: language/profiler.md
     - User-Defined Types: language/user-defined-types.md
     - Async Execution: language/async-execution.md
+    - Intents: language/intents.md
     - Triggers & Scheduling: triggers-and-scheduling.md
   - Functions:
     - Overview: functions/overview.md
@@ -161,6 +162,7 @@ nav:
     - Namespaced Functions: notebooks/namespaced-functions.md
     - Cursors: notebooks/cursors.md
     - Bulk Operations: notebooks/bulk-operations.md
+    - Intents: notebooks/intents.md
     - Complete Reference: notebooks/complete-reference.md
   - Observability:
     - OpenTelemetry Tracing: observability/opentelemetry.md
