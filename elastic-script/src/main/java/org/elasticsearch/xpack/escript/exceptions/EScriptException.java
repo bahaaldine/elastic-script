@@ -9,7 +9,9 @@ package org.elasticsearch.xpack.escript.exceptions;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,6 +55,8 @@ public class EScriptException extends RuntimeException {
     
     private final String code;
     private final String type;
+    private SourceLocation sourceLocation;
+    private final List<EScriptStackFrame> escriptStack;
     
     /**
      * Constructs an EScriptException with just a message.
@@ -97,6 +101,35 @@ public class EScriptException extends RuntimeException {
         super(message, cause);
         this.code = code;
         this.type = type != null ? type : TYPE_GENERIC;
+        this.escriptStack = new ArrayList<>();
+    }
+    
+    /**
+     * Constructs an EScriptException with source location.
+     *
+     * @param message The error message
+     * @param location The source location where the error occurred
+     */
+    public EScriptException(String message, SourceLocation location) {
+        this(message, null, TYPE_GENERIC, null);
+        this.sourceLocation = location;
+    }
+    
+    /**
+     * Constructs an EScriptException with all fields including location.
+     *
+     * @param message The error message
+     * @param code The error code
+     * @param type The exception type
+     * @param location The source location
+     * @param cause The underlying cause
+     */
+    public EScriptException(String message, String code, String type, SourceLocation location, Throwable cause) {
+        super(message, cause);
+        this.code = code;
+        this.type = type != null ? type : TYPE_GENERIC;
+        this.sourceLocation = location;
+        this.escriptStack = new ArrayList<>();
     }
     
     /**
@@ -120,6 +153,21 @@ public class EScriptException extends RuntimeException {
         String code = inferCode(throwable);
         
         return new EScriptException(message, code, type, throwable);
+    }
+    
+    /**
+     * Creates an EScriptException from any Throwable with source location.
+     *
+     * @param throwable The original exception
+     * @param location The source location
+     * @return An EScriptException wrapping the original
+     */
+    public static EScriptException from(Throwable throwable, SourceLocation location) {
+        EScriptException ex = from(throwable);
+        if (location != null) {
+            ex.sourceLocation = location;
+        }
+        return ex;
     }
     
     /**
@@ -198,6 +246,64 @@ public class EScriptException extends RuntimeException {
     }
     
     /**
+     * Returns the source location where the error occurred.
+     */
+    public SourceLocation getSourceLocation() {
+        return sourceLocation;
+    }
+    
+    /**
+     * Sets the source location. Allows enriching the exception with location info.
+     */
+    public EScriptException withLocation(SourceLocation location) {
+        this.sourceLocation = location;
+        return this;
+    }
+    
+    /**
+     * Adds a frame to the elastic-script call stack.
+     * Frames are added in order from innermost to outermost.
+     */
+    public EScriptException addStackFrame(EScriptStackFrame frame) {
+        if (frame != null) {
+            escriptStack.add(frame);
+        }
+        return this;
+    }
+    
+    /**
+     * Adds a frame to the elastic-script call stack from a source location.
+     */
+    public EScriptException addStackFrame(SourceLocation location, String snippet) {
+        if (location != null) {
+            escriptStack.add(new EScriptStackFrame(location, snippet));
+        }
+        return this;
+    }
+    
+    /**
+     * Returns the elastic-script call stack.
+     */
+    public List<EScriptStackFrame> getEScriptStack() {
+        return escriptStack;
+    }
+    
+    /**
+     * Returns a formatted elastic-script stack trace.
+     */
+    public String getEScriptStackTrace() {
+        if (escriptStack.isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("Elastic-script stack trace:\n");
+        for (EScriptStackFrame frame : escriptStack) {
+            sb.append(frame.toString()).append("\n");
+        }
+        return sb.toString();
+    }
+    
+    /**
      * Checks if this exception matches the given named exception type.
      * Used for named CATCH blocks: CATCH http_error
      *
@@ -228,7 +334,41 @@ public class EScriptException extends RuntimeException {
             doc.put("cause", getCause().getMessage());
         }
         
+        // Add source location info
+        if (sourceLocation != null && sourceLocation.hasPosition()) {
+            doc.put("location", sourceLocation.toDocument());
+            doc.put("line", sourceLocation.getLine());
+            doc.put("column", sourceLocation.getColumn());
+            if (sourceLocation.getProcedureName() != null) {
+                doc.put("procedure", sourceLocation.getProcedureName());
+            }
+        }
+        
+        // Add elastic-script call stack
+        if (!escriptStack.isEmpty()) {
+            List<Map<String, Object>> stackDocs = new ArrayList<>();
+            for (EScriptStackFrame frame : escriptStack) {
+                stackDocs.add(frame.toDocument());
+            }
+            doc.put("escript_stack", stackDocs);
+            doc.put("escript_stack_trace", getEScriptStackTrace());
+        }
+        
         return doc;
+    }
+    
+    /**
+     * Returns a formatted error message with location information.
+     */
+    public String getFormattedMessage() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getMessage() != null ? getMessage() : "Unknown error");
+        
+        if (sourceLocation != null && sourceLocation.hasPosition()) {
+            sb.append(" (").append(sourceLocation.toLocationString()).append(")");
+        }
+        
+        return sb.toString();
     }
     
     @Override

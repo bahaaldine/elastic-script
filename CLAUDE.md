@@ -282,8 +282,13 @@
    - ESCRIPT_INTENTS() and ESCRIPT_INTENT() introspection functions
    - Notebook: `18-intents.ipynb`
    - Docs: `docs/language/intents.md`
-8. **Error Handling** - Better error messages and stack traces
-8. **Function Documentation** - Auto-generated docs from `@FunctionSpec` annotations
+8. ~~**Error Handling**~~ ✅ Complete
+   - `SourceLocation` class for line/column tracking
+   - `EScriptStackFrame` for elastic-script call stack
+   - Enhanced `EScriptException` with location and stack info
+   - `getFormattedMessage()` includes location context
+   - `toDocument()` includes line, column, procedure, stack trace
+9. **Function Documentation** - Auto-generated docs from `@FunctionSpec` annotations
 
 ### Low Priority
 8. **Performance Optimization** - Batch operations, connection pooling
