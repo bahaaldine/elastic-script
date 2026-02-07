@@ -23,30 +23,11 @@ import org.elasticsearch.logging.LogManager;
 import org.elasticsearch.logging.Logger;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.xcontent.XContentParser;
-import org.elasticsearch.xpack.escript.functions.community.FunctionLoader;
-import org.elasticsearch.xpack.escript.functions.builtin.datasources.ESFunctions;
-import org.elasticsearch.xpack.escript.functions.builtin.datasources.EsqlBuiltInFunctions;
-import org.elasticsearch.xpack.escript.functions.builtin.datatypes.DocumentBuiltInFunctions;
+import org.elasticsearch.xpack.escript.functions.BuiltInFunctionRegistry;
 import org.elasticsearch.xpack.escript.handlers.ElasticScriptErrorListener;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptLexer;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptParser;
 import org.elasticsearch.xpack.escript.context.ExecutionContext;
-import org.elasticsearch.xpack.escript.functions.builtin.datatypes.ArrayBuiltInFunctions;
-import org.elasticsearch.xpack.escript.functions.builtin.datatypes.DateBuiltInFunctions;
-import org.elasticsearch.xpack.escript.functions.builtin.datatypes.NumberBuiltInFunctions;
-import org.elasticsearch.xpack.escript.functions.builtin.datatypes.StringBuiltInFunctions;
-import org.elasticsearch.xpack.escript.functions.builtin.datatypes.MapBuiltInFunctions;
-import org.elasticsearch.xpack.escript.functions.builtin.inference.InferenceFunctions;
-import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.OpenAIFunctions;
-import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.S3Functions;
-import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.SlackFunctions;
-import org.elasticsearch.xpack.escript.functions.builtin.runbooks.KubernetesFunctions;
-import org.elasticsearch.xpack.escript.functions.builtin.runbooks.PagerDutyFunctions;
-import org.elasticsearch.xpack.escript.functions.builtin.runbooks.TerraformFunctions;
-import org.elasticsearch.xpack.escript.functions.builtin.runbooks.CICDFunctions;
-import org.elasticsearch.xpack.escript.functions.builtin.runbooks.AWSFunctions;
-import org.elasticsearch.xpack.escript.functions.builtin.runbooks.GenericFunctions;
-import org.elasticsearch.xpack.escript.functions.builtin.introspection.IntrospectionFunctions;
 import org.elasticsearch.xpack.escript.procedure.ProcedureDefinition;
 import org.elasticsearch.xpack.escript.utils.ActionListenerUtils;
 import org.elasticsearch.xpack.escript.visitors.ProcedureDefinitionVisitor;
@@ -67,6 +48,7 @@ public class ElasticScriptExecutor {
 
     private final ThreadPool threadPool;
     private final Client client;
+    private final BuiltInFunctionRegistry functionRegistry;
 
     private static final Logger LOGGER = LogManager.getLogger(ElasticScriptExecutor.class);
 
@@ -74,6 +56,7 @@ public class ElasticScriptExecutor {
     public ElasticScriptExecutor(ThreadPool threadPool, Client client) {
         this.threadPool = threadPool;
         this.client = client;
+        this.functionRegistry = BuiltInFunctionRegistry.getInstance(client);
     }
 
     /**
@@ -202,35 +185,9 @@ public class ElasticScriptExecutor {
 
                                 ProcedureExecutor procedureExecutor =
                                     new ProcedureExecutor(executionContext, threadPool, client, storedTokens);
-                                EsqlBuiltInFunctions.registerAll(executionContext, procedureExecutor, client);
-                                ESFunctions.registerGetDocumentFunction(executionContext, client);
-                                ESFunctions.registerUpdateDocumentFunction(executionContext, client);
-                                ESFunctions.registerIndexBulkFunction(executionContext, client);
-                                ESFunctions.registerIndexDocumentFunction(executionContext, client);
-                                ESFunctions.registerRefreshIndexFunction(executionContext, client);
-                                StringBuiltInFunctions.registerAll(executionContext);
-                                NumberBuiltInFunctions.registerAll(executionContext);
-                                ArrayBuiltInFunctions.registerAll(executionContext);
-                                DateBuiltInFunctions.registerAll(executionContext);
-                                DocumentBuiltInFunctions.registerAll(executionContext);
-                                MapBuiltInFunctions.registerAll(executionContext);
-                                OpenAIFunctions.registerAll(executionContext);
-                                SlackFunctions.registerAll(executionContext);
-                                S3Functions.registerAll(executionContext);
-                                InferenceFunctions.registerAll(executionContext, client);
                                 
-                                // Runbook integrations
-                                KubernetesFunctions.registerAll(executionContext);
-                                PagerDutyFunctions.registerAll(executionContext);
-                                TerraformFunctions.registerAll(executionContext);
-                                CICDFunctions.registerAll(executionContext);
-                                AWSFunctions.registerAll(executionContext);
-                                GenericFunctions.registerAll(executionContext);
-                                
-                                // Introspection functions (must be registered last to see all other functions)
-                                IntrospectionFunctions.registerAll(executionContext, client);
-
-                                FunctionLoader.loadCommunityFunctions(executionContext);
+                                // Register all built-in functions using cached registry
+                                functionRegistry.registerAll(executionContext, procedureExecutor);
 
                                 ActionListener<Object> execListener = ActionListenerUtils.withLogging(listener,
                                     this.getClass().getName(), "ExecuteStoredProcedure-" + procedureContent);

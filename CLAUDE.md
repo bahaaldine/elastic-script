@@ -258,14 +258,12 @@
    - Ensure continuation handlers can run on different nodes than initiator
 
 ### Medium Priority
-4. **Function Registration Performance** - Currently all 106 built-in functions are registered on EVERY execution:
-   ```
-   [INFO] Registering ESQL built-in functions
-   [INFO] Registering String built-in functions
-   [INFO] Registering Array built-in functions
-   ... (repeated for each request)
-   ```
-   Should register once at plugin startup, not per-request. Potential significant performance gain.
+4. ~~**Function Registration Performance**~~ ✅ Complete
+   - Created `BuiltInFunctionRegistry` singleton that caches function definitions
+   - Stateless functions (~70): cached permanently after first initialization
+   - Client-dependent functions (~20): cached per Client instance
+   - Executor-dependent functions (ESQL_QUERY): registered per request (required for variable substitution)
+   - Reduces per-request overhead from ~106 registrations to ~1
 5. **Intent System** - Complete DEFINE INTENT functionality
 6. **Error Handling** - Better error messages and stack traces
 8. **Function Documentation** - Auto-generated docs from `@FunctionSpec` annotations

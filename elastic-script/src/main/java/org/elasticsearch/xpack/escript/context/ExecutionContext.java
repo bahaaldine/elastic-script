@@ -479,6 +479,37 @@ public class ExecutionContext {
             functions.put(name, function);
         }
     }
+    
+    /**
+     * Declares a function only if it doesn't already exist.
+     * This is used by the BuiltInFunctionRegistry to efficiently copy cached functions
+     * without throwing exceptions for duplicates.
+     *
+     * @param name The function name.
+     * @param function The FunctionDefinition to register.
+     */
+    public void declareFunctionIfAbsent(String name, FunctionDefinition function) {
+        if (parentContext != null) {
+            parentContext.declareFunctionIfAbsent(name, function);
+        } else {
+            functions.putIfAbsent(name, function);
+        }
+    }
+    
+    /**
+     * Retrieves all functions from this context and all parent contexts.
+     * Used for caching built-in functions.
+     *
+     * @return A Map of all function names to FunctionDefinition objects.
+     */
+    public Map<String, FunctionDefinition> getAllFunctions() {
+        Map<String, FunctionDefinition> allFunctions = new HashMap<>();
+        if (parentContext != null) {
+            allFunctions.putAll(parentContext.getAllFunctions());
+        }
+        allFunctions.putAll(functions);
+        return allFunctions;
+    }
 
     /**
      * Checks if a function with the specified name exists in the current or any parent context.
