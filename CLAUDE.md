@@ -275,7 +275,13 @@
    - Added determineStatementType() for granular span names
    - Traces capture execution ID, procedure name, statement count
    - Errors automatically captured in spans
-7. **Intent System** - Complete DEFINE INTENT functionality
+7. ~~**Intent System**~~ ✅ Complete
+   - DEFINE INTENT with DESCRIPTION, REQUIRES, ACTIONS, ON_FAILURE
+   - INTENT invocation with positional and named arguments
+   - IntentRegistry for storing intents
+   - ESCRIPT_INTENTS() and ESCRIPT_INTENT() introspection functions
+   - Notebook: `18-intents.ipynb`
+   - Docs: `docs/language/intents.md`
 8. **Error Handling** - Better error messages and stack traces
 8. **Function Documentation** - Auto-generated docs from `@FunctionSpec` annotations
 
