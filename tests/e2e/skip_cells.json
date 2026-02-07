@@ -8,12 +8,12 @@
     "reason": "Requires OpenAI API key and Elasticsearch license for inference"
   },
   "06-scheduled-jobs.ipynb": {
-    "skip_all": true,
-    "reason": "Scheduled jobs feature requires background services - not fully implemented yet"
+    "skip_cells": [19],
+    "reason": "Cell 19 waits for job to run - requires real-time execution"
   },
   "07-event-triggers.ipynb": {
-    "skip_all": true,
-    "reason": "Event triggers feature requires background services - not fully implemented yet"
+    "skip_cells": [15, 16],
+    "reason": "Cells 15-16 wait for trigger to fire - requires real-time execution"
   },
   "08-esql-augmentation.ipynb": {
     "skip_all": true,
