@@ -254,12 +254,13 @@
    - Child spans for statements, ESQL queries, external calls
 4. ~~**Async Execution Runtime**~~ ✅ Complete - ON_DONE, ON_FAIL, PARALLEL all working
 5. ~~**ExecutionRegistry Persistence**~~ ✅ Complete - `.escript_executions` index auto-created
-6. ~~**Multi-Node Distributed Execution**~~ ✅ Complete - Multi-node testing framework:
+6. **Multi-Node Distributed Execution** - Framework ready, comprehensive testing pending:
    - [x] `ExecutionRegistry` stores state in `.escript_executions` index (cluster-wide)
    - [x] `LeaderElectionService` for job/trigger scheduling (single leader)
    - [x] Unit tests for `ExecutionState`, `ExecutionPipeline`, `Continuation`
    - [x] Test notebook `08-multinode-testing.ipynb` for verification
    - [x] Documentation for Docker Compose multi-node setup
+   - [ ] **Comprehensive multi-node cluster testing** (pending manual verification)
 
 ### Medium Priority
 4. ~~**Function Registration Performance**~~ ✅ Complete
