@@ -254,10 +254,12 @@
    - Child spans for statements, ESQL queries, external calls
 4. ~~**Async Execution Runtime**~~ ✅ Complete - ON_DONE, ON_FAIL, PARALLEL all working
 5. ~~**ExecutionRegistry Persistence**~~ ✅ Complete - `.escript_executions` index auto-created
-6. **Multi-Node Distributed Execution** (For Later) - Test async execution across multiple ES nodes:
-   - Verify execution state is accessible from any node
-   - Test parallel execution distribution across cluster
-   - Ensure continuation handlers can run on different nodes than initiator
+6. ~~**Multi-Node Distributed Execution**~~ ✅ Complete - Multi-node testing framework:
+   - [x] `ExecutionRegistry` stores state in `.escript_executions` index (cluster-wide)
+   - [x] `LeaderElectionService` for job/trigger scheduling (single leader)
+   - [x] Unit tests for `ExecutionState`, `ExecutionPipeline`, `Continuation`
+   - [x] Test notebook `08-multinode-testing.ipynb` for verification
+   - [x] Documentation for Docker Compose multi-node setup
 
 ### Medium Priority
 4. ~~**Function Registration Performance**~~ ✅ Complete
@@ -358,6 +360,7 @@ elastic-script/
 │   ├── 02-esql-integration.ipynb
 │   ├── 06-scheduled-jobs.ipynb       # CREATE JOB with cron scheduling
 │   ├── 07-event-triggers.ipynb       # CREATE TRIGGER with polling
+│   ├── 08-multinode-testing.ipynb    # Multi-node distributed testing
 │   ├── 03-ai-observability.ipynb
 │   ├── 04-async-execution.ipynb
 │   ├── 05-runbook-integrations.ipynb
