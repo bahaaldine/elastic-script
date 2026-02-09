@@ -333,6 +333,49 @@
     - ProfileResult captures statement, function, and ESQL query timings
     - Automatic recommendations for slow queries and high ESQL percentage
     - Stored in `.escript_profiles` index
+15. ~~**Intelligent Data Applications**~~ ✅ Complete
+    - **Application Framework**: Bundle procedures, skills, intents, sources into deployable units
+      - `CREATE APPLICATION name ... END APPLICATION`
+      - `INSTALL APPLICATION name CONFIG (key => value, ...)`
+      - `DROP APPLICATION name`
+      - `ALTER APPLICATION name SET/ENABLE/DISABLE`
+      - `SHOW APPLICATIONS`, `SHOW APPLICATION name`, `SHOW APPLICATION name SKILLS/INTENTS`
+      - `EXTEND APPLICATION name ADD SKILL/INTENT/SOURCE`
+      - `APPLICATION name | STATUS/PAUSE/RESUME`
+    - **Skills System**: AI-callable procedures with MCP/OpenAI function calling support
+      - `SkillDefinition` with parameters, return types, descriptions
+      - MCP tool spec generation for AI agent integration
+      - REST API: `GET /_escript/skills`, `POST /_escript/skills/{name}/_invoke`
+    - **Intent System**: Natural language pattern matching to skills
+      - `IntentDefinition` with pattern matching and confidence scoring
+      - Pattern syntax: `"churn|leaving|at risk" => detect_churn`
+      - REST API: `POST /_escript/intent`, `POST /_escript/intent/_match`
+    - **Data Structures**:
+      - `ApplicationDefinition` - Complete application bundle
+      - `SkillDefinition` - AI-callable procedure wrapper
+      - `IntentDefinition` - NL pattern to skill mapping
+      - `ApplicationRegistry` - Storage in `.escript_applications` index
+    - **Three Interfaces**:
+      1. Human: Natural language → Intent matching → Skill execution
+      2. AI Agent: MCP/function calling → Typed skill invocation
+      3. Developer: Direct procedure calls
+    - Notebook: `12-intelligent-data-applications.ipynb`
+16. ~~**Standalone Skills System**~~ ✅ Complete
+    - **First-class skill objects** independent of applications
+    - **Grammar statements**:
+      - `CREATE SKILL name(params) RETURNS type DESCRIPTION 'desc' EXAMPLES '...' PROCEDURE proc(args) END SKILL`
+      - `DROP SKILL name`
+      - `SHOW SKILLS`, `SHOW SKILL name`
+      - `ALTER SKILL name SET DESCRIPTION = 'new desc'`
+      - `GENERATE SKILL FROM 'natural language description' [WITH MODEL 'gpt-4'] [SAVE AS name]`
+    - **Skill parameters with metadata**:
+      - Type declarations (NUMBER, STRING, BOOLEAN, ARRAY, DOCUMENT)
+      - Parameter descriptions
+      - Default values
+    - **AI generation**: Natural language to skill template
+    - **SkillRegistry**: Storage in `.escript_skills` index with caching
+    - **Examples field**: For AI discovery and intent matching
+    - Notebook: `22-standalone-skills.ipynb`
 
 ---
 
@@ -368,7 +411,9 @@ elastic-script/
 │   ├── 12-exception-handling.ipynb    # TRY/CATCH/FINALLY
 │   ├── 13-user-defined-functions.ipynb # CREATE FUNCTION
 │   ├── 14-execute-immediate.ipynb      # Dynamic ES|QL
-│   └── 15-map-type.ipynb               # MAP associative arrays
+│   ├── 15-map-type.ipynb               # MAP associative arrays
+│   ├── 12-intelligent-data-applications.ipynb # Skills, Intents, Applications
+│   └── 22-standalone-skills.ipynb            # Standalone skill management
 ├── tests/e2e/                         # E2E test framework
 │   ├── README.md                      # E2E documentation
 │   ├── run_notebook_tests.py          # Programmatic notebook execution

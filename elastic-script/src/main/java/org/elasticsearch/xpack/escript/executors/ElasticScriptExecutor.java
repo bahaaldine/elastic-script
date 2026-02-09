@@ -39,6 +39,8 @@ import org.elasticsearch.xpack.escript.handlers.PermissionStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.ProfileStatementHandler;
 import org.elasticsearch.xpack.escript.profiling.ProfileResult;
 import org.elasticsearch.xpack.escript.handlers.TypeStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.ApplicationStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.SkillStatementHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -275,6 +277,12 @@ public class ElasticScriptExecutor {
                 } else if (programContext.type_statement() != null) {
                     // Handle TYPE statements (CREATE TYPE, DROP TYPE, SHOW TYPES)
                     handleTypeStatement(programContext.type_statement(), listener);
+                } else if (programContext.application_statement() != null) {
+                    // Handle APPLICATION statements (CREATE APPLICATION, INSTALL APPLICATION, DROP APPLICATION, etc.)
+                    handleApplicationStatement(programContext.application_statement(), listener);
+                } else if (programContext.skill_statement() != null) {
+                    // Handle SKILL statements (CREATE SKILL, DROP SKILL, SHOW SKILLS, ALTER SKILL, GENERATE SKILL)
+                    handleSkillStatement(programContext.skill_statement(), listener);
                 } else {
                     listener.onFailure(new IllegalArgumentException("Unsupported top-level statement"));
                 }
@@ -886,6 +894,95 @@ public class ElasticScriptExecutor {
             }
         } else {
             listener.onFailure(new IllegalArgumentException("Unknown TYPE statement type"));
+        }
+    }
+
+    /**
+     * Handles APPLICATION statements (CREATE APPLICATION, INSTALL APPLICATION, DROP APPLICATION, ALTER APPLICATION,
+     * SHOW APPLICATIONS, EXTEND APPLICATION, APPLICATION | STATUS/PAUSE/RESUME).
+     */
+    private void handleApplicationStatement(ElasticScriptParser.Application_statementContext ctx,
+                                           ActionListener<Object> listener) {
+        ApplicationStatementHandler handler = new ApplicationStatementHandler(client);
+
+        if (ctx.create_application_statement() != null) {
+            handler.handleCreateApplication(ctx.create_application_statement(), listener);
+        } else if (ctx.install_application_statement() != null) {
+            handler.handleInstallApplication(ctx.install_application_statement(), listener);
+        } else if (ctx.drop_application_statement() != null) {
+            handler.handleDropApplication(ctx.drop_application_statement(), listener);
+        } else if (ctx.alter_application_statement() != null) {
+            ElasticScriptParser.Alter_application_statementContext alterCtx = ctx.alter_application_statement();
+            if (alterCtx instanceof ElasticScriptParser.AlterApplicationConfigContext) {
+                handler.handleAlterApplicationConfig((ElasticScriptParser.AlterApplicationConfigContext) alterCtx, listener);
+            } else if (alterCtx instanceof ElasticScriptParser.AlterApplicationEnableDisableContext) {
+                handler.handleAlterApplicationEnableDisable((ElasticScriptParser.AlterApplicationEnableDisableContext) alterCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown ALTER APPLICATION variant"));
+            }
+        } else if (ctx.show_applications_statement() != null) {
+            ElasticScriptParser.Show_applications_statementContext showCtx = ctx.show_applications_statement();
+            if (showCtx instanceof ElasticScriptParser.ShowAllApplicationsContext) {
+                handler.handleShowAllApplications(listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowApplicationDetailContext) {
+                handler.handleShowApplicationDetail((ElasticScriptParser.ShowApplicationDetailContext) showCtx, listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowApplicationSkillsContext) {
+                handler.handleShowApplicationSkills((ElasticScriptParser.ShowApplicationSkillsContext) showCtx, listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowApplicationIntentsContext) {
+                handler.handleShowApplicationIntents((ElasticScriptParser.ShowApplicationIntentsContext) showCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown SHOW APPLICATION variant"));
+            }
+        } else if (ctx.extend_application_statement() != null) {
+            ElasticScriptParser.Extend_application_statementContext extendCtx = ctx.extend_application_statement();
+            if (extendCtx instanceof ElasticScriptParser.ExtendApplicationAddContext) {
+                handler.handleExtendApplicationAdd((ElasticScriptParser.ExtendApplicationAddContext) extendCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown EXTEND APPLICATION variant"));
+            }
+        } else if (ctx.application_control_statement() != null) {
+            ElasticScriptParser.Application_control_statementContext controlCtx = ctx.application_control_statement();
+            ElasticScriptParser.Application_control_operationContext opCtx = controlCtx.application_control_operation();
+            if (opCtx instanceof ElasticScriptParser.AppStatusOperationContext) {
+                handler.handleAppStatusOperation(controlCtx, listener);
+            } else if (opCtx instanceof ElasticScriptParser.AppPauseOperationContext) {
+                handler.handleAppPauseOperation(controlCtx, listener);
+            } else if (opCtx instanceof ElasticScriptParser.AppResumeOperationContext) {
+                handler.handleAppResumeOperation(controlCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown APPLICATION control operation"));
+            }
+        } else {
+            listener.onFailure(new IllegalArgumentException("Unknown APPLICATION statement type"));
+        }
+    }
+
+    /**
+     * Handles SKILL statements (CREATE SKILL, DROP SKILL, SHOW SKILLS, ALTER SKILL, GENERATE SKILL).
+     */
+    private void handleSkillStatement(ElasticScriptParser.Skill_statementContext ctx,
+                                      ActionListener<Object> listener) {
+        SkillStatementHandler handler = new SkillStatementHandler(client);
+
+        if (ctx.create_skill_statement() != null) {
+            handler.handleCreateSkill(ctx.create_skill_statement(), listener);
+        } else if (ctx.drop_skill_statement() != null) {
+            handler.handleDropSkill(ctx.drop_skill_statement(), listener);
+        } else if (ctx.show_skills_statement() != null) {
+            ElasticScriptParser.Show_skills_statementContext showCtx = ctx.show_skills_statement();
+            if (showCtx instanceof ElasticScriptParser.ShowAllSkillsContext) {
+                handler.handleShowAllSkills(listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowSkillDetailContext) {
+                handler.handleShowSkillDetail((ElasticScriptParser.ShowSkillDetailContext) showCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown SHOW SKILL variant"));
+            }
+        } else if (ctx.alter_skill_statement() != null) {
+            handler.handleAlterSkill(ctx.alter_skill_statement(), listener);
+        } else if (ctx.generate_skill_statement() != null) {
+            handler.handleGenerateSkill(ctx.generate_skill_statement(), listener);
+        } else {
+            listener.onFailure(new IllegalArgumentException("Unknown SKILL statement type"));
         }
     }
     

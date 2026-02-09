@@ -79,6 +79,30 @@ PROFILES: 'PROFILES';
 CLEAR: 'CLEAR';
 ANALYZE: 'ANALYZE';
 
+// Applications (Intelligent Data Applications)
+APPLICATION: 'APPLICATION';
+APPLICATIONS: 'APPLICATIONS';
+INSTALL: 'INSTALL';
+EXTEND: 'EXTEND';
+SKILL: 'SKILL';
+SKILLS: 'SKILLS';
+INTENTS: 'INTENTS';
+SOURCE: 'SOURCE';
+SOURCES: 'SOURCES';
+VERSION: 'VERSION';
+CONFIG: 'CONFIG';
+PAUSE: 'PAUSE';
+RESUME: 'RESUME';
+HISTORY: 'HISTORY';
+ADD: 'ADD';
+REMOVE: 'REMOVE';
+MODIFY: 'MODIFY';
+END_APPLICATION: 'END APPLICATION';
+END_SKILL: 'END SKILL';
+GENERATE: 'GENERATE';
+EXAMPLES: 'EXAMPLES';
+MODEL: 'MODEL';
+
 // User-Defined Types
 TYPE: 'TYPE';
 TYPES: 'TYPES';
@@ -326,6 +350,8 @@ program
     | permission_statement
     | profile_statement
     | type_statement
+    | application_statement
+    | skill_statement
     ;
 
 procedure
@@ -840,6 +866,7 @@ namespaced_function_call
 method_name
     : ID
     | MAP_TYPE    // ARRAY.MAP(...) - MAP is a keyword but valid method name
+    | ADD         // DATE.ADD(...) - ADD is a keyword but valid method name
     ;
 
 // Namespace identifier - can be ID or type keywords used as namespace
@@ -1393,4 +1420,213 @@ drop_type_statement
 show_types_statement
     : SHOW TYPES                                         # showAllTypes
     | SHOW TYPE ID                                       # showTypeDetail
+    ;
+
+// =======================
+// Application Rules (Intelligent Data Applications)
+// =======================
+// Applications bundle skills, intents, sources, jobs, and triggers
+// into deployable, configurable units
+
+application_statement
+    : create_application_statement
+    | install_application_statement
+    | drop_application_statement
+    | alter_application_statement
+    | show_applications_statement
+    | extend_application_statement
+    | application_control_statement
+    ;
+
+// CREATE APPLICATION name
+//   [DESCRIPTION 'desc']
+//   [VERSION 'x.y.z']
+//   [SOURCES (...)]
+//   [SKILLS (...)]
+//   [INTENTS (...)]
+//   [JOBS (...)]
+//   [TRIGGERS (...)]
+// END APPLICATION
+create_application_statement
+    : CREATE APPLICATION ID
+      (DESCRIPTION STRING)?
+      (VERSION STRING)?
+      application_section*
+      END_APPLICATION
+    ;
+
+application_section
+    : sources_section
+    | skills_section
+    | intents_section
+    | jobs_section
+    | triggers_section
+    ;
+
+// SOURCES (name FROM "index-pattern", ...)
+sources_section
+    : SOURCES LPAREN source_definition (COMMA source_definition)* RPAREN
+    ;
+
+source_definition
+    : ID FROM STRING
+    ;
+
+// SKILLS (skill_name(params) RETURNS type DESCRIPTION 'desc' AS procedure_call, ...)
+skills_section
+    : SKILLS LPAREN skill_definition (COMMA skill_definition)* RPAREN
+    ;
+
+skill_definition
+    : ID LPAREN (parameter_list)? RPAREN 
+      RETURNS datatype 
+      (DESCRIPTION STRING)?
+      AS ID LPAREN (argument_list)? RPAREN
+    ;
+
+// INTENTS (pattern => skill_name, ...)
+intents_section
+    : INTENTS LPAREN intent_mapping (COMMA intent_mapping)* RPAREN
+    ;
+
+intent_mapping
+    : STRING ARROW ID                     // "find churning customers" => detect_churn
+    ;
+
+// JOBS (job_name SCHEDULE 'cron' AS procedure(), ...)
+jobs_section
+    : JOBS LPAREN job_definition (COMMA job_definition)* RPAREN
+    ;
+
+job_definition
+    : ID SCHEDULE STRING AS ID LPAREN (argument_list)? RPAREN
+    ;
+
+// TRIGGERS (ON condition DO procedure(), ...)
+triggers_section
+    : TRIGGERS LPAREN trigger_definition (COMMA trigger_definition)* RPAREN
+    ;
+
+trigger_definition
+    : ON_KW ID (WHEN expression)? DO ID LPAREN (argument_list)? RPAREN
+    ;
+
+// INSTALL APPLICATION 'name' [CONFIG (key => value, ...)]
+install_application_statement
+    : INSTALL APPLICATION (STRING | ID)
+      (CONFIG LPAREN config_item (COMMA config_item)* RPAREN)?
+    ;
+
+config_item
+    : ID ARROW expression                 // orders_index => 'my-orders-*'
+    ;
+
+// DROP APPLICATION name
+drop_application_statement
+    : DROP APPLICATION ID
+    ;
+
+// ALTER APPLICATION name SET key = value, ...
+// ALTER APPLICATION name ENABLE|DISABLE
+alter_application_statement
+    : ALTER APPLICATION ID SET config_item (COMMA config_item)*    # alterApplicationConfig
+    | ALTER APPLICATION ID (ENABLE | DISABLE)                       # alterApplicationEnableDisable
+    ;
+
+// SHOW APPLICATIONS / SHOW APPLICATION name
+show_applications_statement
+    : SHOW APPLICATIONS                                  # showAllApplications
+    | SHOW APPLICATION ID                                # showApplicationDetail
+    | SHOW APPLICATION ID SKILLS                         # showApplicationSkills
+    | SHOW APPLICATION ID INTENTS                        # showApplicationIntents
+    | SHOW APPLICATION ID HISTORY                        # showApplicationHistory
+    ;
+
+// EXTEND APPLICATION name ADD|REMOVE|MODIFY ...
+extend_application_statement
+    : EXTEND APPLICATION ID ADD application_extension    # extendApplicationAdd
+    | EXTEND APPLICATION ID REMOVE application_removal   # extendApplicationRemove
+    ;
+
+application_extension
+    : SKILL skill_definition                             # addSkillExtension
+    | INTENT intent_mapping                              # addIntentExtension
+    | SOURCE source_definition                           # addSourceExtension
+    ;
+
+application_removal
+    : SKILL ID                                           # removeSkillExtension
+    | INTENT STRING                                      # removeIntentExtension
+    | SOURCE ID                                          # removeSourceExtension
+    ;
+
+// APPLICATION 'name' | STATUS / PAUSE / RESUME / HISTORY
+application_control_statement
+    : APPLICATION (STRING | ID) PIPE application_control_operation
+    ;
+
+application_control_operation
+    : STATUS                                             # appStatusOperation
+    | PAUSE                                              # appPauseOperation
+    | RESUME                                             # appResumeOperation
+    | HISTORY (LIMIT INT)?                               # appHistoryOperation
+    ;
+
+// ============================================================================
+// STANDALONE SKILL STATEMENTS
+// ============================================================================
+
+skill_statement
+    : create_skill_statement
+    | drop_skill_statement
+    | show_skills_statement
+    | alter_skill_statement
+    | generate_skill_statement
+    ;
+
+// CREATE SKILL name(params) RETURNS type DESCRIPTION 'desc' 
+//   PROCEDURE proc_name(args)
+// END SKILL
+create_skill_statement
+    : CREATE SKILL ID LPAREN skill_param_list? RPAREN
+      (RETURNS datatype)?
+      (DESCRIPTION STRING)?
+      (EXAMPLES STRING (COMMA STRING)*)?
+      PROCEDURE ID LPAREN argument_list? RPAREN
+      END_SKILL
+    ;
+
+skill_param_list
+    : skill_param (COMMA skill_param)*
+    ;
+
+skill_param
+    : ID datatype (DESCRIPTION STRING)? (DEFAULT expression)?
+    ;
+
+// DROP SKILL name
+drop_skill_statement
+    : DROP SKILL ID
+    ;
+
+// SHOW SKILLS / SHOW SKILL name
+show_skills_statement
+    : SHOW SKILLS                                        # showAllSkills
+    | SHOW SKILL ID                                      # showSkillDetail
+    ;
+
+// ALTER SKILL name SET DESCRIPTION = 'new desc'
+alter_skill_statement
+    : ALTER SKILL ID SET skill_property EQ expression
+    ;
+
+skill_property
+    : DESCRIPTION
+    | PROCEDURE
+    ;
+
+// GENERATE SKILL FROM 'natural language description'
+// GENERATE SKILL FROM 'desc' WITH MODEL 'gpt-4'
+generate_skill_statement
+    : GENERATE SKILL FROM STRING (WITH MODEL STRING)? (SAVE_KW AS ID)?
     ;

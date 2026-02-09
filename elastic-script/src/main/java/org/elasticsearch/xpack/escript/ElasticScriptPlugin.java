@@ -36,6 +36,9 @@ import org.elasticsearch.xpack.escript.actions.TransportElasticScriptAction;
 import org.elasticsearch.xpack.escript.scheduling.LeaderElectionService;
 import org.elasticsearch.xpack.escript.scheduling.JobSchedulerService;
 import org.elasticsearch.xpack.escript.scheduling.TriggerPollingService;
+import org.elasticsearch.xpack.escript.applications.ApplicationRegistry;
+import org.elasticsearch.xpack.escript.actions.RestSkillsAction;
+import org.elasticsearch.xpack.escript.actions.RestIntentAction;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -52,6 +55,9 @@ public class ElasticScriptPlugin extends Plugin implements ActionPlugin {
     private LeaderElectionService leaderElectionService;
     private JobSchedulerService jobSchedulerService;
     private TriggerPollingService triggerPollingService;
+    
+    // Application registry for skills/intents
+    private ApplicationRegistry applicationRegistry;
 
     private static final Logger LOGGER = LogManager.getLogger(ElasticScriptPlugin.class);
 
@@ -63,6 +69,9 @@ public class ElasticScriptPlugin extends Plugin implements ActionPlugin {
 
         // Initialize ElasticScriptExecutor
         elasticScriptExecutor = new ElasticScriptExecutor(threadPool, client);
+        
+        // Initialize ApplicationRegistry for skills and intents
+        applicationRegistry = new ApplicationRegistry(client);
 
         // Initialize scheduling services
         LOGGER.info("Initializing elastic-script scheduling services");
@@ -119,7 +128,9 @@ public class ElasticScriptPlugin extends Plugin implements ActionPlugin {
     ) {
         return List.of(
             new RestRunEScriptAction(elasticScriptExecutor),
-            new RestGetProcedureAction(elasticScriptExecutor)
+            new RestGetProcedureAction(elasticScriptExecutor),
+            new RestSkillsAction(applicationRegistry, elasticScriptExecutor),
+            new RestIntentAction(applicationRegistry, elasticScriptExecutor)
         );
     }
 

@@ -71,8 +71,9 @@ The test runner uses `nbclient` to:
 | 19-security-permissions | ✅ PASSED | GRANT/REVOKE syntax |
 | 20-profiler | ❌ FAILED | Profiler not implemented |
 | 21-user-defined-types | ✅ PASSED | CREATE TYPE |
+| 22-standalone-skills | ✅ PASSED | CREATE/DROP/SHOW/ALTER/GENERATE SKILL |
 
-**Summary: 12 PASSED, 6 FAILED, 4 SKIPPED**
+**Summary: 13 PASSED, 6 FAILED, 4 SKIPPED**
 
 ## Running with Sample Data
 

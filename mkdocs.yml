@@ -133,6 +133,7 @@ nav:
     - User-Defined Types: language/user-defined-types.md
     - Async Execution: language/async-execution.md
     - Intents: language/intents.md
+    - Standalone Skills: language/skills.md
     - Triggers & Scheduling: triggers-and-scheduling.md
   - Functions:
     - Overview: functions/overview.md
@@ -163,6 +164,7 @@ nav:
     - Cursors: notebooks/cursors.md
     - Bulk Operations: notebooks/bulk-operations.md
     - Intents: notebooks/intents.md
+    - Standalone Skills: notebooks/standalone-skills.md
     - Complete Reference: notebooks/complete-reference.md
   - Observability:
     - OpenTelemetry Tracing: observability/opentelemetry.md
