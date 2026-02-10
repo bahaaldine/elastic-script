@@ -110,13 +110,31 @@ class ElasticScriptREPL:
         if not text and self._in_multiline:
             return False
         
+        # Empty input doesn't need continuation
+        if not text:
+            return False
+        
+        upper_text = text.upper()
+        
+        # Check if we started a CREATE PROCEDURE/FUNCTION that hasn't ended
+        if ('CREATE PROCEDURE' in upper_text or 'CREATE FUNCTION' in upper_text):
+            if 'END PROCEDURE' not in upper_text and 'END FUNCTION' not in upper_text:
+                return True
+        
+        # Check if we started a CREATE SKILL that hasn't ended
+        if 'CREATE SKILL' in upper_text and 'END SKILL' not in upper_text:
+            return True
+        
+        # Check if we started TRY that hasn't ended
+        if 'TRY' in upper_text and 'END TRY' not in upper_text:
+            return True
+        
         # Semicolon at end usually means complete
         if text.endswith(';'):
             # But check for block balance
             return not self._is_balanced(text)
         
         # Check for continuation keywords at end
-        upper_text = text.upper()
         for keyword in CONTINUATION_KEYWORDS:
             if upper_text.endswith(keyword):
                 return True
