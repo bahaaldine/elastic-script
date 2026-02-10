@@ -221,30 +221,277 @@ class OutputFormatter:
         """Print a success message."""
         self.console.print(f"[green]✓[/] {message}")
     
-    def print_help(self):
+    def print_help(self, topic: str = None):
         """Print help information."""
+        if topic is None:
+            self._print_main_help()
+        elif topic == "examples":
+            self._print_examples_help()
+        elif topic == "functions":
+            self._print_functions_help()
+        elif topic == "tutorial":
+            self._print_tutorial()
+        elif topic == "syntax":
+            self._print_syntax_help()
+        else:
+            self._print_main_help()
+    
+    def _print_main_help(self):
+        """Print main help menu."""
         help_text = """
-[bold]Commands:[/]
-  [cyan]help[/]        Show this help message
-  [cyan]exit[/]        Exit the CLI (or Ctrl+D)
-  [cyan]clear[/]       Clear the screen
-  [cyan]history[/]     Show command history
-  [cyan]config[/]      Show current configuration
+[bold cyan]Welcome to elastic-script![/] A procedural scripting language for Elasticsearch.
+
+[bold]Quick Start:[/]
+  [green]help examples[/]   Show ready-to-run examples
+  [green]help tutorial[/]   Interactive getting started guide
+  [green]help functions[/]  List available built-in functions
+  [green]help syntax[/]     Language syntax reference
+
+[bold]CLI Commands:[/]
+  [cyan]help[/]             This help menu
+  [cyan]exit[/]             Exit (or Ctrl+D)
+  [cyan]clear[/]            Clear screen
+  [cyan]history[/]          Show command history
+  [cyan]config[/]           Show configuration
+
+[bold]Try These:[/]
+  [dim]# Create a simple procedure[/]
+  [yellow]CREATE PROCEDURE hello() BEGIN PRINT 'Hello World!'; END PROCEDURE;[/]
   
-[bold]Keyboard Shortcuts:[/]
-  [cyan]Tab[/]         Auto-complete
-  [cyan]Ctrl+D[/]      Exit
-  [cyan]Ctrl+C[/]      Cancel current input
-  [cyan]Ctrl+L[/]      Clear screen
-  [cyan]Up/Down[/]     Navigate history
-  [cyan]Ctrl+R[/]      Search history
+  [dim]# Call it[/]
+  [yellow]CALL hello()[/]
   
-[bold]Multi-line Input:[/]
-  Statements ending with keywords like BEGIN, THEN, LOOP
-  automatically continue to the next line. End with a
-  semicolon or blank line to execute.
+  [dim]# Query Elasticsearch with ES|QL[/]
+  [yellow]CALL ESQL_QUERY('FROM logs-* | LIMIT 5')[/]
+
+[bold]Keyboard:[/] [cyan]Tab[/]=complete  [cyan]↑↓[/]=history  [cyan]Ctrl+R[/]=search  [cyan]Ctrl+L[/]=clear
         """
-        self.console.print(Panel(help_text.strip(), title="[bold]Help[/]", box=self._box))
+        self.console.print(Panel(help_text.strip(), title="[bold]elastic-script Help[/]", box=self._box))
+    
+    def _print_examples_help(self):
+        """Print example queries."""
+        examples = """
+[bold cyan]Ready-to-Run Examples[/]
+
+[bold]1. Hello World[/]
+[yellow]CREATE PROCEDURE greet(name STRING)
+BEGIN
+  PRINT 'Hello, ' || name || '!';
+END PROCEDURE;
+
+CALL greet('World')[/]
+
+[bold]2. Query Elasticsearch[/]
+[yellow]-- Get recent logs
+CALL ESQL_QUERY('FROM logs-* | SORT @timestamp DESC | LIMIT 10')
+
+-- Count by status
+CALL ESQL_QUERY('FROM logs-* | STATS count = COUNT(*) BY status')[/]
+
+[bold]3. Variables and Control Flow[/]
+[yellow]CREATE PROCEDURE analyze_logs()
+BEGIN
+  DECLARE error_count NUMBER;
+  SET error_count = ESQL_QUERY('FROM logs-* | WHERE level = "ERROR" | STATS c = COUNT(*)')[0].c;
+  
+  IF error_count > 100 THEN
+    PRINT 'Alert: ' || error_count || ' errors found!';
+  ELSE
+    PRINT 'System healthy: ' || error_count || ' errors';
+  END IF;
+END PROCEDURE;[/]
+
+[bold]4. Loop Through Results[/]
+[yellow]CREATE PROCEDURE list_indices()
+BEGIN
+  DECLARE indices ARRAY;
+  SET indices = ESQL_QUERY('SHOW INDICES');
+  
+  FOR idx IN indices LOOP
+    PRINT 'Index: ' || idx.index;
+  END LOOP;
+END PROCEDURE;[/]
+
+[bold]5. Error Handling[/]
+[yellow]CREATE PROCEDURE safe_query()
+BEGIN
+  TRY
+    CALL ESQL_QUERY('FROM nonexistent-index');
+  CATCH
+    PRINT 'Error: ' || @error.message;
+  END TRY;
+END PROCEDURE;[/]
+
+[dim]Copy any example and paste it to try![/]
+        """
+        self.console.print(Panel(examples.strip(), title="[bold]Examples[/]", box=self._box))
+    
+    def _print_functions_help(self):
+        """Print available functions."""
+        functions = """
+[bold cyan]Built-in Functions (118 total)[/]
+
+[bold]String Functions[/]
+  LENGTH, UPPER, LOWER, TRIM, SUBSTR, REPLACE, SPLIT, CONCAT
+  REGEXP_REPLACE, REGEXP_SUBSTR, REVERSE, INITCAP, LPAD, RPAD
+
+[bold]Array Functions[/]
+  ARRAY_LENGTH, ARRAY_APPEND, ARRAY_CONTAINS, ARRAY_JOIN
+  ARRAY_MAP, ARRAY_FILTER, ARRAY_REDUCE, ARRAY_SORT, ARRAY_SLICE
+
+[bold]Number Functions[/]
+  ABS, CEIL, FLOOR, ROUND, MOD, POWER, SQRT, LOG, EXP
+
+[bold]Date Functions[/]
+  CURRENT_DATE, CURRENT_TIMESTAMP, DATE_ADD, DATE_SUB, DATE_DIFF
+
+[bold]Document/Map Functions[/]
+  DOCUMENT_GET, DOCUMENT_KEYS, DOCUMENT_MERGE
+  MAP_GET, MAP_PUT, MAP_KEYS, MAP_VALUES
+
+[bold]Elasticsearch Functions[/]
+  [green]ESQL_QUERY(query)[/]           Execute ES|QL query
+  [green]INDEX_DOCUMENT(idx, doc)[/]    Index a document
+  [green]GET_DOCUMENT(idx, id)[/]       Get document by ID
+  [green]UPDATE_DOCUMENT(idx, id, d)[/] Update a document
+
+[bold]AI/LLM Functions[/]
+  LLM_COMPLETE, LLM_CHAT, LLM_SUMMARIZE, LLM_CLASSIFY
+
+[bold]Integration Functions[/]
+  SLACK_SEND, HTTP_GET, HTTP_POST, WEBHOOK
+  AWS_LAMBDA_INVOKE, K8S_GET, PAGERDUTY_TRIGGER
+
+[dim]Use Tab to auto-complete function names![/]
+        """
+        self.console.print(Panel(functions.strip(), title="[bold]Functions Reference[/]", box=self._box))
+    
+    def _print_tutorial(self):
+        """Print interactive tutorial."""
+        tutorial = """
+[bold cyan]Getting Started Tutorial[/]
+
+[bold]Step 1: Your First Procedure[/]
+Copy and paste this to create a procedure:
+
+[yellow]CREATE PROCEDURE my_first_proc()
+BEGIN
+  PRINT 'It works!';
+END PROCEDURE;[/]
+
+Then call it:
+[yellow]CALL my_first_proc()[/]
+
+[bold]Step 2: Using Variables[/]
+[yellow]CREATE PROCEDURE greet(name STRING)
+BEGIN
+  DECLARE message STRING;
+  SET message = 'Hello, ' || name || '!';
+  PRINT message;
+END PROCEDURE;
+
+CALL greet('Developer')[/]
+
+[bold]Step 3: Query Elasticsearch[/]
+[yellow]-- Replace 'your-index' with an actual index name
+CALL ESQL_QUERY('FROM your-index | LIMIT 5')[/]
+
+[bold]Step 4: Store Query Results[/]
+[yellow]CREATE PROCEDURE count_docs(index_name STRING)
+BEGIN
+  DECLARE result ARRAY;
+  DECLARE count NUMBER;
+  
+  SET result = ESQL_QUERY('FROM ' || index_name || ' | STATS c = COUNT(*)');
+  SET count = result[0].c;
+  
+  PRINT 'Documents in ' || index_name || ': ' || count;
+END PROCEDURE;
+
+CALL count_docs('logs-*')[/]
+
+[bold]Step 5: Control Flow[/]
+[yellow]CREATE PROCEDURE check_health()
+BEGIN
+  DECLARE errors NUMBER;
+  SET errors = ESQL_QUERY('FROM logs-* | WHERE level = "ERROR" | STATS c = COUNT(*)')[0].c;
+  
+  IF errors > 50 THEN
+    PRINT '⚠️  High error count: ' || errors;
+  ELSEIF errors > 10 THEN
+    PRINT '⚡ Moderate errors: ' || errors;
+  ELSE
+    PRINT '✅ System healthy!';
+  END IF;
+END PROCEDURE;[/]
+
+[bold]What's Next?[/]
+  • [cyan]help examples[/]   - More examples
+  • [cyan]help functions[/]  - All available functions
+  • [cyan]help syntax[/]     - Language reference
+        """
+        self.console.print(Panel(tutorial.strip(), title="[bold]Tutorial[/]", box=self._box))
+    
+    def _print_syntax_help(self):
+        """Print syntax reference."""
+        syntax = """
+[bold cyan]Language Syntax Reference[/]
+
+[bold]Procedures[/]
+[yellow]CREATE PROCEDURE name(param1 TYPE, param2 TYPE)
+BEGIN
+  -- statements
+END PROCEDURE;
+
+DROP PROCEDURE name;
+CALL name(arg1, arg2);[/]
+
+[bold]Variables[/]
+[yellow]DECLARE var_name TYPE;           -- Declare
+DECLARE var_name TYPE = value;   -- Declare with value
+SET var_name = expression;       -- Assign[/]
+
+[bold]Types[/]
+  STRING, NUMBER, BOOLEAN, DATE, ARRAY, DOCUMENT, MAP
+
+[bold]Control Flow[/]
+[yellow]IF condition THEN
+  -- statements
+ELSEIF condition THEN
+  -- statements
+ELSE
+  -- statements
+END IF;
+
+FOR item IN array LOOP
+  -- statements  
+END LOOP;
+
+WHILE condition LOOP
+  -- statements
+END LOOP;[/]
+
+[bold]Error Handling[/]
+[yellow]TRY
+  -- statements that might fail
+CATCH
+  PRINT @error.message;
+FINALLY
+  -- always runs
+END TRY;[/]
+
+[bold]Operators[/]
+  [cyan]||[/]   String concatenation
+  [cyan]??[/]   Null coalescing (a ?? b = a if a not null, else b)
+  [cyan]?.[/]   Safe navigation (a?.b = null if a is null)
+  [cyan]..[/]   Range (1..10)
+
+[bold]Comments[/]
+[yellow]-- Single line comment
+/* Multi-line
+   comment */[/]
+        """
+        self.console.print(Panel(syntax.strip(), title="[bold]Syntax Reference[/]", box=self._box))
     
     def print_syntax(self, code: str):
         """Print syntax-highlighted elastic-script code."""

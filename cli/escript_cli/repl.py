@@ -198,6 +198,8 @@ class ElasticScriptREPL:
     
     # Special commands that should be executed immediately (no multi-line)
     IMMEDIATE_COMMANDS = {'help', 'exit', 'quit', 'q', 'clear', 'history', 'config', 'refresh'}
+    # Help topics
+    HELP_TOPICS = {'examples', 'tutorial', 'functions', 'syntax'}
     
     def _get_input(self) -> Optional[str]:
         """Get input, handling multi-line statements."""
@@ -208,8 +210,14 @@ class ElasticScriptREPL:
             )
             
             # Check if it's a special command - execute immediately
-            if text.strip().lower() in self.IMMEDIATE_COMMANDS:
+            cmd_lower = text.strip().lower()
+            if cmd_lower in self.IMMEDIATE_COMMANDS:
                 return text
+            # Also handle "help <topic>" commands
+            if cmd_lower.startswith('help '):
+                topic = cmd_lower.split(' ', 1)[1].strip()
+                if topic in self.HELP_TOPICS:
+                    return text
             
             # Check for multi-line
             self._multiline_buffer = [text]
@@ -241,6 +249,11 @@ class ElasticScriptREPL:
         
         if cmd == 'help':
             self.output.print_help()
+            return True
+        
+        if cmd.startswith('help '):
+            topic = cmd.split(' ', 1)[1].strip()
+            self.output.print_help(topic)
             return True
         
         if cmd == 'clear':
