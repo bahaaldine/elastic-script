@@ -62,6 +62,7 @@ class ElasticScriptREPL:
         history_path.parent.mkdir(parents=True, exist_ok=True)
         
         # Create prompt session
+        # Note: multiline=False so Enter submits. We handle multi-line manually.
         self.session = PromptSession(
             lexer=PygmentsLexer(ElasticScriptLexer),
             completer=self.completer,
@@ -69,8 +70,7 @@ class ElasticScriptREPL:
             auto_suggest=AutoSuggestFromHistory(),
             history=FileHistory(str(history_path)),
             style=PROMPT_STYLE,
-            multiline=config.multiline,
-            prompt_continuation=self._continuation_prompt,
+            multiline=False,  # We handle multi-line manually
             key_bindings=self._create_key_bindings(),
             enable_history_search=True,
         )
