@@ -147,6 +147,15 @@
 - [x] OpenAI API key prompt and passthrough to Elasticsearch
 - [x] Jupyter notebook kernel (`plesql_kernel`)
 - [x] Test notebooks in `notebooks/` directory
+- [x] **Command-Line Interface (CLI)** - Beautiful interactive REPL:
+  - Syntax highlighting via custom Pygments lexer
+  - Auto-completion for keywords, functions, procedures, skills
+  - Multi-line editing with smart block detection
+  - Rich output formatting (tables, panels, JSON)
+  - Persistent command history with search
+  - Script execution mode (`escript run script.es`)
+  - Configuration via `~/.escriptrc` or environment variables
+  - 145 unit tests for CLI components
 
 ### 5. Sample Data Indices
 - `logs-sample` (100 docs) - Application logs with 20 detailed ERROR logs
@@ -422,6 +431,18 @@ elastic-script/
 ├── otel-collector/                    # OpenTelemetry Collector
 │   ├── config.yaml                    # Collector configuration
 │   └── .gitignore                     # Ignores binary and logs
+├── cli/                               # Command-Line Interface
+│   ├── escript_cli/                   # Python package
+│   │   ├── main.py                    # CLI entry point (Click)
+│   │   ├── repl.py                    # Interactive REPL
+│   │   ├── lexer.py                   # Pygments lexer
+│   │   ├── completer.py               # Auto-completion
+│   │   ├── output.py                  # Rich output formatting
+│   │   ├── client.py                  # ES client
+│   │   └── config.py                  # Configuration
+│   ├── tests/                         # CLI tests (145 tests)
+│   ├── setup.py                       # Package setup
+│   └── README.md                      # CLI documentation
 └── CLAUDE.md                          # This file
 ```
 

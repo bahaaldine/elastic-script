@@ -168,6 +168,8 @@ nav:
     - Complete Reference: notebooks/complete-reference.md
   - Observability:
     - OpenTelemetry Tracing: observability/opentelemetry.md
+  - Tools:
+    - CLI: tools/cli.md
   - Development:
     - Contributing: development/contributing.md
     - Testing: development/testing.md
