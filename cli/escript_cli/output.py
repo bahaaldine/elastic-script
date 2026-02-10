@@ -42,25 +42,9 @@ class OutputFormatter:
         self._box = self.BOX_STYLES.get(config.table_style, ROUNDED)
     
     def print_welcome(self, connection_info: str):
-        """Print welcome banner with Moltler mascot."""
+        """Print welcome banner with Moltler branding."""
         # Moltler - The Skills Creation Framework for Elasticsearch
-        # Clean symmetrical antler rack design
         moltler_banner = """
-[bold yellow]            ╱╲                           ╱╲
-           ╱  ╲       ╱╲   ╱╲       ╱  ╲
-          ╱    ╲     ╱  ╲ ╱  ╲     ╱    ╲
-         ╱      ╲   ╱    ╳    ╲   ╱      ╲
-        ╱        ╲ ╱    ╱ ╲    ╲ ╱        ╲
-       ╱          ╳    ╱   ╲    ╳          ╲
-                  ╲   ╱     ╲   ╱
-                   ╲ ╱       ╲ ╱
-                    ╳    ●    ╳
-                   ╱ ╲       ╱ ╲
-                  ╱   ╲     ╱   ╲
-                 ╱     ╲   ╱     ╲
-                ╱       ╲ ╱       ╲
-               ╱_________╳_________╲[/]
-
 [bold magenta]         ███╗   ███╗ ██████╗ ██╗  ████████╗██╗     ███████╗██████╗
          ████╗ ████║██╔═══██╗██║  ╚══██╔══╝██║     ██╔════╝██╔══██╗
          ██╔████╔██║██║   ██║██║     ██║   ██║     █████╗  ██████╔╝
