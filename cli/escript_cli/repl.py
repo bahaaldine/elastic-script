@@ -196,6 +196,9 @@ class ElasticScriptREPL:
         self.output.print_info("Goodbye!")
         self.client.close()
     
+    # Special commands that should be executed immediately (no multi-line)
+    IMMEDIATE_COMMANDS = {'help', 'exit', 'quit', 'q', 'clear', 'history', 'config', 'refresh'}
+    
     def _get_input(self) -> Optional[str]:
         """Get input, handling multi-line statements."""
         try:
@@ -203,6 +206,10 @@ class ElasticScriptREPL:
             text = self.session.prompt(
                 HTML('<prompt>escript> </prompt>'),
             )
+            
+            # Check if it's a special command - execute immediately
+            if text.strip().lower() in self.IMMEDIATE_COMMANDS:
+                return text
             
             # Check for multi-line
             self._multiline_buffer = [text]
