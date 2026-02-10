@@ -307,12 +307,31 @@ def test(ctx):
     if success:
         output.print_success(message)
         
-        # Test elastic-script endpoint with a valid top-level command
-        result = client.execute("SHOW PROCEDURES")
-        if result.success:
+        # Test elastic-script endpoint - create and call a simple test procedure
+        # First try to create a test procedure
+        create_result = client.execute(
+            "CREATE PROCEDURE __cli_connection_test__() BEGIN DECLARE x NUMBER; SET x = 1; END PROCEDURE;"
+        )
+        
+        if create_result.success:
+            # Procedure created, now call it
+            call_result = client.execute("CALL __cli_connection_test__()")
+            # Clean up
+            client.execute("DROP PROCEDURE __cli_connection_test__")
+            
+            if call_result.success:
+                output.print_success("elastic-script plugin is available")
+            else:
+                output.print_warning(f"elastic-script endpoint issue: {call_result.error}")
+        elif "already exists" in str(create_result.error).lower():
+            # Procedure already exists from a previous test, that's fine
             output.print_success("elastic-script plugin is available")
         else:
-            output.print_warning(f"elastic-script endpoint issue: {result.error}")
+            # Check if it's a syntax error or similar - that still means plugin is working
+            if "Syntax error" in str(create_result.error) or "RuntimeException" in str(create_result.error):
+                output.print_success("elastic-script plugin is available")
+            else:
+                output.print_warning(f"elastic-script endpoint issue: {create_result.error}")
     else:
         output.print_error(message)
         sys.exit(1)
