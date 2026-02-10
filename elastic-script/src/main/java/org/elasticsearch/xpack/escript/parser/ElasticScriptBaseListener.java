@@ -83,6 +83,30 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterShowAllProcedures(ElasticScriptParser.ShowAllProceduresContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitShowAllProcedures(ElasticScriptParser.ShowAllProceduresContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterShowProcedureDetail(ElasticScriptParser.ShowProcedureDetailContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitShowProcedureDetail(ElasticScriptParser.ShowProcedureDetailContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterCreate_function_statement(ElasticScriptParser.Create_function_statementContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -102,6 +126,30 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDelete_function_statement(ElasticScriptParser.Delete_function_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterShowAllFunctions(ElasticScriptParser.ShowAllFunctionsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitShowAllFunctions(ElasticScriptParser.ShowAllFunctionsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterShowFunctionDetail(ElasticScriptParser.ShowFunctionDetailContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitShowFunctionDetail(ElasticScriptParser.ShowFunctionDetailContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

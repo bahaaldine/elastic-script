@@ -47,6 +47,20 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDelete_procedure_statement(ElasticScriptParser.Delete_procedure_statementContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code showAllProcedures}
+	 * labeled alternative in {@link ElasticScriptParser#show_procedures_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowAllProcedures(ElasticScriptParser.ShowAllProceduresContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code showProcedureDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_procedures_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowProcedureDetail(ElasticScriptParser.ShowProcedureDetailContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#create_function_statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -58,6 +72,20 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitDelete_function_statement(ElasticScriptParser.Delete_function_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code showAllFunctions}
+	 * labeled alternative in {@link ElasticScriptParser#show_functions_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowAllFunctions(ElasticScriptParser.ShowAllFunctionsContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code showFunctionDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_functions_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowFunctionDetail(ElasticScriptParser.ShowFunctionDetailContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#return_type}.
 	 * @param ctx the parse tree

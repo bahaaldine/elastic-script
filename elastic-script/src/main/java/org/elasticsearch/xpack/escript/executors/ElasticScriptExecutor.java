@@ -41,6 +41,7 @@ import org.elasticsearch.xpack.escript.profiling.ProfileResult;
 import org.elasticsearch.xpack.escript.handlers.TypeStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.ApplicationStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.SkillStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.ShowStatementHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -216,6 +217,9 @@ public class ElasticScriptExecutor {
                     String procedureId = deleteContext.ID().getText();
                     LOGGER.debug("Deleting procedure {}", procedureId);
                     deleteProcedureAsync(procedureId, listener);
+                } else if (programContext.show_procedures_statement() != null) {
+                    // Handle SHOW PROCEDURES / SHOW PROCEDURE name
+                    handleShowProceduresStatement(programContext.show_procedures_statement(), listener);
                 } else if (programContext.create_procedure_statement() != null ) {
                     ElasticScriptParser.Create_procedure_statementContext createContext = programContext.create_procedure_statement();
                     String procedureId = createContext.procedure().ID().getText();
@@ -259,6 +263,9 @@ public class ElasticScriptExecutor {
                     String functionId = deleteFuncCtx.ID().getText();
                     LOGGER.debug("Deleting function {}", functionId);
                     deleteFunctionAsync(functionId, listener);
+                } else if (programContext.show_functions_statement() != null) {
+                    // Handle SHOW FUNCTIONS / SHOW FUNCTION name
+                    handleShowFunctionsStatement(programContext.show_functions_statement(), listener);
                 } else if (programContext.job_statement() != null) {
                     // Handle JOB statements (CREATE JOB, ALTER JOB, DROP JOB, SHOW JOBS)
                     handleJobStatement(programContext.job_statement(), tokens, listener);
@@ -983,6 +990,38 @@ public class ElasticScriptExecutor {
             handler.handleGenerateSkill(ctx.generate_skill_statement(), listener);
         } else {
             listener.onFailure(new IllegalArgumentException("Unknown SKILL statement type"));
+        }
+    }
+
+    /**
+     * Handles SHOW PROCEDURES statements (SHOW PROCEDURES, SHOW PROCEDURE name).
+     */
+    private void handleShowProceduresStatement(ElasticScriptParser.Show_procedures_statementContext ctx,
+                                               ActionListener<Object> listener) {
+        ShowStatementHandler handler = new ShowStatementHandler(client);
+
+        if (ctx instanceof ElasticScriptParser.ShowAllProceduresContext) {
+            handler.handleShowAllProcedures(listener);
+        } else if (ctx instanceof ElasticScriptParser.ShowProcedureDetailContext) {
+            handler.handleShowProcedureDetail((ElasticScriptParser.ShowProcedureDetailContext) ctx, listener);
+        } else {
+            listener.onFailure(new IllegalArgumentException("Unknown SHOW PROCEDURES variant"));
+        }
+    }
+
+    /**
+     * Handles SHOW FUNCTIONS statements (SHOW FUNCTIONS, SHOW FUNCTION name).
+     */
+    private void handleShowFunctionsStatement(ElasticScriptParser.Show_functions_statementContext ctx,
+                                              ActionListener<Object> listener) {
+        ShowStatementHandler handler = new ShowStatementHandler(client);
+
+        if (ctx instanceof ElasticScriptParser.ShowAllFunctionsContext) {
+            handler.handleShowAllFunctions(listener);
+        } else if (ctx instanceof ElasticScriptParser.ShowFunctionDetailContext) {
+            handler.handleShowFunctionDetail((ElasticScriptParser.ShowFunctionDetailContext) ctx, listener);
+        } else {
+            listener.onFailure(new IllegalArgumentException("Unknown SHOW FUNCTIONS variant"));
         }
     }
     

@@ -17,7 +17,7 @@ __author__ = "Bahaaldine Azarmi"
 KEYWORDS = [
     # Core
     "CREATE", "DROP", "DELETE", "CALL", "EXECUTE", "IMMEDIATE",
-    "PROCEDURE", "FUNCTION", "BEGIN", "END", "RETURN", "RETURNS",
+    "PROCEDURE", "PROCEDURES", "FUNCTION", "FUNCTIONS", "BEGIN", "END", "RETURN", "RETURNS",
     # Variables
     "DECLARE", "VAR", "CONST", "SET", "INTO", "USING",
     # Types

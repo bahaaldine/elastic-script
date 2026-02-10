@@ -43,6 +43,11 @@
 - [x] TRY/CATCH/FINALLY exception handling with `@error` document
 - [x] CREATE FUNCTION for stored user-defined functions
 - [x] EXECUTE IMMEDIATE for dynamic ES|QL
+- [x] **SHOW PROCEDURES / SHOW FUNCTIONS (NEW)**:
+  - [x] `SHOW PROCEDURES` - List all stored procedures
+  - [x] `SHOW PROCEDURE name` - Show details of a specific procedure
+  - [x] `SHOW FUNCTIONS` - List all stored user-defined functions
+  - [x] `SHOW FUNCTION name` - Show details of a specific function
 
 ### 2. Pipe-Driven Async Execution Model (NEW)
 - [x] Grammar tokens: `ON_DONE`, `ON_FAIL`, `TRACK`, `TIMEOUT`, `FINALLY`

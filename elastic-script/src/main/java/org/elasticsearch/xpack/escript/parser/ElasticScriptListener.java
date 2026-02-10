@@ -64,6 +64,30 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitDelete_procedure_statement(ElasticScriptParser.Delete_procedure_statementContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code showAllProcedures}
+	 * labeled alternative in {@link ElasticScriptParser#show_procedures_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowAllProcedures(ElasticScriptParser.ShowAllProceduresContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showAllProcedures}
+	 * labeled alternative in {@link ElasticScriptParser#show_procedures_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowAllProcedures(ElasticScriptParser.ShowAllProceduresContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showProcedureDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_procedures_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowProcedureDetail(ElasticScriptParser.ShowProcedureDetailContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showProcedureDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_procedures_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowProcedureDetail(ElasticScriptParser.ShowProcedureDetailContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#create_function_statement}.
 	 * @param ctx the parse tree
 	 */
@@ -83,6 +107,30 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDelete_function_statement(ElasticScriptParser.Delete_function_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showAllFunctions}
+	 * labeled alternative in {@link ElasticScriptParser#show_functions_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowAllFunctions(ElasticScriptParser.ShowAllFunctionsContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showAllFunctions}
+	 * labeled alternative in {@link ElasticScriptParser#show_functions_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowAllFunctions(ElasticScriptParser.ShowAllFunctionsContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showFunctionDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_functions_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowFunctionDetail(ElasticScriptParser.ShowFunctionDetailContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showFunctionDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_functions_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowFunctionDetail(ElasticScriptParser.ShowFunctionDetailContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#return_type}.
 	 * @param ctx the parse tree

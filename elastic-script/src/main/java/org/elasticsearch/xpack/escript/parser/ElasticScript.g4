@@ -10,6 +10,7 @@ DELETE: 'DELETE';
 DROP: 'DROP';
 CALL : 'CALL';
 PROCEDURE: 'PROCEDURE';
+PROCEDURES: 'PROCEDURES';
 IN: 'IN';
 OUT: 'OUT';
 INOUT: 'INOUT';
@@ -177,6 +178,7 @@ RAISE: 'RAISE';
 CODE: 'CODE';
 ENDTRY: 'END TRY';
 FUNCTION: 'FUNCTION';
+FUNCTIONS: 'FUNCTIONS';
 RETURNS: 'RETURNS';
 RETURN: 'RETURN';
 BREAK: 'BREAK';
@@ -341,8 +343,10 @@ program
     : create_procedure_statement
     | delete_procedure_statement
     | call_procedure_statement
+    | show_procedures_statement
     | create_function_statement
     | delete_function_statement
+    | show_functions_statement
     | define_intent_statement
     | job_statement
     | trigger_statement
@@ -373,6 +377,11 @@ delete_procedure_statement
     : DELETE PROCEDURE ID SEMICOLON
     ;
 
+show_procedures_statement
+    : SHOW PROCEDURES                                    # showAllProcedures
+    | SHOW PROCEDURE ID                                  # showProcedureDetail
+    ;
+
 // =======================
 // Stored Function Statements
 // =======================
@@ -386,6 +395,11 @@ create_function_statement
 
 delete_function_statement
     : DELETE FUNCTION ID SEMICOLON
+    ;
+
+show_functions_statement
+    : SHOW FUNCTIONS                                     # showAllFunctions
+    | SHOW FUNCTION ID                                   # showFunctionDetail
     ;
 
 return_type
