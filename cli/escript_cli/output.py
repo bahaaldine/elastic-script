@@ -42,16 +42,23 @@ class OutputFormatter:
         self._box = self.BOX_STYLES.get(config.table_style, ROUNDED)
     
     def print_welcome(self, connection_info: str):
-        """Print welcome banner with ELKy mascot."""
-        # ELKy the Elk - elastic-script mascot
-        # Stacked layout works better across terminal widths
-        elky_banner = """
-[bold yellow]                          ,'/\\ /\\',
-                         / /  Y  \\ \\
-                        (  \\ ◕ ◕ /  )
-                         \\  '───'  /
-                          \\  ___  /
-                           [_] [_][/]
+        """Print welcome banner with Moltler mascot."""
+        # Moltler the Elk - elastic-script mascot
+        # Friendly elk with majestic branching antlers
+        moltler_banner = """
+[bold yellow]                  ╱╲          ╱╲
+                 ╱  ╲   ╱╲   ╱  ╲
+                ╱    ╲ ╱  ╲ ╱    ╲
+                      ╳    ╳
+                     ╱ ╲  ╱ ╲
+                    ╱   ╲╱   ╲
+                   ╱    ╱╲    ╲
+                  ╱────╱  ╲────╲
+                 ╱   ◕      ◕   ╲
+                │                 │
+                │    (  ‿‿  )     │
+                 ╲               ╱
+                   ─────┬┬─────[/]
 
 [bold magenta]     ███████╗██╗      █████╗ ███████╗████████╗██╗ ██████╗
      ██╔════╝██║     ██╔══██╗██╔════╝╚══██╔══╝██║██╔════╝
@@ -60,17 +67,17 @@ class OutputFormatter:
      ███████╗███████╗██║  ██║███████║   ██║   ██║╚██████╗
      ╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝ ╚═════╝[/]
 [bold blue]                  ___  ___  ___  ___  ___  _____
-                 / __>| __>| . \|_ _|| . ||_   _|
-                 \__ \| <__|   / | | |  _/  | |
-                 <___/|___>|_\_\ |_| |_|    |_|[/]
+                 / __>| __>| . \\|_ _|| . ||_   _|
+                 \\__ \\| <__|   / | | |  _/  | |
+                 <___/|___>|_\\_\\ |_| |_|    |_|[/]
 
 [bold cyan]         ⚡ The Skills Creation Framework for Elasticsearch ⚡[/]
 """
-        self.console.print(elky_banner)
+        self.console.print(moltler_banner)
         self.console.print(Panel(
             f"[bold green]{connection_info}[/]\n"
             "[dim]Type [bold]help[/bold] for commands, [bold]help examples[/bold] for quick start, Ctrl+D to exit[/]",
-            title="[bold blue]🦌 ELKy says: Let's build some skills![/]",
+            title="[bold blue]🦌 Moltler says: Let's build some skills![/]",
             box=self._box,
         ))
     
