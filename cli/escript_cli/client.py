@@ -111,11 +111,19 @@ class ElasticScriptClient:
                     )
             else:
                 error_data = response.json() if response.text else {}
-                error_msg = (
-                    error_data.get("error", {}).get("reason")
-                    or error_data.get("message")
-                    or f"HTTP {response.status_code}"
-                )
+                # Handle different error response formats
+                if isinstance(error_data, dict):
+                    error_field = error_data.get("error")
+                    if isinstance(error_field, dict):
+                        # Elasticsearch-style error: {"error": {"reason": "..."}}
+                        error_msg = error_field.get("reason", str(error_field))
+                    elif isinstance(error_field, str):
+                        # Simple error: {"error": "message"}
+                        error_msg = error_field
+                    else:
+                        error_msg = error_data.get("message") or f"HTTP {response.status_code}"
+                else:
+                    error_msg = str(error_data) or f"HTTP {response.status_code}"
                 return ExecutionResult(
                     success=False,
                     data=None,

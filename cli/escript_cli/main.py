@@ -307,8 +307,8 @@ def test(ctx):
     if success:
         output.print_success(message)
         
-        # Test elastic-script endpoint
-        result = client.execute("PRINT 'CLI connection test'")
+        # Test elastic-script endpoint with a valid top-level command
+        result = client.execute("SHOW PROCEDURES")
         if result.success:
             output.print_success("elastic-script plugin is available")
         else:
