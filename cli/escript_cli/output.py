@@ -44,20 +44,23 @@ class OutputFormatter:
     def print_welcome(self, connection_info: str):
         """Print welcome banner with Moltler mascot."""
         # Moltler - The Skills Creation Framework for Elasticsearch
+        # Clean symmetrical antler rack design
         moltler_banner = """
-[bold yellow]
-               ╱╲             ╱╲
-              ╱  ╲   ╱╲ ╱╲   ╱  ╲
-             ╱    ╲ ╱  ╳  ╲ ╱    ╲
-                   ╲╱╱  ╲╲╱
-                    ╱    ╲
-                 __╱      ╲__
-                ╱  ◕    ◕   ╲
-               │      ▽      │
-               │   ╲_____╱   │
-                ╲    ‿‿‿    ╱
-                 ╲_________╱
-[/]
+[bold yellow]            ╱╲                           ╱╲
+           ╱  ╲       ╱╲   ╱╲       ╱  ╲
+          ╱    ╲     ╱  ╲ ╱  ╲     ╱    ╲
+         ╱      ╲   ╱    ╳    ╲   ╱      ╲
+        ╱        ╲ ╱    ╱ ╲    ╲ ╱        ╲
+       ╱          ╳    ╱   ╲    ╳          ╲
+                  ╲   ╱     ╲   ╱
+                   ╲ ╱       ╲ ╱
+                    ╳    ●    ╳
+                   ╱ ╲       ╱ ╲
+                  ╱   ╲     ╱   ╲
+                 ╱     ╲   ╱     ╲
+                ╱       ╲ ╱       ╲
+               ╱_________╳_________╲[/]
+
 [bold magenta]         ███╗   ███╗ ██████╗ ██╗  ████████╗██╗     ███████╗██████╗
          ████╗ ████║██╔═══██╗██║  ╚══██╔══╝██║     ██╔════╝██╔══██╗
          ██╔████╔██║██║   ██║██║     ██║   ██║     █████╗  ██████╔╝
