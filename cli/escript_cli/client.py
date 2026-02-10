@@ -94,13 +94,21 @@ class ElasticScriptClient:
             
             if response.status_code == 200:
                 data = response.json()
-                return ExecutionResult(
-                    success=True,
-                    data=data.get("result", data),
-                    execution_id=data.get("execution_id"),
-                    output=data.get("output"),
-                    elapsed_ms=data.get("elapsed_ms"),
-                )
+                # Handle both dict and non-dict responses
+                if isinstance(data, dict):
+                    return ExecutionResult(
+                        success=True,
+                        data=data.get("result", data),
+                        execution_id=data.get("execution_id"),
+                        output=data.get("output"),
+                        elapsed_ms=data.get("elapsed_ms"),
+                    )
+                else:
+                    # Simple response (string, number, etc.)
+                    return ExecutionResult(
+                        success=True,
+                        data=data,
+                    )
             else:
                 error_data = response.json() if response.text else {}
                 error_msg = (
