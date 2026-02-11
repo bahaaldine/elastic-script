@@ -410,12 +410,11 @@ def demo(ctx):
   DESCRIPTION 'Check Elasticsearch cluster health - created by demo'
   AUTHOR 'Moltler Demo'
   RETURNS DOCUMENT
-AS
 BEGIN
   DECLARE health DOCUMENT;
   SET health = {'status': 'green', 'cluster': 'demo', 'timestamp': CURRENT_TIMESTAMP()};
   RETURN health;
-END;"""
+END SKILL;"""
     
     output.console.print("[dim]" + skill_code + "[/]")
     output.console.print()

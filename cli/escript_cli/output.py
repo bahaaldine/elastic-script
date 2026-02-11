@@ -288,14 +288,14 @@ class OutputFormatter:
   [cyan]config[/]           Show configuration
 
 [bold]Try These:[/]
-  [dim]# Create a skill[/]
-  [yellow]CREATE SKILL check_health() RETURNS DOCUMENT AS GET_DOCUMENT('_cluster', 'health');[/]
+  [dim]# List existing skills[/]
+  [yellow]SHOW SKILLS[/]
   
-  [dim]# Test the skill[/]
-  [yellow]TEST SKILL check_health[/]
+  [dim]# Test a skill (after loading sample skills)[/]
+  [yellow]TEST SKILL hello_moltler[/]
   
-  [dim]# Create an agent[/]
-  [yellow]CREATE AGENT monitor GOAL 'Monitor cluster health' WITH SKILLS check_health;[/]
+  [dim]# See more examples[/]
+  [yellow]help examples[/]
 
 [bold]Keyboard:[/] [cyan]Tab[/]=complete  [cyan]↑↓[/]=history  [cyan]Ctrl+R[/]=search  [cyan]Ctrl+L[/]=clear
         """
@@ -311,8 +311,9 @@ class OutputFormatter:
   VERSION '1.0'
   DESCRIPTION 'Check cluster health status'
   RETURNS DOCUMENT
-AS
-  GET_DOCUMENT('_cluster', 'health');[/]
+BEGIN
+  RETURN {'status': 'healthy', 'timestamp': CURRENT_TIMESTAMP()};
+END SKILL;[/]
 
 [bold]2. Test a Skill[/]
 [yellow]-- Test with default parameters
@@ -422,22 +423,24 @@ Skills are reusable units of automation. Create one:
   VERSION '1.0'
   DESCRIPTION 'A simple greeting skill'
   RETURNS STRING
-AS
-  'Hello from Moltler!';[/]
+BEGIN
+  RETURN 'Hello from Moltler!';
+END SKILL;[/]
 
 Test it:
 [yellow]TEST SKILL hello_world[/]
 
 [bold]Step 2: Skill with Parameters[/]
-[yellow]CREATE SKILL count_logs(index STRING DEFAULT 'logs-*')
+[yellow]CREATE SKILL count_logs
+  VERSION '1.0'
   DESCRIPTION 'Count documents in an index'
+  (index STRING DEFAULT 'logs-*')
   RETURNS NUMBER
-AS
 BEGIN
   DECLARE result ARRAY;
   SET result = ESQL_QUERY('FROM ' || index || ' | STATS c = COUNT(*)');
   RETURN result[0].c;
-END;[/]
+END SKILL;[/]
 
 Test with parameters:
 [yellow]TEST SKILL count_logs WITH index = 'metrics-*'[/]
@@ -483,14 +486,14 @@ Trigger manually:
 [bold cyan]Moltler Syntax Reference[/]
 
 [bold]Skills[/]
-[yellow]CREATE SKILL name(param TYPE DEFAULT value)
+[yellow]CREATE SKILL name
   VERSION '1.0'
   DESCRIPTION 'What the skill does'
   AUTHOR 'Your Name'
   TAGS ['tag1', 'tag2']
-  REQUIRES skill1, skill2
+  (param TYPE DEFAULT value)
   RETURNS TYPE
-AS expression | BEGIN ... END;[/]
+BEGIN ... END SKILL;[/]
 
 [bold]Connectors[/]
 [yellow]CREATE CONNECTOR name TYPE github CONFIG {...};
