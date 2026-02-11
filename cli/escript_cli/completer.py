@@ -1,5 +1,5 @@
 """
-Auto-completion for elastic-script CLI.
+Auto-completion for Moltler CLI.
 
 Provides:
 - Keyword completion

@@ -1,5 +1,5 @@
 """
-Output formatting for elastic-script CLI using Rich.
+Output formatting for Moltler CLI using Rich.
 
 Provides beautiful formatting for:
 - Query results (tables, JSON)
@@ -24,7 +24,7 @@ from .client import ExecutionResult
 
 
 class OutputFormatter:
-    """Formats and displays elastic-script output."""
+    """Formats and displays Moltler output."""
     
     BOX_STYLES = {
         "rounded": ROUNDED,

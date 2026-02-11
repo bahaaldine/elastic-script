@@ -1,5 +1,5 @@
 """
-Elasticsearch client for elastic-script execution.
+Elasticsearch client for Moltler query execution.
 
 Handles:
 - Connection management

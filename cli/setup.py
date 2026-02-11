@@ -1,5 +1,5 @@
 """
-elastic-script CLI - A beautiful command-line interface for elastic-script.
+Moltler CLI - The AI Skills Creation Framework for Elasticsearch.
 """
 
 from setuptools import setup, find_packages
@@ -8,11 +8,11 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="escript-cli",
+    name="moltler-cli",
     version="0.1.0",
     author="Bahaaldine Azarmi",
     author_email="baha@elastic.co",
-    description="A beautiful CLI for elastic-script - procedural scripting for Elasticsearch",
+    description="Moltler CLI - The AI Skills Creation Framework for Elasticsearch",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/bahaaldine/elastic-script",
@@ -50,10 +50,10 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "escript=escript_cli.main:main",
+            "moltler=escript_cli.main:main",
         ],
         "pygments.lexers": [
-            "escript=escript_cli.lexer:ElasticScriptLexer",
+            "moltler=escript_cli.lexer:ElasticScriptLexer",
         ],
     },
     include_package_data=True,

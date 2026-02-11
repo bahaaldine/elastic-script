@@ -2,27 +2,27 @@
 Moltler CLI - The AI Skills Creation Framework for Elasticsearch.
 
 Usage:
-    escript                          # Start interactive REPL
-    escript query "..."              # Execute a single statement
-    escript run script.es            # Execute a script file
-    escript config                   # Show/manage configuration
-    escript test                     # Test connection to Elasticsearch
+    moltler                          # Start interactive REPL
+    moltler query "..."              # Execute a single statement
+    moltler run script.es            # Execute a script file
+    moltler config                   # Show/manage configuration
+    moltler test                     # Test connection to Elasticsearch
 
 Examples:
     # Skills
-    escript query "SHOW SKILLS"
-    escript query "CREATE SKILL hello() RETURNS STRING AS 'Hello!';"
-    escript query "TEST SKILL hello"
+    moltler query "SHOW SKILLS"
+    moltler query "CREATE SKILL hello() RETURNS STRING AS 'Hello!';"
+    moltler query "TEST SKILL hello"
     
     # Connectors
-    escript query "SHOW CONNECTORS"
-    escript query "TEST CONNECTOR my_github"
-    escript query "SYNC CONNECTOR my_github TO 'github-*'"
+    moltler query "SHOW CONNECTORS"
+    moltler query "TEST CONNECTOR my_github"
+    moltler query "SYNC CONNECTOR my_github TO 'github-*'"
     
     # Agents
-    escript query "SHOW AGENTS"
-    escript query "TRIGGER AGENT incident_responder"
-    escript query "SHOW AGENT incident_responder HISTORY"
+    moltler query "SHOW AGENTS"
+    moltler query "TRIGGER AGENT incident_responder"
+    moltler query "SHOW AGENT incident_responder HISTORY"
 """
 
 import sys
@@ -53,21 +53,21 @@ def cli(ctx, host, port, user, password, ssl, no_color, version):
     
     Start an interactive session:
     
-        $ escript
+        $ moltler
     
     Execute a single statement:
     
-        $ escript query "SHOW SKILLS"
-        $ escript query "TEST SKILL my_skill"
-        $ escript query "TRIGGER AGENT monitor"
+        $ moltler query "SHOW SKILLS"
+        $ moltler query "TEST SKILL my_skill"
+        $ moltler query "TRIGGER AGENT monitor"
     
     Run a script file:
     
-        $ escript run myscript.es
+        $ moltler run myscript.es
     
     Test connection:
     
-        $ escript test
+        $ moltler test
     """
     if version:
         click.echo(f"escript-cli version {__version__}")

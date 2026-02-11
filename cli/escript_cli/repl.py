@@ -1,5 +1,5 @@
 """
-Interactive REPL for elastic-script.
+Interactive REPL for Moltler.
 
 Features:
 - Syntax highlighting
@@ -49,7 +49,7 @@ BLOCK_ENDERS = {'END', 'END;'}
 
 
 class ElasticScriptREPL:
-    """Interactive REPL for elastic-script."""
+    """Interactive REPL for Moltler."""
     
     def __init__(self, config: Config):
         self.config = config
@@ -224,7 +224,7 @@ class ElasticScriptREPL:
         try:
             # Get initial line
             text = self.session.prompt(
-                HTML('<prompt>escript> </prompt>'),
+                HTML('<prompt>moltler> </prompt>'),
             )
             
             # Check if it's a special command - execute immediately

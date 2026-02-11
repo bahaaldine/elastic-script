@@ -1,7 +1,7 @@
 """
-Pygments lexer for elastic-script syntax highlighting.
+Pygments lexer for Moltler syntax highlighting.
 
-This lexer provides syntax highlighting for elastic-script code in:
+This lexer provides syntax highlighting for Moltler code in:
 - The CLI REPL
 - Documentation (via Pygments)
 - Any tool that supports Pygments lexers
@@ -18,13 +18,13 @@ from . import KEYWORDS, ALL_FUNCTIONS
 
 class ElasticScriptLexer(RegexLexer):
     """
-    Lexer for elastic-script, a procedural scripting language for Elasticsearch.
+    Lexer for Moltler, the AI Skills Creation Framework for Elasticsearch.
     """
     
-    name = 'ElasticScript'
-    aliases = ['escript', 'elastic-script', 'plesql']
-    filenames = ['*.es', '*.escript', '*.plesql']
-    mimetypes = ['text/x-escript']
+    name = 'Moltler'
+    aliases = ['moltler', 'escript', 'elastic-script']
+    filenames = ['*.moltler', '*.es', '*.escript']
+    mimetypes = ['text/x-moltler']
     
     # Case insensitive
     flags = 0

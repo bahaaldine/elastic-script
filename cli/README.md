@@ -26,7 +26,7 @@ pip install -e .
 ### From PyPI (Coming Soon)
 
 ```bash
-pip install escript-cli
+pip install moltler-cli
 ```
 
 ## Quick Start
@@ -36,7 +36,7 @@ pip install escript-cli
 Start an interactive session:
 
 ```bash
-escript
+moltler
 ```
 
 You'll see:
@@ -52,63 +52,63 @@ You'll see:
 │ to exit                             │
 └─────────────────────────────────────┘
 
-escript> 
+moltler> 
 ```
 
 ### Execute a Query
 
 ```bash
 # Single query
-escript query "CALL hello()"
+moltler query "CALL hello()"
 
 # With JSON output
-escript query --json "SHOW PROCEDURES"
+moltler query --json "SHOW PROCEDURES"
 ```
 
 ### Run a Script File
 
 ```bash
 # Execute script
-escript run myscript.es
+moltler run myscript.es
 
 # With verbose output
-escript run --verbose setup.es
+moltler run --verbose setup.es
 
 # Dry run (parse only)
-escript run --dry-run test.es
+moltler run --dry-run test.es
 ```
 
 ### Using the Query Language
 
-All Moltler operations are performed through the query language. Use `escript query` to execute statements:
+All Moltler operations are performed through the query language. Use `moltler query` to execute statements:
 
 ```bash
 # Skills
-escript query "SHOW SKILLS"
-escript query "SHOW SKILL analyze_logs"
-escript query "TEST SKILL analyze_logs WITH index = 'logs-*'"
-escript query "CREATE SKILL hello() RETURNS STRING AS 'Hello!';"
+moltler query "SHOW SKILLS"
+moltler query "SHOW SKILL analyze_logs"
+moltler query "TEST SKILL analyze_logs WITH index = 'logs-*'"
+moltler query "CREATE SKILL hello() RETURNS STRING AS 'Hello!';"
 
 # Connectors
-escript query "SHOW CONNECTORS"
-escript query "TEST CONNECTOR my_github"
-escript query "SYNC CONNECTOR my_github TO 'github-*'"
-escript query "QUERY my_github.issues WHERE state = 'open' LIMIT 10"
+moltler query "SHOW CONNECTORS"
+moltler query "TEST CONNECTOR my_github"
+moltler query "SYNC CONNECTOR my_github TO 'github-*'"
+moltler query "QUERY my_github.issues WHERE state = 'open' LIMIT 10"
 
 # Agents
-escript query "SHOW AGENTS"
-escript query "TRIGGER AGENT incident_responder"
-escript query "TRIGGER AGENT incident_responder WITH {'priority': 'high'}"
-escript query "SHOW AGENT incident_responder HISTORY"
-escript query "ENABLE AGENT incident_responder"
-escript query "DISABLE AGENT incident_responder"
+moltler query "SHOW AGENTS"
+moltler query "TRIGGER AGENT incident_responder"
+moltler query "TRIGGER AGENT incident_responder WITH {'priority': 'high'}"
+moltler query "SHOW AGENT incident_responder HISTORY"
+moltler query "ENABLE AGENT incident_responder"
+moltler query "DISABLE AGENT incident_responder"
 ```
 
 ## Configuration
 
 ### Config File
 
-Create `~/.escriptrc` (TOML format):
+Create `~/.moltlerrc` (TOML format):
 
 ```toml
 [connection]
@@ -121,7 +121,7 @@ use_ssl = false
 [repl]
 multiline = true
 vi_mode = false
-history_file = "~/.escript_history"
+history_file = "~/.moltler_history"
 
 [output]
 color = true
@@ -132,7 +132,7 @@ json_indent = 2
 Generate a sample config:
 
 ```bash
-escript config --init
+moltler config --init
 ```
 
 ### Environment Variables
@@ -148,7 +148,7 @@ export ESCRIPT_USE_SSL=false
 ### Command Line Options
 
 ```bash
-escript --host prod.example.com --port 9243 --ssl --user admin
+moltler --host prod.example.com --port 9243 --ssl --user admin
 ```
 
 ## Keyboard Shortcuts
@@ -167,7 +167,7 @@ escript --host prod.example.com --port 9243 --ssl --user admin
 The CLI automatically detects multi-line statements. Statements ending with keywords like `BEGIN`, `THEN`, `LOOP`, or `(` will continue to the next line:
 
 ```
-escript> CREATE PROCEDURE greet(name STRING)
+moltler> CREATE PROCEDURE greet(name STRING)
    ... BEGIN
    ...   PRINT 'Hello, ' || name || '!';
    ... END PROCEDURE;
@@ -179,17 +179,17 @@ escript> CREATE PROCEDURE greet(name STRING)
 
 ### CLI Commands
 
-| Command | Description |
+| Command | Dmoltlerion |
 |---------|-------------|
-| `escript` | Start interactive REPL |
-| `escript query "..."` | Execute a single statement |
-| `escript run <file>` | Execute a script file |
-| `escript config` | Show current configuration |
-| `escript test` | Test connection to Elasticsearch |
+| `moltler` | Start interactive REPL |
+| `moltler query "..."` | Execute a single statement |
+| `moltler run <file>` | Execute a script file |
+| `moltler config` | Show current configuration |
+| `moltler test` | Test connection to Elasticsearch |
 
 ### REPL Commands
 
-| Command | Description |
+| Command | Dmoltlerion |
 |---------|-------------|
 | `help` | Show help information |
 | `help examples` | Show ready-to-run examples |
@@ -204,9 +204,9 @@ escript> CREATE PROCEDURE greet(name STRING)
 
 ### Language Statements
 
-Use these in the REPL or via `escript query`:
+Use these in the REPL or via `moltler query`:
 
-| Statement | Description |
+| Statement | Dmoltlerion |
 |-----------|-------------|
 | `SHOW SKILLS` | List all skills |
 | `SHOW SKILL <name>` | Show skill details |
@@ -225,7 +225,7 @@ Use these in the REPL or via `escript query`:
 ### Create and Call a Procedure
 
 ```
-escript> CREATE PROCEDURE analyze_logs()
+moltler> CREATE PROCEDURE analyze_logs()
    ... BEGIN
    ...   DECLARE log_count NUMBER;
    ...   SET log_count := ESQL_QUERY('FROM logs-* | STATS count = COUNT(*)')[0].count;
@@ -234,17 +234,17 @@ escript> CREATE PROCEDURE analyze_logs()
 
 ✓ CREATE PROCEDURE 'analyze_logs'
 
-escript> CALL analyze_logs()
+moltler> CALL analyze_logs()
 Found 1523 log entries
 ```
 
 ### Query with Pretty Output
 
 ```
-escript> SHOW SKILLS
+moltler> SHOW SKILLS
 
 ┌──────────────────┬─────────────────────────────┬────────────┐
-│ name             │ description                 │ parameters │
+│ name             │ dmoltlerion                 │ parameters │
 ├──────────────────┼─────────────────────────────┼────────────┤
 │ analyze_errors   │ Analyze error patterns      │ 2          │
 │ check_health     │ Check cluster health        │ 0          │
@@ -256,16 +256,16 @@ escript> SHOW SKILLS
 ### Working with Skills
 
 ```
-escript> SHOW SKILLS
+moltler> SHOW SKILLS
 
 ┌──────────────────┬─────────┬─────────────────────────────┐
-│ name             │ version │ description                 │
+│ name             │ version │ dmoltlerion                 │
 ├──────────────────┼─────────┼─────────────────────────────┤
 │ check_health     │ 1.0     │ Check cluster health        │
 │ analyze_logs     │ 1.2     │ Analyze application logs    │
 └──────────────────┴─────────┴─────────────────────────────┘
 
-escript> TEST SKILL analyze_logs WITH index = 'logs-*'
+moltler> TEST SKILL analyze_logs WITH index = 'logs-*'
 ✓ Test PASSED
   Result: {"log_count": 1523, "error_rate": 0.02}
 ```
@@ -273,7 +273,7 @@ escript> TEST SKILL analyze_logs WITH index = 'logs-*'
 ### Working with Connectors
 
 ```
-escript> SHOW CONNECTORS
+moltler> SHOW CONNECTORS
 
 ┌─────────────┬───────────┬──────────────────────────────┐
 │ name        │ type      │ status                       │
@@ -282,18 +282,18 @@ escript> SHOW CONNECTORS
 │ jira_bugs   │ jira      │ enabled (last sync: 30m ago) │
 └─────────────┴───────────┴──────────────────────────────┘
 
-escript> TEST CONNECTOR github_ops
+moltler> TEST CONNECTOR github_ops
 ✓ Connection successful
   Rate limit: 4987/5000 remaining
 
-escript> SYNC CONNECTOR github_ops TO 'github-issues-*'
+moltler> SYNC CONNECTOR github_ops TO 'github-issues-*'
 ✓ Synced 127 issues
 ```
 
 ### Working with Agents
 
 ```
-escript> SHOW AGENTS
+moltler> SHOW AGENTS
 
 ┌─────────────────────┬─────────────┬──────────────────────────┐
 │ name                │ status      │ last run                 │
@@ -302,11 +302,11 @@ escript> SHOW AGENTS
 │ log_analyzer        │ enabled     │ 2024-01-15 09:00:00      │
 └─────────────────────┴─────────────┴──────────────────────────┘
 
-escript> TRIGGER AGENT incident_responder WITH {'alert': 'high-cpu'}
+moltler> TRIGGER AGENT incident_responder WITH {'alert': 'high-cpu'}
 ✓ Agent triggered
   Execution ID: exec_abc123
 
-escript> SHOW AGENT incident_responder HISTORY
+moltler> SHOW AGENT incident_responder HISTORY
 
 ┌─────────────────┬──────────┬─────────────────┬──────────┐
 │ execution_id    │ status   │ started         │ duration │
@@ -328,7 +328,7 @@ END PROCEDURE;
 
 CALL init_data();
 
-$ escript run --verbose setup.es
+$ moltler run --verbose setup.es
 ℹ Running setup.es...
 
 Statement 1/2:

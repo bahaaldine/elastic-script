@@ -1,9 +1,9 @@
 """
-Configuration management for elastic-script CLI.
+Configuration management for Moltler CLI.
 
 Supports:
-- ~/.escriptrc (TOML format)
-- Environment variables
+- ~/.moltlerrc (TOML format)
+- Environment variables (MOLTLER_*)
 - Command-line overrides
 """
 
@@ -20,7 +20,7 @@ except ImportError:
 
 @dataclass
 class Config:
-    """Configuration for the elastic-script CLI."""
+    """Configuration for the Moltler CLI."""
     
     # Connection settings
     host: str = "localhost"
@@ -33,7 +33,7 @@ class Config:
     # REPL settings
     multiline: bool = True
     vi_mode: bool = False
-    history_file: str = "~/.escript_history"
+    history_file: str = "~/.moltler_history"
     history_size: int = 10000
     
     # Output settings
@@ -62,14 +62,14 @@ class Config:
         Load configuration from file and environment.
         
         Priority (highest to lowest):
-        1. Environment variables (ESCRIPT_*)
-        2. ~/.escriptrc
+        1. Environment variables (MOLTLER_*)
+        2. ~/.moltlerrc
         3. Default values
         """
         config = cls()
         
         # Load from file
-        config_file = Path.home() / ".escriptrc"
+        config_file = Path.home() / ".moltlerrc"
         if config_file.exists() and toml is not None:
             try:
                 data = toml.load(config_file)
@@ -137,13 +137,13 @@ class Config:
     def _apply_env(cls, config: "Config") -> "Config":
         """Apply environment variable overrides."""
         env_mappings = {
-            "ESCRIPT_HOST": ("host", str),
-            "ESCRIPT_PORT": ("port", int),
-            "ESCRIPT_USERNAME": ("username", str),
-            "ESCRIPT_PASSWORD": ("password", str),
-            "ESCRIPT_USE_SSL": ("use_ssl", lambda x: x.lower() in ("true", "1", "yes")),
-            "ESCRIPT_COLOR": ("color", lambda x: x.lower() in ("true", "1", "yes")),
-            "ESCRIPT_VI_MODE": ("vi_mode", lambda x: x.lower() in ("true", "1", "yes")),
+            "MOLTLER_HOST": ("host", str),
+            "MOLTLER_PORT": ("port", int),
+            "MOLTLER_USERNAME": ("username", str),
+            "MOLTLER_PASSWORD": ("password", str),
+            "MOLTLER_USE_SSL": ("use_ssl", lambda x: x.lower() in ("true", "1", "yes")),
+            "MOLTLER_COLOR": ("color", lambda x: x.lower() in ("true", "1", "yes")),
+            "MOLTLER_VI_MODE": ("vi_mode", lambda x: x.lower() in ("true", "1", "yes")),
         }
         
         for env_var, (attr, converter) in env_mappings.items():
@@ -162,7 +162,7 @@ class Config:
             raise ImportError("toml package required to save config")
         
         if path is None:
-            path = Path.home() / ".escriptrc"
+            path = Path.home() / ".moltlerrc"
         
         data = {
             "connection": {
@@ -197,8 +197,8 @@ class Config:
 
 
 # Sample config file content
-SAMPLE_CONFIG = '''# elastic-script CLI Configuration
-# Save this file as ~/.escriptrc
+SAMPLE_CONFIG = '''# Moltler CLI Configuration
+# Save this file as ~/.moltlerrc
 
 [connection]
 host = "localhost"
@@ -211,7 +211,7 @@ verify_certs = true
 [repl]
 multiline = true
 vi_mode = false
-history_file = "~/.escript_history"
+history_file = "~/.moltler_history"
 history_size = 10000
 
 [output]
