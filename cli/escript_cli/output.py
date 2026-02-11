@@ -251,13 +251,20 @@ class OutputFormatter:
     def _print_main_help(self):
         """Print main help menu."""
         help_text = """
-[bold cyan]Welcome to elastic-script![/] A procedural scripting language for Elasticsearch.
+[bold cyan]Welcome to Moltler![/] The AI Skills Creation Framework for Elasticsearch.
 
 [bold]Quick Start:[/]
   [green]help examples[/]   Show ready-to-run examples
   [green]help tutorial[/]   Interactive getting started guide
   [green]help functions[/]  List available built-in functions
   [green]help syntax[/]     Language syntax reference
+
+[bold]Moltler Commands:[/]
+  [green]skill list[/]      List available skills
+  [green]skill show[/]      Show skill details
+  [green]connector list[/]  List connectors
+  [green]agent list[/]      List agents
+  [green]agent trigger[/]   Trigger an agent
 
 [bold]CLI Commands:[/]
   [cyan]help[/]             This help menu
@@ -267,18 +274,18 @@ class OutputFormatter:
   [cyan]config[/]           Show configuration
 
 [bold]Try These:[/]
-  [dim]# Create a simple procedure[/]
-  [yellow]CREATE PROCEDURE hello() BEGIN PRINT 'Hello World!'; END PROCEDURE;[/]
+  [dim]# Create a skill[/]
+  [yellow]CREATE SKILL check_health() RETURNS DOCUMENT AS GET_DOCUMENT('_cluster', 'health');[/]
   
-  [dim]# Call it[/]
-  [yellow]CALL hello()[/]
+  [dim]# Test the skill[/]
+  [yellow]TEST SKILL check_health[/]
   
-  [dim]# Query Elasticsearch with ES|QL[/]
-  [yellow]CALL ESQL_QUERY('FROM logs-* | LIMIT 5')[/]
+  [dim]# Create an agent[/]
+  [yellow]CREATE AGENT monitor GOAL 'Monitor cluster health' WITH SKILLS check_health;[/]
 
 [bold]Keyboard:[/] [cyan]Tab[/]=complete  [cyan]↑↓[/]=history  [cyan]Ctrl+R[/]=search  [cyan]Ctrl+L[/]=clear
         """
-        self.console.print(Panel(help_text.strip(), title="[bold]elastic-script Help[/]", box=self._box))
+        self.console.print(Panel(help_text.strip(), title="[bold]Moltler Help[/]", box=self._box))
     
     def _print_examples_help(self):
         """Print example queries."""

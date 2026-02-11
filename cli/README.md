@@ -1,6 +1,6 @@
-# elastic-script CLI
+# Moltler CLI
 
-A beautiful, feature-rich command-line interface for elastic-script - procedural scripting for Elasticsearch.
+A beautiful, feature-rich command-line interface for **Moltler** - the AI Skills Creation Framework for Elasticsearch.
 
 ![Demo](../docs/images/cli-demo.gif)
 
@@ -78,6 +78,61 @@ escript run --verbose setup.es
 escript run --dry-run test.es
 ```
 
+### Manage Skills
+
+```bash
+# List all skills
+escript skill list
+
+# Show skill details
+escript skill show analyze_logs
+
+# Test a skill
+escript skill test analyze_logs --with "index=logs-*,threshold=0.9"
+```
+
+### Manage Connectors
+
+```bash
+# List all connectors
+escript connector list
+
+# Show connector details
+escript connector show my_github
+
+# Test connectivity
+escript connector test my_github
+
+# Sync data from connector
+escript connector sync my_github
+
+# Sync specific entity
+escript connector sync my_github --entity issues
+```
+
+### Manage Agents
+
+```bash
+# List all agents
+escript agent list
+
+# Show agent details
+escript agent show incident_responder
+
+# Trigger an agent
+escript agent trigger incident_responder
+
+# Trigger with context
+escript agent trigger incident_responder --context '{"priority": "high"}'
+
+# Show execution history
+escript agent history incident_responder
+
+# Enable/disable agents
+escript agent enable incident_responder
+escript agent disable incident_responder
+```
+
 ## Configuration
 
 ### Config File
@@ -151,6 +206,8 @@ escript> CREATE PROCEDURE greet(name STRING)
 
 ## Commands
 
+### General Commands
+
 | Command | Description |
 |---------|-------------|
 | `help` | Show help information |
@@ -159,6 +216,34 @@ escript> CREATE PROCEDURE greet(name STRING)
 | `history` | Show recent commands |
 | `config` | Show current configuration |
 | `refresh` | Reload completions from server |
+
+### Skill Commands
+
+| Command | Description |
+|---------|-------------|
+| `skill list` | List all available skills |
+| `skill show <name>` | Show skill details |
+| `skill test <name>` | Test a skill with parameters |
+
+### Connector Commands
+
+| Command | Description |
+|---------|-------------|
+| `connector list` | List all connectors |
+| `connector show <name>` | Show connector details |
+| `connector test <name>` | Test connector connectivity |
+| `connector sync <name>` | Sync data from connector |
+
+### Agent Commands
+
+| Command | Description |
+|---------|-------------|
+| `agent list` | List all agents |
+| `agent show <name>` | Show agent details |
+| `agent trigger <name>` | Manually trigger an agent |
+| `agent history <name>` | Show execution history |
+| `agent enable <name>` | Enable an agent |
+| `agent disable <name>` | Disable an agent |
 
 ## Examples
 
@@ -191,6 +276,66 @@ escript> SHOW SKILLS
 │ generate_report  │ Generate system report      │ 1          │
 └──────────────────┴─────────────────────────────┴────────────┘
 3 row(s)
+```
+
+### Create and Test a Skill
+
+```bash
+$ escript skill list
+┌──────────────────┬─────────┬─────────────────────────────┐
+│ name             │ version │ description                 │
+├──────────────────┼─────────┼─────────────────────────────┤
+│ check_health     │ 1.0     │ Check cluster health        │
+│ analyze_logs     │ 1.2     │ Analyze application logs    │
+└──────────────────┴─────────┴─────────────────────────────┘
+
+$ escript skill test analyze_logs --with "index=logs-*"
+✓ Test PASSED
+  Execution time: 1.24s
+  Result: {"log_count": 1523, "error_rate": 0.02}
+```
+
+### Manage Connectors
+
+```bash
+$ escript connector list
+┌─────────────┬───────────┬──────────────────────────────┐
+│ name        │ type      │ status                       │
+├─────────────┼───────────┼──────────────────────────────┤
+│ github_ops  │ github    │ enabled (last sync: 1h ago)  │
+│ jira_bugs   │ jira      │ enabled (last sync: 30m ago) │
+└─────────────┴───────────┴──────────────────────────────┘
+
+$ escript connector test github_ops
+✓ Connection successful
+  Rate limit: 4987/5000 remaining
+
+$ escript connector sync github_ops --entity issues
+✓ Synced 127 issues to github-ops-issues-*
+```
+
+### Agent Operations
+
+```bash
+$ escript agent list
+┌─────────────────────┬─────────────┬──────────────────────────┐
+│ name                │ status      │ last run                 │
+├─────────────────────┼─────────────┼──────────────────────────┤
+│ incident_responder  │ enabled     │ 2024-01-15 10:23:45      │
+│ log_analyzer        │ enabled     │ 2024-01-15 09:00:00      │
+└─────────────────────┴─────────────┴──────────────────────────┘
+
+$ escript agent trigger incident_responder --context '{"alert": "high-cpu"}'
+✓ Agent triggered
+  Execution ID: exec_abc123
+
+$ escript agent history incident_responder
+┌─────────────────┬──────────┬─────────────────┬──────────┐
+│ execution_id    │ status   │ started         │ duration │
+├─────────────────┼──────────┼─────────────────┼──────────┤
+│ exec_abc123     │ success  │ 10:23:45        │ 12.3s    │
+│ exec_def456     │ success  │ 09:00:00        │ 8.7s     │
+└─────────────────┴──────────┴─────────────────┴──────────┘
 ```
 
 ### Run a Script File

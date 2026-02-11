@@ -1,9 +1,10 @@
 """
-elastic-script CLI - A beautiful command-line interface for elastic-script.
+Moltler CLI - The AI Skills Creation Framework for Elasticsearch.
 
 Features:
+- Skills, Connectors, and Agents management
 - Syntax highlighting for elastic-script
-- Auto-completion for keywords and functions
+- Auto-completion for keywords, functions, skills, connectors, and agents
 - Multi-line editing with smart indentation
 - Beautiful output with tables and panels
 - Persistent command history
@@ -13,7 +14,7 @@ Features:
 __version__ = "0.1.0"
 __author__ = "Bahaaldine Azarmi"
 
-# elastic-script keywords for highlighting and completion
+# Moltler and elastic-script keywords for highlighting and completion
 KEYWORDS = [
     # Core
     "CREATE", "DROP", "DELETE", "CALL", "EXECUTE", "IMMEDIATE",
@@ -33,9 +34,16 @@ KEYWORDS = [
     # Async
     "ASYNC", "ON_DONE", "ON_FAIL", "TRACK", "TIMEOUT", "PARALLEL",
     "EXECUTION", "STATUS", "CANCEL", "RETRY", "WAIT",
-    # Skills & Applications
-    "SKILL", "SKILLS", "APPLICATION", "APPLICATIONS",
-    "INSTALL", "EXTEND", "GENERATE", "FROM", "MODEL", "SAVE", "AS",
+    # Moltler - Skills
+    "SKILL", "SKILLS", "TEST", "GENERATE", "VERSION", "AUTHOR", "TAGS", "REQUIRES",
+    # Moltler - Connectors
+    "CONNECTOR", "CONNECTORS", "SYNC", "QUERY", "EXEC", "INCREMENTAL",
+    # Moltler - Agents
+    "AGENT", "AGENTS", "GOAL", "AUTONOMOUS", "SUPERVISED", "HUMAN_APPROVAL", "DRY_RUN",
+    "ALERT", "SCHEDULE", "WEBHOOK",
+    # Applications
+    "APPLICATION", "APPLICATIONS",
+    "INSTALL", "EXTEND", "FROM", "MODEL", "SAVE", "AS",
     "DESCRIPTION", "EXAMPLES", "SOURCES", "INTENTS",
     "PAUSE", "RESUME", "ENABLE", "DISABLE",
     # Jobs & Triggers
@@ -49,9 +57,9 @@ KEYWORDS = [
     # Types
     "TYPE", "TYPES", "RECORD",
     # Intents
-    "INTENT", "DEFINE", "REQUIRES", "ACTIONS", "ON_FAILURE",
+    "INTENT", "DEFINE", "ACTIONS", "ON_FAILURE",
     # Misc
-    "SHOW", "ALTER", "CONFIG", "VERSION", "HISTORY", "LIMIT",
+    "SHOW", "ALTER", "CONFIG", "HISTORY", "LIMIT",
     "PRINT", "NULL", "TRUE", "FALSE", "AND", "OR", "NOT",
     "LIKE", "BETWEEN", "IS", "EXISTS",
 ]

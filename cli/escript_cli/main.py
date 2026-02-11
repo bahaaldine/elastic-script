@@ -1,11 +1,29 @@
 """
-Main entry point for elastic-script CLI.
+Moltler CLI - The AI Skills Creation Framework for Elasticsearch.
 
 Usage:
-    escript                     # Start interactive REPL
-    escript query "..."         # Execute a single query
-    escript run script.es       # Execute a script file
-    escript config              # Show/manage configuration
+    escript                          # Start interactive REPL
+    escript query "..."              # Execute a single query
+    escript run script.es            # Execute a script file
+    
+    # Skill commands
+    escript skill list               # List all skills
+    escript skill show <name>        # Show skill details
+    escript skill test <name>        # Test a skill
+    
+    # Connector commands
+    escript connector list           # List all connectors
+    escript connector show <name>    # Show connector details
+    escript connector test <name>    # Test connector connectivity
+    escript connector sync <name>    # Sync connector data
+    
+    # Agent commands
+    escript agent list               # List all agents
+    escript agent show <name>        # Show agent details
+    escript agent trigger <name>     # Manually trigger an agent
+    escript agent history <name>     # Show agent execution history
+    
+    escript config                   # Show/manage configuration
 """
 
 import sys
@@ -32,7 +50,7 @@ from .output import OutputFormatter
 @click.pass_context
 def cli(ctx, host, port, user, password, ssl, no_color, version):
     """
-    elastic-script CLI - Interactive scripting for Elasticsearch.
+    Moltler CLI - The AI Skills Creation Framework for Elasticsearch.
     
     Start an interactive session:
     
@@ -40,11 +58,29 @@ def cli(ctx, host, port, user, password, ssl, no_color, version):
     
     Execute a single query:
     
-        $ escript query "CALL hello()"
+        $ escript query "SHOW SKILLS"
     
     Run a script file:
     
         $ escript run myscript.es
+    
+    Manage skills:
+    
+        $ escript skill list
+        $ escript skill show my_skill
+        $ escript skill test my_skill --with "param1=value1"
+    
+    Manage connectors:
+    
+        $ escript connector list
+        $ escript connector test my_github
+        $ escript connector sync my_github
+    
+    Manage agents:
+    
+        $ escript agent list
+        $ escript agent trigger incident_responder
+        $ escript agent history incident_responder
     """
     if version:
         click.echo(f"escript-cli version {__version__}")
