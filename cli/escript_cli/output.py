@@ -290,227 +290,227 @@ class OutputFormatter:
     def _print_examples_help(self):
         """Print example queries."""
         examples = """
-[bold cyan]Ready-to-Run Examples[/]
+[bold cyan]Ready-to-Run Moltler Examples[/]
 
-[bold]1. Hello World[/]
-[yellow]CREATE PROCEDURE greet(name STRING)
-BEGIN
-  PRINT 'Hello, ' || name || '!';
-END PROCEDURE;
+[bold]1. Create a Skill[/]
+[yellow]CREATE SKILL check_health
+  VERSION '1.0'
+  DESCRIPTION 'Check cluster health status'
+  RETURNS DOCUMENT
+AS
+  GET_DOCUMENT('_cluster', 'health');[/]
 
-CALL greet('World')[/]
+[bold]2. Test a Skill[/]
+[yellow]-- Test with default parameters
+TEST SKILL check_health
 
-[bold]2. Query Elasticsearch[/]
-[yellow]-- Get recent logs
-CALL ESQL_QUERY('FROM logs-* | SORT @timestamp DESC | LIMIT 10')
+-- Test with specific parameters
+TEST SKILL analyze_logs WITH index = 'logs-*', threshold = 0.9[/]
 
--- Count by status
-CALL ESQL_QUERY('FROM logs-* | STATS count = COUNT(*) BY status')[/]
+[bold]3. Create a Connector[/]
+[yellow]CREATE CONNECTOR my_github
+  TYPE github
+  CONFIG {
+    'org': 'mycompany',
+    'token': ENV('GITHUB_TOKEN')
+  };
 
-[bold]3. Variables and Control Flow[/]
-[yellow]CREATE PROCEDURE analyze_logs()
-BEGIN
-  DECLARE error_count NUMBER;
-  SET error_count = ESQL_QUERY('FROM logs-* | WHERE level = "ERROR" | STATS c = COUNT(*)')[0].c;
-  
-  IF error_count > 100 THEN
-    PRINT 'Alert: ' || error_count || ' errors found!';
-  ELSE
-    PRINT 'System healthy: ' || error_count || ' errors';
-  END IF;
-END PROCEDURE;[/]
+-- Test connectivity
+TEST CONNECTOR my_github
 
-[bold]4. Loop Through Results[/]
-[yellow]CREATE PROCEDURE list_indices()
-BEGIN
-  DECLARE indices ARRAY;
-  SET indices = ESQL_QUERY('SHOW INDICES');
-  
-  FOR idx IN indices LOOP
-    PRINT 'Index: ' || idx.index;
-  END LOOP;
-END PROCEDURE;[/]
+-- Sync data
+SYNC CONNECTOR my_github TO 'github-*';[/]
 
-[bold]5. Error Handling[/]
-[yellow]CREATE PROCEDURE safe_query()
-BEGIN
-  TRY
-    CALL ESQL_QUERY('FROM nonexistent-index');
-  CATCH
-    PRINT 'Error: ' || @error.message;
-  END TRY;
-END PROCEDURE;[/]
+[bold]4. Query Connector Data[/]
+[yellow]-- Query issues from GitHub connector
+QUERY my_github.issues WHERE state = 'open' LIMIT 10
+
+-- Execute an action
+EXEC my_github.create_issue(title = 'New bug', body = 'Description here')[/]
+
+[bold]5. Create an Agent[/]
+[yellow]CREATE AGENT incident_responder
+  GOAL 'Respond to production incidents automatically'
+  WITH SKILLS check_health, analyze_logs, notify_team
+  EXECUTION SUPERVISED
+  MODEL 'gpt-4'
+  ON ALERT high_error_rate;
+
+-- Trigger manually
+TRIGGER AGENT incident_responder WITH {'priority': 'high'}
+
+-- Check history
+SHOW AGENT incident_responder HISTORY[/]
+
+[bold]6. Generate a Skill with AI[/]
+[yellow]-- Let AI generate a skill from description
+GENERATE SKILL FROM 'Analyze logs for error patterns and return top 10'
+  MODEL 'gpt-4'
+  SAVE AS analyze_errors;[/]
 
 [dim]Copy any example and paste it to try![/]
         """
-        self.console.print(Panel(examples.strip(), title="[bold]Examples[/]", box=self._box))
+        self.console.print(Panel(examples.strip(), title="[bold]Moltler Examples[/]", box=self._box))
     
     def _print_functions_help(self):
         """Print available functions."""
         functions = """
-[bold cyan]Built-in Functions (118 total)[/]
+[bold cyan]Moltler Statements & Built-in Functions[/]
+
+[bold]Skill Statements[/]
+  [green]CREATE SKILL name ...[/]       Create a new skill
+  [green]TEST SKILL name[/]             Test a skill
+  [green]SHOW SKILLS[/]                 List all skills
+  [green]DROP SKILL name[/]             Delete a skill
+  [green]GENERATE SKILL FROM '...'[/]   AI-generate a skill
+
+[bold]Connector Statements[/]
+  [green]CREATE CONNECTOR name ...[/]   Create a connector
+  [green]TEST CONNECTOR name[/]         Test connectivity
+  [green]SYNC CONNECTOR name[/]         Sync data to Elasticsearch
+  [green]QUERY connector.entity[/]      Query connector data
+  [green]EXEC connector.action()[/]     Execute connector action
+
+[bold]Agent Statements[/]
+  [green]CREATE AGENT name ...[/]       Create an agent
+  [green]TRIGGER AGENT name[/]          Manually trigger agent
+  [green]SHOW AGENT name HISTORY[/]     View execution history
+  [green]ENABLE/DISABLE AGENT[/]        Toggle agent status
+
+[bold]Elasticsearch Functions[/]
+  ESQL_QUERY, INDEX_DOCUMENT, GET_DOCUMENT, UPDATE_DOCUMENT
+
+[bold]AI/LLM Functions[/]
+  LLM_COMPLETE, LLM_CHAT, LLM_SUMMARIZE, LLM_CLASSIFY, LLM_EMBED
 
 [bold]String Functions[/]
   LENGTH, UPPER, LOWER, TRIM, SUBSTR, REPLACE, SPLIT, CONCAT
-  REGEXP_REPLACE, REGEXP_SUBSTR, REVERSE, INITCAP, LPAD, RPAD
 
 [bold]Array Functions[/]
-  ARRAY_LENGTH, ARRAY_APPEND, ARRAY_CONTAINS, ARRAY_JOIN
-  ARRAY_MAP, ARRAY_FILTER, ARRAY_REDUCE, ARRAY_SORT, ARRAY_SLICE
-
-[bold]Number Functions[/]
-  ABS, CEIL, FLOOR, ROUND, MOD, POWER, SQRT, LOG, EXP
-
-[bold]Date Functions[/]
-  CURRENT_DATE, CURRENT_TIMESTAMP, DATE_ADD, DATE_SUB, DATE_DIFF
-
-[bold]Document/Map Functions[/]
-  DOCUMENT_GET, DOCUMENT_KEYS, DOCUMENT_MERGE
-  MAP_GET, MAP_PUT, MAP_KEYS, MAP_VALUES
-
-[bold]Elasticsearch Functions[/]
-  [green]ESQL_QUERY(query)[/]           Execute ES|QL query
-  [green]INDEX_DOCUMENT(idx, doc)[/]    Index a document
-  [green]GET_DOCUMENT(idx, id)[/]       Get document by ID
-  [green]UPDATE_DOCUMENT(idx, id, d)[/] Update a document
-
-[bold]AI/LLM Functions[/]
-  LLM_COMPLETE, LLM_CHAT, LLM_SUMMARIZE, LLM_CLASSIFY
+  ARRAY_LENGTH, ARRAY_APPEND, ARRAY_MAP, ARRAY_FILTER, ARRAY_REDUCE
 
 [bold]Integration Functions[/]
-  SLACK_SEND, HTTP_GET, HTTP_POST, WEBHOOK
-  AWS_LAMBDA_INVOKE, K8S_GET, PAGERDUTY_TRIGGER
+  SLACK_SEND, HTTP_GET, HTTP_POST, WEBHOOK, PAGERDUTY_TRIGGER
 
-[dim]Use Tab to auto-complete function names![/]
+[dim]Use Tab to auto-complete! Type 'help syntax' for full reference.[/]
         """
-        self.console.print(Panel(functions.strip(), title="[bold]Functions Reference[/]", box=self._box))
+        self.console.print(Panel(functions.strip(), title="[bold]Moltler Reference[/]", box=self._box))
     
     def _print_tutorial(self):
         """Print interactive tutorial."""
         tutorial = """
-[bold cyan]Getting Started Tutorial[/]
+[bold cyan]Moltler Getting Started Tutorial[/]
 
-[bold]Step 1: Your First Procedure[/]
-Copy and paste this to create a procedure:
+[bold]Step 1: Your First Skill[/]
+Skills are reusable units of automation. Create one:
 
-[yellow]CREATE PROCEDURE my_first_proc()
-BEGIN
-  PRINT 'It works!';
-END PROCEDURE;[/]
+[yellow]CREATE SKILL hello_world
+  VERSION '1.0'
+  DESCRIPTION 'A simple greeting skill'
+  RETURNS STRING
+AS
+  'Hello from Moltler!';[/]
 
-Then call it:
-[yellow]CALL my_first_proc()[/]
+Test it:
+[yellow]TEST SKILL hello_world[/]
 
-[bold]Step 2: Using Variables[/]
-[yellow]CREATE PROCEDURE greet(name STRING)
-BEGIN
-  DECLARE message STRING;
-  SET message = 'Hello, ' || name || '!';
-  PRINT message;
-END PROCEDURE;
-
-CALL greet('Developer')[/]
-
-[bold]Step 3: Query Elasticsearch[/]
-[yellow]-- Replace 'your-index' with an actual index name
-CALL ESQL_QUERY('FROM your-index | LIMIT 5')[/]
-
-[bold]Step 4: Store Query Results[/]
-[yellow]CREATE PROCEDURE count_docs(index_name STRING)
+[bold]Step 2: Skill with Parameters[/]
+[yellow]CREATE SKILL count_logs(index STRING DEFAULT 'logs-*')
+  DESCRIPTION 'Count documents in an index'
+  RETURNS NUMBER
+AS
 BEGIN
   DECLARE result ARRAY;
-  DECLARE count NUMBER;
-  
-  SET result = ESQL_QUERY('FROM ' || index_name || ' | STATS c = COUNT(*)');
-  SET count = result[0].c;
-  
-  PRINT 'Documents in ' || index_name || ': ' || count;
-END PROCEDURE;
+  SET result = ESQL_QUERY('FROM ' || index || ' | STATS c = COUNT(*)');
+  RETURN result[0].c;
+END;[/]
 
-CALL count_docs('logs-*')[/]
+Test with parameters:
+[yellow]TEST SKILL count_logs WITH index = 'metrics-*'[/]
 
-[bold]Step 5: Control Flow[/]
-[yellow]CREATE PROCEDURE check_health()
-BEGIN
-  DECLARE errors NUMBER;
-  SET errors = ESQL_QUERY('FROM logs-* | WHERE level = "ERROR" | STATS c = COUNT(*)')[0].c;
-  
-  IF errors > 50 THEN
-    PRINT '⚠️  High error count: ' || errors;
-  ELSEIF errors > 10 THEN
-    PRINT '⚡ Moderate errors: ' || errors;
-  ELSE
-    PRINT '✅ System healthy!';
-  END IF;
-END PROCEDURE;[/]
+[bold]Step 3: Create a Connector[/]
+Connectors bring external data into Elasticsearch:
+
+[yellow]CREATE CONNECTOR my_github
+  TYPE github
+  CONFIG {'org': 'mycompany', 'token': ENV('GITHUB_TOKEN')};
+
+TEST CONNECTOR my_github[/]
+
+[bold]Step 4: Query Connector Data[/]
+[yellow]-- List open issues
+QUERY my_github.issues WHERE state = 'open' LIMIT 5
+
+-- Sync to Elasticsearch
+SYNC CONNECTOR my_github TO 'github-data-*';[/]
+
+[bold]Step 5: Create an Agent[/]
+Agents orchestrate skills to achieve goals:
+
+[yellow]CREATE AGENT health_monitor
+  GOAL 'Monitor system health and alert on issues'
+  WITH SKILLS count_logs, check_errors
+  EXECUTION AUTONOMOUS
+  ON SCHEDULE EVERY '5m';[/]
+
+Trigger manually:
+[yellow]TRIGGER AGENT health_monitor[/]
 
 [bold]What's Next?[/]
-  • [cyan]help examples[/]   - More examples
+  • [cyan]help examples[/]   - More Moltler examples
   • [cyan]help functions[/]  - All available functions
   • [cyan]help syntax[/]     - Language reference
         """
-        self.console.print(Panel(tutorial.strip(), title="[bold]Tutorial[/]", box=self._box))
+        self.console.print(Panel(tutorial.strip(), title="[bold]Moltler Tutorial[/]", box=self._box))
     
     def _print_syntax_help(self):
         """Print syntax reference."""
         syntax = """
-[bold cyan]Language Syntax Reference[/]
+[bold cyan]Moltler Syntax Reference[/]
 
-[bold]Procedures[/]
-[yellow]CREATE PROCEDURE name(param1 TYPE, param2 TYPE)
-BEGIN
-  -- statements
-END PROCEDURE;
+[bold]Skills[/]
+[yellow]CREATE SKILL name(param TYPE DEFAULT value)
+  VERSION '1.0'
+  DESCRIPTION 'What the skill does'
+  AUTHOR 'Your Name'
+  TAGS ['tag1', 'tag2']
+  REQUIRES skill1, skill2
+  RETURNS TYPE
+AS expression | BEGIN ... END;[/]
 
-DROP PROCEDURE name;
-CALL name(arg1, arg2);[/]
+[bold]Connectors[/]
+[yellow]CREATE CONNECTOR name TYPE github CONFIG {...};
+SYNC CONNECTOR name TO 'index-*' [INCREMENTAL ON field];
+QUERY connector.entity WHERE expr LIMIT n;
+EXEC connector.action(arg = value);[/]
 
-[bold]Variables[/]
-[yellow]DECLARE var_name TYPE;           -- Declare
-DECLARE var_name TYPE = value;   -- Declare with value
-SET var_name = expression;       -- Assign[/]
+[bold]Agents[/]
+[yellow]CREATE AGENT name
+  GOAL 'Agent objective'
+  WITH SKILLS skill1, skill2
+  EXECUTION AUTONOMOUS|SUPERVISED|HUMAN_APPROVAL|DRY_RUN
+  MODEL 'gpt-4'
+  ON SCHEDULE EVERY '5m' | ON ALERT name | ON WEBHOOK path;
 
-[bold]Types[/]
-  STRING, NUMBER, BOOLEAN, DATE, ARRAY, DOCUMENT, MAP
+TRIGGER AGENT name WITH {...};[/]
+
+[bold]Variables & Types[/]
+[yellow]DECLARE var_name TYPE;
+SET var_name = expression;[/]
+  Types: STRING, NUMBER, BOOLEAN, DATE, ARRAY, DOCUMENT, MAP
 
 [bold]Control Flow[/]
-[yellow]IF condition THEN
-  -- statements
-ELSEIF condition THEN
-  -- statements
-ELSE
-  -- statements
-END IF;
-
-FOR item IN array LOOP
-  -- statements  
-END LOOP;
-
-WHILE condition LOOP
-  -- statements
-END LOOP;[/]
+[yellow]IF cond THEN ... ELSEIF cond THEN ... ELSE ... END IF;
+FOR item IN array LOOP ... END LOOP;
+WHILE cond LOOP ... END LOOP;[/]
 
 [bold]Error Handling[/]
-[yellow]TRY
-  -- statements that might fail
-CATCH
-  PRINT @error.message;
-FINALLY
-  -- always runs
-END TRY;[/]
+[yellow]TRY ... CATCH PRINT @error.message; FINALLY ... END TRY;[/]
 
 [bold]Operators[/]
-  [cyan]||[/]   String concatenation
-  [cyan]??[/]   Null coalescing (a ?? b = a if a not null, else b)
-  [cyan]?.[/]   Safe navigation (a?.b = null if a is null)
-  [cyan]..[/]   Range (1..10)
-
-[bold]Comments[/]
-[yellow]-- Single line comment
-/* Multi-line
-   comment */[/]
+  [cyan]||[/] Concatenation  [cyan]??[/] Null coalescing  [cyan]?.[/] Safe nav  [cyan]..[/] Range
         """
-        self.console.print(Panel(syntax.strip(), title="[bold]Syntax Reference[/]", box=self._box))
+        self.console.print(Panel(syntax.strip(), title="[bold]Moltler Syntax[/]", box=self._box))
     
     def print_syntax(self, code: str):
         """Print syntax-highlighted elastic-script code."""
