@@ -171,8 +171,17 @@ class ElasticScriptREPL:
             self.output.print_info(f"Trying to connect to {self.config.url}")
             return
         
+        # Get skill count for welcome message
+        skill_count = 0
+        try:
+            result = self.client.execute("SHOW SKILLS")
+            if result.success and isinstance(result.data, list):
+                skill_count = len(result.data)
+        except Exception:
+            pass  # If it fails, just show 0
+        
         # Print welcome
-        self.output.print_welcome(message)
+        self.output.print_welcome(message, skill_count)
         
         # Load completions from server
         self._load_completions()

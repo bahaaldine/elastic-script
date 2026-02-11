@@ -31,6 +31,20 @@ pip install moltler-cli
 
 ## Quick Start
 
+### See Moltler in Action (Recommended First Step!)
+
+Run the interactive demo to see Moltler's capabilities:
+
+```bash
+moltler demo
+```
+
+This will:
+1. Connect to Elasticsearch
+2. Create a sample skill
+3. Test it and show the results
+4. Guide you on next steps
+
 ### Interactive Mode
 
 Start an interactive session:
@@ -39,30 +53,25 @@ Start an interactive session:
 moltler
 ```
 
-You'll see:
+You'll see a welcome screen with:
+- Connection status
+- Number of available skills
+- Quick start suggestions
 
 ```
-┌─────────────────────────────────────┐
-│ elastic-script                      │
-├─────────────────────────────────────┤
-│ Connected to elastic-cluster        │
-│ (Elasticsearch 8.17.0)              │
-│                                     │
-│ Type 'help' for commands, Ctrl+D    │
-│ to exit                             │
-└─────────────────────────────────────┘
-
-moltler> 
+moltler> SHOW SKILLS
+moltler> TEST SKILL hello_moltler
+moltler> help examples
 ```
 
 ### Execute a Query
 
 ```bash
 # Single query
-moltler query "CALL hello()"
+moltler query "SHOW SKILLS"
 
 # With JSON output
-moltler query --json "SHOW PROCEDURES"
+moltler query --json "SHOW SKILLS"
 ```
 
 ### Run a Script File

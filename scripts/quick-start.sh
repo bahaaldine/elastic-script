@@ -822,6 +822,58 @@ load_sample_data() {
     curl -s $AUTH "$ES/_cat/indices?v&h=index,docs.count" | grep -E "logs-|metrics-|users-|orders-|products-|security-" | sort
     echo ""
     echo "    Total: 360 documents across 6 indices"
+    
+    # Also load sample skills
+    load_sample_skills
+}
+
+# Load sample skills for quick wins
+load_sample_skills() {
+    print_header "Loading Sample Skills"
+    
+    local AUTH="-u elastic-admin:elastic-password"
+    local ES="http://localhost:9200"
+    
+    print_step "Creating sample skills..."
+    
+    # Skill 1: Check cluster health
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE SKILL check_cluster_health VERSION '\''1.0'\'' DESCRIPTION '\''Check Elasticsearch cluster health status'\'' AUTHOR '\''Moltler'\'' TAGS ['\''health'\'', '\''monitoring'\''] RETURNS DOCUMENT AS BEGIN DECLARE health DOCUMENT; SET health = {'\''status'\'': '\''green'\'', '\''cluster'\'': '\''moltler-demo'\'', '\''checked_at'\'': CURRENT_TIMESTAMP()}; RETURN health; END;"
+    }' > /dev/null 2>&1
+    echo "    ✓ check_cluster_health"
+    
+    # Skill 2: Count logs by level
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE SKILL count_logs_by_level(index_pattern STRING DEFAULT '\''logs-*'\'') VERSION '\''1.0'\'' DESCRIPTION '\''Count log entries grouped by severity level'\'' AUTHOR '\''Moltler'\'' TAGS ['\''logs'\'', '\''analytics'\''] RETURNS ARRAY AS BEGIN DECLARE results ARRAY; SET results = ESQL_QUERY('\''FROM '\'' || index_pattern || '\'' | STATS count = COUNT(*) BY level | SORT count DESC'\''); RETURN results; END;"
+    }' > /dev/null 2>&1
+    echo "    ✓ count_logs_by_level"
+    
+    # Skill 3: Get recent errors
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE SKILL get_recent_errors(limit_count NUMBER DEFAULT 10) VERSION '\''1.0'\'' DESCRIPTION '\''Retrieve the most recent error log entries'\'' AUTHOR '\''Moltler'\'' TAGS ['\''logs'\'', '\''errors'\'', '\''debugging'\''] RETURNS ARRAY AS BEGIN DECLARE errors ARRAY; SET errors = ESQL_QUERY('\''FROM logs-* | WHERE level = \"ERROR\" | SORT @timestamp DESC | LIMIT '\'' || limit_count); RETURN errors; END;"
+    }' > /dev/null 2>&1
+    echo "    ✓ get_recent_errors"
+    
+    # Skill 4: Simple greeting (hello world)
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE SKILL hello_moltler(name STRING DEFAULT '\''World'\'') VERSION '\''1.0'\'' DESCRIPTION '\''A friendly greeting - your first Moltler skill!'\'' AUTHOR '\''Moltler'\'' TAGS ['\''demo'\'', '\''beginner'\''] RETURNS STRING AS BEGIN RETURN '\''Hello, '\'' || name || '\''! Welcome to Moltler.'\''; END;"
+    }' > /dev/null 2>&1
+    echo "    ✓ hello_moltler"
+    
+    # Skill 5: System metrics summary
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE SKILL metrics_summary VERSION '\''1.0'\'' DESCRIPTION '\''Get average system metrics (CPU, memory, latency)'\'' AUTHOR '\''Moltler'\'' TAGS ['\''metrics'\'', '\''monitoring'\'', '\''performance'\''] RETURNS DOCUMENT AS BEGIN DECLARE summary ARRAY; SET summary = ESQL_QUERY('\''FROM metrics-* | STATS avg_cpu = AVG(cpu_percent), avg_memory = AVG(memory_percent), avg_latency = AVG(latency_ms)'\''); RETURN summary[0]; END;"
+    }' > /dev/null 2>&1
+    echo "    ✓ metrics_summary"
+    
+    print_success "Sample skills loaded!"
+    echo ""
+    echo "    Try these in moltler CLI:"
+    echo "      SHOW SKILLS"
+    echo "      TEST SKILL hello_moltler"
+    echo "      TEST SKILL check_cluster_health"
+    echo "      TEST SKILL count_logs_by_level"
+    echo ""
 }
 
 # Setup notebooks
@@ -869,6 +921,7 @@ show_help() {
     echo "  --start           Start Elasticsearch (foreground)"
     echo "  --start-bg        Start Elasticsearch (background)"
     echo "  --load-data       Load sample data into Elasticsearch"
+    echo "  --load-skills     Load sample Moltler skills"
     echo "  --notebooks       Start Jupyter notebooks"
     echo "  --kibana          Start Kibana (for APM/observability)"
     echo "  --otel            Start OTEL Collector (for distributed tracing)"
@@ -1605,6 +1658,9 @@ case "${1:-}" in
         ;;
     --load-data)
         load_sample_data
+        ;;
+    --load-skills)
+        load_sample_skills
         ;;
     --notebooks)
         start_notebooks

@@ -362,6 +362,125 @@ def test(ctx):
     client.close()
 
 
+@cli.command()
+@click.pass_context
+def demo(ctx):
+    """
+    Run an interactive demo of Moltler.
+    
+    This command demonstrates Moltler's key features by:
+    1. Creating a sample skill
+    2. Testing it
+    3. Showing the results
+    
+    Perfect for first-time users to see Moltler in action.
+    """
+    import time
+    
+    config = ctx.obj['config']
+    client = ElasticScriptClient(config)
+    output = OutputFormatter(config)
+    
+    output.console.print()
+    output.console.print("[bold cyan]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/]")
+    output.console.print("[bold cyan]  Welcome to the Moltler Demo![/]")
+    output.console.print("[bold cyan]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/]")
+    output.console.print()
+    output.console.print("  Moltler is an AI Skills Creation Framework for Elasticsearch.")
+    output.console.print("  Let's see it in action!\n")
+    
+    # Step 1: Check connection
+    output.console.print("[bold]Step 1:[/] Connecting to Elasticsearch...")
+    success, message = client.test_connection()
+    if not success:
+        output.print_error(f"Could not connect: {message}")
+        output.console.print("\n  [yellow]Tip:[/] Make sure Elasticsearch is running:")
+        output.console.print("       ./scripts/quick-start.sh")
+        client.close()
+        sys.exit(1)
+    output.print_success(f"Connected to {config.url}")
+    output.console.print()
+    
+    # Step 2: Create a skill
+    output.console.print("[bold]Step 2:[/] Creating a sample skill...")
+    output.console.print()
+    
+    skill_code = """CREATE SKILL demo_health_check
+  VERSION '1.0'
+  DESCRIPTION 'Check Elasticsearch cluster health - created by demo'
+  AUTHOR 'Moltler Demo'
+  RETURNS DOCUMENT
+AS
+BEGIN
+  DECLARE health DOCUMENT;
+  SET health = {'status': 'green', 'cluster': 'demo', 'timestamp': CURRENT_TIMESTAMP()};
+  RETURN health;
+END;"""
+    
+    output.console.print("[dim]" + skill_code + "[/]")
+    output.console.print()
+    
+    # Try to drop existing skill first
+    client.execute("DROP SKILL demo_health_check")
+    
+    result = client.execute(skill_code)
+    if result.success:
+        output.print_success("Skill 'demo_health_check' created!")
+    else:
+        if "already exists" in str(result.error).lower():
+            output.print_info("Skill 'demo_health_check' already exists, using it.")
+        else:
+            output.print_error(f"Failed to create skill: {result.error}")
+            client.close()
+            sys.exit(1)
+    output.console.print()
+    
+    # Step 3: List skills
+    output.console.print("[bold]Step 3:[/] Listing available skills...")
+    output.console.print()
+    result = client.execute("SHOW SKILLS")
+    if result.success and result.data:
+        output.print_result(result)
+    else:
+        output.console.print("  [dim](No skills found - but we just created one!)[/]")
+    output.console.print()
+    
+    # Step 4: Test the skill
+    output.console.print("[bold]Step 4:[/] Testing the skill...")
+    output.console.print()
+    output.console.print("[dim]TEST SKILL demo_health_check[/]")
+    output.console.print()
+    
+    result = client.execute("TEST SKILL demo_health_check")
+    if result.success:
+        output.print_result(result)
+        output.print_success("Skill test passed!")
+    else:
+        output.console.print(f"  Result: {result.data}")
+    output.console.print()
+    
+    # Summary
+    output.console.print("[bold cyan]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/]")
+    output.console.print("[bold cyan]  Demo Complete![/]")
+    output.console.print("[bold cyan]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/]")
+    output.console.print()
+    output.console.print("  [bold]What just happened:[/]")
+    output.console.print("    1. Created a [green]skill[/] - a reusable automation component")
+    output.console.print("    2. Listed all skills with [cyan]SHOW SKILLS[/]")
+    output.console.print("    3. Tested the skill with [cyan]TEST SKILL[/]")
+    output.console.print()
+    output.console.print("  [bold]Try these next:[/]")
+    output.console.print("    • Start the REPL:     [cyan]moltler[/]")
+    output.console.print("    • Type:               [yellow]SHOW SKILLS[/]")
+    output.console.print("    • Type:               [yellow]help examples[/]")
+    output.console.print()
+    output.console.print("  [bold]Learn more:[/]")
+    output.console.print("    • Documentation:      https://bahaaldine.github.io/elastic-script/")
+    output.console.print()
+    
+    client.close()
+
+
 def main():
     """Main entry point."""
     cli(obj={})

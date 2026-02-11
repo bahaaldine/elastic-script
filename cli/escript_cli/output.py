@@ -41,7 +41,7 @@ class OutputFormatter:
         )
         self._box = self.BOX_STYLES.get(config.table_style, ROUNDED)
     
-    def print_welcome(self, connection_info: str):
+    def print_welcome(self, connection_info: str, skill_count: int = 0):
         """Print welcome banner with Moltler branding."""
         # Moltler - The Skills Creation Framework for Elasticsearch
         moltler_banner = """
@@ -52,13 +52,26 @@ class OutputFormatter:
          ██║ ╚═╝ ██║╚██████╔╝███████╗██║   ███████╗███████╗██║  ██║
          ╚═╝     ╚═╝ ╚═════╝ ╚══════╝╚═╝   ╚══════╝╚══════╝╚═╝  ╚═╝[/]
 
-[bold cyan]         ⚡ The Skills Creation Framework for Elasticsearch ⚡[/]
+[bold cyan]         ⚡ The AI Skills Creation Framework for Elasticsearch ⚡[/]
 """
         self.console.print(moltler_banner)
+        
+        # Build status line
+        if skill_count > 0:
+            status = f"[bold green]{connection_info}[/] • [cyan]{skill_count} skill{'s' if skill_count != 1 else ''} available[/]"
+        else:
+            status = f"[bold green]{connection_info}[/] • [yellow]No skills yet[/]"
+        
+        # Build quick start tip based on state
+        if skill_count > 0:
+            quick_tip = "[dim]Try:[/] [yellow]SHOW SKILLS[/] [dim]to see available skills[/]"
+        else:
+            quick_tip = "[dim]Try:[/] [yellow]help examples[/] [dim]to create your first skill[/]"
+        
         self.console.print(Panel(
-            f"[bold green]{connection_info}[/]\n"
-            "[dim]Type [bold]help[/bold] for commands, [bold]help examples[/bold] for quick start, Ctrl+D to exit[/]",
-            title="[bold blue]🦌 Moltler says: Let's build some skills![/]",
+            f"{status}\n{quick_tip}\n"
+            "[dim]Type [bold]help[/bold] for commands, Ctrl+D to exit[/]",
+            title="[bold blue]🦌 Ready to build![/]",
             box=self._box,
         ))
     
