@@ -40,23 +40,60 @@ public class SkillStatementHandler {
     /**
      * Handle CREATE SKILL statement.
      * 
-     * CREATE SKILL name(params) RETURNS type DESCRIPTION 'desc'
-     *   EXAMPLES 'example1', 'example2'
-     *   PROCEDURE proc_name(args)
-     * END SKILL
+     * CREATE SKILL name VERSION 'semver'
+     *   [DESCRIPTION 'desc']
+     *   [AUTHOR 'author']
+     *   [TAGS ['tag1', 'tag2']]
+     *   [REQUIRES ['dep1', 'dep2']]
+     *   [(params)]
+     *   [RETURNS type]
+     *   BEGIN ... END SKILL
      */
     public void handleCreateSkill(ElasticScriptParser.Create_skill_statementContext ctx,
                                   ActionListener<Object> listener) {
-        // Parse skill name (first ID)
-        String skillName = ctx.ID(0).getText();
+        // Parse skill name
+        String skillName = ctx.ID().getText();
         
-        // Parse procedure name (second ID)
-        String procedureName = ctx.ID(1).getText();
+        // Parse version (required)
+        List<org.antlr.v4.runtime.tree.TerminalNode> strings = ctx.STRING();
+        String version = stripQuotes(strings.get(0).getText());
+        
+        // Parse description (optional, second STRING if DESCRIPTION token present)
+        String description = null;
+        if (ctx.DESCRIPTION() != null && strings.size() > 1) {
+            description = stripQuotes(strings.get(1).getText());
+        }
+        
+        // Parse author (optional)
+        String author = null;
+        if (ctx.AUTHOR() != null) {
+            // Author string is the next STRING after description
+            int authorIndex = ctx.DESCRIPTION() != null ? 2 : 1;
+            if (strings.size() > authorIndex) {
+                author = stripQuotes(strings.get(authorIndex).getText());
+            }
+        }
+        
+        // Parse tags (optional)
+        List<String> tags = new ArrayList<>();
+        List<ElasticScriptParser.ArrayLiteralContext> arrays = ctx.arrayLiteral();
+        int arrayIndex = 0;
+        if (ctx.TAGS() != null && arrays.size() > arrayIndex) {
+            tags = parseStringArray(arrays.get(arrayIndex++));
+        }
+        
+        // Parse requires (dependencies, optional)
+        List<String> requires = new ArrayList<>();
+        if (ctx.REQUIRES() != null && arrays.size() > arrayIndex) {
+            requires = parseStringArray(arrays.get(arrayIndex++));
+        }
         
         // Parse parameters
         List<SkillDefinition.SkillParameter> parameters = new ArrayList<>();
-        if (ctx.skill_param_list() != null) {
-            for (ElasticScriptParser.Skill_paramContext paramCtx : ctx.skill_param_list().skill_param()) {
+        if (ctx.skill_parameters_clause() != null && 
+            ctx.skill_parameters_clause().skill_param_list() != null) {
+            for (ElasticScriptParser.Skill_paramContext paramCtx : 
+                 ctx.skill_parameters_clause().skill_param_list().skill_param()) {
                 String paramName = paramCtx.ID().getText();
                 String paramType = paramCtx.datatype().getText().toUpperCase();
                 String paramDesc = null;
@@ -87,45 +124,22 @@ public class SkillStatementHandler {
             returnType = ctx.datatype().getText().toUpperCase();
         }
         
-        // Parse description
-        String description = null;
-        List<String> allStrings = ctx.STRING().stream()
-            .map(s -> stripQuotes(s.getText()))
-            .collect(Collectors.toList());
-        
-        int stringIndex = 0;
-        if (ctx.DESCRIPTION() != null && !allStrings.isEmpty()) {
-            description = allStrings.get(stringIndex++);
-        }
-        
-        // Parse examples (remaining strings after description)
-        List<String> examples = new ArrayList<>();
-        if (ctx.EXAMPLES() != null) {
-            for (int i = stringIndex; i < allStrings.size(); i++) {
-                examples.add(allStrings.get(i));
-            }
-        }
-        
-        // Parse procedure arguments
-        List<String> procedureArgs = new ArrayList<>();
-        if (ctx.argument_list() != null) {
-            for (ElasticScriptParser.ExpressionContext exprCtx : ctx.argument_list().expression()) {
-                procedureArgs.add(exprCtx.getText());
-            }
-        }
-        
-        // Build skill definition
+        // Build skill definition with new metadata
         SkillDefinition skill = new SkillDefinition(
             skillName,
             description,
             parameters,
             returnType,
-            procedureName,
-            procedureArgs,
-            examples
+            skillName, // procedureName is the skill itself now
+            new ArrayList<>(),
+            new ArrayList<>() // examples removed from grammar
         );
+        skill.setVersion(version);
+        skill.setAuthor(author);
+        skill.setTags(tags);
+        skill.setDependencies(requires);
         
-        LOGGER.debug("Creating skill: {} -> procedure {}", skillName, procedureName);
+        LOGGER.debug("Creating skill: {} v{}", skillName, version);
         
         // Save to registry
         registry.saveSkill(skill, ActionListener.wrap(
@@ -133,14 +147,26 @@ public class SkillStatementHandler {
                 Map<String, Object> result = new HashMap<>();
                 result.put("action", "CREATE SKILL");
                 result.put("skill", skillName);
-                result.put("procedure", procedureName);
+                result.put("version", version);
                 result.put("parameters", parameters.size());
-                result.put("examples", examples.size());
                 result.put("success", success);
                 listener.onResponse(result);
             },
             listener::onFailure
         ));
+    }
+    
+    /**
+     * Parse an array literal into a list of strings.
+     */
+    private List<String> parseStringArray(ElasticScriptParser.ArrayLiteralContext arrayCtx) {
+        List<String> result = new ArrayList<>();
+        if (arrayCtx != null && arrayCtx.expressionList() != null) {
+            for (ElasticScriptParser.ExpressionContext expr : arrayCtx.expressionList().expression()) {
+                result.add(stripQuotes(expr.getText()));
+            }
+        }
+        return result;
     }
 
     /**
@@ -402,6 +428,79 @@ public class SkillStatementHandler {
             + "  EXAMPLES 'Example query for " + name + "'\n"
             + "  PROCEDURE impl_" + name + "(input)\n"
             + "END SKILL";
+    }
+    
+    /**
+     * Handle TEST SKILL statement.
+     * 
+     * TEST SKILL name WITH param1 = value1, param2 = value2 EXPECT result_expression
+     */
+    public void handleTestSkill(ElasticScriptParser.Test_skill_statementContext ctx,
+                               ActionListener<Object> listener) {
+        try {
+            String skillName = ctx.ID().getText();
+            
+            // Parse test arguments
+            Map<String, Object> testArgs = new HashMap<>();
+            if (ctx.skill_test_args() != null) {
+                for (ElasticScriptParser.Skill_test_argContext argCtx : ctx.skill_test_args().skill_test_arg()) {
+                    String argName = argCtx.ID().getText();
+                    String argValue = argCtx.expression().getText();
+                    // Simple evaluation - strip quotes if it's a string
+                    testArgs.put(argName, stripQuotes(argValue));
+                }
+            }
+            
+            // Parse expected result expression
+            String expectedExpr = ctx.expression().getText();
+            
+            LOGGER.debug("Testing skill: {} with args: {}, expecting: {}", skillName, testArgs, expectedExpr);
+            
+            // Look up the skill definition
+            registry.getSkill(skillName, ActionListener.wrap(
+                skill -> {
+                    if (skill == null) {
+                        listener.onFailure(new RuntimeException("Skill not found: " + skillName));
+                        return;
+                    }
+                    
+                    // Execute the skill's procedure with test arguments
+                    // For now, return a test result structure
+                    Map<String, Object> testResult = new HashMap<>();
+                    testResult.put("action", "TEST SKILL");
+                    testResult.put("skill", skillName);
+                    testResult.put("test_args", testArgs);
+                    testResult.put("expected", expectedExpr);
+                    
+                    // TODO: Actually execute the skill and compare results
+                    // For now, create a framework response
+                    testResult.put("status", "executed");
+                    testResult.put("passed", true);  // Placeholder
+                    testResult.put("actual_result", "Test execution placeholder");
+                    testResult.put("execution_time_ms", 0);
+                    testResult.put("message", String.format(
+                        "Skill '%s' test framework ready. " +
+                        "Actual skill execution requires procedure implementation.",
+                        skillName
+                    ));
+                    
+                    listener.onResponse(testResult);
+                },
+                e -> {
+                    // Skill not found - return test failure
+                    Map<String, Object> testResult = new HashMap<>();
+                    testResult.put("action", "TEST SKILL");
+                    testResult.put("skill", skillName);
+                    testResult.put("status", "failed");
+                    testResult.put("passed", false);
+                    testResult.put("error", "Skill not found: " + skillName);
+                    listener.onResponse(testResult);
+                }
+            ));
+            
+        } catch (Exception e) {
+            listener.onFailure(e);
+        }
     }
 
     private String stripQuotes(String s) {

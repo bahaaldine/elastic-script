@@ -1,8 +1,9 @@
-# elastic-script Documentation
+# Moltler Documentation
+# The AI Skills Creation Framework for Elasticsearch
 # https://bahaaldine.github.io/elastic-script/
 
-site_name: elastic-script
-site_description: A procedural scripting language for Elasticsearch
+site_name: Moltler
+site_description: The AI Skills Creation Framework for Elasticsearch
 site_author: Bahaaldine Azarmi
 site_url: https://bahaaldine.github.io/elastic-script/
 
@@ -56,7 +57,7 @@ theme:
     - content.tabs.link
   
   icon:
-    logo: material/script-text
+    logo: material/creation
     repo: fontawesome/brands/github
 
 # Plugins
@@ -110,14 +111,54 @@ markdown_extensions:
       custom_checkbox: true
   - pymdownx.tilde
 
-# Navigation
+# Navigation - Moltler-first, Skills-focused
 nav:
   - Home: index.md
+  
   - Getting Started:
+    - What is Moltler?: getting-started/what-is-moltler.md
     - Installation: getting-started/installation.md
     - Quick Start: getting-started/quick-start.md
-    - Jupyter Setup: getting-started/jupyter-setup.md
-  - Language Guide:
+    - Your First Skill: getting-started/first-skill.md
+  
+  - Skills:
+    - Overview: skills/overview.md
+    - Creating Skills: skills/creating-skills.md
+    - Skill Parameters: skills/parameters.md
+    - Testing Skills: skills/testing.md
+    - Publishing Skills: skills/publishing.md
+    - Skill Packs: skills/skill-packs.md
+  
+  - Connectors:
+    - Overview: connectors/overview.md
+    - GitHub: connectors/github.md
+    - Jira: connectors/jira.md
+    - Datadog: connectors/datadog.md
+    - Salesforce: connectors/salesforce.md
+    - Zendesk: connectors/zendesk.md
+    - Slack: connectors/slack.md
+    - PagerDuty: connectors/pagerduty.md
+    - Building Connectors: connectors/building-connectors.md
+  
+  - Agents:
+    - Overview: agents/overview.md
+    - Creating Agents: agents/creating-agents.md
+    - Execution Model: agents/execution-model.md
+    - Human-in-the-Loop: agents/human-in-the-loop.md
+    - Monitoring Agents: agents/monitoring.md
+  
+  - AI Features:
+    - Generate Skills: ai/generate-skills.md
+    - Improve Skills: ai/improve-skills.md
+    - Recommendations: ai/recommendations.md
+  
+  - Tools:
+    - CLI (moltler): tools/cli.md
+    - Python SDK: tools/python-sdk.md
+    - Jupyter Notebooks: tools/jupyter.md
+    - VSCode Extension: tools/vscode.md
+  
+  - elastic-script Language:
     - Overview: language/overview.md
     - Variables & Types: language/variables-types.md
     - Control Flow: language/control-flow.md
@@ -128,14 +169,9 @@ nav:
     - Cursors: language/cursors.md
     - Bulk Operations: language/bulk-operations.md
     - Packages: language/packages.md
-    - Security & Permissions: language/security-permissions.md
-    - Profiler: language/profiler.md
-    - User-Defined Types: language/user-defined-types.md
     - Async Execution: language/async-execution.md
-    - Intents: language/intents.md
-    - Standalone Skills: language/skills.md
-    - Triggers & Scheduling: triggers-and-scheduling.md
-  - Functions:
+  
+  - Function Reference:
     - Overview: functions/overview.md
     - String Functions: functions/string.md
     - Number Functions: functions/number.md
@@ -146,34 +182,25 @@ nav:
     - Elasticsearch: functions/elasticsearch.md
     - AI & LLM: functions/ai-llm.md
     - Integrations: functions/integrations.md
+  
   - Examples:
-    - Log Analysis: examples/log-analysis.md
+    - Observability Skills: examples/observability-skills.md
     - Incident Response: examples/incident-response.md
     - Data Pipeline: examples/data-pipeline.md
-  - Notebooks:
-    - Overview: notebooks/index.md
+    - DevOps Automation: examples/devops-automation.md
+  
+  - Tutorials:
     - Getting Started: notebooks/getting-started.md
     - ES|QL Integration: notebooks/esql-integration.md
     - AI & Observability: notebooks/ai-observability.md
     - Async Execution: notebooks/async-execution.md
-    - Runbook Integrations: notebooks/runbook-integrations.md
-    - Scheduled Jobs: notebooks/scheduled-jobs.md
-    - Event Triggers: notebooks/event-triggers.md
-    - First-Class Commands: notebooks/first-class-commands.md
-    - Namespaced Functions: notebooks/namespaced-functions.md
-    - Cursors: notebooks/cursors.md
-    - Bulk Operations: notebooks/bulk-operations.md
-    - Intents: notebooks/intents.md
-    - Standalone Skills: notebooks/standalone-skills.md
     - Complete Reference: notebooks/complete-reference.md
-  - Observability:
-    - OpenTelemetry Tracing: observability/opentelemetry.md
-  - Tools:
-    - CLI: tools/cli.md
+  
   - Development:
     - Contributing: development/contributing.md
     - Testing: development/testing.md
     - Architecture: development/architecture.md
+  
   - Roadmap: roadmap.md
 
 # Extra

@@ -167,6 +167,94 @@ class ElasticScriptClient:
         """List all standalone skills."""
         return self.execute("SHOW SKILLS")
     
+    def list_connectors(self) -> ExecutionResult:
+        """List all configured connectors."""
+        return self.execute("SHOW CONNECTORS")
+    
+    def list_agents(self) -> ExecutionResult:
+        """List all configured agents."""
+        return self.execute("SHOW AGENTS")
+    
+    def get_skill(self, name: str) -> ExecutionResult:
+        """Get details of a specific skill."""
+        return self.execute(f"SHOW SKILL {name}")
+    
+    def get_connector(self, name: str) -> ExecutionResult:
+        """Get details of a specific connector."""
+        return self.execute(f"SHOW CONNECTOR {name}")
+    
+    def get_agent(self, name: str) -> ExecutionResult:
+        """Get details of a specific agent."""
+        return self.execute(f"SHOW AGENT {name}")
+    
+    def test_connector(self, name: str) -> ExecutionResult:
+        """Test connectivity to a connector's external service."""
+        return self.execute(f"TEST CONNECTOR {name}")
+    
+    def sync_connector(self, name: str, entity: Optional[str] = None, full: bool = False) -> ExecutionResult:
+        """Sync data from a connector."""
+        stmt = f"SYNC CONNECTOR {name}"
+        if entity:
+            stmt += f" ENTITY '{entity}'"
+        if full:
+            stmt += " FULL"
+        return self.execute(stmt)
+    
+    def trigger_agent(self, name: str, context: Optional[Dict[str, Any]] = None) -> ExecutionResult:
+        """Manually trigger an agent."""
+        import json as json_lib
+        stmt = f"TRIGGER AGENT {name}"
+        if context:
+            stmt += f" WITH {json_lib.dumps(context)}"
+        return self.execute(stmt)
+    
+    def get_agent_history(self, name: str) -> ExecutionResult:
+        """Get execution history for an agent."""
+        return self.execute(f"SHOW AGENT {name} HISTORY")
+    
+    def enable_agent(self, name: str) -> ExecutionResult:
+        """Enable an agent."""
+        return self.execute(f"ENABLE AGENT {name}")
+    
+    def disable_agent(self, name: str) -> ExecutionResult:
+        """Disable an agent."""
+        return self.execute(f"DISABLE AGENT {name}")
+    
+    def test_skill(self, name: str, params: Optional[Dict[str, Any]] = None, 
+                   expect: Optional[str] = None) -> ExecutionResult:
+        """Test a skill with given parameters."""
+        stmt = f"TEST SKILL {name}"
+        if params:
+            param_str = ", ".join(f"{k} = '{v}'" for k, v in params.items())
+            stmt += f" WITH {param_str}"
+        if expect:
+            stmt += f" EXPECT {expect}"
+        return self.execute(stmt)
+    
+    def generate_skill(self, goal: str, name: Optional[str] = None) -> ExecutionResult:
+        """Generate a skill using AI based on a goal."""
+        stmt = f"GENERATE SKILL FROM '{goal}'"
+        if name:
+            stmt += f" AS {name}"
+        return self.execute(stmt)
+    
+    def exec_connector(self, connector: str, action: str, **kwargs) -> ExecutionResult:
+        """Execute an action on a connector."""
+        args_str = ", ".join(f"{k} = '{v}'" for k, v in kwargs.items())
+        stmt = f"EXEC {connector}.{action}({args_str})"
+        return self.execute(stmt)
+    
+    def query_connector(self, connector: str, entity: str, 
+                       where: Optional[str] = None, 
+                       limit: Optional[int] = None) -> ExecutionResult:
+        """Query an entity from a connector."""
+        stmt = f"QUERY {connector}.{entity}"
+        if where:
+            stmt += f" WHERE {where}"
+        if limit:
+            stmt += f" LIMIT {limit}"
+        return self.execute(stmt)
+    
     def get_cluster_info(self) -> Dict[str, Any]:
         """Get Elasticsearch cluster information."""
         try:

@@ -17,25 +17,46 @@ from . import KEYWORDS, ALL_FUNCTIONS, BUILTIN_FUNCTIONS
 
 class ElasticScriptCompleter(Completer):
     """
-    Auto-completer for elastic-script.
+    Auto-completer for elastic-script (Moltler).
     
     Provides completions for:
-    - Keywords (CREATE, PROCEDURE, etc.)
+    - Keywords (CREATE, PROCEDURE, SKILL, CONNECTOR, AGENT, etc.)
     - Built-in functions (ESQL_QUERY, ARRAY_LENGTH, etc.)
     - User procedures (loaded from server)
     - User functions (loaded from server)
     - Skills (loaded from server)
+    - Connectors (loaded from server)
+    - Agents (loaded from server)
     """
     
     def __init__(self):
         self._procedures: List[str] = []
         self._functions: List[str] = []
         self._skills: List[str] = []
+        self._connectors: List[str] = []
+        self._agents: List[str] = []
         self._variables: List[str] = []
         
         # Build completion lists
         self._keywords = sorted(set(KEYWORDS))
         self._builtins = sorted(set(ALL_FUNCTIONS))
+        
+        # Moltler-specific keywords
+        self._moltler_keywords = [
+            # Skill keywords
+            "SKILL", "SKILLS", "VERSION", "AUTHOR", "TAGS", "REQUIRES",
+            "TEST", "GENERATE", "FROM", "AS",
+            # Connector keywords
+            "CONNECTOR", "CONNECTORS", "SYNC", "ENTITY", "FULL", "INCREMENTAL",
+            "EXEC", "QUERY", "WHERE", "LIMIT", "ORDER", "BY", "ASC", "DESC",
+            # Agent keywords
+            "AGENT", "AGENTS", "GOAL", "TRIGGER", "MODEL", "EXECUTION",
+            "AUTONOMOUS", "SUPERVISED", "DRY_RUN", "HUMAN_APPROVAL",
+            "HISTORY", "ENABLE", "DISABLE",
+            # Connector types
+            "GITHUB", "JIRA", "DATADOG", "PAGERDUTY", "SLACK",
+        ]
+        self._keywords = sorted(set(self._keywords + self._moltler_keywords))
         
         # Namespace completions
         self._namespaces = [
@@ -43,6 +64,14 @@ class ElasticScriptCompleter(Completer):
             "ESQL", "LLM", "INFERENCE", "SLACK", "AWS", "K8S",
             "PAGERDUTY", "TF_CLOUD", "GITHUB", "GITLAB", "JENKINS", "S3", "HTTP"
         ]
+    
+    def update_connectors(self, connectors: List[str]):
+        """Update the list of known connectors."""
+        self._connectors = sorted(connectors)
+    
+    def update_agents(self, agents: List[str]):
+        """Update the list of known agents."""
+        self._agents = sorted(agents)
     
     def update_procedures(self, procedures: List[str]):
         """Update the list of known procedures."""
@@ -82,19 +111,55 @@ class ElasticScriptCompleter(Completer):
         
         elif context == "after_create":
             # After CREATE, suggest object types
-            for kw in ["PROCEDURE", "FUNCTION", "SKILL", "APPLICATION", "JOB", "TRIGGER", "TYPE", "PACKAGE", "ROLE"]:
+            for kw in ["PROCEDURE", "FUNCTION", "SKILL", "APPLICATION", "JOB", "TRIGGER", "TYPE", "PACKAGE", "ROLE", "CONNECTOR", "AGENT"]:
                 if kw.startswith(word):
                     yield Completion(kw, start_position=-len(word), display_meta="keyword")
         
         elif context == "after_drop" or context == "after_delete":
             # After DROP/DELETE, suggest object types
-            for kw in ["PROCEDURE", "FUNCTION", "SKILL", "APPLICATION", "JOB", "TRIGGER", "TYPE", "PACKAGE", "ROLE"]:
+            for kw in ["PROCEDURE", "FUNCTION", "SKILL", "APPLICATION", "JOB", "TRIGGER", "TYPE", "PACKAGE", "ROLE", "CONNECTOR", "AGENT"]:
                 if kw.startswith(word):
                     yield Completion(kw, start_position=-len(word), display_meta="keyword")
         
         elif context == "after_show":
             # After SHOW, suggest showable things
-            for kw in ["PROCEDURES", "FUNCTIONS", "SKILLS", "APPLICATIONS", "JOBS", "TRIGGERS", "TYPES", "PACKAGES", "ROLES", "PROFILES", "PROCEDURE", "FUNCTION", "SKILL", "APPLICATION"]:
+            for kw in ["PROCEDURES", "FUNCTIONS", "SKILLS", "APPLICATIONS", "JOBS", "TRIGGERS", "TYPES", "PACKAGES", "ROLES", "PROFILES", "PROCEDURE", "FUNCTION", "SKILL", "APPLICATION", "CONNECTORS", "CONNECTOR", "AGENTS", "AGENT"]:
+                if kw.startswith(word):
+                    yield Completion(kw, start_position=-len(word), display_meta="keyword")
+        
+        elif context == "after_sync":
+            # After SYNC, suggest CONNECTOR
+            for kw in ["CONNECTOR"]:
+                if kw.startswith(word):
+                    yield Completion(kw, start_position=-len(word), display_meta="keyword")
+            # Also suggest known connectors
+            yield from self._complete_from_list(word, self._connectors, "connector")
+        
+        elif context == "after_test":
+            # After TEST, suggest CONNECTOR or SKILL
+            for kw in ["CONNECTOR", "SKILL"]:
+                if kw.startswith(word):
+                    yield Completion(kw, start_position=-len(word), display_meta="keyword")
+        
+        elif context == "after_trigger":
+            # After TRIGGER, suggest AGENT
+            for kw in ["AGENT"]:
+                if kw.startswith(word):
+                    yield Completion(kw, start_position=-len(word), display_meta="keyword")
+            # Also suggest known agents
+            yield from self._complete_from_list(word, self._agents, "agent")
+        
+        elif context == "after_exec":
+            # After EXEC, suggest connectors
+            yield from self._complete_from_list(word, self._connectors, "connector")
+        
+        elif context == "after_query":
+            # After QUERY, suggest connectors
+            yield from self._complete_from_list(word, self._connectors, "connector")
+        
+        elif context == "after_generate":
+            # After GENERATE, suggest SKILL
+            for kw in ["SKILL"]:
                 if kw.startswith(word):
                     yield Completion(kw, start_position=-len(word), display_meta="keyword")
         
@@ -111,6 +176,8 @@ class ElasticScriptCompleter(Completer):
             yield from self._complete_from_list(word, self._procedures, "procedure")
             yield from self._complete_from_list(word, self._functions, "user func")
             yield from self._complete_from_list(word, self._skills, "skill")
+            yield from self._complete_from_list(word, self._connectors, "connector")
+            yield from self._complete_from_list(word, self._agents, "agent")
             yield from self._complete_from_list(word, self._namespaces, "namespace")
             
             # Variable completions (with @)
@@ -133,6 +200,18 @@ class ElasticScriptCompleter(Completer):
             return "after_delete"
         if text.endswith("SHOW ") or text.endswith("SHOW"):
             return "after_show"
+        if text.endswith("SYNC ") or text.endswith("SYNC"):
+            return "after_sync"
+        if text.endswith("TEST ") or text.endswith("TEST"):
+            return "after_test"
+        if text.endswith("TRIGGER ") or text.endswith("TRIGGER"):
+            return "after_trigger"
+        if text.endswith("EXEC ") or text.endswith("EXEC"):
+            return "after_exec"
+        if text.endswith("QUERY ") or text.endswith("QUERY"):
+            return "after_query"
+        if text.endswith("GENERATE ") or text.endswith("GENERATE"):
+            return "after_generate"
         if text.endswith("."):
             return "after_dot"
         

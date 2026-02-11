@@ -41,6 +41,12 @@ public class SkillDefinition implements Writeable, ToXContentObject {
     private final String procedureName;
     private final List<String> procedureArgs;
     private final List<String> examples;  // Natural language examples for AI discovery
+    
+    // Moltler extended metadata
+    private String version;
+    private String author;
+    private List<String> tags;
+    private List<String> dependencies;
 
     public SkillDefinition(
         String name,
@@ -96,8 +102,20 @@ public class SkillDefinition implements Writeable, ToXContentObject {
     public XContentBuilder toXContent(XContentBuilder builder, Params params) throws IOException {
         builder.startObject();
         builder.field("name", name);
+        if (version != null) {
+            builder.field("version", version);
+        }
         if (description != null) {
             builder.field("description", description);
+        }
+        if (author != null) {
+            builder.field("author", author);
+        }
+        if (tags != null && !tags.isEmpty()) {
+            builder.field("tags", tags);
+        }
+        if (dependencies != null && !dependencies.isEmpty()) {
+            builder.field("dependencies", dependencies);
         }
         if (!parameters.isEmpty()) {
             builder.startArray("parameters");
@@ -146,6 +164,40 @@ public class SkillDefinition implements Writeable, ToXContentObject {
 
     public List<String> getExamples() {
         return examples;
+    }
+    
+    // Moltler extended metadata getters/setters
+    
+    public String getVersion() {
+        return version;
+    }
+    
+    public void setVersion(String version) {
+        this.version = version;
+    }
+    
+    public String getAuthor() {
+        return author;
+    }
+    
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+    
+    public List<String> getTags() {
+        return tags != null ? tags : List.of();
+    }
+    
+    public void setTags(List<String> tags) {
+        this.tags = tags != null ? List.copyOf(tags) : null;
+    }
+    
+    public List<String> getDependencies() {
+        return dependencies != null ? dependencies : List.of();
+    }
+    
+    public void setDependencies(List<String> dependencies) {
+        this.dependencies = dependencies != null ? List.copyOf(dependencies) : null;
     }
 
     /**

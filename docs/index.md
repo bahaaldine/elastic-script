@@ -1,214 +1,234 @@
-# elastic-script
+# Moltler
 
-<div class="grid cards" markdown>
+<div class="hero" markdown>
 
--   :material-robot:{ .lg .middle } __Agent-Native Language__
+## :material-creation: The AI Skills Creation Framework for Elasticsearch
 
-    ---
+**Build, test, and deploy AI-powered skills that automate your operations.**
 
-    A language designed for AI agents to generate, execute, and debug procedures on Elasticsearch data.
-
-    [:octicons-arrow-right-24: Why Agents?](#why-agents)
-
--   :material-shield-check:{ .lg .middle } __Transparent & Debuggable__
-
-    ---
-
-    Every agent action is a procedure you can inspect, trace, and understand.
-
-    [:octicons-arrow-right-24: Observability](#full-observability)
-
--   :material-database:{ .lg .middle } __Native ES|QL Integration__
-
-    ---
-
-    Query your data with ES|QL and process results with cursors and bulk operations.
-
-    [:octicons-arrow-right-24: Elasticsearch Functions](functions/elasticsearch.md)
-
--   :material-lightning-bolt:{ .lg .middle } __Distributed & Scalable__
-
-    ---
-
-    Runs inside Elasticsearch with async execution, scheduled jobs, and event triggers.
-
-    [:octicons-arrow-right-24: Async Guide](language/async-execution.md)
+[Get Started](getting-started/what-is-moltler.md){ .md-button .md-button--primary }
+[View on GitHub](https://github.com/bahaaldine/elastic-script){ .md-button }
 
 </div>
 
 ---
 
-## What is elastic-script?
+<div class="grid cards" markdown>
 
-**elastic-script** is a **procedural language for AI agents** that runs **inside Elasticsearch**.
+-   :material-package-variant:{ .lg .middle } __Skills__
 
-Unlike general-purpose code generation where agents produce arbitrary Python, JavaScript, or shell scripts, elastic-script provides a **constrained, purpose-built language** for data operations. When an AI agent uses elastic-script:
+    ---
 
-- **Actions are transparent** — Every operation is visible, auditable, and logged
-- **Behavior is debuggable** — Procedures can be inspected, traced, and replayed
-- **Capabilities are bounded** — Agents can only do what elastic-script permits
-- **Execution is distributed** — Runs natively in Elasticsearch at scale
+    Create reusable, versioned skills that encapsulate operational knowledge. Share them across teams or publish to the marketplace.
 
----
+    [:octicons-arrow-right-24: Create Your First Skill](getting-started/first-skill.md)
 
-## Why Agents?
+-   :material-connection:{ .lg .middle } __Connectors__
 
-### The Problem with Arbitrary Code Generation
+    ---
 
-When AI agents generate arbitrary code (Python, SQL, shell scripts), you face:
+    Pull data from GitHub, Jira, Datadog, Salesforce, and more. Query external services with familiar syntax.
 
-1. **Security risks** — Unbounded access to file systems, networks, credentials
-2. **Debugging nightmares** — Hard to trace what the agent actually did
-3. **Inconsistent behavior** — Different execution environments, dependencies
-4. **Audit challenges** — No structured record of actions taken
+    [:octicons-arrow-right-24: Browse Connectors](connectors/overview.md)
 
-### The elastic-script Solution
+-   :material-robot:{ .lg .middle } __Agents__
 
-elastic-script is **designed from the ground up for AI agents**:
+    ---
 
-| Challenge | elastic-script Solution |
-|-----------|------------------------|
-| **Security** | Sandboxed execution inside Elasticsearch; no file/network access outside defined functions |
-| **Transparency** | Every procedure is stored, versioned, and inspectable |
-| **Debugging** | Full execution traces, APM integration, structured logging |
-| **Auditing** | Execution history in `.escript_executions` index |
-| **Consistency** | Same language, same runtime, everywhere |
+    Deploy autonomous agents that execute skills based on goals. Monitor their decisions with full observability.
 
-### How It Works
+    [:octicons-arrow-right-24: Build Agents](agents/overview.md)
 
-```
-┌─────────────┐     generates      ┌──────────────────┐
-│   AI Agent  │ ─────────────────► │  elastic-script  │
-│  (LLM/MCP)  │                    │    Procedure     │
-└─────────────┘                    └────────┬─────────┘
-                                            │
-                                   executes │
-                                            ▼
-                               ┌────────────────────────┐
-                               │     Elasticsearch      │
-                               │  ┌──────────────────┐  │
-                               │  │  Logs, Metrics,  │  │
-                               │  │  Events, Alerts  │  │
-                               │  └──────────────────┘  │
-                               └────────────────────────┘
-```
+-   :material-creation:{ .lg .middle } __AI-Powered__
 
-The agent generates elastic-script code → the code runs inside Elasticsearch → the user can inspect exactly what happened.
+    ---
+
+    Generate skills from natural language descriptions. Let AI help you write, test, and improve your automation.
+
+    [:octicons-arrow-right-24: Generate Skills](ai/generate-skills.md)
+
+</div>
 
 ---
 
-## What Can Agents Do?
+## What is Moltler?
 
-With elastic-script, AI agents can:
+**Moltler** is an AI skills creation framework that runs on Elasticsearch. It enables you to:
 
-- **Runbook Automation** - Codify operational procedures that respond to alerts
-- **Data Processing** - Transform and enrich data with complex logic
-- **AI/ML Integration** - Leverage LLMs for log analysis and anomaly detection
-- **Cross-System Orchestration** - Connect to Slack, PagerDuty, AWS, Kubernetes, and more
+1. **Define Skills** - Encapsulate operational knowledge as reusable, versioned procedures
+2. **Connect Data Sources** - Query GitHub, Jira, Datadog, and other services natively
+3. **Deploy Agents** - Create autonomous agents that execute skills to achieve goals
+4. **Observe Everything** - Full tracing, logging, and debugging in Kibana
+
+### The Name
+
+🦌 **Moltler** combines "molt" (the process of shedding and renewal) with "antler" (the signature of our elk mascot). Just like an elk grows stronger antlers each season, Moltler helps your agents evolve and improve over time.
+
+---
+
+## Why Moltler?
+
+### The Problem
+
+Modern operations teams face:
+
+- **Scattered knowledge** - Runbooks in wikis, scripts in repos, processes in people's heads
+- **Tool sprawl** - Dozens of tools that don't talk to each other
+- **Manual toil** - Repetitive tasks that should be automated
+- **AI risk** - Wanting to use AI but worried about uncontrolled actions
+
+### The Moltler Solution
+
+| Challenge | Moltler Solution |
+|-----------|------------------|
+| **Scattered knowledge** | Skills capture operational procedures in versioned, testable code |
+| **Tool sprawl** | Connectors unify data access with a single query language |
+| **Manual toil** | Agents execute skills autonomously based on conditions |
+| **AI risk** | Bounded execution inside Elasticsearch with full observability |
+
+---
 
 ## Quick Example
 
+### 1. Create a Skill
+
 ```sql
-CREATE PROCEDURE analyze_errors()
+CREATE SKILL check_deployment_health
+VERSION '1.0.0'
+DESCRIPTION 'Verifies deployment health across services'
+PARAMETERS (
+    service_name STRING,
+    threshold NUMBER DEFAULT 0.95
+)
+RETURNS DOCUMENT
 BEGIN
-    -- Query recent errors
-    DECLARE errors CURSOR FOR
-        FROM logs-*
-        | WHERE level == "ERROR"
-        | WHERE @timestamp > NOW() - 1 HOUR
-        | LIMIT 100;
+    -- Query service metrics
+    DECLARE metrics CURSOR FOR
+        FROM metrics-*
+        | WHERE service.name == service_name
+        | WHERE @timestamp > NOW() - 5 MINUTES
+        | STATS success_rate = AVG(success);
     
-    -- Count and summarize
-    DECLARE error_count NUMBER = 0;
-    DECLARE messages STRING = '';
+    OPEN metrics;
+    FETCH metrics INTO result;
+    CLOSE metrics;
     
-    FOR error IN errors LOOP
-        SET error_count = error_count + 1;
-        SET messages = messages || error.message || '\n';
-    END LOOP;
-    
-    -- Use AI to summarize if many errors
-    IF error_count > 10 THEN
-        DECLARE summary STRING = LLM_SUMMARIZE(messages);
-        PRINT 'Error Summary: ' || summary;
+    -- Check threshold
+    IF result.success_rate < threshold THEN
+        RETURN {"status": "unhealthy", "rate": result.success_rate};
     END IF;
     
-    RETURN error_count;
-END PROCEDURE;
+    RETURN {"status": "healthy", "rate": result.success_rate};
+END SKILL;
 ```
 
-## The Language
+### 2. Test the Skill
 
-elastic-script is a **procedural language** with familiar SQL-like syntax:
+```sql
+TEST SKILL check_deployment_health
+WITH service_name = 'api-gateway', threshold = 0.90
+EXPECT status = 'healthy';
+```
 
-- **Variables** - `DECLARE`, `VAR`, `CONST` with strong typing
-- **Control Flow** - `IF/THEN/ELSE`, `FOR`, `WHILE`, `SWITCH/CASE`
-- **Error Handling** - `TRY/CATCH/FINALLY` with structured exceptions
-- **Functions** - `CREATE FUNCTION` with `IN`, `OUT`, `INOUT` parameters
-- **Cursors** - Stream large result sets with `OPEN`, `FETCH`, `CLOSE`
-- **Bulk Operations** - `FORALL` with `SAVE EXCEPTIONS` for batch processing
-- **Dynamic SQL** - `EXECUTE IMMEDIATE` with bind variables
+### 3. Create an Agent
 
-All designed to be **easy for agents to generate** and **easy for humans to read**.
+```sql
+CREATE AGENT deployment_guardian
+GOAL 'Ensure all critical services maintain 99% uptime'
+SKILLS [check_deployment_health, notify_oncall, scale_service]
+TRIGGERS [
+    ON SCHEDULE '*/5 * * * *',  -- Every 5 minutes
+    ON ALERT 'high-error-rate'
+]
+BEGIN
+    -- Agent decides which skills to use based on context
+END AGENT;
+```
 
 ---
 
-## Key Features
+## Core Concepts
 
-### 🔧 118 Built-in Functions
+### Skills
 
-| Category | Functions |
-|----------|-----------|
-| **String** | `LENGTH`, `SUBSTR`, `UPPER`, `LOWER`, `TRIM`, `REPLACE`, `REGEXP_REPLACE`... |
-| **Array** | `ARRAY_LENGTH`, `ARRAY_APPEND`, `ARRAY_FILTER`, `ARRAY_MAP`, `ARRAY_REDUCE`... |
-| **MAP** | `MAP_GET`, `MAP_PUT`, `MAP_KEYS`, `MAP_VALUES`, `MAP_MERGE`... |
-| **Elasticsearch** | `ESQL_QUERY`, `INDEX_DOCUMENT`, `GET_DOCUMENT`, `REFRESH_INDEX`... |
-| **AI/LLM** | `LLM_COMPLETE`, `LLM_SUMMARIZE`, `LLM_CLASSIFY`, `INFERENCE`... |
-| **Integrations** | `SLACK_SEND`, `PAGERDUTY_TRIGGER`, `K8S_SCALE`, `AWS_LAMBDA_INVOKE`... |
-
-### ⏰ Scheduled Jobs & Triggers
+Skills are **versioned, testable units of operational knowledge**:
 
 ```sql
--- Run every day at 2 AM
-CREATE JOB daily_cleanup
-SCHEDULE '0 2 * * *'
-AS BEGIN
-    CALL archive_old_logs(30);
-END JOB;
-
--- React to new documents
-CREATE TRIGGER on_critical_error
-ON INDEX 'logs-*'
-WHEN level = 'ERROR' AND severity = 'critical'
-EVERY 5 SECONDS
-AS BEGIN
-    CALL notify_oncall(@document);
-END TRIGGER;
+CREATE SKILL analyze_logs VERSION '2.0.0'
+DESCRIPTION 'Analyzes log patterns for anomalies'
+PARAMETERS (index_pattern STRING, lookback STRING DEFAULT '1h')
+RETURNS ARRAY
+BEGIN
+    -- Implementation
+END SKILL;
 ```
 
-### ⚡ Async Execution
+Features:
+
+- **Versioning** - Track changes, roll back, run A/B tests
+- **Parameters** - Typed inputs with defaults and validation
+- **Testing** - Built-in test framework with assertions
+- **Dependencies** - Skills can require other skills
+
+[:octicons-arrow-right-24: Learn more about Skills](skills/overview.md)
+
+### Connectors
+
+Connectors **pull data from external services** into Elasticsearch:
 
 ```sql
--- Chain procedures with continuations
-analyze_logs()
-    | ON_DONE notify_team(@result)
-    | ON_FAIL alert_oncall(@error)
-    | TRACK AS 'daily-analysis';
+-- Create a connector
+CREATE CONNECTOR github_ops
+TYPE 'github'
+CONFIG {
+    "token": "{{secrets.github_token}}",
+    "org": "mycompany"
+};
 
--- Run in parallel
-PARALLEL [fetch_logs(), fetch_metrics()]
-    | ON_ALL_DONE merge_results(@results);
+-- Query it like any data source
+SELECT * FROM github_ops.issues 
+WHERE state = 'open' AND labels CONTAINS 'incident';
 ```
 
-### 🔍 Full Observability
+Supported connectors:
 
-- **Distributed Tracing** via integrated OTEL Collector (out of the box)
-- Structured logging with execution IDs
-- Traces visible in Kibana APM at http://localhost:5601/app/apm
-- Execution state persisted in `.escript_executions`
-- Full procedure history for debugging and auditing
+- **DevOps**: GitHub, GitLab, Jira, Confluence
+- **Monitoring**: Datadog, New Relic, Prometheus
+- **Communication**: Slack, PagerDuty, Opsgenie
+- **Cloud**: AWS, GCP, Azure
+- **CRM**: Salesforce, Zendesk, HubSpot
 
-[:octicons-arrow-right-24: OpenTelemetry Tracing](observability/opentelemetry.md)
+[:octicons-arrow-right-24: Explore Connectors](connectors/overview.md)
+
+### Agents
+
+Agents are **autonomous executors** that use skills to achieve goals:
+
+```sql
+CREATE AGENT incident_responder
+GOAL 'Investigate and mitigate production incidents'
+SKILLS [
+    diagnose_issue,
+    check_recent_deployments,
+    rollback_deployment,
+    notify_team
+]
+EXECUTION human_approval  -- Require approval for actions
+BEGIN
+    -- Agent autonomously selects skills based on context
+END AGENT;
+```
+
+Features:
+
+- **Goal-oriented** - Define what, not how
+- **Human-in-the-loop** - Approval workflows for critical actions
+- **Observable** - Every decision is logged and traceable
+- **Learnable** - Improve based on outcomes
+
+[:octicons-arrow-right-24: Build Agents](agents/overview.md)
+
+---
 
 ## Installation
 
@@ -220,58 +240,73 @@ PARALLEL [fetch_logs(), fetch_metrics()]
     ./scripts/quick-start.sh
     ```
     
-    This starts **everything**:
+    This starts:
     
-    - Elasticsearch on port 9200
-    - OTEL Collector on ports 4317/4318 (for distributed tracing)
-    - Kibana on port 5601 (view traces at /app/apm)
-    - Jupyter on port 8888
+    - **Elasticsearch** on port 9200
+    - **Kibana** on port 5601
+    - **Moltler CLI** ready to use
+    - **Jupyter Notebooks** on port 8888
 
-=== "Manual Setup"
+=== "CLI Only"
 
     ```bash
-    # Build the plugin
-    cd elasticsearch
-    ./gradlew :x-pack:plugin:elastic-script:assemble
-    
-    # Install in your ES cluster
-    bin/elasticsearch-plugin install file:///path/to/elastic-script.zip
+    pip install moltler
+    moltler init
     ```
 
-## Try It Now
+=== "Docker"
 
-Once running, create and call procedures:
-
-```bash
-# Create a procedure
-curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
-  -H "Content-Type: application/json" \
-  -d '{"query": "CREATE PROCEDURE hello() BEGIN RETURN '\''Hello, World!'\''; END PROCEDURE;"}'
-
-# Call it
-curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
-  -H "Content-Type: application/json" \
-  -d '{"query": "CALL hello()"}'
-
-# Response: {"result": "Hello, World!"}
-```
-
-Or use the **Jupyter notebook** interface for interactive development!
+    ```bash
+    docker run -p 9200:9200 bahaaldine/moltler:latest
+    ```
 
 ---
 
+## The Technology
+
+Moltler is powered by **elastic-script**, a procedural language designed for:
+
+- **AI agents** to generate and execute
+- **Humans** to read and debug
+- **Elasticsearch** to run at scale
+
+The language provides:
+
+- 118+ built-in functions
+- Native ES|QL integration
+- Async execution with continuations
+- Distributed tracing via OpenTelemetry
+
+[:octicons-arrow-right-24: elastic-script Language Reference](language/overview.md)
+
+---
+
+## What's Next?
+
 <div class="grid cards" markdown>
 
--   :material-book-open-page-variant:{ .lg .middle } __Read the Docs__
+-   :material-rocket-launch:{ .lg .middle } __Get Started__
 
-    [:octicons-arrow-right-24: Language Guide](language/overview.md)
+    Create your first skill in 5 minutes.
 
--   :material-function:{ .lg .middle } __Function Reference__
+    [:octicons-arrow-right-24: Quick Start](getting-started/quick-start.md)
 
-    [:octicons-arrow-right-24: All 106 Functions](functions/overview.md)
+-   :material-book-open-page-variant:{ .lg .middle } __Browse Examples__
 
--   :material-flask:{ .lg .middle } __Examples__
+    Real-world skills for observability, incident response, and DevOps.
 
-    [:octicons-arrow-right-24: Real-world Use Cases](examples/log-analysis.md)
+    [:octicons-arrow-right-24: Examples](examples/observability-skills.md)
+
+-   :material-school:{ .lg .middle } __Tutorials__
+
+    Step-by-step guides for common use cases.
+
+    [:octicons-arrow-right-24: Tutorials](notebooks/getting-started.md)
+
+-   :material-map:{ .lg .middle } __Roadmap__
+
+    See what's coming next.
+
+    [:octicons-arrow-right-24: Roadmap](roadmap.md)
 
 </div>

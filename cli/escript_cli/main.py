@@ -287,6 +287,325 @@ def config(ctx, init, show):
         output.console.print(table)
 
 
+@cli.group()
+@click.pass_context
+def skill(ctx):
+    """
+    Manage Moltler skills.
+    
+    Skills are reusable automation components that encapsulate
+    complex operations with parameters and return values.
+    
+    Examples:
+    
+        escript skill list
+        escript skill show my_skill
+        escript skill test my_skill --with "param1=value1"
+    """
+    pass
+
+
+@skill.command('list')
+@click.option('--json', '-j', 'as_json', is_flag=True, help='Output as JSON')
+@click.pass_context
+def skill_list(ctx, as_json):
+    """List all available skills."""
+    config = ctx.obj['config']
+    client = ElasticScriptClient(config)
+    output = OutputFormatter(config)
+    
+    result = client.execute("SHOW SKILLS")
+    
+    if as_json:
+        import json
+        click.echo(json.dumps(result.data, indent=2, default=str))
+    else:
+        output.print_result(result)
+    
+    client.close()
+
+
+@skill.command('show')
+@click.argument('name')
+@click.pass_context
+def skill_show(ctx, name):
+    """Show details of a specific skill."""
+    config = ctx.obj['config']
+    client = ElasticScriptClient(config)
+    output = OutputFormatter(config)
+    
+    result = client.execute(f"SHOW SKILL {name}")
+    output.print_result(result)
+    client.close()
+
+
+@skill.command('test')
+@click.argument('name')
+@click.option('--with', '-w', 'with_params', help='Parameters as key=value pairs (comma-separated)')
+@click.option('--expect', '-e', help='Expected result expression')
+@click.pass_context
+def skill_test(ctx, name, with_params, expect):
+    """Test a skill with given parameters."""
+    config = ctx.obj['config']
+    client = ElasticScriptClient(config)
+    output = OutputFormatter(config)
+    
+    # Build TEST SKILL statement
+    stmt = f"TEST SKILL {name}"
+    
+    if with_params:
+        # Parse key=value pairs
+        params = []
+        for pair in with_params.split(','):
+            pair = pair.strip()
+            if '=' in pair:
+                key, value = pair.split('=', 1)
+                params.append(f"{key.strip()} = '{value.strip()}'")
+        if params:
+            stmt += f" WITH {', '.join(params)}"
+    
+    if expect:
+        stmt += f" EXPECT {expect}"
+    
+    result = client.execute(stmt)
+    output.print_result(result)
+    
+    if result.success and isinstance(result.data, dict):
+        passed = result.data.get('passed', False)
+        if passed:
+            output.print_success("Test PASSED")
+        else:
+            output.print_error("Test FAILED")
+            sys.exit(1)
+    
+    client.close()
+
+
+@cli.group()
+@click.pass_context
+def connector(ctx):
+    """
+    Manage Moltler connectors.
+    
+    Connectors enable integration with external services like
+    GitHub, Jira, Datadog, and more.
+    
+    Examples:
+    
+        escript connector list
+        escript connector show my_github
+        escript connector test my_github
+        escript connector sync my_github
+    """
+    pass
+
+
+@connector.command('list')
+@click.option('--json', '-j', 'as_json', is_flag=True, help='Output as JSON')
+@click.pass_context
+def connector_list(ctx, as_json):
+    """List all configured connectors."""
+    config = ctx.obj['config']
+    client = ElasticScriptClient(config)
+    output = OutputFormatter(config)
+    
+    result = client.execute("SHOW CONNECTORS")
+    
+    if as_json:
+        import json
+        click.echo(json.dumps(result.data, indent=2, default=str))
+    else:
+        output.print_result(result)
+    
+    client.close()
+
+
+@connector.command('show')
+@click.argument('name')
+@click.pass_context
+def connector_show(ctx, name):
+    """Show details of a specific connector."""
+    config = ctx.obj['config']
+    client = ElasticScriptClient(config)
+    output = OutputFormatter(config)
+    
+    result = client.execute(f"SHOW CONNECTOR {name}")
+    output.print_result(result)
+    client.close()
+
+
+@connector.command('test')
+@click.argument('name')
+@click.pass_context
+def connector_test(ctx, name):
+    """Test connectivity to a connector's external service."""
+    config = ctx.obj['config']
+    client = ElasticScriptClient(config)
+    output = OutputFormatter(config)
+    
+    output.print_info(f"Testing connector {name}...")
+    result = client.execute(f"TEST CONNECTOR {name}")
+    output.print_result(result)
+    
+    if result.success and isinstance(result.data, dict):
+        if result.data.get('connected', False):
+            output.print_success("Connection successful")
+        else:
+            output.print_error("Connection failed")
+            sys.exit(1)
+    
+    client.close()
+
+
+@connector.command('sync')
+@click.argument('name')
+@click.option('--entity', '-e', help='Specific entity to sync (e.g., issues, repos)')
+@click.option('--full', is_flag=True, help='Full sync (ignore incremental state)')
+@click.pass_context
+def connector_sync(ctx, name, entity, full):
+    """Sync data from a connector into Elasticsearch."""
+    config = ctx.obj['config']
+    client = ElasticScriptClient(config)
+    output = OutputFormatter(config)
+    
+    stmt = f"SYNC CONNECTOR {name}"
+    if entity:
+        stmt += f" ENTITY '{entity}'"
+    if full:
+        stmt += " FULL"
+    
+    output.print_info(f"Syncing {name}...")
+    result = client.execute(stmt)
+    output.print_result(result)
+    client.close()
+
+
+@cli.group()
+@click.pass_context
+def agent(ctx):
+    """
+    Manage Moltler agents.
+    
+    Agents are autonomous entities that execute skills based on
+    goals, triggers, and configurable execution policies.
+    
+    Examples:
+    
+        escript agent list
+        escript agent show my_agent
+        escript agent trigger my_agent
+        escript agent history my_agent
+    """
+    pass
+
+
+@agent.command('list')
+@click.option('--json', '-j', 'as_json', is_flag=True, help='Output as JSON')
+@click.pass_context
+def agent_list(ctx, as_json):
+    """List all configured agents."""
+    config = ctx.obj['config']
+    client = ElasticScriptClient(config)
+    output = OutputFormatter(config)
+    
+    result = client.execute("SHOW AGENTS")
+    
+    if as_json:
+        import json
+        click.echo(json.dumps(result.data, indent=2, default=str))
+    else:
+        output.print_result(result)
+    
+    client.close()
+
+
+@agent.command('show')
+@click.argument('name')
+@click.pass_context
+def agent_show(ctx, name):
+    """Show details of a specific agent."""
+    config = ctx.obj['config']
+    client = ElasticScriptClient(config)
+    output = OutputFormatter(config)
+    
+    result = client.execute(f"SHOW AGENT {name}")
+    output.print_result(result)
+    client.close()
+
+
+@agent.command('trigger')
+@click.argument('name')
+@click.option('--context', '-c', help='JSON context to pass to the agent')
+@click.pass_context
+def agent_trigger(ctx, name, context):
+    """Manually trigger an agent execution."""
+    config = ctx.obj['config']
+    client = ElasticScriptClient(config)
+    output = OutputFormatter(config)
+    
+    stmt = f"TRIGGER AGENT {name}"
+    if context:
+        stmt += f" WITH {context}"
+    
+    output.print_info(f"Triggering agent {name}...")
+    result = client.execute(stmt)
+    output.print_result(result)
+    
+    if result.success and isinstance(result.data, dict):
+        exec_id = result.data.get('execution_id')
+        if exec_id:
+            output.print_info(f"Execution ID: {exec_id}")
+    
+    client.close()
+
+
+@agent.command('history')
+@click.argument('name')
+@click.option('--limit', '-n', default=10, help='Number of executions to show')
+@click.pass_context
+def agent_history(ctx, name, limit):
+    """Show execution history for an agent."""
+    config = ctx.obj['config']
+    client = ElasticScriptClient(config)
+    output = OutputFormatter(config)
+    
+    result = client.execute(f"SHOW AGENT {name} HISTORY")
+    output.print_result(result)
+    client.close()
+
+
+@agent.command('enable')
+@click.argument('name')
+@click.pass_context
+def agent_enable(ctx, name):
+    """Enable an agent."""
+    config = ctx.obj['config']
+    client = ElasticScriptClient(config)
+    output = OutputFormatter(config)
+    
+    result = client.execute(f"ENABLE AGENT {name}")
+    output.print_result(result)
+    if result.success:
+        output.print_success(f"Agent {name} enabled")
+    client.close()
+
+
+@agent.command('disable')
+@click.argument('name')
+@click.pass_context
+def agent_disable(ctx, name):
+    """Disable an agent."""
+    config = ctx.obj['config']
+    client = ElasticScriptClient(config)
+    output = OutputFormatter(config)
+    
+    result = client.execute(f"DISABLE AGENT {name}")
+    output.print_result(result)
+    if result.success:
+        output.print_success(f"Agent {name} disabled")
+    client.close()
+
+
 @cli.command()
 @click.pass_context
 def test(ctx):

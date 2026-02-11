@@ -1,14 +1,74 @@
-# CLAUDE.md - elastic-script Development Status
+# CLAUDE.md - Moltler Development Status
 
 ## Project Overview
 
-**elastic-script** is a procedural scripting language that runs inside Elasticsearch, designed for:
-- **Runbook automation** - Operational procedures with control flow
-- **AI/LLM integration** - Native OpenAI and Elasticsearch Inference API support
-- **Data processing** - ESQL integration with cursors and loops
-- **Async execution** - Pipe-driven asynchronous workflows
+**Moltler** is an AI Skills Creation Framework built on **elastic-script**, a procedural scripting language running inside Elasticsearch.
+
+### Core Concepts
+
+- **Skills** - Reusable automation components with versioning, metadata, and AI generation
+- **Connectors** - Integrations with external services (GitHub, Jira, Datadog, etc.)
+- **Agents** - Autonomous entities that execute skills based on goals and triggers
+- **elastic-script** - The underlying procedural language powering Moltler
+
+### Why Moltler?
+
+1. **AI-Native Skills** - Create skills that AI agents can discover and execute
+2. **Connector Framework** - Unified interface for external service integration
+3. **Autonomous Agents** - OODA-loop driven execution with configurable policies
+4. **Built on Elasticsearch** - Leverage ES|QL, search, and observability
 
 ---
+
+## 🚀 Moltler Features (NEW)
+
+### Skills System
+- [x] `CREATE SKILL name VERSION 'x.y.z'` - Versioned skill creation
+- [x] `DESCRIPTION`, `AUTHOR`, `TAGS`, `REQUIRES` - Rich metadata
+- [x] `(param IN TYPE DEFAULT value)` - Typed parameters with defaults
+- [x] `RETURNS type` - Explicit return types
+- [x] `TEST SKILL name WITH params EXPECT result` - Skill testing framework
+- [x] `GENERATE SKILL FROM 'goal'` - AI-powered skill generation
+- [x] `SHOW SKILLS`, `SHOW SKILL name` - Skill introspection
+- [x] `SkillRegistry` - Storage in `.escript_skills` index
+
+### Connector Framework
+- [x] `CREATE CONNECTOR name TYPE 'type' CONFIG {...}` - Connector creation
+- [x] **GitHub Connector** - Issues, PRs, repos, workflows, commits
+- [x] **Jira Connector** - Issues, projects, sprints, boards
+- [x] **Datadog Connector** - Metrics, monitors, events, logs
+- [x] `EXEC connector.action(args)` - Execute actions on connectors
+- [x] `QUERY connector.entity WHERE ... LIMIT n ORDER BY ...` - Query entities
+- [x] `SYNC CONNECTOR name TO 'index' [INCREMENTAL ON field]` - Data sync
+- [x] `TEST CONNECTOR name` - Connectivity testing
+- [x] `ConnectorFactory` - Unified connector dispatch
+- [x] `SyncEngine` - Incremental/full sync support
+
+### Agent Runtime
+- [x] `CREATE AGENT name GOAL 'goal' SKILLS [...] EXECUTION mode` - Agent creation
+- [x] Execution modes: `AUTONOMOUS`, `SUPERVISED`, `HUMAN_APPROVAL`, `DRY_RUN`
+- [x] `ON SCHEDULE 'cron'`, `ON ALERT 'name'` - Trigger definitions
+- [x] `TRIGGER AGENT name WITH {...}` - Manual agent execution
+- [x] `AgentRuntime` - OODA-loop execution engine
+- [x] `TriggerManager` - Webhook, alert, and scheduled triggers
+- [x] `SHOW AGENT name HISTORY` - Execution history
+
+### Python SDK
+- [x] `moltler` Python package with high-level APIs
+- [x] `Moltler` client with skills, connectors, agents managers
+- [x] `SkillBuilder`, `AgentBuilder` - Fluent builders
+- [x] Full type annotations and documentation
+- [x] Unit tests with 95%+ coverage
+
+### CLI Enhancements
+- [x] `escript skill list/show/test` - Skill commands
+- [x] `escript connector list/show/test/sync` - Connector commands
+- [x] `escript agent list/show/trigger/history` - Agent commands
+- [x] Auto-completion for Moltler keywords
+
+---
+
+## elastic-script Language Features
 
 ## ✅ Completed Tasks
 
@@ -572,3 +632,65 @@ Based on comprehensive analysis comparing elastic-script to Oracle PL/SQL:
 See `docs/roadmap.md` for full details.
 
 *Last updated: January 22, 2026*
+
+---
+
+## 📁 Moltler Files
+
+### Core Moltler Source
+```
+elastic-script/elastic-script/src/main/java/org/elasticsearch/xpack/escript/
+├── agents/
+│   ├── AgentRuntime.java           # OODA-loop agent execution
+│   └── TriggerManager.java         # Webhook/alert/cron triggers
+├── connectors/
+│   ├── ConnectorFactory.java       # Connector dispatch
+│   ├── SyncEngine.java             # Data synchronization
+│   ├── github/GitHubConnector.java # GitHub API integration
+│   ├── jira/JiraConnector.java     # Jira API integration
+│   └── datadog/DatadogConnector.java # Datadog API integration
+├── handlers/
+│   ├── ConnectorStatementHandler.java  # CONNECTOR statements
+│   ├── AgentStatementHandler.java      # AGENT statements
+│   └── SkillStatementHandler.java      # SKILL statements
+├── applications/
+│   ├── SkillDefinition.java        # Skill data model
+│   └── SkillRegistry.java          # Skill storage
+```
+
+### Python SDK
+```
+elastic-script/sdk/
+├── moltler/
+│   ├── __init__.py                 # Package exports
+│   ├── client.py                   # Moltler client
+│   ├── skills.py                   # Skill management
+│   ├── connectors.py               # Connector management
+│   ├── agents.py                   # Agent management
+│   └── exceptions.py               # Custom exceptions
+├── tests/
+│   ├── test_client.py              # Client tests
+│   ├── test_skills.py              # Skills tests
+│   ├── test_connectors.py          # Connector tests
+│   └── test_agents.py              # Agent tests
+├── setup.py
+├── pyproject.toml
+└── README.md
+```
+
+### CLI Enhancements
+```
+elastic-script/cli/escript_cli/
+├── main.py                         # skill/connector/agent commands
+├── client.py                       # Moltler client methods
+└── completer.py                    # Moltler keyword completion
+```
+
+### Parser Tests
+```
+elastic-script/elastic-script/src/test/java/org/elasticsearch/xpack/escript/parser/
+├── ConnectorParserTests.java       # Connector statement parsing
+├── AgentParserTests.java           # Agent statement parsing
+├── MoltlerSkillParserTests.java    # Skill statement parsing (new grammar)
+└── SkillParserTests.java           # Updated for Moltler grammar
+```

@@ -42,6 +42,8 @@ import org.elasticsearch.xpack.escript.handlers.TypeStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.ApplicationStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.SkillStatementHandler;
 import org.elasticsearch.xpack.escript.handlers.ShowStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.ConnectorStatementHandler;
+import org.elasticsearch.xpack.escript.handlers.AgentStatementHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -290,6 +292,12 @@ public class ElasticScriptExecutor {
                 } else if (programContext.skill_statement() != null) {
                     // Handle SKILL statements (CREATE SKILL, DROP SKILL, SHOW SKILLS, ALTER SKILL, GENERATE SKILL)
                     handleSkillStatement(programContext.skill_statement(), listener);
+                } else if (programContext.connector_statement() != null) {
+                    // Handle CONNECTOR statements (CREATE CONNECTOR, DROP CONNECTOR, SHOW CONNECTORS, etc.)
+                    handleConnectorStatement(programContext.connector_statement(), listener);
+                } else if (programContext.agent_statement() != null) {
+                    // Handle AGENT statements (CREATE AGENT, DROP AGENT, SHOW AGENTS, etc.)
+                    handleAgentStatement(programContext.agent_statement(), listener);
                 } else {
                     listener.onFailure(new IllegalArgumentException("Unsupported top-level statement"));
                 }
@@ -988,6 +996,8 @@ public class ElasticScriptExecutor {
             handler.handleAlterSkill(ctx.alter_skill_statement(), listener);
         } else if (ctx.generate_skill_statement() != null) {
             handler.handleGenerateSkill(ctx.generate_skill_statement(), listener);
+        } else if (ctx.test_skill_statement() != null) {
+            handler.handleTestSkill(ctx.test_skill_statement(), listener);
         } else {
             listener.onFailure(new IllegalArgumentException("Unknown SKILL statement type"));
         }
@@ -1025,6 +1035,99 @@ public class ElasticScriptExecutor {
         }
     }
     
+    /**
+     * Handles CONNECTOR statements (CREATE CONNECTOR, DROP CONNECTOR, SHOW CONNECTORS, etc.).
+     */
+    private void handleConnectorStatement(ElasticScriptParser.Connector_statementContext ctx,
+                                          ActionListener<Object> listener) {
+        ExecutionContext context = new ExecutionContext();
+        ConnectorStatementHandler handler = new ConnectorStatementHandler(client, context);
+
+        if (ctx.create_connector_statement() != null) {
+            handler.handleCreateConnector(ctx.create_connector_statement(), listener);
+        } else if (ctx.drop_connector_statement() != null) {
+            handler.handleDropConnector(ctx.drop_connector_statement(), listener);
+        } else if (ctx.show_connectors_statement() != null) {
+            ElasticScriptParser.Show_connectors_statementContext showCtx = ctx.show_connectors_statement();
+            if (showCtx instanceof ElasticScriptParser.ShowAllConnectorsContext) {
+                handler.handleShowAllConnectors(listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowConnectorDetailContext) {
+                handler.handleShowConnectorDetail((ElasticScriptParser.ShowConnectorDetailContext) showCtx, listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowConnectorStatusContext) {
+                handler.handleShowConnectorStatus((ElasticScriptParser.ShowConnectorStatusContext) showCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown SHOW CONNECTOR variant"));
+            }
+        } else if (ctx.test_connector_statement() != null) {
+            handler.handleTestConnector(ctx.test_connector_statement(), listener);
+        } else if (ctx.sync_connector_statement() != null) {
+            handler.handleSyncConnector(ctx.sync_connector_statement(), listener);
+        } else if (ctx.alter_connector_statement() != null) {
+            ElasticScriptParser.Alter_connector_statementContext alterCtx = ctx.alter_connector_statement();
+            if (alterCtx instanceof ElasticScriptParser.AlterConnectorOptionsContext) {
+                handler.handleAlterConnectorOptions((ElasticScriptParser.AlterConnectorOptionsContext) alterCtx, listener);
+            } else if (alterCtx instanceof ElasticScriptParser.AlterConnectorEnableDisableContext) {
+                handler.handleAlterConnectorEnableDisable((ElasticScriptParser.AlterConnectorEnableDisableContext) alterCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown ALTER CONNECTOR variant"));
+            }
+        } else if (ctx.exec_connector_statement() != null) {
+            handler.handleExecConnector(ctx.exec_connector_statement(), listener);
+        } else if (ctx.query_connector_statement() != null) {
+            handler.handleQueryConnector(ctx.query_connector_statement(), listener);
+        } else {
+            listener.onFailure(new IllegalArgumentException("Unknown CONNECTOR statement variant"));
+        }
+    }
+
+    /**
+     * Handles AGENT statements (CREATE AGENT, DROP AGENT, SHOW AGENTS, etc.).
+     */
+    private void handleAgentStatement(ElasticScriptParser.Agent_statementContext ctx,
+                                      ActionListener<Object> listener) {
+        ExecutionContext context = new ExecutionContext();
+        AgentStatementHandler handler = new AgentStatementHandler(client, context);
+
+        if (ctx.create_agent_statement() != null) {
+            handler.handleCreateAgent(ctx.create_agent_statement(), listener);
+        } else if (ctx.drop_agent_statement() != null) {
+            handler.handleDropAgent(ctx.drop_agent_statement(), listener);
+        } else if (ctx.show_agents_statement() != null) {
+            ElasticScriptParser.Show_agents_statementContext showCtx = ctx.show_agents_statement();
+            if (showCtx instanceof ElasticScriptParser.ShowAllAgentsContext) {
+                handler.handleShowAllAgents(listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowAgentDetailContext) {
+                handler.handleShowAgentDetail((ElasticScriptParser.ShowAgentDetailContext) showCtx, listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowAgentExecutionContext) {
+                handler.handleShowAgentExecution((ElasticScriptParser.ShowAgentExecutionContext) showCtx, listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowAgentHistoryContext) {
+                handler.handleShowAgentHistory((ElasticScriptParser.ShowAgentHistoryContext) showCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown SHOW AGENT variant"));
+            }
+        } else if (ctx.alter_agent_statement() != null) {
+            ElasticScriptParser.Alter_agent_statementContext alterCtx = ctx.alter_agent_statement();
+            if (alterCtx instanceof ElasticScriptParser.AlterAgentConfigContext) {
+                handler.handleAlterAgentConfig((ElasticScriptParser.AlterAgentConfigContext) alterCtx, listener);
+            } else if (alterCtx instanceof ElasticScriptParser.AlterAgentExecutionContext) {
+                handler.handleAlterAgentExecution((ElasticScriptParser.AlterAgentExecutionContext) alterCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown ALTER AGENT variant"));
+            }
+        } else if (ctx.start_stop_agent_statement() != null) {
+            ElasticScriptParser.Start_stop_agent_statementContext ssCtx = ctx.start_stop_agent_statement();
+            if (ssCtx instanceof ElasticScriptParser.EnableDisableAgentContext) {
+                handler.handleEnableDisableAgent((ElasticScriptParser.EnableDisableAgentContext) ssCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown AGENT start/stop variant"));
+            }
+        } else if (ctx.trigger_agent_statement() != null) {
+            handler.handleTriggerAgent(ctx.trigger_agent_statement(), listener);
+        } else {
+            listener.onFailure(new IllegalArgumentException("Unknown AGENT statement variant"));
+        }
+    }
+
     /**
      * Creates an ActionListener that wraps the raw result with ExecutionResult.
      * This includes PRINT output, execution ID, and timing metadata.

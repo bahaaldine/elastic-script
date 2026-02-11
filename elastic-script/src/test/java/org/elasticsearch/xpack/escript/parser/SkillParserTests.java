@@ -12,7 +12,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.elasticsearch.test.ESTestCase;
 
 /**
- * Tests for parsing standalone SKILL statements.
+ * Tests for parsing standalone SKILL statements (Moltler grammar).
  */
 public class SkillParserTests extends ESTestCase {
 
@@ -24,15 +24,16 @@ public class SkillParserTests extends ESTestCase {
     }
 
     // ========================================================================
-    // CREATE SKILL Tests
+    // CREATE SKILL Tests (New Moltler Grammar)
     // ========================================================================
 
     public void testCreateSkillBasic() {
-        String input = "CREATE SKILL detect_churn(threshold NUMBER) "
-            + "RETURNS ARRAY "
-            + "DESCRIPTION 'Identifies customers likely to churn' "
-            + "PROCEDURE run_churn_analysis(threshold) "
-            + "END SKILL";
+        String input = """
+            CREATE SKILL detect_churn VERSION '1.0.0'
+            BEGIN
+                PRINT 'Detecting churn';
+            END SKILL;
+            """;
 
         ElasticScriptParser.ProgramContext ctx = parseProgram(input);
         assertNotNull(ctx);
@@ -40,75 +41,134 @@ public class SkillParserTests extends ESTestCase {
         assertNotNull(ctx.skill_statement().create_skill_statement());
 
         var createCtx = ctx.skill_statement().create_skill_statement();
-        assertEquals("detect_churn", createCtx.ID(0).getText());
-        assertEquals("run_churn_analysis", createCtx.ID(1).getText());
-        assertNotNull(createCtx.skill_param_list());
-        assertEquals(1, createCtx.skill_param_list().skill_param().size());
+        assertEquals("detect_churn", createCtx.ID().getText());
     }
 
-    public void testCreateSkillMultipleParams() {
-        String input = "CREATE SKILL analyze_users(min_age NUMBER, max_age NUMBER, status STRING) "
-            + "RETURNS DOCUMENT "
-            + "DESCRIPTION 'Analyzes user demographics' "
-            + "PROCEDURE user_analysis(min_age, max_age, status) "
-            + "END SKILL";
+    public void testCreateSkillWithDescription() {
+        String input = """
+            CREATE SKILL analyze_users VERSION '1.0.0'
+            DESCRIPTION 'Analyzes user demographics'
+            BEGIN
+                PRINT 'Analyzing';
+            END SKILL;
+            """;
 
         ElasticScriptParser.ProgramContext ctx = parseProgram(input);
         assertNotNull(ctx);
 
         var createCtx = ctx.skill_statement().create_skill_statement();
-        assertEquals("analyze_users", createCtx.ID(0).getText());
-        assertEquals(3, createCtx.skill_param_list().skill_param().size());
+        assertEquals("analyze_users", createCtx.ID().getText());
+        // Description is the second STRING (after VERSION)
+        assertEquals(2, createCtx.STRING().size());
     }
 
-    public void testCreateSkillWithExamples() {
-        String input = "CREATE SKILL find_customers(query STRING) "
-            + "RETURNS ARRAY "
-            + "DESCRIPTION 'Searches for customers matching criteria' "
-            + "EXAMPLES 'Find customers in New York', 'Show me premium users', 'List inactive accounts' "
-            + "PROCEDURE search_customers(query) "
-            + "END SKILL";
+    public void testCreateSkillWithAuthor() {
+        String input = """
+            CREATE SKILL find_customers VERSION '2.0.0'
+            DESCRIPTION 'Searches for customers'
+            AUTHOR 'Platform Team'
+            BEGIN
+                PRINT 'Searching';
+            END SKILL;
+            """;
 
         ElasticScriptParser.ProgramContext ctx = parseProgram(input);
         assertNotNull(ctx);
 
         var createCtx = ctx.skill_statement().create_skill_statement();
-        assertNotNull(createCtx.EXAMPLES());
-        // 4 strings total: 1 for description, 3 for examples
-        assertEquals(4, createCtx.STRING().size());
+        assertEquals(3, createCtx.STRING().size()); // VERSION, DESCRIPTION, AUTHOR
     }
 
-    public void testCreateSkillNoParams() {
-        String input = "CREATE SKILL get_system_status() "
-            + "RETURNS DOCUMENT "
-            + "DESCRIPTION 'Returns current system status' "
-            + "PROCEDURE check_system() "
-            + "END SKILL";
+    public void testCreateSkillWithTags() {
+        String input = """
+            CREATE SKILL get_system_status VERSION '1.0.0'
+            TAGS ['monitoring', 'health']
+            BEGIN
+                PRINT 'Checking';
+            END SKILL;
+            """;
 
         ElasticScriptParser.ProgramContext ctx = parseProgram(input);
         assertNotNull(ctx);
 
         var createCtx = ctx.skill_statement().create_skill_statement();
-        assertEquals("get_system_status", createCtx.ID(0).getText());
-        assertNull(createCtx.skill_param_list());
+        assertEquals("get_system_status", createCtx.ID().getText());
+        assertNotNull(createCtx.arrayLiteral(0)); // TAGS array
     }
 
-    public void testCreateSkillWithParamDescriptions() {
-        String input = "CREATE SKILL analyze_logs(severity STRING DESCRIPTION 'Log severity level', "
-            + "days NUMBER DESCRIPTION 'Number of days to analyze' DEFAULT 7) "
-            + "RETURNS ARRAY "
-            + "DESCRIPTION 'Analyzes log entries' "
-            + "PROCEDURE log_analysis(severity, days) "
-            + "END SKILL";
+    public void testCreateSkillWithDependencies() {
+        String input = """
+            CREATE SKILL analyze_logs VERSION '1.0.0'
+            REQUIRES ['base_skill', 'helper_skill']
+            BEGIN
+                PRINT 'Analyzing';
+            END SKILL;
+            """;
 
         ElasticScriptParser.ProgramContext ctx = parseProgram(input);
         assertNotNull(ctx);
 
         var createCtx = ctx.skill_statement().create_skill_statement();
-        assertEquals(2, createCtx.skill_param_list().skill_param().size());
+        assertNotNull(createCtx.arrayLiteral(0)); // REQUIRES array
+    }
 
-        var param2 = createCtx.skill_param_list().skill_param(1);
-        assertNotNull(param2.DEFAULT());
+    public void testCreateSkillWithParameters() {
+        String input = """
+            CREATE SKILL parameterized_skill VERSION '1.0.0'
+            (severity IN STRING, days IN NUMBER DEFAULT 7)
+            BEGIN
+                PRINT severity;
+            END SKILL;
+            """;
+
+        ElasticScriptParser.ProgramContext ctx = parseProgram(input);
+        assertNotNull(ctx);
+
+        var createCtx = ctx.skill_statement().create_skill_statement();
+        assertNotNull(createCtx.skill_parameters_clause());
+        assertEquals(2, createCtx.skill_parameters_clause().skill_param_list().skill_param().size());
+    }
+
+    public void testCreateSkillWithReturns() {
+        String input = """
+            CREATE SKILL returning_skill VERSION '1.0.0'
+            RETURNS DOCUMENT
+            BEGIN
+                RETURN {};
+            END SKILL;
+            """;
+
+        ElasticScriptParser.ProgramContext ctx = parseProgram(input);
+        assertNotNull(ctx);
+
+        var createCtx = ctx.skill_statement().create_skill_statement();
+        assertNotNull(createCtx.RETURNS());
+        assertNotNull(createCtx.datatype());
+    }
+
+    public void testCreateSkillFull() {
+        String input = """
+            CREATE SKILL full_skill VERSION '3.0.0'
+            DESCRIPTION 'A complete skill'
+            AUTHOR 'DevOps'
+            TAGS ['ops', 'automation']
+            REQUIRES ['base']
+            (input_param IN STRING, output_param OUT NUMBER)
+            RETURNS DOCUMENT
+            BEGIN
+                PRINT input_param;
+                SET output_param = 42;
+                RETURN {"status": "ok"};
+            END SKILL;
+            """;
+
+        ElasticScriptParser.ProgramContext ctx = parseProgram(input);
+        assertNotNull(ctx);
+
+        var createCtx = ctx.skill_statement().create_skill_statement();
+        assertEquals("full_skill", createCtx.ID().getText());
+        assertNotNull(createCtx.skill_parameters_clause());
+        assertNotNull(createCtx.RETURNS());
     }
 
     // ========================================================================
@@ -116,7 +176,7 @@ public class SkillParserTests extends ESTestCase {
     // ========================================================================
 
     public void testDropSkill() {
-        String input = "DROP SKILL detect_churn";
+        String input = "DROP SKILL detect_churn;";
 
         ElasticScriptParser.ProgramContext ctx = parseProgram(input);
         assertNotNull(ctx);
@@ -129,7 +189,7 @@ public class SkillParserTests extends ESTestCase {
     // ========================================================================
 
     public void testShowAllSkills() {
-        String input = "SHOW SKILLS";
+        String input = "SHOW SKILLS;";
 
         ElasticScriptParser.ProgramContext ctx = parseProgram(input);
         assertNotNull(ctx);
@@ -138,7 +198,7 @@ public class SkillParserTests extends ESTestCase {
     }
 
     public void testShowSkillDetail() {
-        String input = "SHOW SKILL detect_churn";
+        String input = "SHOW SKILL detect_churn;";
 
         ElasticScriptParser.ProgramContext ctx = parseProgram(input);
         assertNotNull(ctx);
@@ -153,7 +213,7 @@ public class SkillParserTests extends ESTestCase {
     // ========================================================================
 
     public void testAlterSkillDescription() {
-        String input = "ALTER SKILL detect_churn SET DESCRIPTION = 'Updated description for churn detection'";
+        String input = "ALTER SKILL detect_churn SET DESCRIPTION = 'Updated description for churn detection';";
 
         ElasticScriptParser.ProgramContext ctx = parseProgram(input);
         assertNotNull(ctx);
@@ -165,11 +225,45 @@ public class SkillParserTests extends ESTestCase {
     }
 
     // ========================================================================
+    // TEST SKILL Tests
+    // ========================================================================
+
+    public void testTestSkillBasic() {
+        String input = "TEST SKILL my_skill;";
+
+        ElasticScriptParser.ProgramContext ctx = parseProgram(input);
+        assertNotNull(ctx);
+        assertNotNull(ctx.skill_statement().test_skill_statement());
+        assertEquals("my_skill", ctx.skill_statement().test_skill_statement().ID().getText());
+    }
+
+    public void testTestSkillWithParams() {
+        String input = "TEST SKILL my_skill WITH param1 = 'value1', param2 = 42;";
+
+        ElasticScriptParser.ProgramContext ctx = parseProgram(input);
+        assertNotNull(ctx);
+
+        var testCtx = ctx.skill_statement().test_skill_statement();
+        assertNotNull(testCtx.skill_test_args());
+        assertEquals(2, testCtx.skill_test_args().skill_test_arg().size());
+    }
+
+    public void testTestSkillWithExpect() {
+        String input = "TEST SKILL my_skill WITH x = 1 EXPECT true;";
+
+        ElasticScriptParser.ProgramContext ctx = parseProgram(input);
+        assertNotNull(ctx);
+
+        var testCtx = ctx.skill_statement().test_skill_statement();
+        assertNotNull(testCtx.expression());
+    }
+
+    // ========================================================================
     // GENERATE SKILL Tests
     // ========================================================================
 
     public void testGenerateSkillBasic() {
-        String input = "GENERATE SKILL FROM 'Find customers who might leave based on order patterns'";
+        String input = "GENERATE SKILL FROM 'Find customers who might leave based on order patterns';";
 
         ElasticScriptParser.ProgramContext ctx = parseProgram(input);
         assertNotNull(ctx);
@@ -180,7 +274,7 @@ public class SkillParserTests extends ESTestCase {
     }
 
     public void testGenerateSkillWithModel() {
-        String input = "GENERATE SKILL FROM 'Analyze customer behavior' WITH MODEL 'gpt-4'";
+        String input = "GENERATE SKILL FROM 'Analyze customer behavior' WITH MODEL 'gpt-4';";
 
         ElasticScriptParser.ProgramContext ctx = parseProgram(input);
         assertNotNull(ctx);
@@ -191,7 +285,7 @@ public class SkillParserTests extends ESTestCase {
     }
 
     public void testGenerateSkillWithSave() {
-        String input = "GENERATE SKILL FROM 'Detect anomalies in metrics' SAVE AS anomaly_detector";
+        String input = "GENERATE SKILL FROM 'Detect anomalies in metrics' SAVE AS anomaly_detector;";
 
         ElasticScriptParser.ProgramContext ctx = parseProgram(input);
         assertNotNull(ctx);
@@ -202,7 +296,7 @@ public class SkillParserTests extends ESTestCase {
     }
 
     public void testGenerateSkillWithModelAndSave() {
-        String input = "GENERATE SKILL FROM 'Find trending products' WITH MODEL 'claude-3' SAVE AS trending_products";
+        String input = "GENERATE SKILL FROM 'Find trending products' WITH MODEL 'claude-3' SAVE AS trending_products;";
 
         ElasticScriptParser.ProgramContext ctx = parseProgram(input);
         assertNotNull(ctx);

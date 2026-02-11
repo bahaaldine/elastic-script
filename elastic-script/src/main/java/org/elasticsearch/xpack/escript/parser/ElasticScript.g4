@@ -104,6 +104,42 @@ GENERATE: 'GENERATE';
 EXAMPLES: 'EXAMPLES';
 MODEL: 'MODEL';
 
+// Connectors (External Data Sources)
+CONNECTOR: 'CONNECTOR';
+CONNECTORS: 'CONNECTORS';
+SYNC: 'SYNC';
+INCREMENTAL: 'INCREMENTAL';
+OPTIONS: 'OPTIONS';
+TEST_KW: 'TEST';
+CONNECTOR_EXEC: 'CONNECTOR_EXEC';
+EXEC: 'EXEC';
+ORDER: 'ORDER';
+BY: 'BY';
+ASC: 'ASC';
+DESC: 'DESC';
+
+// Agent Runtime
+AGENT: 'AGENT';
+AGENTS: 'AGENTS';
+GOAL: 'GOAL';
+APPROVAL: 'APPROVAL';
+AUTONOMOUS: 'AUTONOMOUS';
+SUPERVISED: 'SUPERVISED';
+DRY_RUN: 'DRY_RUN';
+HUMAN_APPROVAL: 'HUMAN_APPROVAL';
+END_AGENT: 'END AGENT';
+ALERT: 'ALERT';
+
+// Skill Metadata
+AUTHOR: 'AUTHOR';
+TAGS: 'TAGS';
+LICENSE: 'LICENSE';
+DEPRECATES: 'DEPRECATES';
+PACK: 'PACK';
+PACKS: 'PACKS';
+END_PACK: 'END PACK';
+EXPECT: 'EXPECT';
+
 // User-Defined Types
 TYPE: 'TYPE';
 TYPES: 'TYPES';
@@ -356,6 +392,8 @@ program
     | type_statement
     | application_statement
     | skill_statement
+    | connector_statement
+    | agent_statement
     ;
 
 procedure
@@ -1592,22 +1630,36 @@ application_control_operation
 
 skill_statement
     : create_skill_statement
+    | create_skill_pack_statement
     | drop_skill_statement
     | show_skills_statement
     | alter_skill_statement
     | generate_skill_statement
+    | test_skill_statement
     ;
 
-// CREATE SKILL name(params) RETURNS type DESCRIPTION 'desc' 
-//   PROCEDURE proc_name(args)
-// END SKILL
+// CREATE SKILL name
+//   VERSION 'semver'
+//   [DESCRIPTION 'desc']
+//   [AUTHOR 'author']
+//   [TAGS ['tag1', 'tag2']]
+//   [PARAMETERS (...)]
+//   [RETURNS type]
+//   BEGIN ... END SKILL
 create_skill_statement
-    : CREATE SKILL ID LPAREN skill_param_list? RPAREN
-      (RETURNS datatype)?
+    : CREATE SKILL ID
+      VERSION STRING
       (DESCRIPTION STRING)?
-      (EXAMPLES STRING (COMMA STRING)*)?
-      PROCEDURE ID LPAREN argument_list? RPAREN
-      END_SKILL
+      (AUTHOR STRING)?
+      (TAGS arrayLiteral)?
+      (REQUIRES arrayLiteral)?
+      (skill_parameters_clause)?
+      (RETURNS datatype)?
+      BEGIN statement+ END_SKILL
+    ;
+
+skill_parameters_clause
+    : LPAREN skill_param_list RPAREN
     ;
 
 skill_param_list
@@ -1618,15 +1670,30 @@ skill_param
     : ID datatype (DESCRIPTION STRING)? (DEFAULT expression)?
     ;
 
-// DROP SKILL name
-drop_skill_statement
-    : DROP SKILL ID
+// CREATE SKILL PACK name VERSION 'semver' DESCRIPTION 'desc' SKILLS [...]
+create_skill_pack_statement
+    : CREATE SKILL PACK ID
+      VERSION STRING
+      (DESCRIPTION STRING)?
+      (AUTHOR STRING)?
+      (TAGS arrayLiteral)?
+      SKILLS arrayLiteral
+      END_PACK?
     ;
 
-// SHOW SKILLS / SHOW SKILL name
+// DROP SKILL name [VERSION 'semver']
+drop_skill_statement
+    : DROP SKILL ID (VERSION STRING)?
+    | DROP SKILL PACK ID
+    ;
+
+// SHOW SKILLS / SHOW SKILL name / SHOW SKILL name VERSIONS
 show_skills_statement
     : SHOW SKILLS                                        # showAllSkills
     | SHOW SKILL ID                                      # showSkillDetail
+    | SHOW SKILL ID VERSION STRING                       # showSkillVersion
+    | SHOW SKILL PACK ID                                 # showSkillPackDetail
+    | SHOW SKILL PACKS                                   # showAllSkillPacks
     ;
 
 // ALTER SKILL name SET DESCRIPTION = 'new desc'
@@ -1636,11 +1703,198 @@ alter_skill_statement
 
 skill_property
     : DESCRIPTION
-    | PROCEDURE
+    | AUTHOR
+    ;
+
+// TEST SKILL name WITH param = value, ... EXPECT expression
+test_skill_statement
+    : TEST_KW SKILL ID
+      (WITH skill_test_args)?
+      EXPECT expression
+    ;
+
+skill_test_args
+    : skill_test_arg (COMMA skill_test_arg)*
+    ;
+
+skill_test_arg
+    : ID ASSIGN expression
     ;
 
 // GENERATE SKILL FROM 'natural language description'
 // GENERATE SKILL FROM 'desc' WITH MODEL 'gpt-4'
 generate_skill_statement
     : GENERATE SKILL FROM STRING (WITH MODEL STRING)? (SAVE_KW AS ID)?
+    ;
+
+// ============================================================================
+// CONNECTOR STATEMENTS (External Data Sources)
+// ============================================================================
+
+connector_statement
+    : create_connector_statement
+    | drop_connector_statement
+    | show_connectors_statement
+    | test_connector_statement
+    | sync_connector_statement
+    | alter_connector_statement
+    | exec_connector_statement
+    | query_connector_statement
+    ;
+
+// CREATE CONNECTOR name TYPE 'type' CONFIG { ... } [OPTIONS { ... }]
+// Example:
+//   CREATE CONNECTOR github_org TYPE 'github' CONFIG { "token": "{{secrets.github_token}}", "org": "mycompany" };
+create_connector_statement
+    : CREATE CONNECTOR ID TYPE STRING CONFIG documentLiteral (OPTIONS documentLiteral)?
+    ;
+
+// DROP CONNECTOR name
+drop_connector_statement
+    : DROP CONNECTOR ID
+    ;
+
+// SHOW CONNECTORS / SHOW CONNECTOR name
+show_connectors_statement
+    : SHOW CONNECTORS                                    # showAllConnectors
+    | SHOW CONNECTOR ID                                  # showConnectorDetail
+    | SHOW CONNECTOR ID STATUS                           # showConnectorStatus
+    ;
+
+// TEST CONNECTOR name
+test_connector_statement
+    : TEST_KW CONNECTOR ID
+    ;
+
+// SYNC CONNECTOR name TO 'index-pattern' [INCREMENTAL ON field] [SCHEDULE 'cron']
+// Example:
+//   SYNC CONNECTOR github_org TO github-issues-* SCHEDULE '*/15 * * * *';
+//   SYNC CONNECTOR github_org.issues TO github-issues-* INCREMENTAL ON updated_at;
+sync_connector_statement
+    : SYNC CONNECTOR connector_entity_ref TO STRING 
+      (INCREMENTAL ON_KW ID)?
+      (SCHEDULE STRING)?
+    ;
+
+connector_entity_ref
+    : ID (DOT ID)?                                       // connector_name or connector_name.entity
+    ;
+
+// ALTER CONNECTOR name SET OPTIONS { ... }
+alter_connector_statement
+    : ALTER CONNECTOR ID SET OPTIONS documentLiteral     # alterConnectorOptions
+    | ALTER CONNECTOR ID (ENABLE | DISABLE)              # alterConnectorEnableDisable
+    ;
+
+// EXEC connector_name.action(args) - Execute a connector action
+// Example: EXEC github_org.get_pull_requests(repo='myrepo', state='open')
+exec_connector_statement
+    : EXEC connector_action_call
+    ;
+
+connector_action_call
+    : ID DOT ID LPAREN connector_args? RPAREN
+    ;
+
+connector_args
+    : connector_arg (COMMA connector_arg)*
+    ;
+
+connector_arg
+    : ID ASSIGN expression                               // named argument
+    | expression                                         // positional argument
+    ;
+
+// QUERY connector_name.entity WHERE condition - Query connector data
+// Example: QUERY github_org.issues WHERE repo = 'myrepo' AND state = 'open'
+query_connector_statement
+    : QUERY ID DOT ID (WHERE_CMD expression)? (LIMIT INT)? (ORDER BY expression (ASC | DESC)?)?
+    ;
+
+// ============================================================================
+// AGENT STATEMENTS (Autonomous Executors)
+// ============================================================================
+
+agent_statement
+    : create_agent_statement
+    | drop_agent_statement
+    | show_agents_statement
+    | alter_agent_statement
+    | start_stop_agent_statement
+    | trigger_agent_statement
+    ;
+
+// CREATE AGENT name
+//   GOAL 'description'
+//   SKILLS [skill1, skill2, ...]
+//   [EXECUTION mode]
+//   [TRIGGERS [...]]
+//   [MODEL 'model']
+//   [CONFIG { ... }]
+//   BEGIN ... END AGENT
+create_agent_statement
+    : CREATE AGENT ID
+      GOAL STRING
+      SKILLS LBRACKET agent_skill_list RBRACKET
+      (EXECUTION agent_execution_mode)?
+      (TRIGGERS LBRACKET agent_trigger_list RBRACKET)?
+      (MODEL STRING)?
+      (CONFIG documentLiteral)?
+      BEGIN statement+ END_AGENT
+    ;
+
+agent_skill_list
+    : agent_skill_ref (COMMA agent_skill_ref)*
+    ;
+
+agent_skill_ref
+    : ID (AT ID)?                                        // skill_name or skill_name@version
+    | ID LBRACKET ID RBRACKET                            // skill_name[approval] or skill_name[forbidden]
+    ;
+
+agent_execution_mode
+    : AUTONOMOUS
+    | HUMAN_APPROVAL
+    | SUPERVISED
+    | DRY_RUN
+    ;
+
+agent_trigger_list
+    : agent_trigger_def (COMMA agent_trigger_def)*
+    ;
+
+agent_trigger_def
+    : ON_KW SCHEDULE STRING                              // ON SCHEDULE '*/5 * * * *'
+    | ON_KW ALERT STRING                                 // ON ALERT 'high-cpu-usage'
+    | ON_KW ALERT WHERE_CMD expression                   // ON ALERT WHERE severity = 'critical'
+    | ON_KW ID                                           // ON MANUAL, ON EVENT 'x'
+    ;
+
+// DROP AGENT name
+drop_agent_statement
+    : DROP AGENT ID
+    ;
+
+// SHOW AGENTS / SHOW AGENT name / SHOW AGENT name EXECUTIONS / SHOW AGENT name METRICS
+show_agents_statement
+    : SHOW AGENTS                                        # showAllAgents
+    | SHOW AGENT ID                                      # showAgentDetail
+    | SHOW AGENT ID EXECUTION STRING                     # showAgentExecution
+    | SHOW AGENT ID HISTORY                              # showAgentHistory
+    ;
+
+// ALTER AGENT name CONFIG { ... }
+alter_agent_statement
+    : ALTER AGENT ID SET CONFIG documentLiteral          # alterAgentConfig
+    | ALTER AGENT ID SET EXECUTION agent_execution_mode  # alterAgentExecution
+    ;
+
+// START AGENT name / STOP AGENT name
+start_stop_agent_statement
+    : (ENABLE | DISABLE) AGENT ID                        # enableDisableAgent
+    ;
+
+// Manually trigger an agent: TRIGGER AGENT name WITH { context }
+trigger_agent_statement
+    : TRIGGER AGENT ID (WITH documentLiteral)?
     ;

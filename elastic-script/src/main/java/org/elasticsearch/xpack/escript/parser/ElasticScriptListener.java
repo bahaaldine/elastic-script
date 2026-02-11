@@ -2646,6 +2646,16 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitCreate_skill_statement(ElasticScriptParser.Create_skill_statementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#skill_parameters_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterSkill_parameters_clause(ElasticScriptParser.Skill_parameters_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#skill_parameters_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitSkill_parameters_clause(ElasticScriptParser.Skill_parameters_clauseContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#skill_param_list}.
 	 * @param ctx the parse tree
 	 */
@@ -2665,6 +2675,16 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSkill_param(ElasticScriptParser.Skill_paramContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#create_skill_pack_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterCreate_skill_pack_statement(ElasticScriptParser.Create_skill_pack_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#create_skill_pack_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitCreate_skill_pack_statement(ElasticScriptParser.Create_skill_pack_statementContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#drop_skill_statement}.
 	 * @param ctx the parse tree
@@ -2700,6 +2720,42 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitShowSkillDetail(ElasticScriptParser.ShowSkillDetailContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code showSkillVersion}
+	 * labeled alternative in {@link ElasticScriptParser#show_skills_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowSkillVersion(ElasticScriptParser.ShowSkillVersionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showSkillVersion}
+	 * labeled alternative in {@link ElasticScriptParser#show_skills_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowSkillVersion(ElasticScriptParser.ShowSkillVersionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showSkillPackDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_skills_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowSkillPackDetail(ElasticScriptParser.ShowSkillPackDetailContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showSkillPackDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_skills_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowSkillPackDetail(ElasticScriptParser.ShowSkillPackDetailContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showAllSkillPacks}
+	 * labeled alternative in {@link ElasticScriptParser#show_skills_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowAllSkillPacks(ElasticScriptParser.ShowAllSkillPacksContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showAllSkillPacks}
+	 * labeled alternative in {@link ElasticScriptParser#show_skills_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowAllSkillPacks(ElasticScriptParser.ShowAllSkillPacksContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#alter_skill_statement}.
 	 * @param ctx the parse tree
 	 */
@@ -2720,6 +2776,36 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitSkill_property(ElasticScriptParser.Skill_propertyContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#test_skill_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterTest_skill_statement(ElasticScriptParser.Test_skill_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#test_skill_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitTest_skill_statement(ElasticScriptParser.Test_skill_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#skill_test_args}.
+	 * @param ctx the parse tree
+	 */
+	void enterSkill_test_args(ElasticScriptParser.Skill_test_argsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#skill_test_args}.
+	 * @param ctx the parse tree
+	 */
+	void exitSkill_test_args(ElasticScriptParser.Skill_test_argsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#skill_test_arg}.
+	 * @param ctx the parse tree
+	 */
+	void enterSkill_test_arg(ElasticScriptParser.Skill_test_argContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#skill_test_arg}.
+	 * @param ctx the parse tree
+	 */
+	void exitSkill_test_arg(ElasticScriptParser.Skill_test_argContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#generate_skill_statement}.
 	 * @param ctx the parse tree
 	 */
@@ -2729,4 +2815,348 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitGenerate_skill_statement(ElasticScriptParser.Generate_skill_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#connector_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterConnector_statement(ElasticScriptParser.Connector_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#connector_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitConnector_statement(ElasticScriptParser.Connector_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#create_connector_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterCreate_connector_statement(ElasticScriptParser.Create_connector_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#create_connector_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitCreate_connector_statement(ElasticScriptParser.Create_connector_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#drop_connector_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterDrop_connector_statement(ElasticScriptParser.Drop_connector_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#drop_connector_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitDrop_connector_statement(ElasticScriptParser.Drop_connector_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showAllConnectors}
+	 * labeled alternative in {@link ElasticScriptParser#show_connectors_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowAllConnectors(ElasticScriptParser.ShowAllConnectorsContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showAllConnectors}
+	 * labeled alternative in {@link ElasticScriptParser#show_connectors_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowAllConnectors(ElasticScriptParser.ShowAllConnectorsContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showConnectorDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_connectors_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowConnectorDetail(ElasticScriptParser.ShowConnectorDetailContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showConnectorDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_connectors_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowConnectorDetail(ElasticScriptParser.ShowConnectorDetailContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showConnectorStatus}
+	 * labeled alternative in {@link ElasticScriptParser#show_connectors_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowConnectorStatus(ElasticScriptParser.ShowConnectorStatusContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showConnectorStatus}
+	 * labeled alternative in {@link ElasticScriptParser#show_connectors_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowConnectorStatus(ElasticScriptParser.ShowConnectorStatusContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#test_connector_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterTest_connector_statement(ElasticScriptParser.Test_connector_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#test_connector_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitTest_connector_statement(ElasticScriptParser.Test_connector_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#sync_connector_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterSync_connector_statement(ElasticScriptParser.Sync_connector_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#sync_connector_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitSync_connector_statement(ElasticScriptParser.Sync_connector_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#connector_entity_ref}.
+	 * @param ctx the parse tree
+	 */
+	void enterConnector_entity_ref(ElasticScriptParser.Connector_entity_refContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#connector_entity_ref}.
+	 * @param ctx the parse tree
+	 */
+	void exitConnector_entity_ref(ElasticScriptParser.Connector_entity_refContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code alterConnectorOptions}
+	 * labeled alternative in {@link ElasticScriptParser#alter_connector_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterAlterConnectorOptions(ElasticScriptParser.AlterConnectorOptionsContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code alterConnectorOptions}
+	 * labeled alternative in {@link ElasticScriptParser#alter_connector_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitAlterConnectorOptions(ElasticScriptParser.AlterConnectorOptionsContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code alterConnectorEnableDisable}
+	 * labeled alternative in {@link ElasticScriptParser#alter_connector_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterAlterConnectorEnableDisable(ElasticScriptParser.AlterConnectorEnableDisableContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code alterConnectorEnableDisable}
+	 * labeled alternative in {@link ElasticScriptParser#alter_connector_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitAlterConnectorEnableDisable(ElasticScriptParser.AlterConnectorEnableDisableContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#exec_connector_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterExec_connector_statement(ElasticScriptParser.Exec_connector_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#exec_connector_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitExec_connector_statement(ElasticScriptParser.Exec_connector_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#connector_action_call}.
+	 * @param ctx the parse tree
+	 */
+	void enterConnector_action_call(ElasticScriptParser.Connector_action_callContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#connector_action_call}.
+	 * @param ctx the parse tree
+	 */
+	void exitConnector_action_call(ElasticScriptParser.Connector_action_callContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#connector_args}.
+	 * @param ctx the parse tree
+	 */
+	void enterConnector_args(ElasticScriptParser.Connector_argsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#connector_args}.
+	 * @param ctx the parse tree
+	 */
+	void exitConnector_args(ElasticScriptParser.Connector_argsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#connector_arg}.
+	 * @param ctx the parse tree
+	 */
+	void enterConnector_arg(ElasticScriptParser.Connector_argContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#connector_arg}.
+	 * @param ctx the parse tree
+	 */
+	void exitConnector_arg(ElasticScriptParser.Connector_argContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#query_connector_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterQuery_connector_statement(ElasticScriptParser.Query_connector_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#query_connector_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitQuery_connector_statement(ElasticScriptParser.Query_connector_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#agent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterAgent_statement(ElasticScriptParser.Agent_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#agent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitAgent_statement(ElasticScriptParser.Agent_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#create_agent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterCreate_agent_statement(ElasticScriptParser.Create_agent_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#create_agent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitCreate_agent_statement(ElasticScriptParser.Create_agent_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#agent_skill_list}.
+	 * @param ctx the parse tree
+	 */
+	void enterAgent_skill_list(ElasticScriptParser.Agent_skill_listContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#agent_skill_list}.
+	 * @param ctx the parse tree
+	 */
+	void exitAgent_skill_list(ElasticScriptParser.Agent_skill_listContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#agent_skill_ref}.
+	 * @param ctx the parse tree
+	 */
+	void enterAgent_skill_ref(ElasticScriptParser.Agent_skill_refContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#agent_skill_ref}.
+	 * @param ctx the parse tree
+	 */
+	void exitAgent_skill_ref(ElasticScriptParser.Agent_skill_refContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#agent_execution_mode}.
+	 * @param ctx the parse tree
+	 */
+	void enterAgent_execution_mode(ElasticScriptParser.Agent_execution_modeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#agent_execution_mode}.
+	 * @param ctx the parse tree
+	 */
+	void exitAgent_execution_mode(ElasticScriptParser.Agent_execution_modeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#agent_trigger_list}.
+	 * @param ctx the parse tree
+	 */
+	void enterAgent_trigger_list(ElasticScriptParser.Agent_trigger_listContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#agent_trigger_list}.
+	 * @param ctx the parse tree
+	 */
+	void exitAgent_trigger_list(ElasticScriptParser.Agent_trigger_listContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#agent_trigger_def}.
+	 * @param ctx the parse tree
+	 */
+	void enterAgent_trigger_def(ElasticScriptParser.Agent_trigger_defContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#agent_trigger_def}.
+	 * @param ctx the parse tree
+	 */
+	void exitAgent_trigger_def(ElasticScriptParser.Agent_trigger_defContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#drop_agent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterDrop_agent_statement(ElasticScriptParser.Drop_agent_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#drop_agent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitDrop_agent_statement(ElasticScriptParser.Drop_agent_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showAllAgents}
+	 * labeled alternative in {@link ElasticScriptParser#show_agents_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowAllAgents(ElasticScriptParser.ShowAllAgentsContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showAllAgents}
+	 * labeled alternative in {@link ElasticScriptParser#show_agents_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowAllAgents(ElasticScriptParser.ShowAllAgentsContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showAgentDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_agents_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowAgentDetail(ElasticScriptParser.ShowAgentDetailContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showAgentDetail}
+	 * labeled alternative in {@link ElasticScriptParser#show_agents_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowAgentDetail(ElasticScriptParser.ShowAgentDetailContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showAgentExecution}
+	 * labeled alternative in {@link ElasticScriptParser#show_agents_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowAgentExecution(ElasticScriptParser.ShowAgentExecutionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showAgentExecution}
+	 * labeled alternative in {@link ElasticScriptParser#show_agents_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowAgentExecution(ElasticScriptParser.ShowAgentExecutionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code showAgentHistory}
+	 * labeled alternative in {@link ElasticScriptParser#show_agents_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowAgentHistory(ElasticScriptParser.ShowAgentHistoryContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code showAgentHistory}
+	 * labeled alternative in {@link ElasticScriptParser#show_agents_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowAgentHistory(ElasticScriptParser.ShowAgentHistoryContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code alterAgentConfig}
+	 * labeled alternative in {@link ElasticScriptParser#alter_agent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterAlterAgentConfig(ElasticScriptParser.AlterAgentConfigContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code alterAgentConfig}
+	 * labeled alternative in {@link ElasticScriptParser#alter_agent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitAlterAgentConfig(ElasticScriptParser.AlterAgentConfigContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code alterAgentExecution}
+	 * labeled alternative in {@link ElasticScriptParser#alter_agent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterAlterAgentExecution(ElasticScriptParser.AlterAgentExecutionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code alterAgentExecution}
+	 * labeled alternative in {@link ElasticScriptParser#alter_agent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitAlterAgentExecution(ElasticScriptParser.AlterAgentExecutionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code enableDisableAgent}
+	 * labeled alternative in {@link ElasticScriptParser#start_stop_agent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterEnableDisableAgent(ElasticScriptParser.EnableDisableAgentContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code enableDisableAgent}
+	 * labeled alternative in {@link ElasticScriptParser#start_stop_agent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitEnableDisableAgent(ElasticScriptParser.EnableDisableAgentContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#trigger_agent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterTrigger_agent_statement(ElasticScriptParser.Trigger_agent_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#trigger_agent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitTrigger_agent_statement(ElasticScriptParser.Trigger_agent_statementContext ctx);
 }
