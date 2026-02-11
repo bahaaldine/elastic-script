@@ -259,12 +259,13 @@ class OutputFormatter:
   [green]help functions[/]  List available built-in functions
   [green]help syntax[/]     Language syntax reference
 
-[bold]Moltler Commands:[/]
-  [green]skill list[/]      List available skills
-  [green]skill show[/]      Show skill details
-  [green]connector list[/]  List connectors
-  [green]agent list[/]      List agents
-  [green]agent trigger[/]   Trigger an agent
+[bold]Moltler Statements:[/]
+  [green]SHOW SKILLS[/]           List available skills
+  [green]SHOW SKILL name[/]       Show skill details
+  [green]TEST SKILL name[/]       Test a skill
+  [green]SHOW CONNECTORS[/]       List connectors
+  [green]SHOW AGENTS[/]           List agents
+  [green]TRIGGER AGENT name[/]    Trigger an agent
 
 [bold]CLI Commands:[/]
   [cyan]help[/]             This help menu

@@ -78,59 +78,30 @@ escript run --verbose setup.es
 escript run --dry-run test.es
 ```
 
-### Manage Skills
+### Using the Query Language
+
+All Moltler operations are performed through the query language. Use `escript query` to execute statements:
 
 ```bash
-# List all skills
-escript skill list
+# Skills
+escript query "SHOW SKILLS"
+escript query "SHOW SKILL analyze_logs"
+escript query "TEST SKILL analyze_logs WITH index = 'logs-*'"
+escript query "CREATE SKILL hello() RETURNS STRING AS 'Hello!';"
 
-# Show skill details
-escript skill show analyze_logs
+# Connectors
+escript query "SHOW CONNECTORS"
+escript query "TEST CONNECTOR my_github"
+escript query "SYNC CONNECTOR my_github TO 'github-*'"
+escript query "QUERY my_github.issues WHERE state = 'open' LIMIT 10"
 
-# Test a skill
-escript skill test analyze_logs --with "index=logs-*,threshold=0.9"
-```
-
-### Manage Connectors
-
-```bash
-# List all connectors
-escript connector list
-
-# Show connector details
-escript connector show my_github
-
-# Test connectivity
-escript connector test my_github
-
-# Sync data from connector
-escript connector sync my_github
-
-# Sync specific entity
-escript connector sync my_github --entity issues
-```
-
-### Manage Agents
-
-```bash
-# List all agents
-escript agent list
-
-# Show agent details
-escript agent show incident_responder
-
-# Trigger an agent
-escript agent trigger incident_responder
-
-# Trigger with context
-escript agent trigger incident_responder --context '{"priority": "high"}'
-
-# Show execution history
-escript agent history incident_responder
-
-# Enable/disable agents
-escript agent enable incident_responder
-escript agent disable incident_responder
+# Agents
+escript query "SHOW AGENTS"
+escript query "TRIGGER AGENT incident_responder"
+escript query "TRIGGER AGENT incident_responder WITH {'priority': 'high'}"
+escript query "SHOW AGENT incident_responder HISTORY"
+escript query "ENABLE AGENT incident_responder"
+escript query "DISABLE AGENT incident_responder"
 ```
 
 ## Configuration
@@ -206,44 +177,48 @@ escript> CREATE PROCEDURE greet(name STRING)
 
 ## Commands
 
-### General Commands
+### CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `escript` | Start interactive REPL |
+| `escript query "..."` | Execute a single statement |
+| `escript run <file>` | Execute a script file |
+| `escript config` | Show current configuration |
+| `escript test` | Test connection to Elasticsearch |
+
+### REPL Commands
 
 | Command | Description |
 |---------|-------------|
 | `help` | Show help information |
+| `help examples` | Show ready-to-run examples |
+| `help tutorial` | Interactive getting started guide |
+| `help functions` | List available functions |
+| `help syntax` | Language syntax reference |
 | `exit` | Exit the CLI |
 | `clear` | Clear the screen |
 | `history` | Show recent commands |
 | `config` | Show current configuration |
 | `refresh` | Reload completions from server |
 
-### Skill Commands
+### Language Statements
 
-| Command | Description |
-|---------|-------------|
-| `skill list` | List all available skills |
-| `skill show <name>` | Show skill details |
-| `skill test <name>` | Test a skill with parameters |
+Use these in the REPL or via `escript query`:
 
-### Connector Commands
-
-| Command | Description |
-|---------|-------------|
-| `connector list` | List all connectors |
-| `connector show <name>` | Show connector details |
-| `connector test <name>` | Test connector connectivity |
-| `connector sync <name>` | Sync data from connector |
-
-### Agent Commands
-
-| Command | Description |
-|---------|-------------|
-| `agent list` | List all agents |
-| `agent show <name>` | Show agent details |
-| `agent trigger <name>` | Manually trigger an agent |
-| `agent history <name>` | Show execution history |
-| `agent enable <name>` | Enable an agent |
-| `agent disable <name>` | Disable an agent |
+| Statement | Description |
+|-----------|-------------|
+| `SHOW SKILLS` | List all skills |
+| `SHOW SKILL <name>` | Show skill details |
+| `TEST SKILL <name>` | Test a skill |
+| `CREATE SKILL ...` | Create a new skill |
+| `SHOW CONNECTORS` | List all connectors |
+| `TEST CONNECTOR <name>` | Test connector connectivity |
+| `SYNC CONNECTOR <name> TO ...` | Sync data to Elasticsearch |
+| `QUERY <conn>.<entity> ...` | Query connector data |
+| `SHOW AGENTS` | List all agents |
+| `TRIGGER AGENT <name>` | Manually trigger an agent |
+| `SHOW AGENT <name> HISTORY` | Show execution history |
 
 ## Examples
 
@@ -278,10 +253,11 @@ escript> SHOW SKILLS
 3 row(s)
 ```
 
-### Create and Test a Skill
+### Working with Skills
 
-```bash
-$ escript skill list
+```
+escript> SHOW SKILLS
+
 ┌──────────────────┬─────────┬─────────────────────────────┐
 │ name             │ version │ description                 │
 ├──────────────────┼─────────┼─────────────────────────────┤
@@ -289,16 +265,16 @@ $ escript skill list
 │ analyze_logs     │ 1.2     │ Analyze application logs    │
 └──────────────────┴─────────┴─────────────────────────────┘
 
-$ escript skill test analyze_logs --with "index=logs-*"
+escript> TEST SKILL analyze_logs WITH index = 'logs-*'
 ✓ Test PASSED
-  Execution time: 1.24s
   Result: {"log_count": 1523, "error_rate": 0.02}
 ```
 
-### Manage Connectors
+### Working with Connectors
 
-```bash
-$ escript connector list
+```
+escript> SHOW CONNECTORS
+
 ┌─────────────┬───────────┬──────────────────────────────┐
 │ name        │ type      │ status                       │
 ├─────────────┼───────────┼──────────────────────────────┤
@@ -306,18 +282,19 @@ $ escript connector list
 │ jira_bugs   │ jira      │ enabled (last sync: 30m ago) │
 └─────────────┴───────────┴──────────────────────────────┘
 
-$ escript connector test github_ops
+escript> TEST CONNECTOR github_ops
 ✓ Connection successful
   Rate limit: 4987/5000 remaining
 
-$ escript connector sync github_ops --entity issues
-✓ Synced 127 issues to github-ops-issues-*
+escript> SYNC CONNECTOR github_ops TO 'github-issues-*'
+✓ Synced 127 issues
 ```
 
-### Agent Operations
+### Working with Agents
 
-```bash
-$ escript agent list
+```
+escript> SHOW AGENTS
+
 ┌─────────────────────┬─────────────┬──────────────────────────┐
 │ name                │ status      │ last run                 │
 ├─────────────────────┼─────────────┼──────────────────────────┤
@@ -325,11 +302,12 @@ $ escript agent list
 │ log_analyzer        │ enabled     │ 2024-01-15 09:00:00      │
 └─────────────────────┴─────────────┴──────────────────────────┘
 
-$ escript agent trigger incident_responder --context '{"alert": "high-cpu"}'
+escript> TRIGGER AGENT incident_responder WITH {'alert': 'high-cpu'}
 ✓ Agent triggered
   Execution ID: exec_abc123
 
-$ escript agent history incident_responder
+escript> SHOW AGENT incident_responder HISTORY
+
 ┌─────────────────┬──────────┬─────────────────┬──────────┐
 │ execution_id    │ status   │ started         │ duration │
 ├─────────────────┼──────────┼─────────────────┼──────────┤
