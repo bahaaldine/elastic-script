@@ -369,14 +369,17 @@ def demo(ctx):
     Run an interactive demo of Moltler.
     
     This command demonstrates Moltler's key features by:
-    1. Loading sample data
-    2. Creating a skill that queries real data
-    3. Executing the skill and showing results
+    1. Fetching live data from GitHub's public API
+    2. Indexing it into Elasticsearch
+    3. Creating a skill that queries the data
+    4. Executing the skill and showing real results
     
     Perfect for first-time users to see Moltler in action.
     """
-    import time
     import json
+    import urllib.request
+    import urllib.error
+    import ssl
     
     config = ctx.obj['config']
     client = ElasticScriptClient(config)
@@ -387,8 +390,8 @@ def demo(ctx):
     output.console.print("[bold cyan]  🦌 Welcome to the Moltler Demo![/]")
     output.console.print("[bold cyan]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/]")
     output.console.print()
-    output.console.print("  Moltler lets you build [bold]reusable skills[/] for Elasticsearch.")
-    output.console.print("  Let's create a skill that queries real data!\n")
+    output.console.print("  Moltler connects [bold]external data[/] to Elasticsearch.")
+    output.console.print("  Let's fetch live GitHub issues and query them!\n")
     
     # Step 1: Check connection
     output.console.print("[bold]Step 1:[/] Connecting to Elasticsearch...")
@@ -402,66 +405,138 @@ def demo(ctx):
     output.print_success(f"Connected to {config.url}")
     output.console.print()
     
-    # Step 2: Check/Create sample data
-    output.console.print("[bold]Step 2:[/] Setting up sample data...")
-    
-    # Check if logs-sample exists, if not create some demo docs
-    check_index = client.execute("FROM logs-sample | LIMIT 1")
-    if not check_index.success or "not found" in str(check_index.error).lower():
-        output.console.print("  [dim]Creating demo log entries...[/]")
-        # Create a few sample documents inline
-        for i, (level, msg) in enumerate([
-            ("ERROR", "Connection timeout to database server"),
-            ("ERROR", "Failed to process payment for order #12345"),
-            ("WARN", "High memory usage detected: 85%"),
-            ("INFO", "User login successful: admin@example.com"),
-            ("ERROR", "API rate limit exceeded for client xyz"),
-        ]):
-            doc = {
-                "timestamp": f"2026-02-12T10:0{i}:00Z",
-                "level": level,
-                "message": msg,
-                "service": "demo-app"
-            }
-            client.execute(f"INDEX_DOCUMENT('logs-sample', {json.dumps(doc)})")
-        output.print_success("Demo data created in 'logs-sample' index")
-    else:
-        output.print_success("Sample data found in 'logs-sample'")
+    # Step 2: Fetch live data from GitHub
+    output.console.print("[bold]Step 2:[/] Fetching live issues from GitHub...")
+    output.console.print("  [dim]Source: github.com/elastic/elasticsearch (public API)[/]")
     output.console.print()
     
-    # Step 3: Create a procedure that queries the data
-    output.console.print("[bold]Step 3:[/] Creating a procedure to find errors...")
+    github_url = "https://api.github.com/repos/elastic/elasticsearch/issues?state=open&per_page=20&labels=good%20first%20issue"
+    
+    try:
+        # Create SSL context (handles macOS certificate issues)
+        ssl_context = ssl.create_default_context()
+        try:
+            import certifi
+            ssl_context.load_verify_locations(certifi.where())
+        except ImportError:
+            # Fallback for systems without certifi
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+        
+        req = urllib.request.Request(
+            github_url,
+            headers={"User-Agent": "Moltler-Demo/1.0", "Accept": "application/vnd.github.v3+json"}
+        )
+        with urllib.request.urlopen(req, timeout=10, context=ssl_context) as response:
+            issues = json.loads(response.read().decode('utf-8'))
+        
+        if not issues:
+            # Fallback to regular issues if no "good first issue" found
+            github_url = "https://api.github.com/repos/elastic/elasticsearch/issues?state=open&per_page=20"
+            req = urllib.request.Request(
+                github_url,
+                headers={"User-Agent": "Moltler-Demo/1.0", "Accept": "application/vnd.github.v3+json"}
+            )
+            with urllib.request.urlopen(req, timeout=10, context=ssl_context) as response:
+                issues = json.loads(response.read().decode('utf-8'))
+        
+        output.print_success(f"Fetched {len(issues)} issues from GitHub")
+    except urllib.error.URLError as e:
+        output.print_error(f"Could not reach GitHub API: {e}")
+        output.console.print("  [yellow]Tip:[/] Check your internet connection")
+        client.close()
+        sys.exit(1)
     output.console.print()
     
-    proc_code = """CREATE PROCEDURE find_errors()
+    # Step 3: Index into Elasticsearch using REST API
+    output.console.print("[bold]Step 3:[/] Indexing issues into Elasticsearch...")
+    output.console.print()
+    
+    indexed_count = 0
+    es_url = config.url.rstrip('/')
+    auth_header = None
+    if config.username and config.password:
+        import base64
+        credentials = base64.b64encode(f"{config.username}:{config.password}".encode()).decode()
+        auth_header = f"Basic {credentials}"
+    
+    for issue in issues[:15]:  # Limit to 15 for demo
+        doc = {
+            "number": issue.get("number"),
+            "title": issue.get("title"),
+            "state": issue.get("state"),
+            "labels": [label.get("name") for label in issue.get("labels", [])],
+            "created_at": issue.get("created_at"),
+            "updated_at": issue.get("updated_at"),
+            "comments": issue.get("comments", 0),
+            "author": issue.get("user", {}).get("login"),
+            "url": issue.get("html_url"),
+            "body_preview": (issue.get("body") or "")[:200]
+        }
+        
+        try:
+            doc_id = str(issue.get("number", indexed_count))
+            req = urllib.request.Request(
+                f"{es_url}/github-issues/_doc/{doc_id}",
+                data=json.dumps(doc).encode('utf-8'),
+                headers={
+                    "Content-Type": "application/json",
+                    **({"Authorization": auth_header} if auth_header else {})
+                },
+                method="PUT"
+            )
+            with urllib.request.urlopen(req, timeout=5, context=ssl_context) as resp:
+                indexed_count += 1
+        except Exception:
+            pass  # Continue on individual failures
+    
+    # Refresh the index
+    try:
+        req = urllib.request.Request(
+            f"{es_url}/github-issues/_refresh",
+            headers={**({"Authorization": auth_header} if auth_header else {})},
+            method="POST"
+        )
+        urllib.request.urlopen(req, timeout=5, context=ssl_context)
+    except Exception:
+        pass
+    
+    output.print_success(f"Indexed {indexed_count} issues into 'github-issues'")
+    output.console.print()
+    
+    # Step 4: Create a procedure that queries the data
+    output.console.print("[bold]Step 4:[/] Creating a skill to find issues...")
+    output.console.print()
+    
+    proc_code = """CREATE PROCEDURE find_issues()
 BEGIN
-  DECLARE errors ARRAY;
-  SET errors = ESQL_QUERY('FROM logs-sample | WHERE level == "ERROR" | LIMIT 5');
-  RETURN errors;
+  DECLARE issues ARRAY;
+  SET issues = ESQL_QUERY('FROM github-issues | SORT comments DESC | LIMIT 5');
+  RETURN issues;
 END PROCEDURE;"""
     
     output.console.print("[dim]" + proc_code + "[/]")
     output.console.print()
     
     # Drop and recreate
-    client.execute("DROP PROCEDURE find_errors")
+    client.execute("DROP PROCEDURE find_issues")
     result = client.execute(proc_code)
     
     if result.success:
-        output.print_success("Procedure 'find_errors' created!")
+        output.print_success("Procedure 'find_issues' created!")
     else:
         output.print_error(f"Failed to create procedure: {result.error}")
         client.close()
         sys.exit(1)
     output.console.print()
     
-    # Step 4: Execute the procedure and show real results
-    output.console.print("[bold]Step 4:[/] Running the procedure to find errors...")
+    # Step 5: Execute the procedure and show real results
+    output.console.print("[bold]Step 5:[/] Running the skill to find popular issues...")
     output.console.print()
-    output.console.print("[dim]CALL find_errors()[/]")
+    output.console.print("[dim]CALL find_issues()[/]")
     output.console.print()
     
-    result = client.execute("CALL find_errors()")
+    result = client.execute("CALL find_issues()")
     
     if result.success and result.data:
         output.console.print("[green]Results from Elasticsearch:[/]")
@@ -470,29 +545,29 @@ END PROCEDURE;"""
         if isinstance(result.data, list):
             for i, row in enumerate(result.data[:5], 1):
                 if isinstance(row, dict):
-                    level = row.get('level', 'N/A')
-                    msg = row.get('message', str(row))[:55]
-                    service = row.get('service', 'unknown')
-                    level_color = "red" if level == "ERROR" else "yellow" if level == "WARN" else "green"
-                    output.console.print(f"  [{level_color}]{level:5}[/] [{service}] {msg}")
+                    number = row.get('number', '?')
+                    title = row.get('title', 'No title')[:50]
+                    comments = row.get('comments', 0)
+                    labels = row.get('labels', [])
+                    # Handle labels safely
+                    if isinstance(labels, list):
+                        label_list = [str(l) for l in labels if l][:2]
+                        label_str = ", ".join(label_list) if label_list else ""
+                    else:
+                        label_str = ""
+                    info_parts = [f"{comments} comments"]
+                    if label_str:
+                        info_parts.append(label_str)
+                    output.console.print(f"  [cyan]#{number}[/] {title}...")
+                    output.console.print(f"       [dim]{' | '.join(info_parts)}[/]")
                 else:
                     output.console.print(f"  {row}")
             output.console.print()
         else:
             output.print_result(result)
-        output.print_success(f"Found {len(result.data) if isinstance(result.data, list) else 1} error(s)!")
+        output.print_success(f"Found {len(result.data) if isinstance(result.data, list) else 1} issue(s)!")
     else:
-        output.console.print("  [yellow]Note:[/] No errors found in logs.")
-    output.console.print()
-    
-    # Step 5: Show available skills 
-    output.console.print("[bold]Step 5:[/] Listing available skills:")
-    output.console.print()
-    result = client.execute("SHOW SKILLS")
-    if result.success:
-        output.print_result(result)
-    else:
-        output.console.print("  [dim](Run quick-start.sh to create sample skills)[/]")
+        output.console.print("  [yellow]Note:[/] No issues found.")
     output.console.print()
     
     # Summary
@@ -501,14 +576,15 @@ END PROCEDURE;"""
     output.console.print("[bold cyan]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/]")
     output.console.print()
     output.console.print("  [bold]What you just did:[/]")
-    output.console.print("    • Created a [green]procedure[/] that queries real data")
-    output.console.print("    • Executed [cyan]ESQL[/] and got results from Elasticsearch")
-    output.console.print("    • Procedures are [cyan]reusable[/] - call them anywhere")
+    output.console.print("    • Fetched [green]live data[/] from GitHub's public API")
+    output.console.print("    • Indexed it into [cyan]Elasticsearch[/] automatically")
+    output.console.print("    • Created a [cyan]reusable skill[/] to query it")
+    output.console.print("    • Got real results from real data!")
     output.console.print()
     output.console.print("  [bold]Next steps:[/]")
     output.console.print("    [cyan]moltler[/]                    Start the interactive shell")
     output.console.print("    [yellow]SHOW SKILLS[/]               See available skills")
-    output.console.print("    [yellow]CALL find_errors()[/]        Run the procedure again")
+    output.console.print("    [yellow]CALL find_issues()[/]        Query GitHub issues again")
     output.console.print("    [yellow]help examples[/]             More examples")
     output.console.print()
     output.console.print("  [bold]Learn more:[/]")

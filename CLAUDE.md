@@ -379,6 +379,23 @@
 9. **Security** - API key management, RBAC integration
 10. ~~**Monitoring**~~ ✅ Complete - Execution metrics and slow query logging via PROFILE system
 
+### Public API Connectors (No Auth Required)
+These connectors use public APIs that don't require authentication, making them ideal for demos and quick starts:
+
+| Connector | Status | API Source | Use Case |
+|-----------|--------|------------|----------|
+| **GitHub Public** | ✅ Demo | api.github.com (public repos) | Issues, PRs, releases from public repos |
+| **Hacker News** | 📋 Planned | hacker-news.firebaseio.com | Tech news, trending stories, comments |
+| **Wikipedia** | 📋 Planned | en.wikipedia.org/api/rest_v1 | Articles, search, summaries |
+| **REST Countries** | 📋 Planned | restcountries.com | Country data, populations, flags |
+| **Open Meteo** | 📋 Planned | open-meteo.com | Weather data, forecasts |
+| **JSONPlaceholder** | 📋 Planned | jsonplaceholder.typicode.com | Fake API for testing |
+
+**Implementation Notes:**
+- GitHub Public is implemented in `moltler demo` - fetches live issues from elastic/elasticsearch
+- All connectors should follow the pattern: Fetch → Index → Create Skill → Query
+- No API keys required - rate limits apply (GitHub: 60 req/hr unauthenticated)
+
 ### Recently Verified Features ✅
 11. ~~**Scheduled Jobs (CREATE JOB)**~~ ✅ Complete
     - `CREATE JOB name SCHEDULE 'cron' AS BEGIN ... END JOB`
