@@ -504,11 +504,11 @@ def demo(ctx):
     output.print_success(f"Indexed {indexed_count} issues into 'github-issues'")
     output.console.print()
     
-    # Step 4: Create a procedure that queries the data
-    output.console.print("[bold]Step 4:[/] Creating a skill to find issues...")
+    # Step 4: Create a procedure (the logic)
+    output.console.print("[bold]Step 4:[/] Creating the procedure logic...")
     output.console.print()
     
-    proc_code = """CREATE PROCEDURE find_issues()
+    proc_code = """CREATE PROCEDURE find_popular_issues()
 BEGIN
   DECLARE issues ARRAY;
   SET issues = ESQL_QUERY('FROM github-issues | SORT comments DESC | LIMIT 5');
@@ -519,24 +519,61 @@ END PROCEDURE;"""
     output.console.print()
     
     # Drop and recreate
-    client.execute("DROP PROCEDURE find_issues")
+    client.execute("DROP PROCEDURE find_popular_issues")
     result = client.execute(proc_code)
     
     if result.success:
-        output.print_success("Procedure 'find_issues' created!")
+        output.print_success("Procedure created!")
     else:
         output.print_error(f"Failed to create procedure: {result.error}")
         client.close()
         sys.exit(1)
     output.console.print()
     
-    # Step 5: Execute the procedure and show real results
-    output.console.print("[bold]Step 5:[/] Running the skill to find popular issues...")
-    output.console.print()
-    output.console.print("[dim]CALL find_issues()[/]")
+    # Step 5: Create a skill that wraps the procedure
+    output.console.print("[bold]Step 5:[/] Registering as a skill...")
     output.console.print()
     
-    result = client.execute("CALL find_issues()")
+    skill_code = """CREATE SKILL find_popular_issues
+  VERSION '1.0'
+  DESCRIPTION 'Find the most discussed GitHub issues from elastic/elasticsearch'
+  AUTHOR 'Moltler Demo'
+  RETURNS ARRAY
+BEGIN
+  RETURN CALL find_popular_issues();
+END SKILL;"""
+    
+    output.console.print("[dim]" + skill_code + "[/]")
+    output.console.print()
+    
+    client.execute("DROP SKILL find_popular_issues")
+    result = client.execute(skill_code)
+    
+    if result.success:
+        output.print_success("Skill 'find_popular_issues' registered!")
+    else:
+        # Skill registration is optional - proceed even if it fails
+        output.console.print(f"  [dim]Note: Skill metadata registration pending[/]")
+    output.console.print()
+    
+    # Step 6: Show available skills
+    output.console.print("[bold]Step 6:[/] Viewing available skills...")
+    output.console.print()
+    output.console.print("[dim]SHOW SKILLS[/]")
+    output.console.print()
+    
+    result = client.execute("SHOW SKILLS")
+    if result.success:
+        output.print_result(result)
+    output.console.print()
+    
+    # Step 7: Execute the skill and show real results
+    output.console.print("[bold]Step 7:[/] Running the skill to find popular issues...")
+    output.console.print()
+    output.console.print("[dim]CALL find_popular_issues()[/]")
+    output.console.print()
+    
+    result = client.execute("CALL find_popular_issues()")
     
     if result.success and result.data:
         output.console.print("[green]Results from Elasticsearch:[/]")
@@ -582,10 +619,10 @@ END PROCEDURE;"""
     output.console.print("    • Got real results from real data!")
     output.console.print()
     output.console.print("  [bold]Next steps:[/]")
-    output.console.print("    [cyan]moltler[/]                    Start the interactive shell")
-    output.console.print("    [yellow]SHOW SKILLS[/]               See available skills")
-    output.console.print("    [yellow]CALL find_issues()[/]        Query GitHub issues again")
-    output.console.print("    [yellow]help examples[/]             More examples")
+    output.console.print("    [cyan]moltler[/]                        Start the interactive shell")
+    output.console.print("    [yellow]SHOW SKILLS[/]                   See all your skills")
+    output.console.print("    [yellow]CALL find_popular_issues()[/]    Run the skill again")
+    output.console.print("    [yellow]SHOW SKILL find_popular_issues[/]   View skill details")
     output.console.print()
     output.console.print("  [bold]Learn more:[/]")
     output.console.print("    https://bahaaldine.github.io/elastic-script/")
