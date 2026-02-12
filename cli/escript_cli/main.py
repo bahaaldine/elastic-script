@@ -447,15 +447,16 @@ END SKILL;"""
     # Step 4: Test the skill
     output.console.print("[bold]Step 4:[/] Testing the skill...")
     output.console.print()
-    output.console.print("[dim]TEST SKILL demo_health_check[/]")
+    test_query = "TEST SKILL demo_health_check EXPECT true"
+    output.console.print(f"[dim]{test_query}[/]")
     output.console.print()
     
-    result = client.execute("TEST SKILL demo_health_check")
+    result = client.execute(test_query)
     if result.success:
         output.print_result(result)
         output.print_success("Skill test passed!")
     else:
-        output.console.print(f"  Result: {result.data}")
+        output.console.print(f"  [yellow]Note:[/] {result.error}")
     output.console.print()
     
     # Summary
@@ -466,7 +467,7 @@ END SKILL;"""
     output.console.print("  [bold]What just happened:[/]")
     output.console.print("    1. Created a [green]skill[/] - a reusable automation component")
     output.console.print("    2. Listed all skills with [cyan]SHOW SKILLS[/]")
-    output.console.print("    3. Tested the skill with [cyan]TEST SKILL[/]")
+    output.console.print("    3. Tested the skill with [cyan]TEST SKILL ... EXPECT[/]")
     output.console.print()
     output.console.print("  [bold]Try these next:[/]")
     output.console.print("    • Start the REPL:     [cyan]moltler[/]")
