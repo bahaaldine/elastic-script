@@ -998,6 +998,8 @@ public class ElasticScriptExecutor {
             handler.handleGenerateSkill(ctx.generate_skill_statement(), listener);
         } else if (ctx.test_skill_statement() != null) {
             handler.handleTestSkill(ctx.test_skill_statement(), listener);
+        } else if (ctx.run_skill_statement() != null) {
+            handler.handleRunSkill(ctx.run_skill_statement(), listener);
         } else {
             listener.onFailure(new IllegalArgumentException("Unknown SKILL statement type"));
         }

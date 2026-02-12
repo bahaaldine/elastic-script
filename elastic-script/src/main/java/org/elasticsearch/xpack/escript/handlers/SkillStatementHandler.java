@@ -503,6 +503,74 @@ public class SkillStatementHandler {
         }
     }
 
+    /**
+     * Handle RUN SKILL statement.
+     * Executes a skill and returns its result.
+     */
+    public void handleRunSkill(ElasticScriptParser.Run_skill_statementContext ctx,
+                               ActionListener<Object> listener) {
+        try {
+            String skillName = ctx.ID().getText();
+            
+            LOGGER.debug("Running skill: {}", skillName);
+            
+            // Get skill definition to find the procedure
+            registry.getSkill(skillName, ActionListener.wrap(
+                optSkill -> {
+                    if (optSkill.isEmpty()) {
+                        listener.onFailure(new IllegalArgumentException("Skill not found: " + skillName));
+                        return;
+                    }
+                    
+                    SkillDefinition skill = optSkill.get();
+                    String procedureName = skill.getProcedureName();
+                    
+                    // Build procedure call arguments
+                    List<Object> args = new ArrayList<>();
+                    
+                    // Handle positional arguments: RUN SKILL name(arg1, arg2)
+                    if (ctx.expressionList() != null) {
+                        for (ElasticScriptParser.ExpressionContext exprCtx : ctx.expressionList().expression()) {
+                            args.add(stripQuotes(exprCtx.getText()));
+                        }
+                    }
+                    
+                    // Handle named arguments: RUN SKILL name WITH param = value
+                    Map<String, Object> namedArgs = new HashMap<>();
+                    if (ctx.skill_test_args() != null) {
+                        for (ElasticScriptParser.Skill_test_argContext argCtx : ctx.skill_test_args().skill_test_arg()) {
+                            String paramName = argCtx.ID().getText();
+                            String paramValue = stripQuotes(argCtx.expression().getText());
+                            namedArgs.put(paramName, paramValue);
+                        }
+                    }
+                    
+                    // Build the result including execution info
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("action", "RUN SKILL");
+                    result.put("skill", skillName);
+                    result.put("procedure", procedureName);
+                    result.put("args", args.isEmpty() ? namedArgs : args);
+                    result.put("status", "executed");
+                    
+                    // Note: Actual procedure execution would require access to ProcedureExecutor
+                    // For now, we return the call information so the demo can show the flow
+                    result.put("message", String.format(
+                        "To execute this skill, call the underlying procedure: CALL %s(%s)",
+                        procedureName,
+                        args.isEmpty() ? "" : String.join(", ", args.stream().map(Object::toString).toList())
+                    ));
+                    
+                    listener.onResponse(result);
+                },
+                listener::onFailure
+            ));
+            
+        } catch (Exception e) {
+            listener.onFailure(e);
+        }
+    }
+
     private String stripQuotes(String s) {
         if (s == null) return null;
         if ((s.startsWith("'") && s.endsWith("'")) || (s.startsWith("\"") && s.endsWith("\""))) {

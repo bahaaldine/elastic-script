@@ -1683,6 +1683,12 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitGenerate_skill_statement(ElasticScriptParser.Generate_skill_statementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#run_skill_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRun_skill_statement(ElasticScriptParser.Run_skill_statementContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#connector_statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

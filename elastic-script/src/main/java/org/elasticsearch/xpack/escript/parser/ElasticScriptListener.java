@@ -2816,6 +2816,16 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitGenerate_skill_statement(ElasticScriptParser.Generate_skill_statementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#run_skill_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterRun_skill_statement(ElasticScriptParser.Run_skill_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#run_skill_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitRun_skill_statement(ElasticScriptParser.Run_skill_statementContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#connector_statement}.
 	 * @param ctx the parse tree
 	 */

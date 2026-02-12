@@ -3203,6 +3203,18 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterRun_skill_statement(ElasticScriptParser.Run_skill_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRun_skill_statement(ElasticScriptParser.Run_skill_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterConnector_statement(ElasticScriptParser.Connector_statementContext ctx) { }
 	/**
 	 * {@inheritDoc}

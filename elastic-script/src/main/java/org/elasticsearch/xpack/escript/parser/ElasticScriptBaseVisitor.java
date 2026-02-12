@@ -1879,6 +1879,13 @@ public class ElasticScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> imp
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitRun_skill_statement(ElasticScriptParser.Run_skill_statementContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitConnector_statement(ElasticScriptParser.Connector_statementContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

@@ -113,6 +113,7 @@ OPTIONS: 'OPTIONS';
 TEST_KW: 'TEST';
 CONNECTOR_EXEC: 'CONNECTOR_EXEC';
 EXEC: 'EXEC';
+RUN: 'RUN';
 ORDER: 'ORDER';
 BY: 'BY';
 ASC: 'ASC';
@@ -1636,6 +1637,7 @@ skill_statement
     | alter_skill_statement
     | generate_skill_statement
     | test_skill_statement
+    | run_skill_statement
     ;
 
 // CREATE SKILL name
@@ -1725,6 +1727,13 @@ skill_test_arg
 // GENERATE SKILL FROM 'desc' WITH MODEL 'gpt-4'
 generate_skill_statement
     : GENERATE SKILL FROM STRING (WITH MODEL STRING)? (SAVE_KW AS ID)?
+    ;
+
+// RUN SKILL name [(args)]
+// RUN SKILL name WITH param = value, ...
+run_skill_statement
+    : RUN SKILL ID (LPAREN expressionList? RPAREN)?
+    | RUN SKILL ID WITH skill_test_args
     ;
 
 // ============================================================================
