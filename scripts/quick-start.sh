@@ -160,8 +160,63 @@ check_prerequisites() {
             exit 1
         fi
         print_success "Elasticsearch submodule initialized"
+        
+        # Apply necessary patches to the submodule
+        apply_elasticsearch_patches
     else
         print_success "Elasticsearch source found"
+        
+        # Ensure patches are applied even for existing submodules
+        apply_elasticsearch_patches
+    fi
+}
+
+# Apply patches to elasticsearch submodule for compatibility
+apply_elasticsearch_patches() {
+    local RUN_GRADLE="$ES_DIR/build-tools-internal/src/main/groovy/elasticsearch.run.gradle"
+    
+    if [ ! -f "$RUN_GRADLE" ]; then
+        return
+    fi
+    
+    # Check if ML disable patch is already applied
+    if ! grep -q "xpack.ml.enabled.*false" "$RUN_GRADLE" 2>/dev/null; then
+        print_step "Applying ML disable patch for compatibility..."
+        
+        # Insert ML disable setting after xpack.security.enabled line
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS sed
+            sed -i '' "/setting 'xpack.security.enabled', 'true'/a\\
+      // Disable ML to avoid native code issues on some systems\\
+      setting 'xpack.ml.enabled', 'false'" "$RUN_GRADLE"
+        else
+            # Linux sed
+            sed -i "/setting 'xpack.security.enabled', 'true'/a\\      // Disable ML to avoid native code issues on some systems\n      setting 'xpack.ml.enabled', 'false'" "$RUN_GRADLE"
+        fi
+        
+        print_success "ML disable patch applied"
+    fi
+    
+    # Check if OpenAI key passthrough is already applied
+    if ! grep -q "OPENAI_API_KEY" "$RUN_GRADLE" 2>/dev/null; then
+        print_step "Applying OpenAI key passthrough patch..."
+        
+        # Insert OpenAI key passthrough after numberOfNodes line
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS sed
+            sed -i '' "/numberOfNodes = 1/a\\
+      \\
+      // Pass OpenAI API key from environment to the cluster\\
+      String openaiKey = System.getenv(\"OPENAI_API_KEY\")\\
+      if (openaiKey != null \&\& !openaiKey.isEmpty()) {\\
+        environment 'OPENAI_API_KEY', openaiKey\\
+      }" "$RUN_GRADLE"
+        else
+            # Linux sed
+            sed -i "/numberOfNodes = 1/a\\      \n      // Pass OpenAI API key from environment to the cluster\n      String openaiKey = System.getenv(\"OPENAI_API_KEY\")\n      if (openaiKey != null \&\& !openaiKey.isEmpty()) {\n        environment 'OPENAI_API_KEY', openaiKey\n      }" "$RUN_GRADLE"
+        fi
+        
+        print_success "OpenAI key passthrough patch applied"
     fi
 }
 
