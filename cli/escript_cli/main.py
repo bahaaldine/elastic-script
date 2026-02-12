@@ -369,13 +369,14 @@ def demo(ctx):
     Run an interactive demo of Moltler.
     
     This command demonstrates Moltler's key features by:
-    1. Creating a sample skill
-    2. Testing it
-    3. Showing the results
+    1. Loading sample data
+    2. Creating a skill that queries real data
+    3. Executing the skill and showing results
     
     Perfect for first-time users to see Moltler in action.
     """
     import time
+    import json
     
     config = ctx.obj['config']
     client = ElasticScriptClient(config)
@@ -383,11 +384,11 @@ def demo(ctx):
     
     output.console.print()
     output.console.print("[bold cyan]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/]")
-    output.console.print("[bold cyan]  Welcome to the Moltler Demo![/]")
+    output.console.print("[bold cyan]  🦌 Welcome to the Moltler Demo![/]")
     output.console.print("[bold cyan]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/]")
     output.console.print()
-    output.console.print("  Moltler is an AI Skills Creation Framework for Elasticsearch.")
-    output.console.print("  Let's see it in action!\n")
+    output.console.print("  Moltler lets you build [bold]reusable skills[/] for Elasticsearch.")
+    output.console.print("  Let's create a skill that queries real data!\n")
     
     # Step 1: Check connection
     output.console.print("[bold]Step 1:[/] Connecting to Elasticsearch...")
@@ -401,81 +402,117 @@ def demo(ctx):
     output.print_success(f"Connected to {config.url}")
     output.console.print()
     
-    # Step 2: Create a skill
-    output.console.print("[bold]Step 2:[/] Creating a sample skill...")
-    output.console.print()
+    # Step 2: Check/Create sample data
+    output.console.print("[bold]Step 2:[/] Setting up sample data...")
     
-    skill_code = """CREATE SKILL demo_health_check
-  VERSION '1.0'
-  DESCRIPTION 'Check Elasticsearch cluster health - created by demo'
-  AUTHOR 'Moltler Demo'
-  RETURNS DOCUMENT
-BEGIN
-  DECLARE health DOCUMENT;
-  SET health = {'status': 'green', 'cluster': 'demo', 'timestamp': CURRENT_TIMESTAMP()};
-  RETURN health;
-END SKILL;"""
-    
-    output.console.print("[dim]" + skill_code + "[/]")
-    output.console.print()
-    
-    # Try to drop existing skill first
-    client.execute("DROP SKILL demo_health_check")
-    
-    result = client.execute(skill_code)
-    if result.success:
-        output.print_success("Skill 'demo_health_check' created!")
+    # Check if logs-sample exists, if not create some demo docs
+    check_index = client.execute("FROM logs-sample | LIMIT 1")
+    if not check_index.success or "not found" in str(check_index.error).lower():
+        output.console.print("  [dim]Creating demo log entries...[/]")
+        # Create a few sample documents inline
+        for i, (level, msg) in enumerate([
+            ("ERROR", "Connection timeout to database server"),
+            ("ERROR", "Failed to process payment for order #12345"),
+            ("WARN", "High memory usage detected: 85%"),
+            ("INFO", "User login successful: admin@example.com"),
+            ("ERROR", "API rate limit exceeded for client xyz"),
+        ]):
+            doc = {
+                "timestamp": f"2026-02-12T10:0{i}:00Z",
+                "level": level,
+                "message": msg,
+                "service": "demo-app"
+            }
+            client.execute(f"INDEX_DOCUMENT('logs-sample', {json.dumps(doc)})")
+        output.print_success("Demo data created in 'logs-sample' index")
     else:
-        if "already exists" in str(result.error).lower():
-            output.print_info("Skill 'demo_health_check' already exists, using it.")
-        else:
-            output.print_error(f"Failed to create skill: {result.error}")
-            client.close()
-            sys.exit(1)
+        output.print_success("Sample data found in 'logs-sample'")
     output.console.print()
     
-    # Step 3: List skills
-    output.console.print("[bold]Step 3:[/] Listing available skills...")
+    # Step 3: Create a procedure that queries the data
+    output.console.print("[bold]Step 3:[/] Creating a procedure to find errors...")
+    output.console.print()
+    
+    proc_code = """CREATE PROCEDURE find_errors()
+BEGIN
+  DECLARE errors ARRAY;
+  SET errors = ESQL_QUERY('FROM logs-sample | WHERE level == "ERROR" | LIMIT 5');
+  RETURN errors;
+END PROCEDURE;"""
+    
+    output.console.print("[dim]" + proc_code + "[/]")
+    output.console.print()
+    
+    # Drop and recreate
+    client.execute("DROP PROCEDURE find_errors")
+    result = client.execute(proc_code)
+    
+    if result.success:
+        output.print_success("Procedure 'find_errors' created!")
+    else:
+        output.print_error(f"Failed to create procedure: {result.error}")
+        client.close()
+        sys.exit(1)
+    output.console.print()
+    
+    # Step 4: Execute the procedure and show real results
+    output.console.print("[bold]Step 4:[/] Running the procedure to find errors...")
+    output.console.print()
+    output.console.print("[dim]CALL find_errors()[/]")
+    output.console.print()
+    
+    result = client.execute("CALL find_errors()")
+    
+    if result.success and result.data:
+        output.console.print("[green]Results from Elasticsearch:[/]")
+        output.console.print()
+        # Format the results nicely
+        if isinstance(result.data, list):
+            for i, row in enumerate(result.data[:5], 1):
+                if isinstance(row, dict):
+                    level = row.get('level', 'N/A')
+                    msg = row.get('message', str(row))[:55]
+                    service = row.get('service', 'unknown')
+                    level_color = "red" if level == "ERROR" else "yellow" if level == "WARN" else "green"
+                    output.console.print(f"  [{level_color}]{level:5}[/] [{service}] {msg}")
+                else:
+                    output.console.print(f"  {row}")
+            output.console.print()
+        else:
+            output.print_result(result)
+        output.print_success(f"Found {len(result.data) if isinstance(result.data, list) else 1} error(s)!")
+    else:
+        output.console.print("  [yellow]Note:[/] No errors found in logs.")
+    output.console.print()
+    
+    # Step 5: Show available skills 
+    output.console.print("[bold]Step 5:[/] Listing available skills:")
     output.console.print()
     result = client.execute("SHOW SKILLS")
-    if result.success and result.data:
-        output.print_result(result)
-    else:
-        output.console.print("  [dim](No skills found - but we just created one!)[/]")
-    output.console.print()
-    
-    # Step 4: Test the skill
-    output.console.print("[bold]Step 4:[/] Testing the skill...")
-    output.console.print()
-    test_query = "TEST SKILL demo_health_check EXPECT true"
-    output.console.print(f"[dim]{test_query}[/]")
-    output.console.print()
-    
-    result = client.execute(test_query)
     if result.success:
         output.print_result(result)
-        output.print_success("Skill test passed!")
     else:
-        output.console.print(f"  [yellow]Note:[/] {result.error}")
+        output.console.print("  [dim](Run quick-start.sh to create sample skills)[/]")
     output.console.print()
     
     # Summary
     output.console.print("[bold cyan]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/]")
-    output.console.print("[bold cyan]  Demo Complete![/]")
+    output.console.print("[bold cyan]  🎉 Demo Complete![/]")
     output.console.print("[bold cyan]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/]")
     output.console.print()
-    output.console.print("  [bold]What just happened:[/]")
-    output.console.print("    1. Created a [green]skill[/] - a reusable automation component")
-    output.console.print("    2. Listed all skills with [cyan]SHOW SKILLS[/]")
-    output.console.print("    3. Tested the skill with [cyan]TEST SKILL ... EXPECT[/]")
+    output.console.print("  [bold]What you just did:[/]")
+    output.console.print("    • Created a [green]procedure[/] that queries real data")
+    output.console.print("    • Executed [cyan]ESQL[/] and got results from Elasticsearch")
+    output.console.print("    • Procedures are [cyan]reusable[/] - call them anywhere")
     output.console.print()
-    output.console.print("  [bold]Try these next:[/]")
-    output.console.print("    • Start the REPL:     [cyan]moltler[/]")
-    output.console.print("    • Type:               [yellow]SHOW SKILLS[/]")
-    output.console.print("    • Type:               [yellow]help examples[/]")
+    output.console.print("  [bold]Next steps:[/]")
+    output.console.print("    [cyan]moltler[/]                    Start the interactive shell")
+    output.console.print("    [yellow]SHOW SKILLS[/]               See available skills")
+    output.console.print("    [yellow]CALL find_errors()[/]        Run the procedure again")
+    output.console.print("    [yellow]help examples[/]             More examples")
     output.console.print()
     output.console.print("  [bold]Learn more:[/]")
-    output.console.print("    • Documentation:      https://bahaaldine.github.io/elastic-script/")
+    output.console.print("    https://bahaaldine.github.io/elastic-script/")
     output.console.print()
     
     client.close()

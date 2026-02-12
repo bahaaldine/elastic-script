@@ -184,9 +184,23 @@ class OutputFormatter:
         self.console.print(f"[dim]{len(data)} row(s)[/]")
     
     def _print_action_result(self, data: Dict[str, Any]):
-        """Print an action result (CREATE, DROP, etc.)."""
+        """Print an action result (CREATE, DROP, SHOW, TEST, etc.)."""
         action = data.get("action", "")
         success = data.get("success", True)
+        
+        # Special handling for SHOW commands that return lists
+        if action == "SHOW SKILLS" and "skills" in data:
+            self._print_skills_table(data["skills"], data.get("count", len(data["skills"])))
+            return
+        elif action == "SHOW CONNECTORS" and "connectors" in data:
+            self._print_connectors_table(data["connectors"], data.get("count", 0))
+            return
+        elif action == "SHOW AGENTS" and "agents" in data:
+            self._print_agents_table(data["agents"], data.get("count", 0))
+            return
+        elif action == "TEST SKILL":
+            self._print_test_result(data)
+            return
         
         if success or "success" not in data:
             icon = "[green]✓[/]"
@@ -210,6 +224,107 @@ class OutputFormatter:
         if details:
             for key, value in details.items():
                 self.console.print(f"  [dim]{key}:[/] {value}")
+    
+    def _print_skills_table(self, skills: list, count: int):
+        """Print skills as a formatted table."""
+        if not skills:
+            self.console.print("[yellow]No skills found.[/]")
+            self.console.print("[dim]Create one with: CREATE SKILL name VERSION '1.0' ...[/]")
+            return
+        
+        table = Table(
+            title=f"[bold]Skills[/] ({count} total)",
+            box=self._box,
+            show_header=True,
+            header_style="bold cyan"
+        )
+        table.add_column("Name", style="green")
+        table.add_column("Description")
+        table.add_column("Returns", style="yellow")
+        table.add_column("Params", justify="center")
+        
+        for skill in skills:
+            table.add_row(
+                skill.get("name", ""),
+                skill.get("description", "")[:50] + ("..." if len(skill.get("description", "")) > 50 else ""),
+                skill.get("return_type", ""),
+                str(skill.get("parameters", 0))
+            )
+        
+        self.console.print(table)
+    
+    def _print_connectors_table(self, connectors: list, count: int):
+        """Print connectors as a formatted table."""
+        if not connectors:
+            self.console.print("[yellow]No connectors found.[/]")
+            return
+        
+        table = Table(
+            title=f"[bold]Connectors[/] ({count} total)",
+            box=self._box,
+            show_header=True,
+            header_style="bold cyan"
+        )
+        table.add_column("Name", style="green")
+        table.add_column("Type")
+        table.add_column("Status", style="yellow")
+        
+        for conn in connectors:
+            table.add_row(
+                conn.get("name", ""),
+                conn.get("type", ""),
+                conn.get("status", "")
+            )
+        
+        self.console.print(table)
+    
+    def _print_agents_table(self, agents: list, count: int):
+        """Print agents as a formatted table."""
+        if not agents:
+            self.console.print("[yellow]No agents found.[/]")
+            return
+        
+        table = Table(
+            title=f"[bold]Agents[/] ({count} total)",
+            box=self._box,
+            show_header=True,
+            header_style="bold cyan"
+        )
+        table.add_column("Name", style="green")
+        table.add_column("Description")
+        table.add_column("Skills")
+        table.add_column("Enabled", justify="center")
+        
+        for agent in agents:
+            table.add_row(
+                agent.get("name", ""),
+                agent.get("description", "")[:40],
+                str(agent.get("skills_count", 0)),
+                "[green]●[/]" if agent.get("enabled", False) else "[red]○[/]"
+            )
+        
+        self.console.print(table)
+    
+    def _print_test_result(self, data: Dict[str, Any]):
+        """Print skill test result."""
+        skill_name = data.get("skill", "unknown")
+        passed = data.get("passed", False)
+        status = data.get("status", "unknown")
+        actual = data.get("actual_result")
+        expected = data.get("expected")
+        
+        if passed:
+            self.console.print(f"[green]✓ TEST PASSED[/] - Skill '{skill_name}'")
+        else:
+            self.console.print(f"[red]✗ TEST FAILED[/] - Skill '{skill_name}'")
+        
+        # Show details
+        if actual is not None:
+            self.console.print(f"  [dim]Result:[/] {actual}")
+        if expected and not passed:
+            self.console.print(f"  [dim]Expected:[/] {expected}")
+        if "message" in data:
+            self.console.print(f"  [dim]Note:[/] {data['message']}")
     
     def _print_json(self, data: Any):
         """Print data as formatted JSON."""
