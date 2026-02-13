@@ -1352,20 +1352,17 @@ setup_kibana_plugin() {
         print_success "Kibana source already present"
     fi
     
-    # Link Moltler plugin
+    # Copy Moltler plugin (symlinks cause module resolution issues with Kibana's babel)
     local PLUGINS_DIR="$KIBANA_SOURCE_DIR/plugins"
-    local LINK_PATH="$PLUGINS_DIR/moltler"
+    local PLUGIN_PATH="$PLUGINS_DIR/moltler"
     mkdir -p "$PLUGINS_DIR"
     
-    if [ -L "$LINK_PATH" ]; then
-        rm "$LINK_PATH"
-    fi
-    if [ -d "$LINK_PATH" ] && [ ! -L "$LINK_PATH" ]; then
-        rm -rf "$LINK_PATH"
+    if [ -L "$PLUGIN_PATH" ] || [ -d "$PLUGIN_PATH" ]; then
+        rm -rf "$PLUGIN_PATH"
     fi
     
-    ln -s "$KIBANA_PLUGIN_DIR/plugins/moltler" "$LINK_PATH"
-    print_success "Moltler plugin linked"
+    cp -r "$KIBANA_PLUGIN_DIR/plugins/moltler" "$PLUGIN_PATH"
+    print_success "Moltler plugin installed"
     
     # Bootstrap Kibana if not done
     if [ ! -d "$KIBANA_SOURCE_DIR/node_modules/@kbn" ]; then

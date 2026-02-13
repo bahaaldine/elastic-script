@@ -115,22 +115,19 @@ clone_kibana() {
 }
 
 link_plugin() {
-    print_step "Linking Moltler plugin..."
+    print_step "Installing Moltler plugin..."
     
     PLUGINS_DIR="$KIBANA_DIR/plugins"
     mkdir -p "$PLUGINS_DIR"
     
-    # Create symlink to our plugin
-    LINK_PATH="$PLUGINS_DIR/moltler"
-    if [ -L "$LINK_PATH" ]; then
-        rm "$LINK_PATH"
-    fi
-    if [ -d "$LINK_PATH" ]; then
-        rm -rf "$LINK_PATH"
+    # Copy plugin (symlinks cause module resolution issues with Kibana's babel)
+    PLUGIN_PATH="$PLUGINS_DIR/moltler"
+    if [ -L "$PLUGIN_PATH" ] || [ -d "$PLUGIN_PATH" ]; then
+        rm -rf "$PLUGIN_PATH"
     fi
     
-    ln -s "$PLUGIN_DIR" "$LINK_PATH"
-    print_success "Plugin linked to $LINK_PATH"
+    cp -r "$PLUGIN_DIR" "$PLUGIN_PATH"
+    print_success "Plugin installed to $PLUGIN_PATH"
 }
 
 bootstrap_kibana() {
