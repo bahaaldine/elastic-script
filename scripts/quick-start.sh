@@ -979,6 +979,7 @@ show_help() {
     echo "  --load-skills     Load sample Moltler skills"
     echo "  --notebooks       Start Jupyter notebooks"
     echo "  --kibana          Start Kibana (for APM/observability)"
+    echo "  --kibana-plugin   Start Kibana with Moltler Skills Manager plugin"
     echo "  --otel            Start OTEL Collector (for distributed tracing)"
     echo "  --stop            Stop all (ES, OTEL, Kibana, Jupyter)"
     echo "  --stop-notebooks  Stop only Jupyter notebooks"
@@ -1270,6 +1271,183 @@ stop_kibana() {
         else
             print_warning "No Kibana running"
         fi
+    fi
+}
+
+# =============================================================================
+# Moltler Kibana Plugin (Skills Manager)
+# =============================================================================
+
+KIBANA_PLUGIN_DIR="$PROJECT_ROOT/kibana-plugin"
+KIBANA_SOURCE_DIR="$KIBANA_PLUGIN_DIR/kibana"
+REQUIRED_NODE_VERSION="22"
+
+# Check if correct Node version is available
+check_node_for_kibana_plugin() {
+    local NODE_VERSION=""
+    
+    # Check current Node version
+    if command -v node &> /dev/null; then
+        NODE_VERSION=$(node -v | sed 's/v//' | cut -d. -f1)
+    fi
+    
+    if [ "$NODE_VERSION" = "$REQUIRED_NODE_VERSION" ]; then
+        return 0
+    fi
+    
+    # Try to use nvm to switch to correct version
+    if [ -f "$HOME/.nvm/nvm.sh" ]; then
+        print_step "Switching to Node $REQUIRED_NODE_VERSION via nvm..."
+        source "$HOME/.nvm/nvm.sh"
+        
+        # Check if version is installed
+        if nvm ls $REQUIRED_NODE_VERSION > /dev/null 2>&1; then
+            nvm use $REQUIRED_NODE_VERSION
+            return 0
+        else
+            print_step "Installing Node $REQUIRED_NODE_VERSION via nvm..."
+            nvm install $REQUIRED_NODE_VERSION
+            nvm use $REQUIRED_NODE_VERSION
+            return 0
+        fi
+    fi
+    
+    # Node version not available
+    print_error "Kibana plugin requires Node.js $REQUIRED_NODE_VERSION.x"
+    print_warning "Current: $(node -v 2>/dev/null || echo 'not installed')"
+    echo ""
+    echo "  To install the correct version:"
+    echo "    1. Install nvm: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash"
+    echo "    2. Run: nvm install $REQUIRED_NODE_VERSION && nvm use $REQUIRED_NODE_VERSION"
+    echo "    3. Re-run this script"
+    echo ""
+    return 1
+}
+
+# Setup Kibana from source with Moltler plugin
+setup_kibana_plugin() {
+    print_header "Setting up Moltler Kibana Plugin"
+    
+    # Check Node version
+    if ! check_node_for_kibana_plugin; then
+        return 1
+    fi
+    
+    print_success "Node.js $(node -v)"
+    
+    # Check if yarn is installed
+    if ! command -v yarn &> /dev/null; then
+        print_step "Installing yarn..."
+        npm install -g yarn
+    fi
+    print_success "yarn $(yarn -v)"
+    
+    # Clone Kibana if not exists
+    if [ ! -d "$KIBANA_SOURCE_DIR" ]; then
+        print_step "Cloning Kibana repository (this takes several minutes)..."
+        print_warning "Repository size is ~2GB, please be patient..."
+        git clone --depth 1 https://github.com/elastic/kibana.git "$KIBANA_SOURCE_DIR"
+        print_success "Kibana cloned"
+    else
+        print_success "Kibana source already present"
+    fi
+    
+    # Link Moltler plugin
+    local PLUGINS_DIR="$KIBANA_SOURCE_DIR/plugins"
+    local LINK_PATH="$PLUGINS_DIR/moltler"
+    mkdir -p "$PLUGINS_DIR"
+    
+    if [ -L "$LINK_PATH" ]; then
+        rm "$LINK_PATH"
+    fi
+    if [ -d "$LINK_PATH" ] && [ ! -L "$LINK_PATH" ]; then
+        rm -rf "$LINK_PATH"
+    fi
+    
+    ln -s "$KIBANA_PLUGIN_DIR/plugins/moltler" "$LINK_PATH"
+    print_success "Moltler plugin linked"
+    
+    # Bootstrap Kibana if not done
+    if [ ! -d "$KIBANA_SOURCE_DIR/node_modules/@kbn" ]; then
+        print_step "Bootstrapping Kibana (this takes 5-10 minutes on first run)..."
+        cd "$KIBANA_SOURCE_DIR"
+        yarn kbn bootstrap
+        print_success "Kibana bootstrapped"
+    else
+        print_success "Kibana already bootstrapped"
+    fi
+    
+    cd "$PROJECT_ROOT"
+    return 0
+}
+
+# Start Kibana with Moltler plugin
+start_kibana_with_plugin() {
+    print_header "Starting Kibana with Moltler Skills Manager"
+    
+    # Check Node version
+    if ! check_node_for_kibana_plugin; then
+        return 1
+    fi
+    
+    # Setup if needed
+    if [ ! -d "$KIBANA_SOURCE_DIR/node_modules" ]; then
+        setup_kibana_plugin
+    fi
+    
+    # Check if already running
+    if curl -s http://localhost:5601/api/status > /dev/null 2>&1; then
+        print_success "Kibana already running at http://localhost:5601"
+        return 0
+    fi
+    
+    print_step "Starting Kibana in background..."
+    cd "$KIBANA_SOURCE_DIR"
+    
+    # Start Kibana
+    nohup yarn start --no-base-path > "$PROJECT_ROOT/kibana-plugin.log" 2>&1 &
+    KIBANA_PID=$!
+    echo $KIBANA_PID > "$PROJECT_ROOT/.kibana_plugin_pid"
+    
+    print_step "Waiting for Kibana to be ready (this takes 1-2 minutes)..."
+    for i in {1..120}; do
+        if curl -s http://localhost:5601/api/status > /dev/null 2>&1; then
+            echo ""
+            print_success "Kibana with Moltler plugin is ready!"
+            echo ""
+            echo "  Open: http://localhost:5601"
+            echo "  Find 'Moltler' in the sidebar under Management"
+            echo ""
+            cd "$PROJECT_ROOT"
+            return 0
+        fi
+        sleep 2
+        echo -n "."
+    done
+    
+    echo ""
+    print_warning "Kibana taking longer than expected. Check kibana-plugin.log"
+    cd "$PROJECT_ROOT"
+    return 1
+}
+
+# Stop Kibana plugin
+stop_kibana_plugin() {
+    print_header "Stopping Kibana Plugin"
+    
+    if [ -f "$PROJECT_ROOT/.kibana_plugin_pid" ]; then
+        PID=$(cat "$PROJECT_ROOT/.kibana_plugin_pid")
+        if kill -0 $PID 2>/dev/null; then
+            kill $PID
+            rm "$PROJECT_ROOT/.kibana_plugin_pid"
+            print_success "Kibana plugin stopped"
+        else
+            print_warning "Kibana plugin process not found"
+            rm "$PROJECT_ROOT/.kibana_plugin_pid"
+        fi
+    else
+        # Also try the regular stop
+        stop_kibana
     fi
 }
 
@@ -1723,6 +1901,12 @@ case "${1:-}" in
     --kibana)
         start_kibana_background
         ;;
+    --kibana-plugin)
+        setup_kibana_plugin && start_kibana_with_plugin
+        ;;
+    --setup-kibana-plugin)
+        setup_kibana_plugin
+        ;;
     --no-otel)
         EDOT_ENABLED=false
         print_step "EDOT tracing disabled"
@@ -1732,6 +1916,7 @@ case "${1:-}" in
         ;;
     --stop-kibana)
         stop_kibana
+        stop_kibana_plugin
         ;;
     --otel)
         start_otel_collector
