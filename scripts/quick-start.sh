@@ -1401,8 +1401,17 @@ start_kibana_with_plugin() {
     print_step "Starting Kibana in background..."
     cd "$KIBANA_SOURCE_DIR"
     
-    # Start Kibana
-    nohup yarn start --no-base-path > "$PROJECT_ROOT/kibana-plugin.log" 2>&1 &
+    # Set Elasticsearch credentials for Kibana
+    export ELASTICSEARCH_HOSTS="http://localhost:9200"
+    export ELASTICSEARCH_USERNAME="elastic-admin"
+    export ELASTICSEARCH_PASSWORD="elastic-password"
+    
+    # Start Kibana with ES credentials
+    nohup yarn start --no-base-path \
+        --elasticsearch.hosts=http://localhost:9200 \
+        --elasticsearch.username=elastic-admin \
+        --elasticsearch.password=elastic-password \
+        > "$PROJECT_ROOT/kibana-plugin.log" 2>&1 &
     KIBANA_PID=$!
     echo $KIBANA_PID > "$PROJECT_ROOT/.kibana_plugin_pid"
     
