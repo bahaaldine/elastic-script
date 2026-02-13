@@ -9,8 +9,7 @@
   "description": "Moltler Skills Manager - Create, manage, and run AI skills",
   "server": true,
   "ui": true,
-  "browser": true,
-  "requiredPlugins": ["kibanaReact"],
+  "requiredPlugins": [],
   "optionalPlugins": [],
   "requiredBundles": ["kibanaReact"]
 }
