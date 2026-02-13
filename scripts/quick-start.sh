@@ -1899,7 +1899,55 @@ case "${1:-}" in
         start_kibana_background
         ;;
     --kibana-plugin)
+        # Full setup: ES + Demo + Kibana with Moltler plugin - ONE COMMAND
+        print_header "🦌 Moltler Full Setup (ES + Skills Manager)"
+        
+        # 1. Build if needed
+        build_plugin
+        
+        # 2. Start ES in background if not running
+        if ! curl -s -u elastic-admin:elastic-password http://localhost:9200 > /dev/null 2>&1; then
+            start_elasticsearch_background
+            # Wait for ES
+            print_step "Waiting for Elasticsearch..."
+            for i in {1..60}; do
+                if curl -s -u elastic-admin:elastic-password http://localhost:9200 > /dev/null 2>&1; then
+                    print_success "Elasticsearch ready"
+                    break
+                fi
+                sleep 2
+                echo -n "."
+            done
+            echo ""
+        else
+            print_success "Elasticsearch already running"
+        fi
+        
+        # 3. Load sample data and run demo
+        load_sample_data
+        
+        # 4. Run the Moltler demo to create skills
+        print_step "Creating demo skills..."
+        cd "$PROJECT_ROOT/cli"
+        if python -m escript_cli.main demo > /dev/null 2>&1; then
+            print_success "Demo skills created"
+        else
+            print_warning "Demo skills may already exist"
+        fi
+        cd "$PROJECT_ROOT"
+        
+        # 5. Setup and start Kibana with plugin
         setup_kibana_plugin && start_kibana_with_plugin
+        
+        # 6. Final summary
+        echo ""
+        print_header "🎉 Moltler is Ready!"
+        echo "  Elasticsearch: http://localhost:9200"
+        echo "  Kibana:        http://localhost:5601"
+        echo ""
+        echo "  Open Kibana and find 'Moltler' in the sidebar"
+        echo "  Your skills are waiting for you!"
+        echo ""
         ;;
     --setup-kibana-plugin)
         setup_kibana_plugin
