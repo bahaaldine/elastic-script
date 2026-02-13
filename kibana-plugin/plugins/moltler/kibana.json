@@ -1,0 +1,14 @@
+{
+  "id": "moltler",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Moltler",
+    "githubTeam": "moltler"
+  },
+  "description": "Moltler Skills Manager - Create, manage, and run AI skills",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [],
+  "optionalPlugins": []
+}

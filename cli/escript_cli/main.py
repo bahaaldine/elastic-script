@@ -567,14 +567,14 @@ END SKILL;"""
         output.print_result(result)
     output.console.print()
     
-    # Step 7: Execute the skill's procedure and show real results
+    # Step 7: Execute the skill and show real results
     output.console.print("[bold]Step 7:[/] Executing the skill...")
     output.console.print()
-    output.console.print("[dim]CALL find_popular_issues()[/]")
+    output.console.print("[dim]RUN SKILL find_popular_issues[/]")
     output.console.print()
     
-    # Execute the skill's underlying procedure
-    result = client.execute("CALL find_popular_issues()")
+    # Execute the skill using RUN SKILL
+    result = client.execute("RUN SKILL find_popular_issues")
     
     if result.success and result.data:
         output.console.print("[green]Results from Elasticsearch:[/]")
@@ -622,7 +622,7 @@ END SKILL;"""
     output.console.print("  [bold]Next steps:[/]")
     output.console.print("    [cyan]moltler[/]                          Start the interactive shell")
     output.console.print("    [yellow]SHOW SKILLS[/]                     See all your skills")
-    output.console.print("    [yellow]CALL find_popular_issues()[/]      Execute the skill")
+    output.console.print("    [yellow]RUN SKILL find_popular_issues[/]   Execute the skill")
     output.console.print("    [yellow]SHOW SKILL find_popular_issues[/]  View skill details")
     output.console.print()
     output.console.print("  [bold]Learn more:[/]")

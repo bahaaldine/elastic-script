@@ -1,0 +1,23 @@
+{
+  "name": "moltler",
+  "version": "1.0.0",
+  "description": "Moltler Skills Manager - Create, manage, and run AI skills in Kibana",
+  "main": "target/server/index.js",
+  "kibana": {
+    "version": "kibana"
+  },
+  "scripts": {
+    "build": "yarn plugin-helpers build",
+    "dev": "yarn plugin-helpers dev",
+    "dev:watch": "yarn plugin-helpers dev --watch",
+    "kbn": "node ../../scripts/kbn.js",
+    "lint": "../../node_modules/.bin/eslint .",
+    "lint:fix": "../../node_modules/.bin/eslint . --fix",
+    "test": "../../node_modules/.bin/jest --config jest.config.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "author": "Moltler Team",
+  "license": "Elastic-2.0",
+  "devDependencies": {},
+  "dependencies": {}
+}

@@ -16,3 +16,4 @@ apm-server/
 otel-collector/otelcol-contrib
 otel-collector/*.log
 otel-collector/*.pid
+kibana-plugin/kibana/

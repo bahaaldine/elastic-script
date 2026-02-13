@@ -396,6 +396,221 @@ These connectors use public APIs that don't require authentication, making them 
 - All connectors should follow the pattern: Fetch → Index → Create Skill → Query
 - No API keys required - rate limits apply (GitHub: 60 req/hr unauthenticated)
 
+---
+
+## 🎯 CORE PRINCIPLE: Frictionless Onboarding
+
+> **Every feature must be designed so users can't stop using it.**
+> **Easiest possible onboarding with no compromise.**
+
+This principle applies to ALL future development:
+
+| Aspect | Requirement |
+|--------|-------------|
+| **Installation** | One command, zero config, works immediately |
+| **First Value** | User sees meaningful results within 60 seconds |
+| **Discovery** | Features are self-documenting and explorable |
+| **Progression** | Natural path from demo → customize → production |
+| **Integration** | Drop into existing workflows (Claude, VS Code, Kibana) |
+| **Error Recovery** | Clear messages, suggested fixes, never stuck |
+
+---
+
+## 🖥️ Kibana Skills Manager Plugin (📋 Planned)
+
+### Overview
+Dedicated Kibana plugin for visual skills management. Stored in `kibana-plugin/` folder - optional component that users can choose to install.
+
+### Directory Structure (Planned)
+```
+elastic-script/
+├── kibana-plugin/                    # Separate folder for Kibana plugin
+│   ├── kibana/                       # Kibana source (git submodule)
+│   ├── plugins/moltler/              # The actual plugin
+│   │   ├── public/                   # Browser-side code
+│   │   │   ├── application.tsx       # Main app entry
+│   │   │   ├── components/
+│   │   │   │   ├── SkillsList.tsx    # Skills table/grid
+│   │   │   │   ├── SkillEditor.tsx   # Monaco-based editor
+│   │   │   │   ├── SkillTester.tsx   # Test execution panel
+│   │   │   │   └── ContextBrowser.tsx # Indices/workflows explorer
+│   │   │   └── services/
+│   │   │       └── api.ts            # REST API client
+│   │   ├── server/                   # Server-side code
+│   │   │   ├── plugin.ts             # Plugin registration
+│   │   │   └── routes/               # Proxy routes to ES
+│   │   ├── common/                   # Shared types
+│   │   ├── kibana.json               # Plugin manifest
+│   │   └── tsconfig.json
+│   ├── scripts/
+│   │   └── install-kibana-plugin.sh  # Setup script
+│   └── README.md                     # Plugin documentation
+```
+
+### Phase 1: Skills Viewer (P0)
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **Skills List View** | 📋 Planned | Table of all skills with name, description, version, author |
+| **Skill Details Panel** | 📋 Planned | Full skill definition, parameters, return type |
+| **Search & Filter** | 📋 Planned | Filter by name, tags, author |
+| **Run Skill** | 📋 Planned | Execute skill with parameter inputs, view results |
+| **Elastic EUI** | 📋 Planned | Built entirely with Elastic EUI components |
+
+### Phase 2: Skills Editor (P1)
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **Monaco Editor** | 📋 Planned | Full elastic-script editor in Kibana |
+| **Syntax Highlighting** | 📋 Planned | Grammar-aware highlighting for elastic-script |
+| **Autocomplete** | 📋 Planned | Keywords, functions, indices, connectors |
+| **Inline Validation** | 📋 Planned | Real-time syntax error detection |
+| **Test Panel** | 📋 Planned | Write and run tests inline |
+| **Save & Version** | 📋 Planned | Version management for skills |
+
+### Phase 3: Context Browser (P1)
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **Index Explorer** | 📋 Planned | Browse available indices with field info |
+| **Workflow Viewer** | 📋 Planned | See connected workflows/pipelines |
+| **Agent Status** | 📋 Planned | View agent health and recent executions |
+| **Connector Status** | 📋 Planned | Connectivity status for all connectors |
+
+### Installation Script Requirements
+```bash
+# scripts/install-kibana-plugin.sh should:
+# 1. Clone Kibana repo (matching ES version)
+# 2. Symlink moltler plugin into plugins/
+# 3. Build the plugin
+# 4. Provide instructions for starting Kibana
+
+./scripts/install-kibana-plugin.sh
+# Output: Kibana ready at http://localhost:5601 with Moltler plugin
+```
+
+### Research Needed
+- Kibana plugin development guide: https://www.elastic.co/guide/en/kibana/current/kibana-plugins.html
+- Elastic EUI: https://elastic.github.io/eui/
+- Monaco Editor integration in Kibana (Dev Tools example)
+- Custom language support for Monaco (TextMate grammars or Monarch)
+
+---
+
+## 🤖 AI Integration: MCP Server & Skill Consumption (📋 Planned)
+
+### Goal
+Make Moltler skills directly usable by AI agents (Claude Desktop, Claude Code, VS Code Copilot, custom agents).
+
+### Approach Options
+
+| Approach | Pros | Cons | Status |
+|----------|------|------|--------|
+| **MCP Server for Moltler** | Direct Claude integration, standard protocol | Need to implement MCP server | 📋 Preferred |
+| **OpenAI Function Calling** | Wide compatibility | Need wrapper per AI system | 📋 Alternative |
+| **REST API + Agent Wrapper** | Simple, works everywhere | Manual integration needed | ✅ Exists |
+
+### MCP Server Architecture (Preferred)
+```
+┌─────────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│  Claude Desktop │────▶│  Moltler MCP     │────▶│  Elasticsearch   │
+│  Claude Code    │     │  Server          │     │  + elastic-script│
+│  ClawdBot       │     │                  │     │                  │
+└─────────────────┘     └──────────────────┘     └──────────────────┘
+                              │
+                              ▼
+                        ┌──────────────────┐
+                        │ Skills exposed   │
+                        │ as MCP tools     │
+                        └──────────────────┘
+```
+
+### MCP Server Implementation (Planned)
+```
+elastic-script/
+├── mcp-server/                       # MCP server component
+│   ├── src/
+│   │   ├── server.ts                 # MCP server entry
+│   │   ├── tools/
+│   │   │   ├── skills.ts             # Skill discovery & execution
+│   │   │   ├── queries.ts            # ESQL query execution
+│   │   │   └── connectors.ts         # Connector actions
+│   │   └── resources/
+│   │       └── indices.ts            # Index discovery
+│   ├── package.json
+│   └── README.md
+```
+
+### Features (Planned)
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **Skill Discovery** | 📋 Planned | AI sees all available skills as tools |
+| **Skill Execution** | 📋 Planned | AI invokes skills with typed parameters |
+| **Index Awareness** | 📋 Planned | AI knows what data is available |
+| **Connector Access** | 📋 Planned | AI can use connectors (GitHub, Jira, etc.) |
+| **ESQL Queries** | 📋 Planned | AI can query Elasticsearch directly |
+
+### Configuration (Planned)
+```json
+// Claude Desktop config (~/.config/claude/claude_desktop_config.json)
+{
+  "mcpServers": {
+    "moltler": {
+      "command": "npx",
+      "args": ["moltler-mcp-server"],
+      "env": {
+        "ELASTICSEARCH_URL": "http://localhost:9200",
+        "ELASTICSEARCH_USER": "elastic-admin",
+        "ELASTICSEARCH_PASSWORD": "elastic-password"
+      }
+    }
+  }
+}
+```
+
+### Research Needed
+- MCP specification: https://modelcontextprotocol.io/
+- MCP TypeScript SDK: https://github.com/modelcontextprotocol/typescript-sdk
+- Example MCP servers for reference patterns
+- Claude Desktop MCP configuration
+
+---
+
+## 🔍 Context Awareness (📋 Planned)
+
+### Goal
+CLI and Kibana plugin should automatically discover and expose what's available in the cluster.
+
+### Discovery Sources
+
+| Source | What It Provides | API |
+|--------|------------------|-----|
+| **Elasticsearch Indices** | Data indices available for querying | `GET /_cat/indices` |
+| **Index Mappings** | Field names and types for autocomplete | `GET /index/_mapping` |
+| **Technical Indices** | Skills (`.escript_skills`), Procedures, Jobs, etc. | Direct queries |
+| **Kibana Saved Objects** | Dashboards, visualizations, data views | Kibana API |
+| **Connectors** | Available connectors and their status | `.escript_connectors` |
+| **Agents** | Running agents and their goals | `.escript_agents` |
+
+### Implementation (Planned)
+```
+# CLI context commands
+moltler context indices       # List all available indices
+moltler context fields logs*  # Show fields for matching indices
+moltler context connectors    # List configured connectors
+moltler context agents        # List running agents
+
+# SHOW commands in elastic-script
+SHOW INDICES;                 # List queryable indices
+SHOW FIELDS FOR 'index-*';    # Show index fields
+SHOW CONNECTORS;              # Already exists
+SHOW AGENTS;                  # Already exists
+```
+
+### Autocomplete Integration
+- CLI completer pulls from context discovery
+- Kibana editor autocomplete uses same data
+- MCP server exposes as resources for AI
+
+---
+
 ### Recently Verified Features ✅
 11. ~~**Scheduled Jobs (CREATE JOB)**~~ ✅ Complete
     - `CREATE JOB name SCHEDULE 'cron' AS BEGIN ... END JOB`
@@ -649,6 +864,22 @@ Based on comprehensive analysis comparing elastic-script to Oracle PL/SQL:
 See `docs/roadmap.md` for full details.
 
 *Last updated: January 22, 2026*
+
+---
+
+## 🚨 Strategic Priorities (NEW)
+
+These are the highest-impact items for user adoption:
+
+| Priority | Feature | Impact | Effort |
+|----------|---------|--------|--------|
+| **P0** | MCP Server for Skills | AI agents can use skills directly | Medium |
+| **P0** | Kibana Plugin (Phase 1) | Visual skill management | Medium |
+| **P1** | Context Awareness in CLI | Better autocomplete, discovery | Low |
+| **P1** | Kibana Skills Editor | Create skills visually | Medium |
+| **P2** | Public API Connectors | More demo options | Low each |
+
+**Guiding Principle**: Every feature must pass the "60-second value" test - can a new user see meaningful results within one minute?
 
 ---
 

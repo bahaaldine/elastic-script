@@ -999,10 +999,55 @@ public class ElasticScriptExecutor {
         } else if (ctx.test_skill_statement() != null) {
             handler.handleTestSkill(ctx.test_skill_statement(), listener);
         } else if (ctx.run_skill_statement() != null) {
-            handler.handleRunSkill(ctx.run_skill_statement(), listener);
+            // RUN SKILL needs to execute the underlying procedure
+            handleRunSkillStatement(ctx.run_skill_statement(), listener);
         } else {
             listener.onFailure(new IllegalArgumentException("Unknown SKILL statement type"));
         }
+    }
+    
+    /**
+     * Handles RUN SKILL statement by looking up the skill and executing its procedure.
+     */
+    private void handleRunSkillStatement(ElasticScriptParser.Run_skill_statementContext ctx,
+                                         ActionListener<Object> listener) {
+        String skillName = ctx.ID().getText();
+        
+        // Look up the skill to get the procedure name
+        SkillStatementHandler skillHandler = new SkillStatementHandler(client);
+        org.elasticsearch.xpack.escript.applications.SkillRegistry registry = 
+            new org.elasticsearch.xpack.escript.applications.SkillRegistry(client);
+        
+        registry.getSkill(skillName, ActionListener.wrap(
+            optSkill -> {
+                if (optSkill.isEmpty()) {
+                    listener.onFailure(new IllegalArgumentException("Skill not found: " + skillName));
+                    return;
+                }
+                
+                org.elasticsearch.xpack.escript.applications.SkillDefinition skill = optSkill.get();
+                String procedureName = skill.getProcedureName();
+                
+                // Build the CALL statement
+                StringBuilder callStatement = new StringBuilder("CALL ");
+                callStatement.append(procedureName);
+                callStatement.append("(");
+                
+                // Handle arguments if provided
+                if (ctx.expressionList() != null) {
+                    List<String> args = new java.util.ArrayList<>();
+                    for (ElasticScriptParser.ExpressionContext exprCtx : ctx.expressionList().expression()) {
+                        args.add(exprCtx.getText());
+                    }
+                    callStatement.append(String.join(", ", args));
+                }
+                callStatement.append(")");
+                
+                // Execute the procedure
+                executeProcedure(callStatement.toString(), java.util.Collections.emptyMap(), listener);
+            },
+            listener::onFailure
+        ));
     }
 
     /**
