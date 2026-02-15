@@ -1364,6 +1364,15 @@ setup_kibana_plugin() {
     cp -r "$KIBANA_PLUGIN_DIR/plugins/moltler" "$PLUGIN_PATH"
     print_success "Moltler plugin installed"
     
+    # Clear optimizer cache so our plugin bundle gets built
+    # The optimizer caches bundles; if we add a new plugin after bootstrap,
+    # we need to clear the cache to force a rebuild including our plugin
+    if [ -d "$KIBANA_SOURCE_DIR/.kibana-dev-cache" ]; then
+        print_step "Clearing optimizer cache to build Moltler bundle..."
+        rm -rf "$KIBANA_SOURCE_DIR/.kibana-dev-cache"
+        print_success "Optimizer cache cleared"
+    fi
+    
     # Bootstrap Kibana if not done
     if [ ! -d "$KIBANA_SOURCE_DIR/node_modules/@kbn" ]; then
         print_step "Bootstrapping Kibana (this takes 5-10 minutes on first run)..."
