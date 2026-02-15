@@ -6,6 +6,12 @@ export function defineRoutes(router: IRouter, logger: Logger) {
   router.get(
     {
       path: '/api/moltler/skills',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is open for all authenticated users',
+        },
+      },
       validate: false,
     },
     async (context, request, response) => {
@@ -55,6 +61,12 @@ export function defineRoutes(router: IRouter, logger: Logger) {
   router.get(
     {
       path: '/api/moltler/skills/{name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is open for all authenticated users',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -96,6 +108,12 @@ export function defineRoutes(router: IRouter, logger: Logger) {
   router.post(
     {
       path: '/api/moltler/skills/{name}/run',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is open for all authenticated users',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -147,6 +165,12 @@ export function defineRoutes(router: IRouter, logger: Logger) {
   router.get(
     {
       path: '/api/moltler/indices',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is open for all authenticated users',
+        },
+      },
       validate: false,
     },
     async (context, request, response) => {
@@ -180,6 +204,12 @@ export function defineRoutes(router: IRouter, logger: Logger) {
   router.get(
     {
       path: '/api/moltler/example',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is open for all authenticated users',
+        },
+      },
       validate: false,
     },
     async (context, request, response) => {
