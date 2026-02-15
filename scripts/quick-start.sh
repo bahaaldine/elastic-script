@@ -1352,28 +1352,7 @@ setup_kibana_plugin() {
         print_success "Kibana source already present"
     fi
     
-    # Copy Moltler plugin (symlinks cause module resolution issues with Kibana's babel)
-    local PLUGINS_DIR="$KIBANA_SOURCE_DIR/plugins"
-    local PLUGIN_PATH="$PLUGINS_DIR/moltler"
-    mkdir -p "$PLUGINS_DIR"
-    
-    if [ -L "$PLUGIN_PATH" ] || [ -d "$PLUGIN_PATH" ]; then
-        rm -rf "$PLUGIN_PATH"
-    fi
-    
-    cp -r "$KIBANA_PLUGIN_DIR/plugins/moltler" "$PLUGIN_PATH"
-    print_success "Moltler plugin installed"
-    
-    # Clear optimizer cache so our plugin bundle gets built
-    # The optimizer caches bundles; if we add a new plugin after bootstrap,
-    # we need to clear the cache to force a rebuild including our plugin
-    if [ -d "$KIBANA_SOURCE_DIR/.kibana-dev-cache" ]; then
-        print_step "Clearing optimizer cache to build Moltler bundle..."
-        rm -rf "$KIBANA_SOURCE_DIR/.kibana-dev-cache"
-        print_success "Optimizer cache cleared"
-    fi
-    
-    # Bootstrap Kibana if not done
+    # Bootstrap Kibana first (needed before we can use generate_plugin)
     if [ ! -d "$KIBANA_SOURCE_DIR/node_modules/@kbn" ]; then
         print_step "Bootstrapping Kibana (this takes 5-10 minutes on first run)..."
         cd "$KIBANA_SOURCE_DIR"
@@ -1382,6 +1361,46 @@ setup_kibana_plugin() {
     else
         print_success "Kibana already bootstrapped"
     fi
+    
+    # Generate or update Moltler plugin using Kibana's plugin generator
+    # This ensures the plugin is properly integrated with Kibana's build system
+    local PLUGIN_PATH="$KIBANA_SOURCE_DIR/plugins/moltler"
+    
+    if [ ! -d "$PLUGIN_PATH" ]; then
+        print_step "Generating Moltler plugin structure..."
+        cd "$KIBANA_SOURCE_DIR"
+        node scripts/generate_plugin.js --yes --name moltler --ui --server
+        print_success "Moltler plugin generated"
+    else
+        print_success "Moltler plugin already exists"
+    fi
+    
+    # Fix the plugin manifest (generator leaves owner.name empty)
+    print_step "Configuring plugin manifest..."
+    cat > "$PLUGIN_PATH/kibana.json" << 'EOF'
+{
+  "id": "moltler",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Moltler Team",
+    "githubTeam": "moltler"
+  },
+  "description": "Moltler Skills Manager - Create, manage, and run AI skills",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation"],
+  "optionalPlugins": []
+}
+EOF
+    print_success "Plugin manifest configured"
+    
+    # Build the plugin bundle using plugin_helpers
+    # This creates target/public with the compiled browser bundle
+    print_step "Building Moltler plugin bundle..."
+    cd "$PLUGIN_PATH"
+    node ../../scripts/plugin_helpers dev
+    print_success "Moltler plugin bundle built"
     
     cd "$PROJECT_ROOT"
     return 0
