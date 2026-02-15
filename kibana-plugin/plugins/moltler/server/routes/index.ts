@@ -1,11 +1,8 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
-/**
- * Define server routes that proxy to Elasticsearch elastic-script endpoints
- */
 export function defineRoutes(router: IRouter, logger: Logger) {
-  // GET /api/moltler/skills - List all skills
+  // List all skills
   router.get(
     {
       path: '/api/moltler/skills',
@@ -14,29 +11,11 @@ export function defineRoutes(router: IRouter, logger: Logger) {
     async (context, request, response) => {
       try {
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-
-        // Query the .escript_skills index
-        const result = await esClient.search({
-          index: '.escript_skills',
-          size: 1000,
-          query: { match_all: {} },
-          sort: [{ name: 'asc' }],
-        });
-
-        const skills = result.hits.hits.map((hit) => ({
-          id: hit._id,
-          ...hit._source as Record<string, unknown>,
-        }));
-
-        return response.ok({
-          body: {
-            skills,
-            count: skills.length,
-          },
-        });
-      } catch (error: any) {
-        // If index doesn't exist, return empty list
-        if (error.meta?.statusCode === 404) {
+        
+        // Check if skills index exists
+        const indexExists = await esClient.indices.exists({ index: '.escript_skills' });
+        
+        if (!indexExists) {
           return response.ok({
             body: {
               skills: [],
@@ -44,16 +23,35 @@ export function defineRoutes(router: IRouter, logger: Logger) {
             },
           });
         }
-        logger.error(`Error fetching skills: ${error.message}`);
+        
+        const result = await esClient.search({
+          index: '.escript_skills',
+          size: 100,
+          query: { match_all: {} },
+        });
+        
+        const skills = result.hits.hits.map((hit: any) => ({
+          name: hit._id,
+          ...hit._source,
+        }));
+        
+        return response.ok({
+          body: {
+            skills,
+            count: skills.length,
+          },
+        });
+      } catch (error: any) {
+        logger.error(`Failed to fetch skills: ${error.message}`);
         return response.customError({
-          statusCode: error.meta?.statusCode || 500,
+          statusCode: 500,
           body: { message: error.message },
         });
       }
     }
   );
 
-  // GET /api/moltler/skills/:name - Get a specific skill
+  // Get a specific skill
   router.get(
     {
       path: '/api/moltler/skills/{name}',
@@ -65,20 +63,18 @@ export function defineRoutes(router: IRouter, logger: Logger) {
     },
     async (context, request, response) => {
       try {
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const { name } = request.params;
-
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        
         const result = await esClient.get({
           index: '.escript_skills',
           id: name,
         });
-
+        
         return response.ok({
           body: {
-            skill: {
-              id: result._id,
-              ...result._source as Record<string, unknown>,
-            },
+            name: result._id,
+            ...result._source,
           },
         });
       } catch (error: any) {
@@ -87,16 +83,16 @@ export function defineRoutes(router: IRouter, logger: Logger) {
             body: { message: `Skill '${request.params.name}' not found` },
           });
         }
-        logger.error(`Error fetching skill: ${error.message}`);
+        logger.error(`Failed to fetch skill: ${error.message}`);
         return response.customError({
-          statusCode: error.meta?.statusCode || 500,
+          statusCode: 500,
           body: { message: error.message },
         });
       }
     }
   );
 
-  // POST /api/moltler/skills/:name/run - Execute a skill
+  // Run a skill
   router.post(
     {
       path: '/api/moltler/skills/{name}/run',
@@ -111,9 +107,11 @@ export function defineRoutes(router: IRouter, logger: Logger) {
     },
     async (context, request, response) => {
       try {
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const { name } = request.params;
-
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        
+        const startTime = Date.now();
+        
         // Execute the skill via _escript endpoint
         const result = await esClient.transport.request({
           method: 'POST',
@@ -122,65 +120,74 @@ export function defineRoutes(router: IRouter, logger: Logger) {
             query: `RUN SKILL ${name}`,
           },
         });
-
+        
+        const executionTime = Date.now() - startTime;
+        
         return response.ok({
           body: {
             success: true,
             result,
+            executionTime,
           },
         });
       } catch (error: any) {
-        logger.error(`Error running skill: ${error.message}`);
+        logger.error(`Failed to run skill: ${error.message}`);
         return response.customError({
-          statusCode: error.meta?.statusCode || 500,
+          statusCode: 500,
           body: {
             success: false,
-            message: error.message,
+            error: error.message,
           },
         });
       }
     }
   );
 
-  // GET /api/moltler/indices - List available indices for context awareness
+  // List indices (for context awareness)
   router.get(
     {
       path: '/api/moltler/indices',
-      validate: {
-        query: schema.object({
-          pattern: schema.maybe(schema.string()),
-        }),
-      },
+      validate: false,
     },
     async (context, request, response) => {
       try {
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const pattern = request.query.pattern || '*';
-
+        
         const result = await esClient.cat.indices({
-          index: pattern,
           format: 'json',
           h: 'index,docs.count,store.size,health,status',
         });
-
+        
         // Filter out system indices
         const indices = (result as any[]).filter(
-          (idx) => !idx.index.startsWith('.') || idx.index.startsWith('.escript')
+          (idx: any) => !idx.index.startsWith('.')
         );
-
+        
         return response.ok({
-          body: {
-            indices,
-            count: indices.length,
-          },
+          body: { indices },
         });
       } catch (error: any) {
-        logger.error(`Error fetching indices: ${error.message}`);
+        logger.error(`Failed to fetch indices: ${error.message}`);
         return response.customError({
-          statusCode: error.meta?.statusCode || 500,
+          statusCode: 500,
           body: { message: error.message },
         });
       }
+    }
+  );
+
+  // Example endpoint (keeping for compatibility)
+  router.get(
+    {
+      path: '/api/moltler/example',
+      validate: false,
+    },
+    async (context, request, response) => {
+      return response.ok({
+        body: {
+          time: new Date().toISOString(),
+        },
+      });
     }
   );
 }

@@ -1,7 +1,3 @@
-/**
- * Moltler Plugin - Common types shared between server and client
- */
-
 export const PLUGIN_ID = 'moltler';
 export const PLUGIN_NAME = 'Moltler';
 
@@ -36,11 +32,6 @@ export interface SkillParameter {
 export interface SkillsListResponse {
   skills: SkillDefinition[];
   count: number;
-}
-
-export interface SkillExecutionRequest {
-  skillName: string;
-  parameters?: Record<string, unknown>;
 }
 
 export interface SkillExecutionResponse {
