@@ -50,6 +50,64 @@ export interface EScriptResponse {
   message?: string;
 }
 
+// Fetch a single skill's full details
+async function fetchSkillDetails(name: string): Promise<Skill | null> {
+  try {
+    const response = await fetch(`${API_BASE}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ query: `SHOW SKILL ${name}` }),
+    });
+    
+    if (!response.ok) return null;
+    
+    const data = await response.json();
+    const s = data.result;
+    if (!s) return null;
+    
+    // Generate a representation of the CREATE SKILL command
+    const params = (s.parameters || []).map((p: Record<string, unknown>) => 
+      `${p.name} ${p.type}${p.default !== undefined ? ` DEFAULT ${JSON.stringify(p.default)}` : ''}`
+    ).join(', ');
+    
+    const body = `CREATE SKILL ${s.name}
+  VERSION '1.0'
+  DESCRIPTION '${(s.description || '').replace(/'/g, "''")}'
+  ${s.author ? `AUTHOR '${s.author}'` : ''}
+  ${s.tags?.length ? `TAGS [${s.tags.map((t: string) => `'${t}'`).join(', ')}]` : ''}
+  ${params ? `(${params})` : ''}
+  ${s.return_type ? `RETURNS ${s.return_type}` : ''}
+BEGIN
+  -- This skill wraps procedure: ${s.procedure || s.name}
+  CALL ${s.procedure || s.name}();
+END SKILL;`;
+
+    return {
+      name: s.name,
+      type: 'SKILL',
+      description: s.description,
+      return_type: s.return_type,
+      procedure: s.procedure,
+      version: s.version,
+      author: s.author,
+      tags: s.tags,
+      parameters: (s.parameters || []).map((p: Record<string, unknown>) => ({
+        name: p.name as string,
+        type: p.type as string,
+        description: p.description as string,
+        required: p.required as boolean,
+        default: p.default,
+      })),
+      body: body.replace(/\n\s*\n/g, '\n'), // Remove empty lines
+    };
+  } catch {
+    return null;
+  }
+}
+
 // Fetch skills using SHOW SKILLS command
 export async function fetchSkills(): Promise<Skill[]> {
   try {
@@ -69,25 +127,53 @@ export async function fetchSkills(): Promise<Skill[]> {
     const data = await response.json();
     
     // SHOW SKILLS returns { result: { skills: [...], count: n, action: "SHOW SKILLS" } }
-    const skills = data.result?.skills || [];
+    const skillsList = data.result?.skills || [];
     
-    return skills.map((s: Record<string, unknown>) => ({
-      name: s.name as string,
-      type: 'SKILL' as const,
-      description: s.description as string,
-      return_type: s.return_type as string,
-      procedure: s.procedure as string,
-      version: s.version as string,
-      author: s.author as string,
-      tags: s.tags as string[],
-      parameters: [], // SHOW SKILLS returns count, we'd need SHOW SKILL <name> for details
-    }));
+    // Fetch full details for each skill in parallel
+    const detailedSkills = await Promise.all(
+      skillsList.map((s: Record<string, unknown>) => fetchSkillDetails(s.name as string))
+    );
+    
+    return detailedSkills.filter((s): s is Skill => s !== null);
   } catch {
     return [];
   }
 }
 
-// Fetch procedures using ESCRIPT_PROCEDURES()
+// Fetch a single procedure's full details
+async function fetchProcedureDetails(name: string): Promise<Skill | null> {
+  try {
+    const response = await fetch(`${API_BASE}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ query: `SHOW PROCEDURE ${name}` }),
+    });
+    
+    if (!response.ok) return null;
+    
+    const data = await response.json();
+    const p = data.result;
+    if (!p) return null;
+    
+    // The procedure body is stored as the full CREATE PROCEDURE statement
+    const body = p.definition || p.body || p.procedure || '';
+    
+    return {
+      name: p.name || name,
+      type: 'PROCEDURE',
+      description: p.description || '',
+      body: body.startsWith('CREATE') ? body : `CREATE ${body}`,
+      parameters: parseParameters(p.parameters),
+    };
+  } catch {
+    return null;
+  }
+}
+
+// Fetch procedures using SHOW PROCEDURES
 export async function fetchProcedures(): Promise<Skill[]> {
   try {
     const response = await fetch(`${API_BASE}`, {
@@ -96,7 +182,7 @@ export async function fetchProcedures(): Promise<Skill[]> {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: JSON.stringify({ query: 'SELECT * FROM ESCRIPT_PROCEDURES()' }),
+      body: JSON.stringify({ query: 'SHOW PROCEDURES' }),
     });
     
     if (!response.ok) {
@@ -105,42 +191,63 @@ export async function fetchProcedures(): Promise<Skill[]> {
     
     const data = await response.json();
     
-    // The result might be in different formats
-    let procedures: Record<string, unknown>[] = [];
+    // SHOW PROCEDURES returns { result: { procedures: [...], count: n } }
+    const proceduresList = data.result?.procedures || [];
     
-    if (Array.isArray(data.result)) {
-      procedures = data.result;
-    } else if (data.result && Array.isArray(data.result.rows)) {
-      procedures = data.result.rows;
-    } else if (Array.isArray(data)) {
-      procedures = data;
-    }
+    // Fetch full details for each procedure in parallel
+    const detailedProcedures = await Promise.all(
+      proceduresList.map((p: Record<string, unknown>) => fetchProcedureDetails(p.name as string))
+    );
     
-    return procedures.map((p: Record<string, unknown>) => ({
-      name: (p.name as string) || (p.procedure_name as string) || 'unknown',
-      type: 'PROCEDURE' as const,
-      description: (p.description as string) || '',
-      body: (p.body as string) || (p.definition as string) || '',
-      parameters: parseParameters(p.parameters || p.params),
-      created_at: p.created_at as string,
-      updated_at: p.updated_at as string,
-    }));
+    return detailedProcedures.filter((p): p is Skill => p !== null);
   } catch {
     return [];
   }
 }
 
-// Fetch functions using ESCRIPT_FUNCTIONS() - user-defined functions
-export async function fetchFunctions(): Promise<Skill[]> {
+// Fetch a single function's full details
+async function fetchFunctionDetails(name: string): Promise<Skill | null> {
   try {
-    // First try to get stored user-defined functions
     const response = await fetch(`${API_BASE}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: JSON.stringify({ query: 'SELECT * FROM ESCRIPT_FUNCTIONS()' }),
+      body: JSON.stringify({ query: `SHOW FUNCTION ${name}` }),
+    });
+    
+    if (!response.ok) return null;
+    
+    const data = await response.json();
+    const f = data.result;
+    if (!f) return null;
+    
+    const body = f.definition || f.body || '';
+    
+    return {
+      name: f.name || name,
+      type: 'FUNCTION',
+      description: f.description || '',
+      return_type: f.return_type || f.returnType || '',
+      body: body.startsWith('CREATE') ? body : `CREATE ${body}`,
+      parameters: parseParameters(f.parameters),
+    };
+  } catch {
+    return null;
+  }
+}
+
+// Fetch functions using SHOW FUNCTIONS
+export async function fetchFunctions(): Promise<Skill[]> {
+  try {
+    const response = await fetch(`${API_BASE}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ query: 'SHOW FUNCTIONS' }),
     });
     
     if (!response.ok) {
@@ -149,29 +256,19 @@ export async function fetchFunctions(): Promise<Skill[]> {
     
     const data = await response.json();
     
-    let functions: Record<string, unknown>[] = [];
+    // SHOW FUNCTIONS returns { result: { functions: [...], count: n } }
+    const functionsList = data.result?.functions || [];
     
-    if (Array.isArray(data.result)) {
-      functions = data.result;
-    } else if (data.result && Array.isArray(data.result.rows)) {
-      functions = data.result.rows;
-    } else if (Array.isArray(data)) {
-      functions = data;
-    }
+    // Filter to only user-defined functions and fetch details
+    const userFunctions = functionsList.filter(
+      (f: Record<string, unknown>) => f.is_builtin !== true && f.isBuiltin !== true
+    );
     
-    // Filter to only show user-defined functions (not built-ins)
-    return functions
-      .filter((f: Record<string, unknown>) => f.is_builtin !== true && f.isBuiltin !== true)
-      .map((f: Record<string, unknown>) => ({
-        name: (f.name as string) || 'unknown',
-        type: 'FUNCTION' as const,
-        description: (f.description as string) || '',
-        return_type: (f.return_type as string) || (f.returnType as string) || '',
-        body: (f.body as string) || (f.definition as string) || '',
-        parameters: parseParameters(f.parameters || f.params),
-        created_at: f.created_at as string,
-        updated_at: f.updated_at as string,
-      }));
+    const detailedFunctions = await Promise.all(
+      userFunctions.map((f: Record<string, unknown>) => fetchFunctionDetails(f.name as string))
+    );
+    
+    return detailedFunctions.filter((f): f is Skill => f !== null);
   } catch {
     return [];
   }
