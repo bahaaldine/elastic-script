@@ -979,10 +979,13 @@ show_help() {
     echo "  --load-skills     Load sample Moltler skills"
     echo "  --notebooks       Start Jupyter notebooks"
     echo ""
-    echo "Kibana & Moltler Plugin:"
+    echo "Moltler Skills Manager:"
+    echo "  --moltler         Full setup: ES + demo data + Skills Manager UI (recommended)"
+    echo "  --ui              Start Skills Manager web UI only (http://localhost:3000)"
+    echo "  --stop-ui         Stop the web UI"
+    echo ""
+    echo "Kibana:"
     echo "  --kibana          Start pre-built Kibana (for APM/observability)"
-    echo "  --kibana-plugin   Start Kibana with Moltler Skills Manager plugin"
-    echo "                    (Requires Node.js 22+, first run downloads Kibana source)"
     echo ""
     echo "Observability:"
     echo "  --otel            Start OTEL Collector (for distributed tracing)"
@@ -1045,7 +1048,7 @@ stop_all() {
     stop_otel_collector
     stop_apm_server
     stop_kibana
-    stop_kibana_plugin
+    stop_moltler_ui
     stop_elasticsearch
 }
 
@@ -1285,262 +1288,136 @@ stop_kibana() {
 }
 
 # =============================================================================
-# Moltler Kibana Plugin (Full Kibana Development Mode)
+# Moltler Skills Manager Web UI
 # =============================================================================
 
-KIBANA_PLUGIN_DIR="$PROJECT_ROOT/kibana-plugin"
-KIBANA_SOURCE_DIR="$KIBANA_PLUGIN_DIR/kibana"
-REQUIRED_NODE_VERSION="22"
+MOLTLER_UI_DIR="$PROJECT_ROOT/moltler-ui"
+MOLTLER_UI_PORT=3000
+MOLTLER_UI_PID="$PROJECT_ROOT/.moltler_ui_pid"
+MOLTLER_UI_LOG="$PROJECT_ROOT/moltler-ui.log"
 
-# Fix macOS file descriptor limits for Kibana development
-fix_macos_ulimit() {
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # Check current limit
-        local CURRENT_LIMIT=$(ulimit -n)
-        if [ "$CURRENT_LIMIT" -lt 10240 ]; then
-            print_step "Increasing file descriptor limit (was $CURRENT_LIMIT)..."
-            ulimit -n 10240 2>/dev/null || true
-            print_success "File descriptor limit set to $(ulimit -n)"
-        fi
-    fi
-}
-
-# Check if correct Node version is available
-check_node_for_kibana_plugin() {
-    local NODE_VERSION=""
+# Setup Moltler UI (install dependencies)
+setup_moltler_ui() {
+    print_header "Setting up Moltler Skills Manager UI"
     
-    # Fix macOS ulimit first
-    fix_macos_ulimit
-    
-    # Check current Node version
-    if command -v node &> /dev/null; then
-        NODE_VERSION=$(node -v | sed 's/v//' | cut -d. -f1)
+    if [ ! -d "$MOLTLER_UI_DIR" ]; then
+        print_error "Moltler UI directory not found at $MOLTLER_UI_DIR"
+        return 1
     fi
     
-    if [ "$NODE_VERSION" = "$REQUIRED_NODE_VERSION" ]; then
-        return 0
-    fi
-    
-    # Try to use nvm to switch to correct version
-    if [ -f "$HOME/.nvm/nvm.sh" ]; then
-        print_step "Switching to Node $REQUIRED_NODE_VERSION via nvm..."
-        source "$HOME/.nvm/nvm.sh"
-        
-        # Check if version is installed
-        if nvm ls $REQUIRED_NODE_VERSION > /dev/null 2>&1; then
-            nvm use $REQUIRED_NODE_VERSION
-            return 0
-        else
-            print_step "Installing Node $REQUIRED_NODE_VERSION via nvm..."
-            nvm install $REQUIRED_NODE_VERSION
-            nvm use $REQUIRED_NODE_VERSION
-            return 0
-        fi
-    fi
-    
-    # Node version not available
-    print_error "Kibana plugin requires Node.js $REQUIRED_NODE_VERSION.x"
-    print_warning "Current: $(node -v 2>/dev/null || echo 'not installed')"
-    echo ""
-    echo "  To install the correct version:"
-    echo "    1. Install nvm: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash"
-    echo "    2. Run: nvm install $REQUIRED_NODE_VERSION && nvm use $REQUIRED_NODE_VERSION"
-    echo "    3. Re-run this script"
-    echo ""
-    return 1
-}
-
-# Setup Kibana from source with Moltler plugin
-setup_kibana_plugin() {
-    print_header "Setting up Moltler Kibana Plugin"
-    
-    # Check Node version
-    if ! check_node_for_kibana_plugin; then
+    # Check if Node.js is installed
+    if ! command -v node &> /dev/null; then
+        print_error "Node.js is required for Moltler UI"
+        echo "  Install Node.js 18+ from https://nodejs.org/"
         return 1
     fi
     
     print_success "Node.js $(node -v)"
     
-    # Check if yarn is installed
-    if ! command -v yarn &> /dev/null; then
-        print_step "Installing yarn..."
-        npm install -g yarn
-    fi
-    print_success "yarn $(yarn -v)"
-    
-    # Clone Kibana if not exists
-    if [ ! -d "$KIBANA_SOURCE_DIR" ]; then
-        print_step "Cloning Kibana repository (this takes several minutes)..."
-        print_warning "Repository size is ~2GB, please be patient..."
-        git clone --depth 1 https://github.com/elastic/kibana.git "$KIBANA_SOURCE_DIR"
-        print_success "Kibana cloned"
+    # Install dependencies if needed
+    if [ ! -d "$MOLTLER_UI_DIR/node_modules" ]; then
+        print_step "Installing dependencies..."
+        cd "$MOLTLER_UI_DIR"
+        npm install
+        print_success "Dependencies installed"
+        cd "$PROJECT_ROOT"
     else
-        print_success "Kibana source already present"
+        print_success "Dependencies already installed"
     fi
     
-    # Bootstrap Kibana first (needed before we can use generate_plugin)
-    if [ ! -d "$KIBANA_SOURCE_DIR/node_modules/@kbn" ]; then
-        print_step "Bootstrapping Kibana (this takes 5-10 minutes on first run)..."
-        cd "$KIBANA_SOURCE_DIR"
-        yarn kbn bootstrap
-        print_success "Kibana bootstrapped"
-    else
-        print_success "Kibana already bootstrapped"
-    fi
-    
-    # Generate Moltler plugin using Kibana's official generator
-    # https://www.elastic.co/docs/extend/kibana/plugin-tooling
-    local PLUGIN_PATH="$KIBANA_SOURCE_DIR/plugins/moltler"
-    
-    if [ ! -d "$PLUGIN_PATH" ]; then
-        print_step "Generating Moltler plugin using Kibana plugin generator..."
-        cd "$KIBANA_SOURCE_DIR"
-        
-        # Run the generator non-interactively with CLI options
-        node scripts/generate_plugin --name moltler --ui --server --yes
-        
-        if [ -d "$PLUGIN_PATH" ]; then
-            print_success "Moltler plugin generated successfully"
-        else
-            print_error "Failed to generate plugin"
-            cd "$PROJECT_ROOT"
-            return 1
-        fi
-    else
-        print_success "Moltler plugin already exists"
-    fi
-    
-    cd "$PROJECT_ROOT"
     return 0
 }
 
-# Start Kibana with Moltler plugin
-start_kibana_with_plugin() {
-    print_header "Starting Kibana with Moltler Skills Manager"
-    
-    # Fix macOS file descriptor limits (prevents EMFILE errors)
-    fix_macos_ulimit
-    
-    # Check Node version
-    if ! check_node_for_kibana_plugin; then
-        return 1
-    fi
+# Start Moltler UI
+start_moltler_ui() {
+    print_header "Starting Moltler Skills Manager UI"
     
     # Setup if needed
-    if [ ! -d "$KIBANA_SOURCE_DIR/node_modules" ]; then
-        setup_kibana_plugin
-    fi
-    
-    # Ensure plugin exists (generate if needed)
-    local PLUGIN_PATH="$KIBANA_SOURCE_DIR/plugins/moltler"
-    
-    if [ ! -d "$PLUGIN_PATH" ]; then
-        print_step "Generating Moltler plugin..."
-        cd "$KIBANA_SOURCE_DIR"
-        node scripts/generate_plugin --name moltler --ui --server --yes
-        cd "$PROJECT_ROOT"
-        
-        if [ ! -d "$PLUGIN_PATH" ]; then
-            print_error "Failed to generate plugin"
-            return 1
-        fi
-        
-        # Clear optimizer caches since we have a new plugin
-        print_step "Clearing optimizer caches for new plugin..."
-        find "$KIBANA_SOURCE_DIR" -name ".kbn-optimizer-cache" -type f -delete 2>/dev/null
-        print_success "Plugin generated (optimizer will build on startup)"
-    else
-        print_success "Moltler plugin ready"
-    fi
+    setup_moltler_ui || return 1
     
     # Check if already running
-    if curl -s http://localhost:5601/api/status > /dev/null 2>&1; then
-        print_success "Kibana already running at http://localhost:5601"
+    if curl -s http://localhost:$MOLTLER_UI_PORT > /dev/null 2>&1; then
+        print_success "Moltler UI already running at http://localhost:$MOLTLER_UI_PORT"
         return 0
     fi
     
-    print_step "Starting Kibana in background..."
-    cd "$KIBANA_SOURCE_DIR"
+    # Check if Elasticsearch is running
+    if ! curl -s -u elastic-admin:elastic-password http://localhost:9200 > /dev/null 2>&1; then
+        print_warning "Elasticsearch not running. Starting it first..."
+        start_elasticsearch_background
+        print_step "Waiting for Elasticsearch..."
+        for i in {1..30}; do
+            if curl -s -u elastic-admin:elastic-password http://localhost:9200 > /dev/null 2>&1; then
+                print_success "Elasticsearch ready"
+                break
+            fi
+            sleep 2
+            echo -n "."
+        done
+        echo ""
+    fi
     
-    # Set Elasticsearch credentials for Kibana
-    export ELASTICSEARCH_HOSTS="http://localhost:9200"
-    export ELASTICSEARCH_USERNAME="elastic-admin"
-    export ELASTICSEARCH_PASSWORD="elastic-password"
+    print_step "Starting Moltler UI in background..."
+    cd "$MOLTLER_UI_DIR"
     
-    # Create a wrapper script that sets ulimit before starting Kibana
-    # This is necessary because ulimit must be set in the same shell
-    # that runs the process, not a parent shell
-    cat > /tmp/start-kibana.sh << KIBANA_SCRIPT
-#!/bin/bash
-# Increase file descriptor limit for macOS (Kibana needs many open files)
-ulimit -n 65536 2>/dev/null || ulimit -n 10240 2>/dev/null || true
-
-# Source nvm if available to get the correct Node.js version
-export NVM_DIR="\$HOME/.nvm"
-[ -s "\$NVM_DIR/nvm.sh" ] && . "\$NVM_DIR/nvm.sh"
-nvm use $REQUIRED_NODE_VERSION 2>/dev/null || true
-
-cd "$KIBANA_SOURCE_DIR"
-exec yarn start \\
-    --no-base-path \\
-    --no-watch \\
-    --elasticsearch.hosts=http://localhost:9200 \\
-    --elasticsearch.username=elastic-admin \\
-    --elasticsearch.password=elastic-password
-KIBANA_SCRIPT
-    chmod +x /tmp/start-kibana.sh
+    nohup npm run dev -- --host > "$MOLTLER_UI_LOG" 2>&1 &
+    UI_PID=$!
+    echo $UI_PID > "$MOLTLER_UI_PID"
     
-    # Start Kibana with:
-    # --no-watch: Disable file watching (prevents restart loops)
-    # --no-base-path: Direct access without proxy
-    # ulimit is set inside the script for proper inheritance
-    nohup /tmp/start-kibana.sh > "$PROJECT_ROOT/kibana-plugin.log" 2>&1 &
-    KIBANA_PID=$!
-    echo $KIBANA_PID > "$PROJECT_ROOT/.kibana_plugin_pid"
+    print_step "Waiting for UI to be ready..."
     
-    print_step "Waiting for Kibana to be ready..."
-    print_step "(First run builds bundles - may take 2-3 minutes)"
-    
-    for i in {1..180}; do
-        if curl -s http://localhost:5601/api/status > /dev/null 2>&1; then
+    for i in {1..30}; do
+        if curl -s http://localhost:$MOLTLER_UI_PORT > /dev/null 2>&1; then
             echo ""
-            print_success "Kibana with Moltler plugin is ready!"
+            print_success "Moltler Skills Manager UI is ready!"
             echo ""
-            echo "  Open: http://localhost:5601"
-            echo "  Find 'Moltler' in the sidebar under Management"
+            echo "  ⚡ Open: http://localhost:$MOLTLER_UI_PORT"
+            echo ""
+            echo "  Features:"
+            echo "    - View all skills as a sortable, filterable table"
+            echo "    - Click a skill to see its details in a flyout panel"
+            echo "    - Edit skills with Monaco editor (syntax highlighting + autocomplete)"
+            echo "    - Create new procedures and functions"
+            echo "    - Execute skills directly from the UI"
             echo ""
             cd "$PROJECT_ROOT"
             return 0
         fi
-        sleep 2
+        sleep 1
         echo -n "."
     done
     
     echo ""
-    print_warning "Kibana taking longer than expected. Check kibana-plugin.log"
+    print_warning "UI taking longer than expected. Check moltler-ui.log"
     print_step "Tail of log:"
-    tail -10 "$PROJECT_ROOT/kibana-plugin.log" 2>/dev/null || true
+    tail -10 "$MOLTLER_UI_LOG" 2>/dev/null || true
     cd "$PROJECT_ROOT"
     return 1
 }
 
-# Stop Kibana plugin
-stop_kibana_plugin() {
-    print_header "Stopping Kibana Plugin"
+# Stop Moltler UI
+stop_moltler_ui() {
+    print_header "Stopping Moltler Skills Manager UI"
     
-    if [ -f "$PROJECT_ROOT/.kibana_plugin_pid" ]; then
-        PID=$(cat "$PROJECT_ROOT/.kibana_plugin_pid")
+    if [ -f "$MOLTLER_UI_PID" ]; then
+        PID=$(cat "$MOLTLER_UI_PID")
         if kill -0 $PID 2>/dev/null; then
             kill $PID
-            rm "$PROJECT_ROOT/.kibana_plugin_pid"
-            print_success "Kibana plugin stopped"
+            rm "$MOLTLER_UI_PID"
+            print_success "Moltler UI stopped"
         else
-            print_warning "Kibana plugin process not found"
-            rm "$PROJECT_ROOT/.kibana_plugin_pid"
+            print_warning "Moltler UI process not found"
+            rm "$MOLTLER_UI_PID"
         fi
     else
-        # Also try the regular stop
-        stop_kibana
+        # Try to find and kill by port
+        PID=$(lsof -ti:$MOLTLER_UI_PORT 2>/dev/null)
+        if [ -n "$PID" ]; then
+            kill $PID 2>/dev/null
+            print_success "Moltler UI stopped (port $MOLTLER_UI_PORT)"
+        else
+            print_warning "Moltler UI not running"
+        fi
     fi
 }
 
@@ -1934,6 +1811,15 @@ check_status() {
         print_warning "Not running"
     fi
     
+    # Moltler UI
+    echo ""
+    echo "Moltler Skills Manager UI (port 3000):"
+    if curl -s http://localhost:3000 > /dev/null 2>&1; then
+        print_success "Running at http://localhost:3000"
+    else
+        print_warning "Not running"
+    fi
+    
     # Jupyter
     echo ""
     echo "Jupyter (port 8888):"
@@ -1994,12 +1880,9 @@ case "${1:-}" in
     --kibana)
         start_kibana_background
         ;;
-    --kibana-plugin)
-        # Full setup: ES + Demo + Kibana with Moltler plugin - ONE COMMAND
-        print_header "🦌 Moltler Full Setup (ES + Kibana Plugin)"
-        
-        # Fix file descriptor limit for macOS
-        fix_macos_ulimit
+    --moltler)
+        # Full setup: ES + Demo + Moltler UI - ONE COMMAND
+        print_header "⚡ Moltler Full Setup (ES + Skills Manager UI)"
         
         # 1. Check prerequisites (includes submodule init)
         check_prerequisites
@@ -2038,21 +1921,23 @@ case "${1:-}" in
         fi
         cd "$PROJECT_ROOT"
         
-        # 6. Setup and start Kibana with plugin
-        setup_kibana_plugin && start_kibana_with_plugin
+        # 6. Start Moltler Skills Manager UI
+        start_moltler_ui
         
         # 7. Final summary
         echo ""
         print_header "🎉 Moltler is Ready!"
-        echo "  Elasticsearch: http://localhost:9200"
-        echo "  Kibana:        http://localhost:5601"
+        echo "  Elasticsearch:        http://localhost:9200"
+        echo "  Skills Manager UI:    http://localhost:$MOLTLER_UI_PORT"
         echo ""
-        echo "  Open Kibana and find 'Moltler' in the sidebar"
-        echo "  Your skills are waiting for you!"
+        echo "  Open the Skills Manager to view, edit, and run your skills!"
         echo ""
         ;;
-    --setup-kibana-plugin)
-        setup_kibana_plugin
+    --ui)
+        start_moltler_ui
+        ;;
+    --stop-ui)
+        stop_moltler_ui
         ;;
     --no-otel)
         EDOT_ENABLED=false
@@ -2063,7 +1948,6 @@ case "${1:-}" in
         ;;
     --stop-kibana)
         stop_kibana
-        stop_kibana_plugin
         ;;
     --otel)
         start_otel_collector

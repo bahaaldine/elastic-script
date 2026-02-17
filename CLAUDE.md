@@ -416,81 +416,82 @@ This principle applies to ALL future development:
 
 ---
 
-## 🖥️ Kibana Skills Manager Plugin (📋 Planned)
+## 🖥️ Moltler Skills Manager Web UI (✅ Implemented)
 
 ### Overview
-Dedicated Kibana plugin for visual skills management. Stored in `kibana-plugin/` folder - optional component that users can choose to install.
+Modern React-based web UI for visual skills management. Standalone web application that communicates directly with the elastic-script API.
 
-### Directory Structure (Planned)
+### Features
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **Skills Table** | ✅ Done | Sortable, filterable table with pagination (TanStack Table) |
+| **Search & Filter** | ✅ Done | Global search across all skill properties |
+| **Skill Details Panel** | ✅ Done | Flyout showing full skill definition, parameters |
+| **Monaco Editor** | ✅ Done | Full editor with elastic-script syntax highlighting |
+| **Autocomplete** | ✅ Done | Keywords, built-in functions, language constructs |
+| **Execute Skills** | ✅ Done | Run skills directly from the UI |
+| **Dark/Light Mode** | ✅ Done | Toggle between themes |
+| **Create Skills** | ✅ Done | Create new procedures and functions |
+
+### Tech Stack
+- **React 19** + TypeScript
+- **Vite** (fast dev server and build)
+- **Tailwind CSS 4** + Radix UI components
+- **TanStack Table** (powerful data tables)
+- **Monaco Editor** (VS Code's editor)
+- **React Query** (data fetching and caching)
+
+### Directory Structure
 ```
 elastic-script/
-├── kibana-plugin/                    # Separate folder for Kibana plugin
-│   ├── kibana/                       # Kibana source (git submodule)
-│   ├── plugins/moltler/              # The actual plugin
-│   │   ├── public/                   # Browser-side code
-│   │   │   ├── application.tsx       # Main app entry
-│   │   │   ├── components/
-│   │   │   │   ├── SkillsList.tsx    # Skills table/grid
-│   │   │   │   ├── SkillEditor.tsx   # Monaco-based editor
-│   │   │   │   ├── SkillTester.tsx   # Test execution panel
-│   │   │   │   └── ContextBrowser.tsx # Indices/workflows explorer
-│   │   │   └── services/
-│   │   │       └── api.ts            # REST API client
-│   │   ├── server/                   # Server-side code
-│   │   │   ├── plugin.ts             # Plugin registration
-│   │   │   └── routes/               # Proxy routes to ES
-│   │   ├── common/                   # Shared types
-│   │   ├── kibana.json               # Plugin manifest
-│   │   └── tsconfig.json
-│   ├── scripts/
-│   │   └── install-kibana-plugin.sh  # Setup script
-│   └── README.md                     # Plugin documentation
+├── moltler-ui/                       # Standalone web UI
+│   ├── src/
+│   │   ├── api/                      # API client for elastic-script
+│   │   │   └── skills.ts
+│   │   ├── components/
+│   │   │   ├── skills/               # Skill-specific components
+│   │   │   │   ├── SkillsTable.tsx   # Main table view
+│   │   │   │   ├── SkillDetail.tsx   # Detail flyout panel
+│   │   │   │   └── SkillEditor.tsx   # Monaco editor with elastic-script
+│   │   │   └── ui/                   # Reusable UI components
+│   │   │       ├── button.tsx
+│   │   │       ├── table.tsx
+│   │   │       ├── sheet.tsx         # Flyout panels
+│   │   │       └── ...
+│   │   ├── lib/utils.ts              # Utilities
+│   │   ├── App.tsx                   # Main application
+│   │   └── index.css                 # Tailwind styles
+│   ├── index.html
+│   ├── vite.config.ts                # Vite config with API proxy
+│   ├── package.json
+│   └── README.md
 ```
 
-### Phase 1: Skills Viewer (P0)
-| Feature | Status | Description |
-|---------|--------|-------------|
-| **Skills List View** | 📋 Planned | Table of all skills with name, description, version, author |
-| **Skill Details Panel** | 📋 Planned | Full skill definition, parameters, return type |
-| **Search & Filter** | 📋 Planned | Filter by name, tags, author |
-| **Run Skill** | 📋 Planned | Execute skill with parameter inputs, view results |
-| **Elastic EUI** | 📋 Planned | Built entirely with Elastic EUI components |
-
-### Phase 2: Skills Editor (P1)
-| Feature | Status | Description |
-|---------|--------|-------------|
-| **Monaco Editor** | 📋 Planned | Full elastic-script editor in Kibana |
-| **Syntax Highlighting** | 📋 Planned | Grammar-aware highlighting for elastic-script |
-| **Autocomplete** | 📋 Planned | Keywords, functions, indices, connectors |
-| **Inline Validation** | 📋 Planned | Real-time syntax error detection |
-| **Test Panel** | 📋 Planned | Write and run tests inline |
-| **Save & Version** | 📋 Planned | Version management for skills |
-
-### Phase 3: Context Browser (P1)
-| Feature | Status | Description |
-|---------|--------|-------------|
-| **Index Explorer** | 📋 Planned | Browse available indices with field info |
-| **Workflow Viewer** | 📋 Planned | See connected workflows/pipelines |
-| **Agent Status** | 📋 Planned | View agent health and recent executions |
-| **Connector Status** | 📋 Planned | Connectivity status for all connectors |
-
-### Installation Script Requirements
+### Quick Start
 ```bash
-# scripts/install-kibana-plugin.sh should:
-# 1. Clone Kibana repo (matching ES version)
-# 2. Symlink moltler plugin into plugins/
-# 3. Build the plugin
-# 4. Provide instructions for starting Kibana
+# Full setup: Elasticsearch + demo data + Skills Manager UI
+./scripts/quick-start.sh --moltler
 
-./scripts/install-kibana-plugin.sh
-# Output: Kibana ready at http://localhost:5601 with Moltler plugin
+# Or just start the UI (requires ES to be running)
+./scripts/quick-start.sh --ui
+
+# Open in browser
+open http://localhost:3000
 ```
 
-### Research Needed
-- Kibana plugin development guide: https://www.elastic.co/guide/en/kibana/current/kibana-plugins.html
-- Elastic EUI: https://elastic.github.io/eui/
-- Monaco Editor integration in Kibana (Dev Tools example)
-- Custom language support for Monaco (TextMate grammars or Monarch)
+### Development
+```bash
+cd moltler-ui
+npm install
+npm run dev    # Development server on port 3000
+npm run build  # Production build
+```
+
+### API Proxy
+The UI proxies API requests through Vite to avoid CORS issues:
+- `GET /api/skills` → `GET /_escript/skills`
+- `POST /api/skills/{name}/_invoke` → `POST /_escript/skills/{name}/_invoke`
+- `POST /api` → `POST /_escript` (raw query execution)
 
 ---
 
@@ -576,7 +577,7 @@ elastic-script/
 ## 🔍 Context Awareness (📋 Planned)
 
 ### Goal
-CLI and Kibana plugin should automatically discover and expose what's available in the cluster.
+CLI and Skills Manager UI should automatically discover and expose what's available in the cluster.
 
 ### Discovery Sources
 
@@ -874,9 +875,9 @@ These are the highest-impact items for user adoption:
 | Priority | Feature | Impact | Effort |
 |----------|---------|--------|--------|
 | **P0** | MCP Server for Skills | AI agents can use skills directly | Medium |
-| **P0** | Kibana Plugin (Phase 1) | Visual skill management | Medium |
+| ✅ | Skills Manager Web UI | Visual skill management | Done |
 | **P1** | Context Awareness in CLI | Better autocomplete, discovery | Low |
-| **P1** | Kibana Skills Editor | Create skills visually | Medium |
+| ✅ | Skills Editor with Monaco | Create/edit skills visually | Done |
 | **P2** | Public API Connectors | More demo options | Low each |
 
 **Guiding Principle**: Every feature must pass the "60-second value" test - can a new user see meaningful results within one minute?
