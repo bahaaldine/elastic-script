@@ -1396,9 +1396,8 @@ setup_kibana_plugin() {
         print_step "Generating Moltler plugin using Kibana plugin generator..."
         cd "$KIBANA_SOURCE_DIR"
         
-        # Run the generator with answers piped in
-        # The generator asks: plugin name, should it have a UI, should it have server, description
-        printf 'moltler\nMoltler Skills Manager\ny\ny\n' | node scripts/generate_plugin moltler
+        # Run the generator non-interactively with CLI options
+        node scripts/generate_plugin --name moltler --ui --server --yes
         
         if [ -d "$PLUGIN_PATH" ]; then
             print_success "Moltler plugin generated successfully"
@@ -1438,7 +1437,7 @@ start_kibana_with_plugin() {
     if [ ! -d "$PLUGIN_PATH" ]; then
         print_step "Generating Moltler plugin..."
         cd "$KIBANA_SOURCE_DIR"
-        printf 'moltler\nMoltler Skills Manager\ny\ny\n' | node scripts/generate_plugin moltler
+        node scripts/generate_plugin --name moltler --ui --server --yes
         cd "$PROJECT_ROOT"
         
         if [ ! -d "$PLUGIN_PATH" ]; then
