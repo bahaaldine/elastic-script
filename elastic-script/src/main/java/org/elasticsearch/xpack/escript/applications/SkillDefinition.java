@@ -47,6 +47,8 @@ public class SkillDefinition implements Writeable, ToXContentObject {
     private String author;
     private List<String> tags;
     private List<String> dependencies;
+    private String documentation;  // Auto-generated skill.md content
+    private String sourceCode;     // The CREATE SKILL source code
 
     public SkillDefinition(
         String name,
@@ -134,6 +136,12 @@ public class SkillDefinition implements Writeable, ToXContentObject {
         if (!examples.isEmpty()) {
             builder.field("examples", examples);
         }
+        if (documentation != null) {
+            builder.field("documentation", documentation);
+        }
+        if (sourceCode != null) {
+            builder.field("source_code", sourceCode);
+        }
         builder.endObject();
         return builder;
     }
@@ -198,6 +206,148 @@ public class SkillDefinition implements Writeable, ToXContentObject {
     
     public void setDependencies(List<String> dependencies) {
         this.dependencies = dependencies != null ? List.copyOf(dependencies) : null;
+    }
+    
+    public String getDocumentation() {
+        return documentation;
+    }
+    
+    public void setDocumentation(String documentation) {
+        this.documentation = documentation;
+    }
+    
+    public String getSourceCode() {
+        return sourceCode;
+    }
+    
+    public void setSourceCode(String sourceCode) {
+        this.sourceCode = sourceCode;
+    }
+    
+    /**
+     * Generates rich documentation (skill.md) for this skill.
+     * This includes the user-provided description enhanced with
+     * implementation details, parameter documentation, and usage examples.
+     */
+    public String generateDocumentation() {
+        StringBuilder md = new StringBuilder();
+        
+        // Header
+        md.append("# ").append(name).append("\n\n");
+        
+        // Badges
+        if (version != null) {
+            md.append("![Version](https://img.shields.io/badge/version-").append(version).append("-blue) ");
+        }
+        if (author != null) {
+            md.append("![Author](https://img.shields.io/badge/author-").append(author.replace(" ", "%20")).append("-green) ");
+        }
+        if (tags != null && !tags.isEmpty()) {
+            for (String tag : tags) {
+                md.append("![").append(tag).append("](https://img.shields.io/badge/tag-").append(tag).append("-lightgrey) ");
+            }
+        }
+        md.append("\n\n");
+        
+        // Description
+        md.append("## Description\n\n");
+        md.append(description != null ? description : "No description provided.").append("\n\n");
+        
+        // Parameters
+        if (!parameters.isEmpty()) {
+            md.append("## Parameters\n\n");
+            md.append("| Name | Type | Required | Default | Description |\n");
+            md.append("|------|------|----------|---------|-------------|\n");
+            for (SkillParameter param : parameters) {
+                md.append("| `").append(param.getName()).append("` ");
+                md.append("| `").append(param.getType() != null ? param.getType() : "STRING").append("` ");
+                md.append("| ").append(param.isRequired() ? "Yes" : "No").append(" ");
+                md.append("| ").append(param.getDefaultValue() != null ? "`" + param.getDefaultValue() + "`" : "-").append(" ");
+                md.append("| ").append(param.getDescription() != null ? param.getDescription() : "-").append(" |\n");
+            }
+            md.append("\n");
+        }
+        
+        // Returns
+        if (returnType != null) {
+            md.append("## Returns\n\n");
+            md.append("**Type:** `").append(returnType).append("`\n\n");
+        }
+        
+        // Usage
+        md.append("## Usage\n\n");
+        md.append("### Via MCP (AI Agents)\n\n");
+        md.append("```json\n");
+        md.append("{\n");
+        md.append("  \"method\": \"tools/call\",\n");
+        md.append("  \"params\": {\n");
+        md.append("    \"name\": \"").append(name).append("\",\n");
+        md.append("    \"arguments\": {");
+        if (!parameters.isEmpty()) {
+            md.append("\n");
+            for (int i = 0; i < parameters.size(); i++) {
+                SkillParameter p = parameters.get(i);
+                md.append("      \"").append(p.getName()).append("\": ");
+                if ("NUMBER".equalsIgnoreCase(p.getType())) {
+                    md.append(p.getDefaultValue() != null ? p.getDefaultValue() : "0");
+                } else if ("BOOLEAN".equalsIgnoreCase(p.getType())) {
+                    md.append(p.getDefaultValue() != null ? p.getDefaultValue() : "true");
+                } else {
+                    md.append("\"").append(p.getDefaultValue() != null ? p.getDefaultValue() : "value").append("\"");
+                }
+                if (i < parameters.size() - 1) md.append(",");
+                md.append("\n");
+            }
+            md.append("    ");
+        }
+        md.append("}\n");
+        md.append("  }\n");
+        md.append("}\n");
+        md.append("```\n\n");
+        
+        md.append("### Via elastic-script\n\n");
+        md.append("```sql\n");
+        md.append("-- Direct procedure call\n");
+        md.append("CALL ").append(procedureName).append("(");
+        for (int i = 0; i < procedureArgs.size(); i++) {
+            if (i > 0) md.append(", ");
+            md.append(procedureArgs.get(i));
+        }
+        md.append(");\n");
+        md.append("```\n\n");
+        
+        // Implementation details
+        md.append("## Implementation\n\n");
+        md.append("This skill wraps the `").append(procedureName).append("` procedure.\n\n");
+        if (sourceCode != null && !sourceCode.isEmpty()) {
+            md.append("```sql\n");
+            md.append(sourceCode).append("\n");
+            md.append("```\n\n");
+        }
+        
+        // Examples
+        if (!examples.isEmpty()) {
+            md.append("## Examples\n\n");
+            for (String example : examples) {
+                md.append("- ").append(example).append("\n");
+            }
+            md.append("\n");
+        }
+        
+        // Dependencies
+        if (dependencies != null && !dependencies.isEmpty()) {
+            md.append("## Dependencies\n\n");
+            for (String dep : dependencies) {
+                md.append("- `").append(dep).append("`\n");
+            }
+            md.append("\n");
+        }
+        
+        // Footer
+        md.append("---\n\n");
+        md.append("*Generated by Moltler Skills Manager*\n");
+        
+        return md.toString();
     }
 
     /**

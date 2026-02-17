@@ -245,6 +245,12 @@ public class SkillRegistry {
         String procedureName = (String) source.get("procedure");
         List<String> procedureArgs = (List<String>) source.get("procedure_args");
         List<String> examples = (List<String>) source.get("examples");
+        String version = (String) source.get("version");
+        String author = (String) source.get("author");
+        List<String> tags = (List<String>) source.get("tags");
+        List<String> dependencies = (List<String>) source.get("dependencies");
+        String documentation = (String) source.get("documentation");
+        String sourceCode = (String) source.get("source_code");
 
         List<SkillDefinition.SkillParameter> params = new ArrayList<>();
         List<Map<String, Object>> paramsData = (List<Map<String, Object>>) source.get("parameters");
@@ -260,7 +266,7 @@ public class SkillRegistry {
             }
         }
 
-        return new SkillDefinition(
+        SkillDefinition skill = new SkillDefinition(
             name,
             description,
             params,
@@ -269,5 +275,15 @@ public class SkillRegistry {
             procedureArgs != null ? procedureArgs : List.of(),
             examples != null ? examples : List.of()
         );
+        
+        // Set extended metadata
+        skill.setVersion(version);
+        skill.setAuthor(author);
+        skill.setTags(tags);
+        skill.setDependencies(dependencies);
+        skill.setDocumentation(documentation);
+        skill.setSourceCode(sourceCode);
+        
+        return skill;
     }
 }

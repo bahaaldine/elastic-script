@@ -15,6 +15,8 @@ export interface Skill {
   application?: string;
   parameters?: Parameter[];
   body?: string;
+  documentation?: string;  // Generated skill.md content
+  source_code?: string;    // Original source code
   mcp_spec?: Record<string, unknown>;
   created_at?: string;
   updated_at?: string;
@@ -68,12 +70,14 @@ async function fetchSkillDetails(name: string): Promise<Skill | null> {
     const s = data.result;
     if (!s) return null;
     
-    // Generate a representation of the CREATE SKILL command
-    const params = (s.parameters || []).map((p: Record<string, unknown>) => 
-      `${p.name} ${p.type}${p.default !== undefined ? ` DEFAULT ${JSON.stringify(p.default)}` : ''}`
-    ).join(', ');
-    
-    const body = `CREATE SKILL ${s.name}
+    // Use source_code if available, otherwise generate a representation
+    let body = s.source_code as string;
+    if (!body) {
+      const params = (s.parameters || []).map((p: Record<string, unknown>) => 
+        `${p.name} ${p.type}${p.default !== undefined ? ` DEFAULT ${JSON.stringify(p.default)}` : ''}`
+      ).join(', ');
+      
+      body = `CREATE SKILL ${s.name}
   VERSION '1.0'
   DESCRIPTION '${(s.description || '').replace(/'/g, "''")}'
   ${s.author ? `AUTHOR '${s.author}'` : ''}
@@ -84,6 +88,8 @@ BEGIN
   -- This skill wraps procedure: ${s.procedure || s.name}
   CALL ${s.procedure || s.name}();
 END SKILL;`;
+      body = body.replace(/\n\s*\n/g, '\n'); // Remove empty lines
+    }
 
     return {
       name: s.name,
@@ -101,7 +107,9 @@ END SKILL;`;
         required: p.required as boolean,
         default: p.default,
       })),
-      body: body.replace(/\n\s*\n/g, '\n'), // Remove empty lines
+      body: body,
+      documentation: s.documentation as string,
+      source_code: s.source_code as string,
     };
   } catch {
     return null;

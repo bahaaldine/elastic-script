@@ -139,6 +139,38 @@ public class SkillStatementHandler {
         skill.setTags(tags);
         skill.setDependencies(requires);
         
+        // Capture source code from the parse context
+        String sourceCode = ctx.getText();
+        // Try to reconstruct a readable version
+        StringBuilder readableSource = new StringBuilder();
+        readableSource.append("CREATE SKILL ").append(skillName).append("\n");
+        readableSource.append("  VERSION '").append(version).append("'\n");
+        if (description != null) {
+            readableSource.append("  DESCRIPTION '").append(description).append("'\n");
+        }
+        if (author != null) {
+            readableSource.append("  AUTHOR '").append(author).append("'\n");
+        }
+        if (tags != null && !tags.isEmpty()) {
+            readableSource.append("  TAGS [").append(tags.stream().map(t -> "'" + t + "'").collect(Collectors.joining(", "))).append("]\n");
+        }
+        if (!parameters.isEmpty()) {
+            readableSource.append("  (").append(parameters.stream()
+                .map(p -> p.getName() + " " + p.getType() + (p.getDefaultValue() != null ? " DEFAULT " + p.getDefaultValue() : ""))
+                .collect(Collectors.joining(", "))).append(")\n");
+        }
+        if (returnType != null) {
+            readableSource.append("  RETURNS ").append(returnType).append("\n");
+        }
+        readableSource.append("BEGIN\n");
+        readableSource.append("  -- Implementation\n");
+        readableSource.append("END SKILL;");
+        skill.setSourceCode(readableSource.toString());
+        
+        // Generate documentation
+        String documentation = skill.generateDocumentation();
+        skill.setDocumentation(documentation);
+        
         LOGGER.debug("Creating skill: {} v{}", skillName, version);
         
         // Save to registry
