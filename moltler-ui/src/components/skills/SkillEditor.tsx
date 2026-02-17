@@ -28,6 +28,7 @@ interface SkillEditorProps {
   onSave: (skill: Skill) => Promise<void>
   onExecute: (code: string) => Promise<ExecutionResult>
   isNew?: boolean
+  createType?: 'PROCEDURE' | 'FUNCTION' | 'SKILL'
 }
 
 // Register elastic-script language for Monaco
@@ -39,13 +40,15 @@ const registerElasticScriptLanguage = (monaco: typeof import('monaco-editor')) =
   monaco.languages.setMonarchTokensProvider('elasticscript', {
     ignoreCase: true,
     keywords: [
-      'CREATE', 'PROCEDURE', 'FUNCTION', 'BEGIN', 'END', 'DECLARE', 'VAR', 'CONST',
+      'CREATE', 'PROCEDURE', 'FUNCTION', 'SKILL', 'BEGIN', 'END', 'DECLARE', 'VAR', 'CONST',
+      'VERSION', 'DESCRIPTION', 'AUTHOR', 'TAGS', 'RETURNS', 'REQUIRES', 'DEFAULT',
       'IF', 'THEN', 'ELSE', 'ELSEIF', 'ENDIF', 'FOR', 'LOOP', 'WHILE', 'DO',
       'IN', 'OUT', 'INOUT', 'RETURN', 'CALL', 'PRINT', 'SET',
       'TRY', 'CATCH', 'FINALLY', 'THROW', 'EXCEPTION',
       'ON_DONE', 'ON_FAIL', 'TRACK', 'TIMEOUT', 'PARALLEL', 'EXECUTION',
       'STATUS', 'CANCEL', 'RETRY', 'WAIT', 'CURSOR', 'FETCH', 'INTO', 'FROM',
       'TRUE', 'FALSE', 'NULL', 'AND', 'OR', 'NOT', 'AS', 'IS',
+      'DROP', 'SHOW', 'SKILLS', 'PACK',
     ],
     builtinFunctions: [
       'LENGTH', 'SUBSTR', 'UPPER', 'LOWER', 'TRIM', 'REPLACE', 'CONCAT',
@@ -131,10 +134,14 @@ const registerElasticScriptLanguage = (monaco: typeof import('monaco-editor')) =
       }
 
       const keywords = [
-        'CREATE PROCEDURE', 'BEGIN', 'END PROCEDURE', 'DECLARE', 'VAR', 'CONST',
+        'CREATE PROCEDURE', 'CREATE FUNCTION', 'CREATE SKILL', 
+        'BEGIN', 'END PROCEDURE', 'END FUNCTION', 'END SKILL',
+        'VERSION', 'DESCRIPTION', 'AUTHOR', 'TAGS', 'RETURNS', 'REQUIRES', 'DEFAULT',
+        'DECLARE', 'VAR', 'CONST',
         'IF', 'THEN', 'ELSE', 'ELSEIF', 'ENDIF', 'FOR', 'LOOP', 'END LOOP',
         'WHILE', 'DO', 'RETURN', 'CALL', 'PRINT', 'SET',
         'TRY', 'CATCH', 'FINALLY', 'ON_DONE', 'ON_FAIL', 'TRACK',
+        'DROP PROCEDURE', 'DROP FUNCTION', 'DROP SKILL', 'SHOW SKILLS',
       ]
 
       const functions = [
@@ -164,6 +171,34 @@ const registerElasticScriptLanguage = (monaco: typeof import('monaco-editor')) =
   })
 }
 
+const TEMPLATES = {
+  PROCEDURE: `CREATE PROCEDURE my_procedure()
+BEGIN
+  -- Your code here
+  PRINT 'Hello from Moltler!';
+END PROCEDURE;`,
+  FUNCTION: `CREATE FUNCTION my_function(value NUMBER)
+RETURNS NUMBER
+AS
+BEGIN
+  -- Your code here
+  RETURN value * 2;
+END FUNCTION;`,
+  SKILL: `CREATE SKILL my_skill
+  VERSION '1.0'
+  DESCRIPTION 'A brief description of what this skill does'
+  AUTHOR 'Your Name'
+  TAGS ['demo', 'example']
+  (param1 STRING DEFAULT 'default_value')
+  RETURNS STRING
+BEGIN
+  -- Your skill implementation
+  -- Skills can call procedures: CALL my_procedure();
+  -- Or run ES|QL queries: SET result = ESQL_QUERY('FROM logs-* | LIMIT 10');
+  RETURN 'Hello from ' || param1;
+END SKILL;`,
+}
+
 export function SkillEditor({
   skill,
   isOpen,
@@ -171,6 +206,7 @@ export function SkillEditor({
   onSave,
   onExecute,
   isNew = false,
+  createType = 'PROCEDURE',
 }: SkillEditorProps) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -188,15 +224,18 @@ export function SkillEditor({
     } else if (isNew) {
       setName('')
       setDescription('')
-      setCode(`CREATE PROCEDURE my_skill()
-BEGIN
-  -- Your code here
-  PRINT 'Hello from Moltler!';
-END PROCEDURE;`)
+      setCode(TEMPLATES[createType] || TEMPLATES.PROCEDURE)
     }
     setOutput(null)
     setError(null)
-  }, [skill, isNew])
+  }, [skill, isNew, createType])
+
+  const detectType = (code: string): 'PROCEDURE' | 'FUNCTION' | 'SKILL' => {
+    const upper = code.toUpperCase()
+    if (upper.includes('CREATE SKILL')) return 'SKILL'
+    if (upper.includes('CREATE FUNCTION')) return 'FUNCTION'
+    return 'PROCEDURE'
+  }
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -204,7 +243,7 @@ END PROCEDURE;`)
     try {
       await onSave({
         name,
-        type: code.toUpperCase().includes('CREATE FUNCTION') ? 'FUNCTION' : 'PROCEDURE',
+        type: detectType(code),
         description,
         body: code,
       })

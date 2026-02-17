@@ -419,19 +419,27 @@ This principle applies to ALL future development:
 ## 🖥️ Moltler Skills Manager Web UI (✅ Implemented)
 
 ### Overview
-Modern React-based web UI for visual skills management. Standalone web application that communicates directly with the elastic-script API.
+Modern React-based web UI for visual skills management. Standalone web application that communicates directly with the elastic-script API. Features three tabs for managing different entity types.
+
+### UI Structure
+The UI has **three tabs** to manage different elastic-script entities:
+- **Skills** - AI-ready skills created with `CREATE SKILL` (have version, description, author, tags)
+- **Procedures** - Reusable logic created with `CREATE PROCEDURE` (called by skills or directly)
+- **Functions** - User-defined functions created with `CREATE FUNCTION` (return values)
 
 ### Features
 | Feature | Status | Description |
 |---------|--------|-------------|
-| **Skills Table** | ✅ Done | Sortable, filterable table with pagination (TanStack Table) |
-| **Search & Filter** | ✅ Done | Global search across all skill properties |
-| **Skill Details Panel** | ✅ Done | Flyout showing full skill definition, parameters |
+| **Tabbed Interface** | ✅ Done | Skills, Procedures, Functions tabs |
+| **Sortable Tables** | ✅ Done | Sortable, filterable tables with pagination (TanStack Table) |
+| **Search & Filter** | ✅ Done | Global search across all properties |
+| **Detail Flyout** | ✅ Done | Flyout showing full definition and parameters |
 | **Monaco Editor** | ✅ Done | Full editor with elastic-script syntax highlighting |
 | **Autocomplete** | ✅ Done | Keywords, built-in functions, language constructs |
-| **Execute Skills** | ✅ Done | Run skills directly from the UI |
+| **Execute Code** | ✅ Done | Run code directly from the UI |
 | **Dark/Light Mode** | ✅ Done | Toggle between themes |
-| **Create Skills** | ✅ Done | Create new procedures and functions |
+| **Create/Edit/Delete** | ✅ Done | Full CRUD for skills, procedures, and functions |
+| **Code Templates** | ✅ Done | Type-specific templates when creating new items |
 
 ### Tech Stack
 - **React 19** + TypeScript

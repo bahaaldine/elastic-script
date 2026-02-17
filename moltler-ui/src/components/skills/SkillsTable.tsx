@@ -32,6 +32,7 @@ interface SkillsTableProps {
   onExecute: (skill: Skill) => void
   onCreate: () => void
   isLoading?: boolean
+  createLabel?: string
 }
 
 export function SkillsTable({
@@ -42,6 +43,7 @@ export function SkillsTable({
   onExecute,
   onCreate,
   isLoading,
+  createLabel = 'Create Skill',
 }: SkillsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -193,7 +195,7 @@ export function SkillsTable({
         </div>
         <Button onClick={onCreate}>
           <Plus className="mr-2 h-4 w-4" />
-          Create Skill
+          {createLabel}
         </Button>
       </div>
 

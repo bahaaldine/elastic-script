@@ -1032,14 +1032,59 @@ load_demo_procedures() {
     echo "    ✓ demo_workflow"
     
     print_success "Demo procedures loaded!"
+    
+    # Now create Skills that wrap the procedures
+    print_step "Creating demo skills..."
+    
+    # Drop existing skills first
+    for skill_name in "hello_moltler" "log_analyzer" "user_stats" "order_report" "system_health" "product_search"; do
+        curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d "{
+            \"query\": \"DROP SKILL $skill_name\"
+        }" > /dev/null 2>&1
+    done
+    
+    # Skill 1: hello_moltler
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE SKILL hello_moltler VERSION '\''1.0'\'' DESCRIPTION '\''A friendly greeting - your first Moltler skill!'\'' AUTHOR '\''Moltler'\'' TAGS ['\''demo'\'', '\''beginner'\''] (name STRING DEFAULT '\''World'\'') RETURNS STRING BEGIN CALL hello_world(); RETURN '\''Hello, '\'' || name || '\''! Welcome to Moltler.'\''; END SKILL;"
+    }' > /dev/null 2>&1
+    echo "    ✓ hello_moltler (wraps hello_world procedure)"
+    
+    # Skill 2: log_analyzer
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE SKILL log_analyzer VERSION '\''1.0'\'' DESCRIPTION '\''Analyze application logs and identify error patterns'\'' AUTHOR '\''Moltler'\'' TAGS ['\''logs'\'', '\''analytics'\'', '\''monitoring'\''] (index_name STRING DEFAULT '\''logs-sample'\'') RETURNS ARRAY BEGIN DECLARE results ARRAY; SET results = CALL analyze_logs(index_name); RETURN results; END SKILL;"
+    }' > /dev/null 2>&1
+    echo "    ✓ log_analyzer (wraps analyze_logs procedure)"
+    
+    # Skill 3: user_stats
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE SKILL user_stats VERSION '\''1.0'\'' DESCRIPTION '\''Get comprehensive user statistics including admin and active counts'\'' AUTHOR '\''Moltler'\'' TAGS ['\''users'\'', '\''analytics'\''] RETURNS DOCUMENT BEGIN DECLARE stats DOCUMENT; SET stats = CALL get_user_stats(); RETURN stats; END SKILL;"
+    }' > /dev/null 2>&1
+    echo "    ✓ user_stats (wraps get_user_stats procedure)"
+    
+    # Skill 4: order_report
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE SKILL order_report VERSION '\''1.0'\'' DESCRIPTION '\''Generate e-commerce order summary with revenue and status breakdown'\'' AUTHOR '\''Moltler'\'' TAGS ['\''orders'\'', '\''ecommerce'\'', '\''analytics'\''] RETURNS DOCUMENT BEGIN DECLARE report DOCUMENT; SET report = CALL order_summary(); RETURN report; END SKILL;"
+    }' > /dev/null 2>&1
+    echo "    ✓ order_report (wraps order_summary procedure)"
+    
+    # Skill 5: system_health
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE SKILL system_health VERSION '\''1.0'\'' DESCRIPTION '\''Check overall system health and identify issues'\'' AUTHOR '\''Moltler'\'' TAGS ['\''health'\'', '\''monitoring'\'', '\''devops'\''] RETURNS DOCUMENT BEGIN DECLARE health DOCUMENT; SET health = CALL health_check(); RETURN health; END SKILL;"
+    }' > /dev/null 2>&1
+    echo "    ✓ system_health (wraps health_check procedure)"
+    
+    # Skill 6: product_search
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE SKILL product_search VERSION '\''1.0'\'' DESCRIPTION '\''Search for products by keyword with optional result limit'\'' AUTHOR '\''Moltler'\'' TAGS ['\''products'\'', '\''search'\'', '\''ecommerce'\''] (keyword STRING, max_results NUMBER DEFAULT 10) RETURNS ARRAY BEGIN DECLARE products ARRAY; SET products = CALL search_products(keyword, max_results); RETURN products; END SKILL;"
+    }' > /dev/null 2>&1
+    echo "    ✓ product_search (wraps search_products procedure)"
+    
+    print_success "Demo skills loaded!"
     echo ""
-    echo "    Available procedures:"
-    echo "      CALL hello_world()"
-    echo "      CALL analyze_logs()"
-    echo "      CALL get_user_stats()"
-    echo "      CALL order_summary()"
-    echo "      CALL health_check()"
-    echo "      CALL demo_workflow()"
+    echo "    The Skills Manager UI shows 3 tabs:"
+    echo "      • Skills - AI-ready skills with metadata (hello_moltler, log_analyzer, etc.)"
+    echo "      • Procedures - Reusable logic (hello_world, analyze_logs, etc.)"
+    echo "      • Functions - Utility functions"
     echo ""
 }
 

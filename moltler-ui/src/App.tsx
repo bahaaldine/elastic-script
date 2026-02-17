@@ -1,17 +1,19 @@
 import { useState } from 'react'
 import { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Zap, RefreshCw, Moon, Sun } from 'lucide-react'
+import { Zap, RefreshCw, Moon, Sun, Code, Boxes, FunctionSquare } from 'lucide-react'
 import { SkillsTable } from '@/components/skills/SkillsTable'
 import { SkillEditor } from '@/components/skills/SkillEditor'
 import { SkillDetail } from '@/components/skills/SkillDetail'
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   fetchSkills,
+  fetchProcedures,
+  fetchFunctions,
   saveProcedure,
   deleteProcedure,
   executeCode,
   type Skill,
-  type ExecutionResult,
 } from '@/api/skills'
 
 const queryClient = new QueryClient({
@@ -28,6 +30,8 @@ function SkillsManager() {
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null)
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null)
   const [isCreating, setIsCreating] = useState(false)
+  const [createType, setCreateType] = useState<'PROCEDURE' | 'FUNCTION' | 'SKILL'>('PROCEDURE')
+  const [activeTab, setActiveTab] = useState('skills')
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       return document.documentElement.classList.contains('dark')
@@ -35,17 +39,37 @@ function SkillsManager() {
     return false
   })
 
-  // Fetch skills
-  const { data: skills = [], isLoading, refetch } = useQuery({
+  // Fetch all data
+  const { data: skills = [], isLoading: skillsLoading, refetch: refetchSkills } = useQuery({
     queryKey: ['skills'],
     queryFn: fetchSkills,
   })
+
+  const { data: procedures = [], isLoading: proceduresLoading, refetch: refetchProcedures } = useQuery({
+    queryKey: ['procedures'],
+    queryFn: fetchProcedures,
+  })
+
+  const { data: functions = [], isLoading: functionsLoading, refetch: refetchFunctions } = useQuery({
+    queryKey: ['functions'],
+    queryFn: fetchFunctions,
+  })
+
+  const isLoading = skillsLoading || proceduresLoading || functionsLoading
+
+  const refetchAll = () => {
+    refetchSkills()
+    refetchProcedures()
+    refetchFunctions()
+  }
 
   // Save mutation
   const saveMutation = useMutation({
     mutationFn: (skill: Skill) => saveProcedure(skill.body || ''),
     onSuccess: () => {
       queryClientHook.invalidateQueries({ queryKey: ['skills'] })
+      queryClientHook.invalidateQueries({ queryKey: ['procedures'] })
+      queryClientHook.invalidateQueries({ queryKey: ['functions'] })
     },
   })
 
@@ -54,6 +78,8 @@ function SkillsManager() {
     mutationFn: (name: string) => deleteProcedure(name),
     onSuccess: () => {
       queryClientHook.invalidateQueries({ queryKey: ['skills'] })
+      queryClientHook.invalidateQueries({ queryKey: ['procedures'] })
+      queryClientHook.invalidateQueries({ queryKey: ['functions'] })
       setSelectedSkill(null)
     },
   })
@@ -65,8 +91,28 @@ function SkillsManager() {
   }
 
   const handleDelete = async (skill: Skill) => {
-    if (confirm(`Are you sure you want to delete "${skill.name}"?`)) {
+    const typeLabel = skill.type === 'SKILL' ? 'skill' : skill.type === 'FUNCTION' ? 'function' : 'procedure'
+    if (confirm(`Are you sure you want to delete the ${typeLabel} "${skill.name}"?`)) {
       await deleteMutation.mutateAsync(skill.name)
+    }
+  }
+
+  const handleCreate = (type: 'PROCEDURE' | 'FUNCTION' | 'SKILL') => {
+    setCreateType(type)
+    setIsCreating(true)
+  }
+
+  // Get the active list based on tab
+  const getActiveList = () => {
+    switch (activeTab) {
+      case 'skills':
+        return skills
+      case 'procedures':
+        return procedures
+      case 'functions':
+        return functions
+      default:
+        return skills
     }
   }
 
@@ -91,7 +137,7 @@ function SkillsManager() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => refetch()}
+                onClick={refetchAll}
                 disabled={isLoading}
               >
                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -109,18 +155,62 @@ function SkillsManager() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <SkillsTable
-          skills={skills}
-          isLoading={isLoading}
-          onSelect={(skill) => setSelectedSkill(skill)}
-          onEdit={(skill) => setEditingSkill(skill)}
-          onDelete={handleDelete}
-          onExecute={(skill) => {
-            setEditingSkill(skill)
-          }}
-          onCreate={() => setIsCreating(true)}
-        />
+      <main className="container mx-auto px-4 py-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="grid w-full max-w-md grid-cols-3">
+            <TabsTrigger value="skills" className="flex items-center gap-2">
+              <Boxes className="h-4 w-4" />
+              Skills ({skills.length})
+            </TabsTrigger>
+            <TabsTrigger value="procedures" className="flex items-center gap-2">
+              <Code className="h-4 w-4" />
+              Procedures ({procedures.length})
+            </TabsTrigger>
+            <TabsTrigger value="functions" className="flex items-center gap-2">
+              <FunctionSquare className="h-4 w-4" />
+              Functions ({functions.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="skills" className="space-y-4">
+            <SkillsTable
+              skills={skills}
+              isLoading={skillsLoading}
+              onSelect={(skill) => setSelectedSkill(skill)}
+              onEdit={(skill) => setEditingSkill(skill)}
+              onDelete={handleDelete}
+              onExecute={(skill) => setEditingSkill(skill)}
+              onCreate={() => handleCreate('SKILL')}
+              createLabel="Create Skill"
+            />
+          </TabsContent>
+
+          <TabsContent value="procedures" className="space-y-4">
+            <SkillsTable
+              skills={procedures}
+              isLoading={proceduresLoading}
+              onSelect={(skill) => setSelectedSkill(skill)}
+              onEdit={(skill) => setEditingSkill(skill)}
+              onDelete={handleDelete}
+              onExecute={(skill) => setEditingSkill(skill)}
+              onCreate={() => handleCreate('PROCEDURE')}
+              createLabel="Create Procedure"
+            />
+          </TabsContent>
+
+          <TabsContent value="functions" className="space-y-4">
+            <SkillsTable
+              skills={functions}
+              isLoading={functionsLoading}
+              onSelect={(skill) => setSelectedSkill(skill)}
+              onEdit={(skill) => setEditingSkill(skill)}
+              onDelete={handleDelete}
+              onExecute={(skill) => setEditingSkill(skill)}
+              onCreate={() => handleCreate('FUNCTION')}
+              createLabel="Create Function"
+            />
+          </TabsContent>
+        </Tabs>
       </main>
 
       {/* Skill Detail Flyout */}
@@ -142,6 +232,7 @@ function SkillsManager() {
         skill={editingSkill}
         isOpen={!!editingSkill || isCreating}
         isNew={isCreating}
+        createType={createType}
         onClose={() => {
           setEditingSkill(null)
           setIsCreating(false)

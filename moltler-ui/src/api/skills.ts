@@ -6,7 +6,10 @@ const API_BASE = '/api';
 export interface Skill {
   name: string;
   type?: 'PROCEDURE' | 'FUNCTION' | 'SKILL';
+  version?: string;
   description?: string;
+  author?: string;
+  tags?: string[];
   return_type?: string;
   procedure?: string;
   application?: string;
@@ -47,12 +50,8 @@ export interface EScriptResponse {
   message?: string;
 }
 
-// Fetch all skills (both from skills API and procedures)
+// Fetch skills from the skills API (CREATE SKILL)
 export async function fetchSkills(): Promise<Skill[]> {
-  // First try to get procedures (the main source for demo)
-  const procedures = await fetchProcedures();
-  
-  // Then try to get skills from the skills API
   try {
     const response = await fetch(`${API_BASE}/skills`, {
       headers: {
@@ -60,31 +59,22 @@ export async function fetchSkills(): Promise<Skill[]> {
       },
     });
     
-    if (response.ok) {
-      const data: SkillsResponse = await response.json();
-      const skills = (data.skills || []).map(s => ({
-        ...s,
-        type: 'SKILL' as const,
-      }));
-      
-      // Combine and dedupe by name
-      const combined = [...procedures];
-      for (const skill of skills) {
-        if (!combined.find(p => p.name === skill.name)) {
-          combined.push(skill);
-        }
-      }
-      return combined;
+    if (!response.ok) {
+      return [];
     }
+    
+    const data: SkillsResponse = await response.json();
+    return (data.skills || []).map(s => ({
+      ...s,
+      type: 'SKILL' as const,
+    }));
   } catch {
-    // Skills API might not have data, that's ok
+    return [];
   }
-  
-  return procedures;
 }
 
 // Fetch procedures using ESCRIPT_PROCEDURES()
-async function fetchProcedures(): Promise<Skill[]> {
+export async function fetchProcedures(): Promise<Skill[]> {
   try {
     const response = await fetch(`${API_BASE}`, {
       method: 'POST',
@@ -121,6 +111,53 @@ async function fetchProcedures(): Promise<Skill[]> {
       created_at: p.created_at as string,
       updated_at: p.updated_at as string,
     }));
+  } catch {
+    return [];
+  }
+}
+
+// Fetch functions using ESCRIPT_FUNCTIONS() - user-defined functions
+export async function fetchFunctions(): Promise<Skill[]> {
+  try {
+    // First try to get stored user-defined functions
+    const response = await fetch(`${API_BASE}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ query: 'SELECT * FROM ESCRIPT_FUNCTIONS()' }),
+    });
+    
+    if (!response.ok) {
+      return [];
+    }
+    
+    const data = await response.json();
+    
+    let functions: Record<string, unknown>[] = [];
+    
+    if (Array.isArray(data.result)) {
+      functions = data.result;
+    } else if (data.result && Array.isArray(data.result.rows)) {
+      functions = data.result.rows;
+    } else if (Array.isArray(data)) {
+      functions = data;
+    }
+    
+    // Filter to only show user-defined functions (not built-ins)
+    return functions
+      .filter((f: Record<string, unknown>) => f.is_builtin !== true && f.isBuiltin !== true)
+      .map((f: Record<string, unknown>) => ({
+        name: (f.name as string) || 'unknown',
+        type: 'FUNCTION' as const,
+        description: (f.description as string) || '',
+        return_type: (f.return_type as string) || (f.returnType as string) || '',
+        body: (f.body as string) || (f.definition as string) || '',
+        parameters: parseParameters(f.parameters || f.params),
+        created_at: f.created_at as string,
+        updated_at: f.updated_at as string,
+      }));
   } catch {
     return [];
   }
@@ -196,26 +233,26 @@ export async function executeCode(code: string): Promise<ExecutionResult> {
   };
 }
 
-// List all procedures (stored procedures in the system)
-export async function listProcedures(): Promise<Skill[]> {
-  const result = await executeCode('CALL ESCRIPT_PROCEDURES()');
-  if (result.success && Array.isArray(result.result)) {
-    return result.result.map((p: Record<string, unknown>) => ({
-      name: p.name as string,
-      description: p.description as string,
-      procedure: p.name as string,
-      parameters: [],
-    }));
-  }
-  return [];
-}
-
-// Create or update a procedure
+// Create or update a procedure/function/skill
 export async function saveProcedure(code: string): Promise<ExecutionResult> {
   return executeCode(code);
 }
 
-// Delete a procedure
+// Delete a procedure, function, or skill
 export async function deleteProcedure(name: string): Promise<ExecutionResult> {
-  return executeCode(`DROP PROCEDURE ${name}`);
+  // Try dropping as each type
+  const results = await Promise.allSettled([
+    executeCode(`DROP PROCEDURE ${name}`),
+    executeCode(`DROP FUNCTION ${name}`),
+    executeCode(`DROP SKILL ${name}`),
+  ]);
+  
+  // Return the first successful result
+  for (const result of results) {
+    if (result.status === 'fulfilled' && result.value.success) {
+      return result.value;
+    }
+  }
+  
+  return { success: true };
 }
