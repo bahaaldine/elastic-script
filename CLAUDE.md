@@ -434,12 +434,14 @@ The UI has **three tabs** to manage different elastic-script entities:
 | **Sortable Tables** | ✅ Done | Sortable, filterable tables with pagination (TanStack Table) |
 | **Search & Filter** | ✅ Done | Global search across all properties |
 | **Detail Flyout** | ✅ Done | Flyout showing full definition and parameters |
+| **Implementation/Docs Tabs** | ✅ Done | View source code or auto-generated markdown documentation |
 | **Monaco Editor** | ✅ Done | Full editor with elastic-script syntax highlighting |
 | **Autocomplete** | ✅ Done | Keywords, built-in functions, language constructs |
 | **Execute Code** | ✅ Done | Run code directly from the UI |
 | **Dark/Light Mode** | ✅ Done | Toggle between themes |
 | **Create/Edit/Delete** | ✅ Done | Full CRUD for skills, procedures, and functions |
 | **Code Templates** | ✅ Done | Type-specific templates when creating new items |
+| **Auto-Generated Docs** | ✅ Done | skill.md generated automatically with rich formatting |
 
 ### Tech Stack
 - **React 19** + TypeScript
@@ -1025,3 +1027,91 @@ elastic-script/elastic-script/src/test/java/org/elasticsearch/xpack/escript/pars
 ├── MoltlerSkillParserTests.java    # Skill statement parsing (new grammar)
 └── SkillParserTests.java           # Updated for Moltler grammar
 ```
+
+---
+
+## 📚 GitHub Pages Documentation
+
+### Overview
+Comprehensive documentation site hosted on GitHub Pages with Jekyll.
+
+**URL:** https://bahaaldine.github.io/elastic-script/
+
+### Pages
+| Page | Description |
+|------|-------------|
+| `index.md` | Home page with quick start |
+| `getting-started.md` | Installation and first skill guide |
+| `language-reference.md` | Full elastic-script syntax |
+| `functions.md` | 106 built-in functions reference |
+| `mcp.md` | MCP integration for AI agents |
+| `ui.md` | Skills Manager UI guide |
+| `api.md` | REST API reference |
+
+### Configuration
+```yaml
+# docs/_config.yml
+title: Moltler - elastic-script
+theme: jekyll-theme-cayman
+baseurl: /elastic-script
+```
+
+### Enabling GitHub Pages
+1. Go to repository Settings → Pages
+2. Set Source to "Deploy from a branch"
+3. Select `main` branch and `/docs` folder
+4. Save and wait for deployment
+
+---
+
+## 📄 Auto-Generated Skill Documentation (skill.md)
+
+### Overview
+When skills are created, rich markdown documentation is automatically generated and stored alongside the skill definition.
+
+### Features
+- **Markdown Badges:** Version, author, tags
+- **Parameter Tables:** Full parameter documentation
+- **Usage Examples:** MCP JSON-RPC and elastic-script examples
+- **Implementation Details:** Wrapped procedure information
+- **Auto-enrichment:** Documentation derived from code analysis
+
+### Storage
+Documentation is stored in SkillDefinition:
+- `documentation` field - Generated markdown content
+- `source_code` field - Original CREATE SKILL source
+
+### UI Display
+The Skills Manager UI shows documentation in a tabbed interface:
+- **Implementation Tab:** Source code in Monaco editor
+- **Documentation Tab:** Rendered markdown with syntax highlighting
+
+### Example Generated Documentation
+```markdown
+# analyze_logs
+
+![Version](https://img.shields.io/badge/version-1.0-blue)
+![Author](https://img.shields.io/badge/author-DevOps-green)
+
+## Description
+Analyze application logs for errors and patterns.
+
+## Parameters
+| Name | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `index_pattern` | `STRING` | No | `logs-*` | Index pattern |
+| `limit` | `NUMBER` | No | `10` | Max results |
+
+## Usage
+### Via MCP (AI Agents)
+\`\`\`json
+{"method": "tools/call", "params": {"name": "analyze_logs", ...}}
+\`\`\`
+
+### Via elastic-script
+\`\`\`sql
+CALL run_log_analysis(index_pattern, limit);
+\`\`\`
+```
+
+*Last updated: January 22, 2026*
