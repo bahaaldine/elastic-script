@@ -1431,18 +1431,20 @@ start_kibana_with_plugin() {
         setup_kibana_plugin
     fi
     
-    # Always sync plugin to get latest changes
+    # Always sync plugin to get latest changes (clean slate)
     local PLUGIN_PATH="$KIBANA_SOURCE_DIR/plugins/moltler"
     local SOURCE_PLUGIN="$KIBANA_PLUGIN_DIR/plugins/moltler"
-    print_step "Syncing Moltler plugin..."
-    rm -rf "$PLUGIN_PATH"
-    cp -r "$SOURCE_PLUGIN" "$PLUGIN_PATH"
     
-    # Clear optimizer cache to force rebuild with new plugin
-    if [ -f "$KIBANA_SOURCE_DIR/node_modules/.kbn-optimizer-cache" ]; then
-        print_step "Clearing optimizer cache..."
-        rm -f "$KIBANA_SOURCE_DIR/node_modules/.kbn-optimizer-cache"
-    fi
+    print_step "Cleaning up old plugin and caches..."
+    # Remove old plugin (including any generated files)
+    rm -rf "$PLUGIN_PATH"
+    # Clear optimizer cache to force rebuild
+    rm -f "$KIBANA_SOURCE_DIR/node_modules/.kbn-optimizer-cache" 2>/dev/null
+    rm -rf "$KIBANA_SOURCE_DIR/node_modules/.cache/@kbn/optimizer" 2>/dev/null
+    
+    print_step "Syncing Moltler plugin..."
+    cp -r "$SOURCE_PLUGIN" "$PLUGIN_PATH"
+    print_success "Plugin synced (optimizer will rebuild on startup)"
     
     # Check if already running
     if curl -s http://localhost:5601/api/status > /dev/null 2>&1; then
