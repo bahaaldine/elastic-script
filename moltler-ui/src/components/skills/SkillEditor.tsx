@@ -255,15 +255,54 @@ export function SkillEditor({
     }
   }
 
+  // Extract the name from a CREATE statement
+  const extractName = (code: string): string | null => {
+    // Match CREATE SKILL/PROCEDURE/FUNCTION name
+    const match = code.match(/CREATE\s+(SKILL|PROCEDURE|FUNCTION)\s+(\w+)/i)
+    return match ? match[2] : null
+  }
+
+  // Generate invocation code based on the definition
+  const generateInvocation = (code: string): string | null => {
+    const upper = code.toUpperCase()
+    const extractedName = extractName(code)
+    
+    if (!extractedName) return null
+    
+    if (upper.includes('CREATE SKILL')) {
+      // For skills, we need to extract parameters and generate a CALL to the skill
+      // Skills wrap procedures, so we invoke via CALL
+      return `CALL ${extractedName}()`
+    } else if (upper.includes('CREATE PROCEDURE')) {
+      return `CALL ${extractedName}()`
+    } else if (upper.includes('CREATE FUNCTION')) {
+      // Functions need to be called in an expression context
+      return `SELECT ${extractedName}()`
+    }
+    
+    return null
+  }
+
   const handleExecute = async () => {
     setIsExecuting(true)
     setError(null)
     setOutput(null)
     try {
-      const result = await onExecute(code)
+      // Check if this is a definition (CREATE SKILL/PROCEDURE/FUNCTION)
+      // If so, invoke it instead of recreating it
+      const invocation = generateInvocation(code)
+      const codeToExecute = invocation || code
+      
+      const result = await onExecute(codeToExecute)
       if (result.success) {
         // Format the output to show both message and result
         let outputText = ''
+        
+        // If we generated an invocation, show what we ran
+        if (invocation) {
+          outputText += `Invoked: ${invocation}\n\n`
+        }
+        
         if (result.output) {
           outputText += result.output
         }
@@ -271,7 +310,7 @@ export function SkillEditor({
           const resultStr = typeof result.result === 'object' 
             ? JSON.stringify(result.result, null, 2) 
             : String(result.result)
-          if (outputText) outputText += '\n\n'
+          if (outputText && !outputText.endsWith('\n\n')) outputText += '\n\n'
           outputText += `Result:\n${resultStr}`
         }
         setOutput(outputText || 'Executed successfully')
@@ -379,7 +418,12 @@ export function SkillEditor({
             disabled={isExecuting || !code.trim()}
           >
             <Play className="mr-2 h-4 w-4" />
-            {isExecuting ? 'Running...' : 'Run'}
+            {isExecuting 
+              ? 'Running...' 
+              : generateInvocation(code) 
+                ? 'Invoke' 
+                : 'Run'
+            }
           </Button>
           <div className="flex gap-2">
             <Button variant="outline" onClick={onClose}>
