@@ -50,23 +50,37 @@ export interface EScriptResponse {
   message?: string;
 }
 
-// Fetch skills from the skills API (CREATE SKILL)
+// Fetch skills using SHOW SKILLS command
 export async function fetchSkills(): Promise<Skill[]> {
   try {
-    const response = await fetch(`${API_BASE}/skills`, {
+    const response = await fetch(`${API_BASE}`, {
+      method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
+      body: JSON.stringify({ query: 'SHOW SKILLS' }),
     });
     
     if (!response.ok) {
       return [];
     }
     
-    const data: SkillsResponse = await response.json();
-    return (data.skills || []).map(s => ({
-      ...s,
+    const data = await response.json();
+    
+    // SHOW SKILLS returns { result: { skills: [...], count: n, action: "SHOW SKILLS" } }
+    const skills = data.result?.skills || [];
+    
+    return skills.map((s: Record<string, unknown>) => ({
+      name: s.name as string,
       type: 'SKILL' as const,
+      description: s.description as string,
+      return_type: s.return_type as string,
+      procedure: s.procedure as string,
+      version: s.version as string,
+      author: s.author as string,
+      tags: s.tags as string[],
+      parameters: [], // SHOW SKILLS returns count, we'd need SHOW SKILL <name> for details
     }));
   } catch {
     return [];
