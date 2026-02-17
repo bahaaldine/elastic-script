@@ -7,7 +7,6 @@ import type {
 } from '@kbn/core/server';
 
 import type { MoltlerPluginSetup, MoltlerPluginStart } from './types';
-import { defineRoutes } from './routes';
 
 export class MoltlerPlugin implements Plugin<MoltlerPluginSetup, MoltlerPluginStart> {
   private readonly logger: Logger;
@@ -16,18 +15,13 @@ export class MoltlerPlugin implements Plugin<MoltlerPluginSetup, MoltlerPluginSt
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup) {
-    this.logger.debug('moltler: Setup');
-    const router = core.http.createRouter();
-
-    // Register server side APIs
-    defineRoutes(router, this.logger);
-
+  public setup(core: CoreSetup): MoltlerPluginSetup {
+    this.logger.info('Moltler plugin setup');
     return {};
   }
 
-  public start(core: CoreStart) {
-    this.logger.debug('moltler: Started');
+  public start(core: CoreStart): MoltlerPluginStart {
+    this.logger.info('Moltler plugin started');
     return {};
   }
 

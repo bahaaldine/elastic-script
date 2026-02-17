@@ -1,8 +1,8 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
-import { MoltlerServerPlugin } from './plugin';
+import { MoltlerPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new MoltlerServerPlugin(initializerContext);
+  return new MoltlerPlugin(initializerContext);
 }
 
-export type { MoltlerServerPluginSetup, MoltlerServerPluginStart } from './plugin';
+export type { MoltlerPluginSetup, MoltlerPluginStart } from './types';
