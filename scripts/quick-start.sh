@@ -1388,27 +1388,28 @@ setup_kibana_plugin() {
         print_success "Kibana already bootstrapped"
     fi
     
-    # Copy Moltler plugin to Kibana (not symlink - symlinks cause module resolution issues)
+    # Generate Moltler plugin using Kibana's official generator
+    # https://www.elastic.co/docs/extend/kibana/plugin-tooling
     local PLUGIN_PATH="$KIBANA_SOURCE_DIR/plugins/moltler"
-    local SOURCE_PLUGIN="$KIBANA_PLUGIN_DIR/plugins/moltler"
     
-    # Remove any existing symlink or directory
-    if [ -L "$PLUGIN_PATH" ]; then
-        print_step "Removing old plugin symlink..."
-        rm "$PLUGIN_PATH"
+    if [ ! -d "$PLUGIN_PATH" ]; then
+        print_step "Generating Moltler plugin using Kibana plugin generator..."
+        cd "$KIBANA_SOURCE_DIR"
+        
+        # Run the generator with answers piped in
+        # The generator asks: plugin name, should it have a UI, should it have server, description
+        printf 'moltler\nMoltler Skills Manager\ny\ny\n' | node scripts/generate_plugin moltler
+        
+        if [ -d "$PLUGIN_PATH" ]; then
+            print_success "Moltler plugin generated successfully"
+        else
+            print_error "Failed to generate plugin"
+            cd "$PROJECT_ROOT"
+            return 1
+        fi
+    else
+        print_success "Moltler plugin already exists"
     fi
-    
-    # Copy plugin files (always refresh to get latest changes)
-    print_step "Copying Moltler plugin to Kibana..."
-    rm -rf "$PLUGIN_PATH"
-    cp -r "$SOURCE_PLUGIN" "$PLUGIN_PATH"
-    print_success "Moltler plugin copied"
-    
-    # The plugin manifest from source is used as-is (no navigation dependency)
-    print_success "Plugin copied with manifest"
-    
-    # Note: Plugin bundles are built automatically by @kbn/optimizer during Kibana startup
-    # No explicit build step needed for Kibana 9.x plugins
     
     cd "$PROJECT_ROOT"
     return 0
@@ -1431,22 +1432,27 @@ start_kibana_with_plugin() {
         setup_kibana_plugin
     fi
     
-    # Always sync plugin to get latest changes (clean slate)
+    # Ensure plugin exists (generate if needed)
     local PLUGIN_PATH="$KIBANA_SOURCE_DIR/plugins/moltler"
-    local SOURCE_PLUGIN="$KIBANA_PLUGIN_DIR/plugins/moltler"
     
-    print_step "Cleaning up old plugin and caches..."
-    # Remove old plugin (including any generated files)
-    rm -rf "$PLUGIN_PATH"
-    
-    # Clear ALL optimizer caches to force full rebuild with new plugin
-    # The optimizer caches are in each plugin's target/public/.kbn-optimizer-cache
-    print_step "Clearing all optimizer caches (this ensures new plugin is built)..."
-    find "$KIBANA_SOURCE_DIR" -name ".kbn-optimizer-cache" -type f -delete 2>/dev/null
-    
-    print_step "Syncing Moltler plugin..."
-    cp -r "$SOURCE_PLUGIN" "$PLUGIN_PATH"
-    print_success "Plugin synced (optimizer will rebuild ALL bundles on startup - this may take a few minutes)"
+    if [ ! -d "$PLUGIN_PATH" ]; then
+        print_step "Generating Moltler plugin..."
+        cd "$KIBANA_SOURCE_DIR"
+        printf 'moltler\nMoltler Skills Manager\ny\ny\n' | node scripts/generate_plugin moltler
+        cd "$PROJECT_ROOT"
+        
+        if [ ! -d "$PLUGIN_PATH" ]; then
+            print_error "Failed to generate plugin"
+            return 1
+        fi
+        
+        # Clear optimizer caches since we have a new plugin
+        print_step "Clearing optimizer caches for new plugin..."
+        find "$KIBANA_SOURCE_DIR" -name ".kbn-optimizer-cache" -type f -delete 2>/dev/null
+        print_success "Plugin generated (optimizer will build on startup)"
+    else
+        print_success "Moltler plugin ready"
+    fi
     
     # Check if already running
     if curl -s http://localhost:5601/api/status > /dev/null 2>&1; then
