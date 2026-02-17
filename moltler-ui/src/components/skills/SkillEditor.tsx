@@ -262,7 +262,19 @@ export function SkillEditor({
     try {
       const result = await onExecute(code)
       if (result.success) {
-        setOutput(result.output || 'Executed successfully')
+        // Format the output to show both message and result
+        let outputText = ''
+        if (result.output) {
+          outputText += result.output
+        }
+        if (result.result !== undefined && result.result !== null) {
+          const resultStr = typeof result.result === 'object' 
+            ? JSON.stringify(result.result, null, 2) 
+            : String(result.result)
+          if (outputText) outputText += '\n\n'
+          outputText += `Result:\n${resultStr}`
+        }
+        setOutput(outputText || 'Executed successfully')
       } else {
         setError(result.error || 'Execution failed')
       }
@@ -337,17 +349,17 @@ export function SkillEditor({
 
           {/* Output / Error */}
           {(output || error) && (
-            <div className={`p-3 rounded-md text-sm font-mono ${
+            <div className={`p-3 rounded-md text-sm font-mono max-h-48 overflow-auto ${
               error
-                ? 'bg-destructive/10 text-destructive border border-destructive/20'
-                : 'bg-green-50 text-green-800 border border-green-200 dark:bg-green-900/20 dark:text-green-200 dark:border-green-800'
+                ? 'bg-red-100 text-red-900 border border-red-300 dark:bg-red-950 dark:text-red-200 dark:border-red-800'
+                : 'bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-800'
             }`}>
-              <div className="flex items-start justify-between">
-                <pre className="whitespace-pre-wrap">{error || output}</pre>
+              <div className="flex items-start justify-between gap-2">
+                <pre className="whitespace-pre-wrap flex-1 overflow-auto">{error || output}</pre>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6 shrink-0"
+                  className="h-6 w-6 shrink-0 hover:bg-black/10 dark:hover:bg-white/10"
                   onClick={() => {
                     setOutput(null)
                     setError(null)
