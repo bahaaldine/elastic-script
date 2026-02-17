@@ -978,13 +978,22 @@ show_help() {
     echo "  --load-data       Load sample data into Elasticsearch"
     echo "  --load-skills     Load sample Moltler skills"
     echo "  --notebooks       Start Jupyter notebooks"
-    echo "  --kibana          Start Kibana (for APM/observability)"
+    echo ""
+    echo "Kibana & Moltler Plugin:"
+    echo "  --kibana          Start pre-built Kibana (for APM/observability)"
     echo "  --kibana-plugin   Start Kibana with Moltler Skills Manager plugin"
+    echo "                    (Requires Node.js 22+, first run downloads Kibana source)"
+    echo ""
+    echo "Observability:"
     echo "  --otel            Start OTEL Collector (for distributed tracing)"
-    echo "  --stop            Stop all (ES, OTEL, Kibana, Jupyter)"
+    echo ""
+    echo "Stop Services:"
+    echo "  --stop            Stop all services"
     echo "  --stop-notebooks  Stop only Jupyter notebooks"
     echo "  --stop-kibana     Stop only Kibana"
     echo "  --stop-otel       Stop only OTEL Collector"
+    echo ""
+    echo "Other:"
     echo "  --status          Check service status"
     echo "  --help            Show this help"
     echo ""
@@ -1036,6 +1045,7 @@ stop_all() {
     stop_otel_collector
     stop_apm_server
     stop_kibana
+    stop_kibana_plugin
     stop_elasticsearch
 }
 
@@ -1275,16 +1285,32 @@ stop_kibana() {
 }
 
 # =============================================================================
-# Moltler Kibana Plugin (Skills Manager)
+# Moltler Kibana Plugin (Full Kibana Development Mode)
 # =============================================================================
 
 KIBANA_PLUGIN_DIR="$PROJECT_ROOT/kibana-plugin"
 KIBANA_SOURCE_DIR="$KIBANA_PLUGIN_DIR/kibana"
 REQUIRED_NODE_VERSION="22"
 
+# Fix macOS file descriptor limits for Kibana development
+fix_macos_ulimit() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # Check current limit
+        local CURRENT_LIMIT=$(ulimit -n)
+        if [ "$CURRENT_LIMIT" -lt 10240 ]; then
+            print_step "Increasing file descriptor limit (was $CURRENT_LIMIT)..."
+            ulimit -n 10240 2>/dev/null || true
+            print_success "File descriptor limit set to $(ulimit -n)"
+        fi
+    fi
+}
+
 # Check if correct Node version is available
 check_node_for_kibana_plugin() {
     local NODE_VERSION=""
+    
+    # Fix macOS ulimit first
+    fix_macos_ulimit
     
     # Check current Node version
     if command -v node &> /dev/null; then
@@ -1362,45 +1388,27 @@ setup_kibana_plugin() {
         print_success "Kibana already bootstrapped"
     fi
     
-    # Generate or update Moltler plugin using Kibana's plugin generator
-    # This ensures the plugin is properly integrated with Kibana's build system
+    # Copy Moltler plugin to Kibana (not symlink - symlinks cause module resolution issues)
     local PLUGIN_PATH="$KIBANA_SOURCE_DIR/plugins/moltler"
+    local SOURCE_PLUGIN="$KIBANA_PLUGIN_DIR/plugins/moltler"
     
-    if [ ! -d "$PLUGIN_PATH" ]; then
-        print_step "Generating Moltler plugin structure..."
-        cd "$KIBANA_SOURCE_DIR"
-        node scripts/generate_plugin.js --yes --name moltler --ui --server
-        print_success "Moltler plugin generated"
-    else
-        print_success "Moltler plugin already exists"
+    # Remove any existing symlink or directory
+    if [ -L "$PLUGIN_PATH" ]; then
+        print_step "Removing old plugin symlink..."
+        rm "$PLUGIN_PATH"
     fi
     
-    # Fix the plugin manifest (generator leaves owner.name empty)
-    print_step "Configuring plugin manifest..."
-    cat > "$PLUGIN_PATH/kibana.json" << 'EOF'
-{
-  "id": "moltler",
-  "version": "1.0.0",
-  "kibanaVersion": "kibana",
-  "owner": {
-    "name": "Moltler Team",
-    "githubTeam": "moltler"
-  },
-  "description": "Moltler Skills Manager - Create, manage, and run AI skills",
-  "server": true,
-  "ui": true,
-  "requiredPlugins": ["navigation"],
-  "optionalPlugins": []
-}
-EOF
-    print_success "Plugin manifest configured"
+    # Copy plugin files (always refresh to get latest changes)
+    print_step "Copying Moltler plugin to Kibana..."
+    rm -rf "$PLUGIN_PATH"
+    cp -r "$SOURCE_PLUGIN" "$PLUGIN_PATH"
+    print_success "Moltler plugin copied"
     
-    # Build the plugin bundle using plugin_helpers
-    # This creates target/public with the compiled browser bundle
-    print_step "Building Moltler plugin bundle..."
-    cd "$PLUGIN_PATH"
-    node ../../scripts/plugin_helpers dev
-    print_success "Moltler plugin bundle built"
+    # The plugin manifest from source is used as-is (no navigation dependency)
+    print_success "Plugin copied with manifest"
+    
+    # Note: Plugin bundles are built automatically by @kbn/optimizer during Kibana startup
+    # No explicit build step needed for Kibana 9.x plugins
     
     cd "$PROJECT_ROOT"
     return 0
@@ -1410,6 +1418,9 @@ EOF
 start_kibana_with_plugin() {
     print_header "Starting Kibana with Moltler Skills Manager"
     
+    # Fix macOS file descriptor limits (prevents EMFILE errors)
+    fix_macos_ulimit
+    
     # Check Node version
     if ! check_node_for_kibana_plugin; then
         return 1
@@ -1418,6 +1429,19 @@ start_kibana_with_plugin() {
     # Setup if needed
     if [ ! -d "$KIBANA_SOURCE_DIR/node_modules" ]; then
         setup_kibana_plugin
+    fi
+    
+    # Always sync plugin to get latest changes
+    local PLUGIN_PATH="$KIBANA_SOURCE_DIR/plugins/moltler"
+    local SOURCE_PLUGIN="$KIBANA_PLUGIN_DIR/plugins/moltler"
+    print_step "Syncing Moltler plugin..."
+    rm -rf "$PLUGIN_PATH"
+    cp -r "$SOURCE_PLUGIN" "$PLUGIN_PATH"
+    
+    # Clear optimizer cache to force rebuild with new plugin
+    if [ -f "$KIBANA_SOURCE_DIR/node_modules/.kbn-optimizer-cache" ]; then
+        print_step "Clearing optimizer cache..."
+        rm -f "$KIBANA_SOURCE_DIR/node_modules/.kbn-optimizer-cache"
     fi
     
     # Check if already running
@@ -1434,17 +1458,41 @@ start_kibana_with_plugin() {
     export ELASTICSEARCH_USERNAME="elastic-admin"
     export ELASTICSEARCH_PASSWORD="elastic-password"
     
-    # Start Kibana with ES credentials
-    nohup yarn start --no-base-path \
-        --elasticsearch.hosts=http://localhost:9200 \
-        --elasticsearch.username=elastic-admin \
-        --elasticsearch.password=elastic-password \
-        > "$PROJECT_ROOT/kibana-plugin.log" 2>&1 &
+    # Create a wrapper script that sets ulimit before starting Kibana
+    # This is necessary because ulimit must be set in the same shell
+    # that runs the process, not a parent shell
+    cat > /tmp/start-kibana.sh << KIBANA_SCRIPT
+#!/bin/bash
+# Increase file descriptor limit for macOS (Kibana needs many open files)
+ulimit -n 65536 2>/dev/null || ulimit -n 10240 2>/dev/null || true
+
+# Source nvm if available to get the correct Node.js version
+export NVM_DIR="\$HOME/.nvm"
+[ -s "\$NVM_DIR/nvm.sh" ] && . "\$NVM_DIR/nvm.sh"
+nvm use $REQUIRED_NODE_VERSION 2>/dev/null || true
+
+cd "$KIBANA_SOURCE_DIR"
+exec yarn start \\
+    --no-base-path \\
+    --no-watch \\
+    --elasticsearch.hosts=http://localhost:9200 \\
+    --elasticsearch.username=elastic-admin \\
+    --elasticsearch.password=elastic-password
+KIBANA_SCRIPT
+    chmod +x /tmp/start-kibana.sh
+    
+    # Start Kibana with:
+    # --no-watch: Disable file watching (prevents restart loops)
+    # --no-base-path: Direct access without proxy
+    # ulimit is set inside the script for proper inheritance
+    nohup /tmp/start-kibana.sh > "$PROJECT_ROOT/kibana-plugin.log" 2>&1 &
     KIBANA_PID=$!
     echo $KIBANA_PID > "$PROJECT_ROOT/.kibana_plugin_pid"
     
-    print_step "Waiting for Kibana to be ready (this takes 1-2 minutes)..."
-    for i in {1..120}; do
+    print_step "Waiting for Kibana to be ready..."
+    print_step "(First run builds bundles - may take 2-3 minutes)"
+    
+    for i in {1..180}; do
         if curl -s http://localhost:5601/api/status > /dev/null 2>&1; then
             echo ""
             print_success "Kibana with Moltler plugin is ready!"
@@ -1461,6 +1509,8 @@ start_kibana_with_plugin() {
     
     echo ""
     print_warning "Kibana taking longer than expected. Check kibana-plugin.log"
+    print_step "Tail of log:"
+    tail -10 "$PROJECT_ROOT/kibana-plugin.log" 2>/dev/null || true
     cd "$PROJECT_ROOT"
     return 1
 }
@@ -1937,7 +1987,10 @@ case "${1:-}" in
         ;;
     --kibana-plugin)
         # Full setup: ES + Demo + Kibana with Moltler plugin - ONE COMMAND
-        print_header "🦌 Moltler Full Setup (ES + Skills Manager)"
+        print_header "🦌 Moltler Full Setup (ES + Kibana Plugin)"
+        
+        # Fix file descriptor limit for macOS
+        fix_macos_ulimit
         
         # 1. Check prerequisites (includes submodule init)
         check_prerequisites
