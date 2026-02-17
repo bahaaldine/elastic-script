@@ -1,0 +1,38 @@
+{
+  "name": "@moltler/mcp-bridge",
+  "version": "1.0.0",
+  "description": "MCP bridge for Moltler/elastic-script - connects AI agents to Elasticsearch skills",
+  "main": "dist/index.js",
+  "bin": {
+    "moltler-mcp": "dist/index.js"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "elasticsearch",
+    "elastic-script",
+    "moltler",
+    "ai",
+    "llm",
+    "claude"
+  ],
+  "author": "Moltler",
+  "license": "Elastic-2.0",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "tsx": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

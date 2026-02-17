@@ -829,7 +829,81 @@ cd elastic-script/elasticsearch
 
 ---
 
-*Last updated: January 9, 2026*
+*Last updated: January 22, 2026*
+
+---
+
+## 🤖 MCP Integration (Model Context Protocol)
+
+### Overview
+Skills are exposed to AI agents via the Model Context Protocol (MCP), enabling tools like Claude Desktop to discover and invoke elastic-script skills.
+
+### Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/_escript/mcp` | GET | Server info and capabilities |
+| `/_escript/mcp` | POST | JSON-RPC endpoint for MCP protocol |
+
+### Supported MCP Methods
+
+| Method | Description |
+|--------|-------------|
+| `initialize` | Initialize MCP session |
+| `tools/list` | List all skills as MCP tools |
+| `tools/call` | Invoke a skill by name |
+| `ping` | Health check |
+
+### Usage Examples
+
+**List available tools:**
+```bash
+curl -u elastic-admin:elastic-password -X POST http://localhost:9200/_escript/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "tools/list", "id": 1}'
+```
+
+**Invoke a skill:**
+```bash
+curl -u elastic-admin:elastic-password -X POST http://localhost:9200/_escript/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {"name": "metrics_summary", "arguments": {}},
+    "id": 2
+  }'
+```
+
+### Claude Desktop Integration
+
+1. Install the MCP bridge: `npm install -g @moltler/mcp-bridge`
+
+2. Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "moltler": {
+      "command": "npx",
+      "args": ["@moltler/mcp-bridge", "--es-url", "http://localhost:9200"]
+    }
+  }
+}
+```
+
+3. Restart Claude Desktop - skills appear as tools!
+
+### MCP Bridge Package
+
+The `mcp-bridge/` directory contains a Node.js package that translates stdio MCP to HTTP:
+
+```
+mcp-bridge/
+├── src/index.ts       # Bridge implementation
+├── package.json       # npm package config
+├── tsconfig.json      # TypeScript config
+└── README.md          # Usage documentation
+```
 
 ---
 

@@ -39,6 +39,7 @@ import org.elasticsearch.xpack.escript.scheduling.TriggerPollingService;
 import org.elasticsearch.xpack.escript.applications.ApplicationRegistry;
 import org.elasticsearch.xpack.escript.actions.RestSkillsAction;
 import org.elasticsearch.xpack.escript.actions.RestIntentAction;
+import org.elasticsearch.xpack.escript.actions.RestMcpAction;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -130,7 +131,8 @@ public class ElasticScriptPlugin extends Plugin implements ActionPlugin {
             new RestRunEScriptAction(elasticScriptExecutor),
             new RestGetProcedureAction(elasticScriptExecutor),
             new RestSkillsAction(applicationRegistry, elasticScriptExecutor),
-            new RestIntentAction(applicationRegistry, elasticScriptExecutor)
+            new RestIntentAction(applicationRegistry, elasticScriptExecutor),
+            new RestMcpAction(elasticScriptExecutor)
         );
     }
 

@@ -1087,6 +1087,12 @@ load_demo_procedures() {
     echo "      • Procedures (10) - Reusable logic: hello_world, analyze_logs, get_user_stats, etc."
     echo "      • Functions - User-defined functions"
     echo ""
+    echo "    MCP Endpoint for AI agents:"
+    echo "      POST http://localhost:9200/_escript/mcp"
+    echo ""
+    echo "    For Claude Desktop, add to your config:"
+    echo "      {\"mcpServers\": {\"moltler\": {\"command\": \"npx\", \"args\": [\"@moltler/mcp-bridge\", \"--es-url\", \"http://localhost:9200\"]}}}"
+    echo ""
 }
 
 # Setup notebooks
