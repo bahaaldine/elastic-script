@@ -158,14 +158,15 @@ async function fetchProcedureDetails(name: string): Promise<Skill | null> {
     const p = data.result;
     if (!p) return null;
     
-    // The procedure body is stored as the full CREATE PROCEDURE statement
-    const body = p.definition || p.body || p.procedure || '';
+    // The procedure body is in 'source' field from SHOW PROCEDURE
+    const source = p.source || p.definition || p.body || p.procedure || '';
+    const body = source.startsWith('CREATE') ? source : `CREATE ${source}`;
     
     return {
       name: p.name || name,
       type: 'PROCEDURE',
       description: p.description || '',
-      body: body.startsWith('CREATE') ? body : `CREATE ${body}`,
+      body: body,
       parameters: parseParameters(p.parameters),
     };
   } catch {
@@ -223,14 +224,16 @@ async function fetchFunctionDetails(name: string): Promise<Skill | null> {
     const f = data.result;
     if (!f) return null;
     
-    const body = f.definition || f.body || '';
+    // The function body is in 'source' field from SHOW FUNCTION
+    const source = f.source || f.definition || f.body || '';
+    const body = source.startsWith('CREATE') ? source : `CREATE ${source}`;
     
     return {
       name: f.name || name,
       type: 'FUNCTION',
       description: f.description || '',
       return_type: f.return_type || f.returnType || '',
-      body: body.startsWith('CREATE') ? body : `CREATE ${body}`,
+      body: body,
       parameters: parseParameters(f.parameters),
     };
   } catch {
