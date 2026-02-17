@@ -240,8 +240,8 @@ END PROCEDURE;`)
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             {isNew ? 'Create New Skill' : 'Edit Skill'}
-            {skill && (
-              <Badge variant={skill.type === 'PROCEDURE' ? 'default' : 'secondary'}>
+            {skill && skill.type && (
+              <Badge variant={skill.type === 'PROCEDURE' ? 'default' : skill.type === 'SKILL' ? 'success' : 'secondary'}>
                 {skill.type}
               </Badge>
             )}

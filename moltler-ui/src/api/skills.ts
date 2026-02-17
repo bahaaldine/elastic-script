@@ -5,7 +5,7 @@ const API_BASE = '/api';
 
 export interface Skill {
   name: string;
-  type?: 'PROCEDURE' | 'FUNCTION';
+  type?: 'PROCEDURE' | 'FUNCTION' | 'SKILL';
   description?: string;
   return_type?: string;
   procedure?: string;
@@ -47,20 +47,99 @@ export interface EScriptResponse {
   message?: string;
 }
 
-// Fetch all skills
+// Fetch all skills (both from skills API and procedures)
 export async function fetchSkills(): Promise<Skill[]> {
-  const response = await fetch(`${API_BASE}/skills`, {
-    headers: {
-      'Accept': 'application/json',
-    },
-  });
+  // First try to get procedures (the main source for demo)
+  const procedures = await fetchProcedures();
   
-  if (!response.ok) {
-    throw new Error(`Failed to fetch skills: ${response.statusText}`);
+  // Then try to get skills from the skills API
+  try {
+    const response = await fetch(`${API_BASE}/skills`, {
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+    
+    if (response.ok) {
+      const data: SkillsResponse = await response.json();
+      const skills = (data.skills || []).map(s => ({
+        ...s,
+        type: 'SKILL' as const,
+      }));
+      
+      // Combine and dedupe by name
+      const combined = [...procedures];
+      for (const skill of skills) {
+        if (!combined.find(p => p.name === skill.name)) {
+          combined.push(skill);
+        }
+      }
+      return combined;
+    }
+  } catch {
+    // Skills API might not have data, that's ok
   }
   
-  const data: SkillsResponse = await response.json();
-  return data.skills || [];
+  return procedures;
+}
+
+// Fetch procedures using ESCRIPT_PROCEDURES()
+async function fetchProcedures(): Promise<Skill[]> {
+  try {
+    const response = await fetch(`${API_BASE}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ query: 'SELECT * FROM ESCRIPT_PROCEDURES()' }),
+    });
+    
+    if (!response.ok) {
+      return [];
+    }
+    
+    const data = await response.json();
+    
+    // The result might be in different formats
+    let procedures: Record<string, unknown>[] = [];
+    
+    if (Array.isArray(data.result)) {
+      procedures = data.result;
+    } else if (data.result && Array.isArray(data.result.rows)) {
+      procedures = data.result.rows;
+    } else if (Array.isArray(data)) {
+      procedures = data;
+    }
+    
+    return procedures.map((p: Record<string, unknown>) => ({
+      name: (p.name as string) || (p.procedure_name as string) || 'unknown',
+      type: 'PROCEDURE' as const,
+      description: (p.description as string) || '',
+      body: (p.body as string) || (p.definition as string) || '',
+      parameters: parseParameters(p.parameters || p.params),
+      created_at: p.created_at as string,
+      updated_at: p.updated_at as string,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+// Parse parameters from various formats
+function parseParameters(params: unknown): Parameter[] {
+  if (!params) return [];
+  if (Array.isArray(params)) {
+    return params.map(p => ({
+      name: p.name || p.param_name || 'param',
+      type: p.type || p.param_type || 'STRING',
+      mode: p.mode || 'IN',
+      description: p.description,
+      required: p.required !== false,
+      default: p.default_value || p.default,
+    }));
+  }
+  return [];
 }
 
 // Get a single skill by name

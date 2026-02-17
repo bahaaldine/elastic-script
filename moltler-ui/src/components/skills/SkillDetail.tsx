@@ -48,7 +48,7 @@ export function SkillDetail({
           <div className="flex items-center justify-between">
             <SheetTitle className="flex items-center gap-2">
               {skill.name}
-              <Badge variant={skill.type === 'PROCEDURE' ? 'default' : 'secondary'}>
+              <Badge variant={skill.type === 'PROCEDURE' ? 'default' : skill.type === 'SKILL' ? 'success' : 'secondary'}>
                 {skill.type}
               </Badge>
             </SheetTitle>

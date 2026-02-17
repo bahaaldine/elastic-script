@@ -75,13 +75,13 @@ export function SkillsTable({
         ),
       },
       {
-        accessorKey: 'return_type',
+        accessorKey: 'type',
         header: 'Type',
         cell: ({ row }) => {
-          const returnType = row.original.return_type
-          const type = row.original.type || (returnType === 'void' ? 'PROCEDURE' : 'FUNCTION')
+          const type = row.original.type || 'PROCEDURE'
+          const variant = type === 'PROCEDURE' ? 'default' : type === 'SKILL' ? 'success' : 'secondary'
           return (
-            <Badge variant={type === 'PROCEDURE' ? 'default' : 'secondary'}>
+            <Badge variant={variant}>
               {type}
             </Badge>
           )

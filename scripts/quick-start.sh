@@ -931,6 +931,118 @@ load_sample_skills() {
     echo ""
 }
 
+# Load demo procedures for the Skills Manager UI
+load_demo_procedures() {
+    print_header "Loading Demo Procedures"
+    
+    local AUTH="-u elastic-admin:elastic-password"
+    local ES="http://localhost:9200"
+    local DEMO_FILE="$PROJECT_ROOT/scripts/demo-procedures.sql"
+    
+    if [ ! -f "$DEMO_FILE" ]; then
+        print_warning "Demo procedures file not found: $DEMO_FILE"
+        return 1
+    fi
+    
+    print_step "Loading demo procedures..."
+    
+    # Parse and execute each procedure from the file
+    # We'll extract procedure names and their full definitions
+    local PROCEDURE_NAMES=(
+        "hello_world"
+        "analyze_logs"
+        "get_user_stats"
+        "aggregate_metrics"
+        "order_summary"
+        "security_audit"
+        "search_products"
+        "generate_report"
+        "health_check"
+        "demo_workflow"
+    )
+    
+    for proc_name in "${PROCEDURE_NAMES[@]}"; do
+        # Drop existing procedure first
+        curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d "{
+            \"query\": \"DROP PROCEDURE $proc_name\"
+        }" > /dev/null 2>&1
+    done
+    
+    # Now load the full demo file by reading and executing each procedure
+    # Read the file, remove comments, and extract procedure blocks
+    
+    # Procedure 1: hello_world
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE PROCEDURE hello_world() BEGIN PRINT '\''Hello from Moltler!'\''; PRINT '\''elastic-script is running inside Elasticsearch.'\''; END PROCEDURE;"
+    }' > /dev/null 2>&1
+    echo "    ✓ hello_world"
+    
+    # Procedure 2: analyze_logs  
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE PROCEDURE analyze_logs(log_index STRING DEFAULT '\''logs-sample'\'') BEGIN DECLARE results ARRAY; DECLARE error_count NUMBER; DECLARE total_count NUMBER; SET results = ESQL_QUERY('\''FROM '\'' || log_index || '\'' | STATS total = COUNT(*)'\''); SET total_count = DOCUMENT_GET(results[0], '\''total'\''); SET results = ESQL_QUERY('\''FROM '\'' || log_index || '\'' | WHERE level = \"ERROR\" | STATS errors = COUNT(*)'\''); SET error_count = DOCUMENT_GET(results[0], '\''errors'\''); SET results = ESQL_QUERY('\''FROM '\'' || log_index || '\'' | WHERE level = \"ERROR\" | STATS count = COUNT(*) BY message | SORT count DESC | LIMIT 5'\''); PRINT '\''Log Analysis: '\'' || total_count || '\'' total logs, '\'' || error_count || '\'' errors'\''; RETURN results; END PROCEDURE;"
+    }' > /dev/null 2>&1
+    echo "    ✓ analyze_logs"
+    
+    # Procedure 3: get_user_stats
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE PROCEDURE get_user_stats() BEGIN DECLARE users ARRAY; DECLARE admins ARRAY; DECLARE active ARRAY; SET users = ESQL_QUERY('\''FROM users-sample | STATS total = COUNT(*)'\''); SET admins = ESQL_QUERY('\''FROM users-sample | WHERE role = \"admin\" | STATS count = COUNT(*)'\''); SET active = ESQL_QUERY('\''FROM users-sample | WHERE status = \"active\" | STATS count = COUNT(*)'\''); RETURN {\"total_users\": DOCUMENT_GET(users[0], '\''total'\''), \"admin_count\": DOCUMENT_GET(admins[0], '\''count'\''), \"active_users\": DOCUMENT_GET(active[0], '\''count'\'')}; END PROCEDURE;"
+    }' > /dev/null 2>&1
+    echo "    ✓ get_user_stats"
+    
+    # Procedure 4: aggregate_metrics
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE PROCEDURE aggregate_metrics(metric_name STRING) BEGIN DECLARE results ARRAY; DECLARE query STRING; SET query = '\''FROM metrics-sample | WHERE metric_name = \"'\'' || metric_name || '\''\" | STATS avg_value = AVG(value), max_value = MAX(value), min_value = MIN(value)'\''; SET results = ESQL_QUERY(query); IF ARRAY_LENGTH(results) > 0 THEN RETURN {\"metric\": metric_name, \"average\": DOCUMENT_GET(results[0], '\''avg_value'\''), \"maximum\": DOCUMENT_GET(results[0], '\''max_value'\''), \"minimum\": DOCUMENT_GET(results[0], '\''min_value'\'')}; ELSE RETURN {\"error\": \"No data found for metric\"}; END IF; END PROCEDURE;"
+    }' > /dev/null 2>&1
+    echo "    ✓ aggregate_metrics"
+    
+    # Procedure 5: order_summary
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE PROCEDURE order_summary() BEGIN DECLARE orders ARRAY; DECLARE by_status ARRAY; SET orders = ESQL_QUERY('\''FROM orders-sample | STATS order_count = COUNT(*), total_revenue = SUM(total)'\''); SET by_status = ESQL_QUERY('\''FROM orders-sample | STATS count = COUNT(*) BY status | SORT count DESC'\''); PRINT '\''Order Summary: '\'' || DOCUMENT_GET(orders[0], '\''order_count'\'') || '\'' orders, $'\'' || DOCUMENT_GET(orders[0], '\''total_revenue'\'') || '\'' revenue'\''; RETURN {\"total_orders\": DOCUMENT_GET(orders[0], '\''order_count'\''), \"total_revenue\": DOCUMENT_GET(orders[0], '\''total_revenue'\''), \"by_status\": by_status}; END PROCEDURE;"
+    }' > /dev/null 2>&1
+    echo "    ✓ order_summary"
+    
+    # Procedure 6: security_audit
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE PROCEDURE security_audit(severity STRING DEFAULT '\''all'\'') BEGIN DECLARE events ARRAY; DECLARE by_type ARRAY; IF severity = '\''all'\'' THEN SET events = ESQL_QUERY('\''FROM security-events | STATS total = COUNT(*)'\''); SET by_type = ESQL_QUERY('\''FROM security-events | STATS count = COUNT(*) BY event_type | SORT count DESC'\''); ELSE SET events = ESQL_QUERY('\''FROM security-events | WHERE severity = \"'\'' || severity || '\''\" | STATS total = COUNT(*)'\''); SET by_type = ESQL_QUERY('\''FROM security-events | WHERE severity = \"'\'' || severity || '\''\" | STATS count = COUNT(*) BY event_type | SORT count DESC'\''); END IF; RETURN {\"total_events\": DOCUMENT_GET(events[0], '\''total'\''), \"events_by_type\": by_type}; END PROCEDURE;"
+    }' > /dev/null 2>&1
+    echo "    ✓ security_audit"
+    
+    # Procedure 7: search_products
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE PROCEDURE search_products(search_term STRING, max_results NUMBER DEFAULT 10) BEGIN DECLARE results ARRAY; SET results = ESQL_QUERY('\''FROM products-sample | WHERE name LIKE \"*'\'' || search_term || '\''*\" | SORT price ASC | LIMIT '\'' || max_results); PRINT '\''Found '\'' || ARRAY_LENGTH(results) || '\'' products matching \"'\'' || search_term || '\''\"'\''; RETURN results; END PROCEDURE;"
+    }' > /dev/null 2>&1
+    echo "    ✓ search_products"
+    
+    # Procedure 8: health_check
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE PROCEDURE health_check() BEGIN DECLARE error_results ARRAY; DECLARE security_results ARRAY; DECLARE status STRING; DECLARE issues ARRAY; SET issues = []; SET status = '\''healthy'\''; SET error_results = ESQL_QUERY('\''FROM logs-sample | WHERE level = \"ERROR\" | STATS error_count = COUNT(*)'\''); IF DOCUMENT_GET(error_results[0], '\''error_count'\'') > 10 THEN SET status = '\''warning'\''; SET issues = ARRAY_APPEND(issues, '\''High error count in logs'\''); END IF; SET security_results = ESQL_QUERY('\''FROM security-events | WHERE severity = \"critical\" | STATS critical_count = COUNT(*)'\''); IF DOCUMENT_GET(security_results[0], '\''critical_count'\'') > 0 THEN SET status = '\''critical'\''; SET issues = ARRAY_APPEND(issues, '\''Critical security events detected'\''); END IF; RETURN {\"status\": status, \"timestamp\": CURRENT_TIMESTAMP(), \"issues\": issues}; END PROCEDURE;"
+    }' > /dev/null 2>&1
+    echo "    ✓ health_check"
+    
+    # Procedure 9: generate_report
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE PROCEDURE generate_report(report_type STRING) BEGIN DECLARE report DOCUMENT; IF report_type = '\''users'\'' THEN SET report = CALL get_user_stats(); ELSEIF report_type = '\''orders'\'' THEN SET report = CALL order_summary(); ELSEIF report_type = '\''security'\'' THEN SET report = CALL security_audit('\''all'\''); ELSE RETURN {\"error\": \"Unknown report type. Available: users, orders, security\"}; END IF; RETURN {\"report_type\": report_type, \"generated_at\": CURRENT_TIMESTAMP(), \"data\": report}; END PROCEDURE;"
+    }' > /dev/null 2>&1
+    echo "    ✓ generate_report"
+    
+    # Procedure 10: demo_workflow
+    curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
+        "query": "CREATE PROCEDURE demo_workflow() BEGIN PRINT '\''=== Moltler Demo Workflow ==='\''; PRINT '\''Step 1: Running health check...'\''; DECLARE health DOCUMENT; SET health = CALL health_check(); PRINT '\''  Status: '\'' || DOCUMENT_GET(health, '\''status'\''); PRINT '\''Step 2: Getting user statistics...'\''; DECLARE user_stats DOCUMENT; SET user_stats = CALL get_user_stats(); PRINT '\''  Total users: '\'' || DOCUMENT_GET(user_stats, '\''total_users'\''); PRINT '\''Step 3: Generating order summary...'\''; DECLARE orders DOCUMENT; SET orders = CALL order_summary(); PRINT '\''  Total revenue: $'\'' || DOCUMENT_GET(orders, '\''total_revenue'\''); PRINT '\''=== Demo Complete ==='\''; RETURN {\"success\": TRUE, \"health\": health, \"users\": user_stats, \"orders\": orders}; END PROCEDURE;"
+    }' > /dev/null 2>&1
+    echo "    ✓ demo_workflow"
+    
+    print_success "Demo procedures loaded!"
+    echo ""
+    echo "    Available procedures:"
+    echo "      CALL hello_world()"
+    echo "      CALL analyze_logs()"
+    echo "      CALL get_user_stats()"
+    echo "      CALL order_summary()"
+    echo "      CALL health_check()"
+    echo "      CALL demo_workflow()"
+    echo ""
+}
+
 # Setup notebooks
 setup_notebooks() {
     print_header "Setting Up Notebooks"
@@ -1911,15 +2023,8 @@ case "${1:-}" in
         # 4. Load sample data
         load_sample_data
         
-        # 5. Run the Moltler demo to create skills
-        print_step "Creating demo skills..."
-        cd "$PROJECT_ROOT/cli"
-        if python -m escript_cli.main demo > /dev/null 2>&1; then
-            print_success "Demo skills created"
-        else
-            print_warning "Demo skills may already exist"
-        fi
-        cd "$PROJECT_ROOT"
+        # 5. Load demo procedures for the Skills Manager
+        load_demo_procedures
         
         # 6. Start Moltler Skills Manager UI
         start_moltler_ui
