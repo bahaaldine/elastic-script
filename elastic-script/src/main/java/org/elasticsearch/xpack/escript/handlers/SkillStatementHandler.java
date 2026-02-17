@@ -124,14 +124,40 @@ public class SkillStatementHandler {
             returnType = ctx.datatype().getText().toUpperCase();
         }
         
+        // Extract the skill body statements
+        List<ElasticScriptParser.StatementContext> bodyStatements = ctx.statement();
+        StringBuilder bodyText = new StringBuilder();
+        for (ElasticScriptParser.StatementContext stmt : bodyStatements) {
+            bodyText.append(stmt.getText()).append(" ");
+        }
+        String skillBody = bodyText.toString().trim();
+        
+        // Build the procedure parameters string
+        String procParamsStr = parameters.stream()
+            .map(p -> p.getName() + " " + p.getType() + 
+                (p.getDefaultValue() != null ? " DEFAULT " + p.getDefaultValue() : ""))
+            .collect(Collectors.joining(", "));
+        
+        // Create the corresponding procedure definition
+        StringBuilder procBuilder = new StringBuilder();
+        procBuilder.append("CREATE PROCEDURE ").append(skillName).append("(");
+        procBuilder.append(procParamsStr);
+        procBuilder.append(") ");
+        procBuilder.append("BEGIN ");
+        procBuilder.append(skillBody);
+        procBuilder.append(" END PROCEDURE;");
+        String procedureDefinition = procBuilder.toString();
+        
+        LOGGER.debug("Creating procedure for skill {}: {}", skillName, procedureDefinition);
+        
         // Build skill definition with new metadata
         SkillDefinition skill = new SkillDefinition(
             skillName,
             description,
             parameters,
             returnType,
-            skillName, // procedureName is the skill itself now
-            new ArrayList<>(),
+            skillName, // procedureName is the skill itself
+            parameters.stream().map(SkillDefinition.SkillParameter::getName).collect(Collectors.toList()),
             new ArrayList<>() // examples removed from grammar
         );
         skill.setVersion(version);
@@ -139,9 +165,7 @@ public class SkillStatementHandler {
         skill.setTags(tags);
         skill.setDependencies(requires);
         
-        // Capture source code from the parse context
-        String sourceCode = ctx.getText();
-        // Try to reconstruct a readable version
+        // Build readable source code with actual body
         StringBuilder readableSource = new StringBuilder();
         readableSource.append("CREATE SKILL ").append(skillName).append("\n");
         readableSource.append("  VERSION '").append(version).append("'\n");
@@ -155,15 +179,16 @@ public class SkillStatementHandler {
             readableSource.append("  TAGS [").append(tags.stream().map(t -> "'" + t + "'").collect(Collectors.joining(", "))).append("]\n");
         }
         if (!parameters.isEmpty()) {
-            readableSource.append("  (").append(parameters.stream()
-                .map(p -> p.getName() + " " + p.getType() + (p.getDefaultValue() != null ? " DEFAULT " + p.getDefaultValue() : ""))
-                .collect(Collectors.joining(", "))).append(")\n");
+            readableSource.append("  (").append(procParamsStr).append(")\n");
         }
         if (returnType != null) {
             readableSource.append("  RETURNS ").append(returnType).append("\n");
         }
         readableSource.append("BEGIN\n");
-        readableSource.append("  -- Implementation\n");
+        // Add formatted body
+        for (ElasticScriptParser.StatementContext stmt : bodyStatements) {
+            readableSource.append("  ").append(stmt.getText()).append("\n");
+        }
         readableSource.append("END SKILL;");
         skill.setSourceCode(readableSource.toString());
         
@@ -173,19 +198,39 @@ public class SkillStatementHandler {
         
         LOGGER.debug("Creating skill: {} v{}", skillName, version);
         
-        // Save to registry
-        registry.saveSkill(skill, ActionListener.wrap(
-            success -> {
-                Map<String, Object> result = new HashMap<>();
-                result.put("action", "CREATE SKILL");
-                result.put("skill", skillName);
-                result.put("version", version);
-                result.put("parameters", parameters.size());
-                result.put("success", success);
-                listener.onResponse(result);
-            },
-            listener::onFailure
-        ));
+        // First, save the corresponding procedure, then save the skill
+        String finalProcedureDefinition = procedureDefinition;
+        String finalReturnType = returnType;
+        
+        // Store the procedure
+        Map<String, Object> procSource = new HashMap<>();
+        procSource.put("procedure", finalProcedureDefinition);
+        procSource.put("created_at", System.currentTimeMillis());
+        procSource.put("skill", skillName); // Mark as skill-generated
+        
+        client.prepareIndex(".elastic_script_procedures")
+            .setId(skillName)
+            .setSource(procSource)
+            .execute(ActionListener.wrap(
+                indexResponse -> {
+                    LOGGER.debug("Stored procedure for skill {}", skillName);
+                    // Now save the skill to registry
+                    registry.saveSkill(skill, ActionListener.wrap(
+                        success -> {
+                            Map<String, Object> result = new HashMap<>();
+                            result.put("action", "CREATE SKILL");
+                            result.put("skill", skillName);
+                            result.put("version", version);
+                            result.put("parameters", parameters.size());
+                            result.put("procedure_created", true);
+                            result.put("success", success);
+                            listener.onResponse(result);
+                        },
+                        listener::onFailure
+                    ));
+                },
+                listener::onFailure
+            ));
     }
     
     /**
