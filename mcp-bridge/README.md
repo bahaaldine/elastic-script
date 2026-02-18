@@ -1,111 +1,109 @@
 # Moltler MCP Bridge
 
-Connect AI agents to Elasticsearch elastic-script skills via the Model Context Protocol (MCP).
-
-## What is this?
-
-This is a lightweight bridge that enables AI agents (like Claude Desktop) to use elastic-script skills as tools. It translates MCP's stdio protocol to HTTP calls against the Elasticsearch `/_escript/mcp` endpoint.
+Connect AI agents (Claude Desktop, Cursor, etc.) to your Moltler skills via the Model Context Protocol (MCP).
 
 ## Quick Start
 
-### 1. Start Elasticsearch with elastic-script
-
 ```bash
-cd elastic-script
-./scripts/quick-start.sh --moltler
+# 1. Make sure Elasticsearch is running with skills loaded
+./scripts/quick-start.sh
+
+# 2. Run the setup wizard
+cd mcp-bridge
+./setup.sh
 ```
 
-### 2. Configure Claude Desktop
+The setup wizard will configure your preferred AI agent.
 
-Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+## What is MCP?
+
+[Model Context Protocol (MCP)](https://modelcontextprotocol.io/) is a standard for connecting AI assistants to external tools and data sources. This bridge exposes your Moltler skills as MCP tools that any compatible AI agent can discover and use.
+
+## Supported AI Agents
+
+### Claude Desktop
+
+1. Run `./setup.sh` and choose option 1
+2. Restart Claude Desktop
+3. Look for the hammer icon (🔨) - your Moltler skills will appear there
+
+### Cursor
+
+1. Run `./setup.sh` and choose option 2  
+2. Restart Cursor
+3. Skills are available as tools in the AI chat
+
+### Other MCP Clients
+
+Any MCP-compatible client can connect using:
 
 ```json
 {
   "mcpServers": {
-    "moltler": {
-      "command": "npx",
-      "args": [
-        "@moltler/mcp-bridge",
-        "--es-url", "http://localhost:9200",
-        "--username", "elastic-admin",
-        "--password", "elastic-password"
-      ]
+    "moltler-skills": {
+      "command": "python3",
+      "args": ["/path/to/mcp-bridge/moltler_mcp_server.py"],
+      "env": {
+        "ES_URL": "http://localhost:9200",
+        "ES_USER": "elastic-admin",
+        "ES_PASSWORD": "elastic-password"
+      }
     }
   }
 }
 ```
 
-### 3. Restart Claude Desktop
+## Usage Examples
 
-Your skills are now available as tools! Try asking Claude:
-- "List the available tools"
-- "Check the system health"
-- "Get user statistics"
+Once configured, you can ask your AI agent:
 
-## Usage
+- "Use moltler to check the cluster health"
+- "Call the count_logs_by_level skill to see log distribution"
+- "Get the recent errors from my system"
+- "Run the metrics_summary skill"
 
-```bash
-# Using npx (recommended)
-npx @moltler/mcp-bridge --es-url http://localhost:9200
+The AI will automatically discover available skills and call them with the appropriate arguments.
 
-# Or install globally
-npm install -g @moltler/mcp-bridge
-moltler-mcp --es-url http://localhost:9200
-```
-
-## Options
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--es-url` | `http://localhost:9200` | Elasticsearch URL |
-| `--username` | `elastic-admin` | Elasticsearch username |
-| `--password` | `elastic-password` | Elasticsearch password |
-
-## Environment Variables
-
-You can also configure via environment variables:
+## Testing
 
 ```bash
-export ELASTICSEARCH_URL=http://localhost:9200
-export ELASTICSEARCH_USERNAME=elastic-admin
-export ELASTICSEARCH_PASSWORD=elastic-password
+# Test the MCP endpoint directly
+./setup.sh  # Choose option 4
+
+# Or manually:
+curl -s -u elastic-admin:elastic-password \
+  -X POST http://localhost:9200/_escript/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"tools/list","id":1}' | jq .
 ```
 
-## How It Works
+## Architecture
 
 ```
-┌─────────────────┐      stdio       ┌─────────────────┐      HTTP       ┌─────────────────┐
-│  Claude Desktop │ ◄──────────────► │  MCP Bridge     │ ◄─────────────► │  Elasticsearch  │
-│  (AI Agent)     │      MCP         │  (this package) │   /_escript/mcp │  elastic-script │
-└─────────────────┘                  └─────────────────┘                 └─────────────────┘
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│  Claude/Cursor  │────▶│  MCP Bridge      │────▶│  Elasticsearch  │
+│  (AI Agent)     │     │  (Python stdio)  │     │  /_escript/mcp  │
+└─────────────────┘     └──────────────────┘     └─────────────────┘
+                              │
+                              ▼
+                        ┌─────────────────┐
+                        │  Your Skills    │
+                        │  - hello_moltler│
+                        │  - metrics_sum  │
+                        │  - log_analyzer │
+                        └─────────────────┘
 ```
 
-1. Claude Desktop starts the bridge as a subprocess
-2. Bridge reads MCP messages from stdin, writes to stdout
-3. Bridge forwards requests to Elasticsearch's MCP endpoint
-4. Skills are exposed as MCP tools that Claude can invoke
+## Troubleshooting
 
-## Creating Skills
+**Skills not showing up?**
+- Make sure Elasticsearch is running: `curl http://localhost:9200`
+- Check that skills are loaded: `./scripts/quick-start.sh --load-data`
 
-Skills are created in Elasticsearch using elastic-script:
+**Connection refused?**
+- Verify ES credentials in the config
+- Check firewall settings
 
-```sql
-CREATE SKILL analyze_logs
-  VERSION '1.0'
-  DESCRIPTION 'Analyze application logs for errors and patterns'
-  AUTHOR 'DevOps Team'
-  TAGS ['logs', 'monitoring']
-  (index_name STRING DEFAULT 'logs-*')
-  RETURNS DOCUMENT
-BEGIN
-  DECLARE results ARRAY;
-  SET results = ESQL_QUERY('FROM ' || index_name || ' | WHERE level = "ERROR" | LIMIT 10');
-  RETURN {"errors": results, "count": ARRAY_LENGTH(results)};
-END SKILL;
-```
-
-Then the skill automatically appears as a tool for AI agents.
-
-## License
-
-Elastic License 2.0
+**Claude doesn't see the tools?**
+- Restart Claude Desktop after configuration
+- Check `~/Library/Application Support/Claude/claude_desktop_config.json`

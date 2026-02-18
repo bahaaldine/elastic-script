@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "moltler-skills": {
+      "command": "python3",
+      "args": [
+        "/PATH/TO/elastic-script/mcp-bridge/moltler_mcp_server.py"
+      ],
+      "env": {
+        "ES_URL": "http://localhost:9200",
+        "ES_USER": "elastic-admin",
+        "ES_PASSWORD": "elastic-password"
+      }
+    }
+  }
+}
