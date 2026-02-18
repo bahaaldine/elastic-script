@@ -909,9 +909,9 @@ load_sample_skills() {
     }' > /dev/null 2>&1
     echo "    ✓ count_logs_by_level"
     
-    # Skill 3: Get recent errors (fixed ESQL == syntax)
+    # Skill 3: Get recent errors (fixed ESQL == syntax, uses INT for LIMIT)
     curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
-        "query": "CREATE SKILL get_recent_errors VERSION '\''1.0'\'' DESCRIPTION '\''Retrieve the most recent error log entries'\'' AUTHOR '\''Moltler'\'' TAGS ['\''logs'\'', '\''errors'\'', '\''debugging'\''] (limit_count NUMBER DEFAULT 10) RETURNS ARRAY BEGIN DECLARE errors ARRAY; SET errors = ESQL_QUERY('\''FROM logs-sample | WHERE level == \"ERROR\" | SORT @timestamp DESC | LIMIT '\'' || limit_count); RETURN errors; END SKILL;"
+        "query": "CREATE SKILL get_recent_errors VERSION '\''1.0'\'' DESCRIPTION '\''Retrieve the most recent error log entries'\'' AUTHOR '\''Moltler'\'' TAGS ['\''logs'\'', '\''errors'\'', '\''debugging'\''] (limit_count INT DEFAULT 10) RETURNS ARRAY BEGIN DECLARE errors ARRAY; SET errors = ESQL_QUERY('\''FROM logs-sample | WHERE level == \"ERROR\" | SORT @timestamp DESC | LIMIT '\'' || limit_count); RETURN errors; END SKILL;"
     }' > /dev/null 2>&1
     echo "    ✓ get_recent_errors"
     
