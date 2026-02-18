@@ -124,11 +124,20 @@ public class SkillStatementHandler {
             returnType = ctx.datatype().getText().toUpperCase();
         }
         
-        // Extract the skill body statements
+        // Extract the skill body statements with proper whitespace
+        // Use the token stream to get the original text with whitespace preserved
         List<ElasticScriptParser.StatementContext> bodyStatements = ctx.statement();
         StringBuilder bodyText = new StringBuilder();
         for (ElasticScriptParser.StatementContext stmt : bodyStatements) {
-            bodyText.append(stmt.getText()).append(" ");
+            // Get the original text from the input stream to preserve whitespace
+            org.antlr.v4.runtime.misc.Interval interval = stmt.getSourceInterval();
+            String stmtText = stmt.start.getInputStream().getText(
+                new org.antlr.v4.runtime.misc.Interval(
+                    stmt.start.getStartIndex(), 
+                    stmt.stop.getStopIndex()
+                )
+            );
+            bodyText.append(stmtText).append(" ");
         }
         String skillBody = bodyText.toString().trim();
         
