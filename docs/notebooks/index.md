@@ -10,7 +10,7 @@ These notebooks provide interactive tutorials for learning elastic-script. Each 
     The quickest way to get started:
     
     ```bash
-    git clone https://github.com/bahaaldine/elastic-script.git
+    git clone https://github.com/bahaaldine/moltler.git
     cd elastic-script
     ./scripts/quick-start.sh
     ```

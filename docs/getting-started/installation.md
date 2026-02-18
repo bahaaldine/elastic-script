@@ -18,7 +18,7 @@ The fastest way to get started:
 
 ```bash
 # Clone the repository
-git clone https://github.com/bahaaldine/elastic-script.git
+git clone https://github.com/bahaaldine/moltler.git
 cd elastic-script
 
 # Run the quick-start script
@@ -54,7 +54,7 @@ This will:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/bahaaldine/elastic-script.git
+git clone https://github.com/bahaaldine/moltler.git
 cd elastic-script
 
 # Initialize the Elasticsearch submodule

@@ -16,7 +16,7 @@ title: Getting Started
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/bahaaldine/elastic-script.git
+git clone https://github.com/bahaaldine/moltler.git
 cd elastic-script
 ```
 

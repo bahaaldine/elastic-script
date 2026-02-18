@@ -13,7 +13,7 @@ Moltler enables you to create **AI-ready skills** that wrap Elasticsearch operat
 
 ```bash
 # Clone and start
-git clone https://github.com/bahaaldine/elastic-script.git
+git clone https://github.com/bahaaldine/moltler.git
 cd elastic-script
 ./scripts/quick-start.sh --moltler
 

@@ -111,4 +111,4 @@ Both syntaxes are supported for backward compatibility!
 
 ## Try It
 
-Download the [11-namespaced-functions.ipynb](https://github.com/bahaaldine/elastic-script/blob/main/notebooks/11-namespaced-functions.ipynb) notebook.
+Download the [11-namespaced-functions.ipynb](https://github.com/bahaaldine/moltler/blob/main/notebooks/11-namespaced-functions.ipynb) notebook.

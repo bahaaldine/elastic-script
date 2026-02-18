@@ -198,4 +198,4 @@ DROP TRIGGER document_processor
 
 ---
 
-[View the interactive notebook →](https://github.com/bahaaldine/elastic-script/blob/main/notebooks/07-event-triggers.ipynb)
+[View the interactive notebook →](https://github.com/bahaaldine/moltler/blob/main/notebooks/07-event-triggers.ipynb)

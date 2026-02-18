@@ -13,7 +13,7 @@ Guide for contributing to elastic-script development.
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/bahaaldine/elastic-script.git
+git clone https://github.com/bahaaldine/moltler.git
 cd elastic-script
 
 # Initialize Elasticsearch submodule

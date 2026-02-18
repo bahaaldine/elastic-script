@@ -123,4 +123,4 @@ CALL product_catalog();
 
 ## Try It
 
-Download the [10-first-class-commands.ipynb](https://github.com/bahaaldine/elastic-script/blob/main/notebooks/10-first-class-commands.ipynb) notebook.
+Download the [10-first-class-commands.ipynb](https://github.com/bahaaldine/moltler/blob/main/notebooks/10-first-class-commands.ipynb) notebook.

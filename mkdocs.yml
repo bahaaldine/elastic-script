@@ -1,14 +1,14 @@
 # Moltler Documentation
 # The AI Skills Creation Framework for Elasticsearch
-# https://bahaaldine.github.io/elastic-script/
+# https://bahaaldine.github.io/moltler/
 
 site_name: Moltler
 site_description: The AI Skills Creation Framework for Elasticsearch
 site_author: Bahaaldine Azarmi
-site_url: https://bahaaldine.github.io/elastic-script/
+site_url: https://bahaaldine.github.io/moltler/
 
-repo_name: bahaaldine/elastic-script
-repo_url: https://github.com/bahaaldine/elastic-script
+repo_name: bahaaldine/moltler
+repo_url: https://github.com/bahaaldine/moltler
 edit_uri: edit/main/docs/
 
 # Theme Configuration

@@ -9,7 +9,7 @@
     # Then open http://localhost:8888/notebooks/03-ai-observability.ipynb
     ```
     
-    [:fontawesome-brands-github: View on GitHub](https://github.com/bahaaldine/elastic-script/blob/main/notebooks/03-ai-observability.ipynb){ .md-button }
+    [:fontawesome-brands-github: View on GitHub](https://github.com/bahaaldine/moltler/blob/main/notebooks/03-ai-observability.ipynb){ .md-button }
 
 ---
 

@@ -9,7 +9,7 @@
     # Then open http://localhost:8888/notebooks/00-complete-reference.ipynb
     ```
     
-    [:fontawesome-brands-github: View on GitHub](https://github.com/bahaaldine/elastic-script/blob/main/notebooks/00-complete-reference.ipynb){ .md-button }
+    [:fontawesome-brands-github: View on GitHub](https://github.com/bahaaldine/moltler/blob/main/notebooks/00-complete-reference.ipynb){ .md-button }
 
 ---
 

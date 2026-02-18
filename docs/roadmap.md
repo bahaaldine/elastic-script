@@ -1837,7 +1837,7 @@ https://apps.company.com/incidents  (custom domain)
 
 Have an idea for elastic-script? We'd love to hear it!
 
-[:fontawesome-brands-github: Open a Feature Request](https://github.com/bahaaldine/elastic-script/issues/new?labels=enhancement&template=feature_request.md){ .md-button .md-button--primary }
+[:fontawesome-brands-github: Open a Feature Request](https://github.com/bahaaldine/moltler/issues/new?labels=enhancement&template=feature_request.md){ .md-button .md-button--primary }
 
 ---
 

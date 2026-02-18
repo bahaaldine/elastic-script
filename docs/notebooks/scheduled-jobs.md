@@ -157,4 +157,4 @@ DROP JOB hello_job
 
 ---
 
-[View the interactive notebook →](https://github.com/bahaaldine/elastic-script/blob/main/notebooks/06-scheduled-jobs.ipynb)
+[View the interactive notebook →](https://github.com/bahaaldine/moltler/blob/main/notebooks/06-scheduled-jobs.ipynb)

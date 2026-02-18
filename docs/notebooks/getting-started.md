@@ -9,7 +9,7 @@
     # Then open http://localhost:8888/notebooks/01-getting-started.ipynb
     ```
     
-    [:fontawesome-brands-github: View on GitHub](https://github.com/bahaaldine/elastic-script/blob/main/notebooks/01-getting-started.ipynb){ .md-button }
+    [:fontawesome-brands-github: View on GitHub](https://github.com/bahaaldine/moltler/blob/main/notebooks/01-getting-started.ipynb){ .md-button }
 
 ---
 

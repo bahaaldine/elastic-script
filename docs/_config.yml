@@ -1,5 +1,5 @@
-title: Moltler - elastic-script
-description: Procedural scripting language that runs inside Elasticsearch
+title: Moltler
+description: The AI Skills Creation Framework for Elasticsearch
 theme: jekyll-theme-cayman
 remote_theme: pages-themes/cayman@v0.2.0
 
@@ -21,11 +21,11 @@ header_page_links:
   - title: UI
     url: /ui
   - title: GitHub
-    url: https://github.com/bahaaldine/elastic-script
+    url: https://github.com/bahaaldine/moltler
 
 # GitHub Pages
 url: https://bahaaldine.github.io
-baseurl: /elastic-script
+baseurl: /moltler
 
 # Exclude
 exclude:
