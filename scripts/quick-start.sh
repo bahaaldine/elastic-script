@@ -2153,24 +2153,32 @@ case "${1:-}" in
                     download_kibana && start_kibana_background
                 fi
                 
+                # Start Moltler Skills Manager UI if not running
+                if ! curl -s http://localhost:3000 > /dev/null 2>&1; then
+                    start_moltler_ui
+                fi
+                
                 echo ""
                 print_header "🚀 Launching Jupyter Notebooks & Kibana"
                 cd "$NOTEBOOKS_DIR"
                 python3 -m notebook --notebook-dir="$NOTEBOOKS_DIR" &
                 JUPYTER_PID=$!
                 echo ""
+                print_success "Moltler Skills Manager at http://localhost:3000"
                 print_success "Jupyter started at http://localhost:8888"
                 print_success "Kibana available at http://localhost:5601"
                 print_success "OTEL Collector ready at localhost:4317/4318"
                 print_success "View traces at http://localhost:5601/app/apm"
                 echo ""
                 
-                # Open both in browser
+                # Open UI, notebooks, and Kibana in browser
                 sleep 2
                 if command -v open &> /dev/null; then
+                    open "http://localhost:3000"
                     open "http://localhost:8888"
                     open "http://localhost:5601/app/apm"
                 elif command -v xdg-open &> /dev/null; then
+                    xdg-open "http://localhost:3000"
                     xdg-open "http://localhost:8888"
                     xdg-open "http://localhost:5601/app/apm"
                 fi
@@ -2188,8 +2196,9 @@ case "${1:-}" in
             echo "  6. Start OTEL Collector (for distributed tracing)"
             echo "  7. Start Kibana"
             echo "  8. Load sample data"
-            echo "  9. Start Jupyter notebooks"
-            echo "  10. Open Jupyter and Kibana APM in browser"
+            echo "  9. Start Moltler Skills Manager UI"
+            echo "  10. Start Jupyter notebooks"
+            echo "  11. Open Skills Manager, Jupyter, and Kibana APM in browser"
             echo ""
             read -p "Continue? [Y/n] " -n 1 -r
             echo
@@ -2218,6 +2227,9 @@ case "${1:-}" in
                 load_sample_data
                 print_examples
                 setup_notebooks
+                
+                # Start Moltler Skills Manager UI
+                start_moltler_ui
                 
                 echo ""
                 print_header "🚀 Launching Jupyter Notebooks"
