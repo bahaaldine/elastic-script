@@ -270,9 +270,8 @@ export function SkillEditor({
     if (!extractedName) return null
     
     if (upper.includes('CREATE SKILL')) {
-      // For skills, we need to extract parameters and generate a CALL to the skill
-      // Skills wrap procedures, so we invoke via CALL
-      return `CALL ${extractedName}()`
+      // For skills, use RUN SKILL which looks up the skill and executes its procedure
+      return `RUN SKILL ${extractedName}`
     } else if (upper.includes('CREATE PROCEDURE')) {
       return `CALL ${extractedName}()`
     } else if (upper.includes('CREATE FUNCTION')) {
