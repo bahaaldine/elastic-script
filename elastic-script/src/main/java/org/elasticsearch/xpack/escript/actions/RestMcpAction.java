@@ -290,19 +290,24 @@ public class RestMcpAction extends BaseRestHandler {
                     Object value = arguments.get(argName);
                     
                     // Use default if not provided
+                    boolean isDefaultValue = false;
                     if (value == null) {
                         for (SkillDefinition.SkillParameter p : skill.getParameters()) {
                             if (p.getName().equals(argName) && p.getDefaultValue() != null) {
                                 value = p.getDefaultValue();
+                                isDefaultValue = true;
                                 break;
                             }
                         }
                     }
                     
-                    if (value instanceof String) {
-                        callBuilder.append("'").append(value.toString().replace("'", "''")).append("'");
-                    } else if (value == null) {
+                    if (value == null) {
                         callBuilder.append("NULL");
+                    } else if (isDefaultValue) {
+                        // Default values are already properly formatted (e.g., 'logs-sample' or 10)
+                        callBuilder.append(value);
+                    } else if (value instanceof String) {
+                        callBuilder.append("'").append(value.toString().replace("'", "''")).append("'");
                     } else {
                         callBuilder.append(value);
                     }
@@ -338,9 +343,9 @@ public class RestMcpAction extends BaseRestHandler {
                             if (finalValue == null) {
                                 textResult = "null";
                             } else if (finalValue instanceof Map || finalValue instanceof List) {
-                                textResult = XContentFactory.jsonBuilder()
-                                    .value(finalValue)
-                                    .toString();
+                                XContentBuilder jsonBuilder = XContentFactory.jsonBuilder();
+                                jsonBuilder.value(finalValue);
+                                textResult = org.elasticsearch.common.Strings.toString(jsonBuilder);
                             } else {
                                 textResult = finalValue.toString();
                             }
