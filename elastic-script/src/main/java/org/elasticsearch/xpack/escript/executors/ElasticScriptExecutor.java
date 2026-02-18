@@ -126,9 +126,25 @@ public class ElasticScriptExecutor {
                                             ? programContext.call_procedure_statement().argument_list().expression()
                                             : List.of();
 
-                                    if (parameterContexts.size() != callArgs.size()) {
+                                    // Count required parameters (those without DEFAULT)
+                                    int requiredParams = 0;
+                                    for (var param : parameterContexts) {
+                                        if (param.DEFAULT() == null) {
+                                            requiredParams++;
+                                        }
+                                    }
+
+                                    // Check if we have enough arguments
+                                    if (callArgs.size() < requiredParams) {
                                         listener.onFailure(
-                                            new IllegalArgumentException("Mismatch between declared parameters and call arguments"));
+                                            new IllegalArgumentException("Not enough arguments: expected at least " 
+                                                + requiredParams + " but got " + callArgs.size()));
+                                        return;
+                                    }
+                                    if (callArgs.size() > parameterContexts.size()) {
+                                        listener.onFailure(
+                                            new IllegalArgumentException("Too many arguments: expected at most " 
+                                                + parameterContexts.size() + " but got " + callArgs.size()));
                                         return;
                                     }
 
@@ -136,7 +152,18 @@ public class ElasticScriptExecutor {
                                         var param = parameterContexts.get(i);
                                         String paramName = param.ID().getText();
                                         String paramType = param.datatype().getText().toUpperCase(java.util.Locale.ROOT);
-                                        String rawValue = callArgs.get(i).getText();
+                                        
+                                        // Get raw value from call arg, or use DEFAULT if not provided
+                                        String rawValue;
+                                        if (i < callArgs.size()) {
+                                            rawValue = callArgs.get(i).getText();
+                                        } else if (param.DEFAULT() != null && param.expression() != null) {
+                                            rawValue = param.expression().getText();
+                                        } else {
+                                            listener.onFailure(
+                                                new IllegalArgumentException("Missing required parameter: " + paramName));
+                                            return;
+                                        }
 
                                         Object value;
                                         switch (paramType) {
