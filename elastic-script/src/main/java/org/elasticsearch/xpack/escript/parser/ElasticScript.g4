@@ -944,7 +944,7 @@ parameter_list
     ;
 
 parameter
-    : (IN | OUT | INOUT)? ID datatype
+    : (IN | OUT | INOUT)? ID datatype (DEFAULT expression)?
     ;
 
 argument_list
