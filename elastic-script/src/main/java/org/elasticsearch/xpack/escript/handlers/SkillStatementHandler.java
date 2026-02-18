@@ -148,13 +148,15 @@ public class SkillStatementHandler {
             .collect(Collectors.joining(", "));
         
         // Create the corresponding procedure definition
+        // Note: The grammar rule 'procedure' expects "PROCEDURE name(...) BEGIN ... END PROCEDURE"
+        // NOT "CREATE PROCEDURE ..." - the CREATE is handled by the create_procedure_statement rule
         StringBuilder procBuilder = new StringBuilder();
-        procBuilder.append("CREATE PROCEDURE ").append(skillName).append("(");
+        procBuilder.append("PROCEDURE ").append(skillName).append("(");
         procBuilder.append(procParamsStr);
         procBuilder.append(") ");
         procBuilder.append("BEGIN ");
         procBuilder.append(skillBody);
-        procBuilder.append(" END PROCEDURE;");
+        procBuilder.append(" END PROCEDURE");
         String procedureDefinition = procBuilder.toString();
         
         LOGGER.debug("Creating procedure for skill {}: {}", skillName, procedureDefinition);
