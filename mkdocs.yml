@@ -157,6 +157,7 @@ nav:
     - Python SDK: tools/python-sdk.md
     - Jupyter Notebooks: tools/jupyter.md
     - VSCode Extension: tools/vscode.md
+    - MCP Bridge: tools/mcp-bridge.md
   
   - elastic-script Language:
     - Overview: language/overview.md

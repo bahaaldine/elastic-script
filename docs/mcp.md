@@ -124,55 +124,54 @@ Response:
 }
 ```
 
-## MCP Bridge for stdio Clients
+## MCP Bridge for AI Agents
 
-For MCP clients that use stdio transport (like Claude Desktop), use the MCP bridge:
+For MCP clients that use stdio transport (Claude Desktop, Cursor, etc.), use the included MCP bridge.
 
-### Installation
+### Quick Setup
 
 ```bash
-npm install -g @moltler/mcp-bridge
+cd mcp-bridge
+./setup.sh
 ```
 
-Or use directly with npx:
+The setup wizard will configure your preferred AI agent (Claude Desktop, Cursor, or manual).
+
+### Manual Installation
 
 ```bash
-npx @moltler/mcp-bridge --es-url http://localhost:9200
-```
+# Install dependencies
+pip3 install httpx
 
-### Configuration
-
-```bash
-moltler-mcp \
-  --es-url http://localhost:9200 \
-  --username elastic-admin \
-  --password elastic-password
+# Run the MCP server
+python3 mcp-bridge/moltler_mcp_server.py
 ```
 
 ### Environment Variables
 
 ```bash
-export ELASTICSEARCH_URL=http://localhost:9200
-export ELASTICSEARCH_USERNAME=elastic-admin
-export ELASTICSEARCH_PASSWORD=elastic-password
-moltler-mcp
+export ES_URL=http://localhost:9200
+export ES_USER=elastic-admin
+export ES_PASSWORD=elastic-password
+python3 mcp-bridge/moltler_mcp_server.py
 ```
 
 ## Claude Desktop Integration
 
 ### Configuration
 
-Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
+Run the setup wizard or manually edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
-    "moltler": {
-      "command": "npx",
-      "args": ["@moltler/mcp-bridge", "--es-url", "http://localhost:9200"],
+    "moltler-skills": {
+      "command": "python3",
+      "args": ["/path/to/elastic-script/mcp-bridge/moltler_mcp_server.py"],
       "env": {
-        "ELASTICSEARCH_USERNAME": "elastic-admin",
-        "ELASTICSEARCH_PASSWORD": "elastic-password"
+        "ES_URL": "http://localhost:9200",
+        "ES_USER": "elastic-admin",
+        "ES_PASSWORD": "elastic-password"
       }
     }
   }
@@ -182,8 +181,39 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ### Verification
 
 1. Restart Claude Desktop
-2. Look for "moltler" in the MCP tools menu
-3. Ask Claude: "What Elasticsearch skills do you have available?"
+2. Look for the hammer icon (🔨) - your Moltler skills will appear there
+3. Ask Claude: "What Moltler skills do you have available?"
+
+## Cursor Integration
+
+### Configuration
+
+The setup wizard creates `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "moltler-skills": {
+      "command": "python3",
+      "args": ["/path/to/elastic-script/mcp-bridge/moltler_mcp_server.py"],
+      "env": {
+        "ES_URL": "http://localhost:9200",
+        "ES_USER": "elastic-admin",
+        "ES_PASSWORD": "elastic-password"
+      }
+    }
+  }
+}
+```
+
+## Example Prompts
+
+Once configured, you can ask your AI agent:
+
+- "Use moltler to check the cluster health"
+- "Call the count_logs_by_level skill to see log distribution"
+- "Get recent errors using moltler"
+- "What metrics are available? Run the metrics_summary skill"
 
 ## Creating MCP-Ready Skills
 

@@ -136,6 +136,32 @@ client = NotebookClient(nb, timeout=300, ...)  # 5 minutes
 ### "no such index" errors
 Load sample data: `./scripts/quick-start.sh`
 
+## Additional Test Scripts
+
+### Skills Tests
+
+```bash
+# Comprehensive skills tests
+./test_skills_comprehensive.sh
+
+# E2E skills tests
+./test_skills_e2e.sh
+```
+
+### MCP Bridge Tests
+
+```bash
+# Test MCP endpoint and bridge
+./test_mcp_bridge.sh
+```
+
+These tests verify:
+- MCP `initialize` method
+- MCP `tools/list` returns skills
+- MCP `tools/call` executes skills
+- Error handling for invalid tools/methods
+- Python MCP bridge script functionality
+
 ## Architecture
 
 ```
@@ -144,6 +170,9 @@ tests/e2e/
 ├── requirements.txt          # Python dependencies
 ├── run_tests.sh              # Shell wrapper
 ├── run_notebook_tests.py     # Main test runner
+├── test_skills_comprehensive.sh  # Skills tests
+├── test_skills_e2e.sh        # Skills E2E tests
+├── test_mcp_bridge.sh        # MCP bridge tests
 └── __init__.py               # Python package marker
 ```
 
