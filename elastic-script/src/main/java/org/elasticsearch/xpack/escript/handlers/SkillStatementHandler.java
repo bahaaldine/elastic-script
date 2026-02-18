@@ -211,11 +211,24 @@ public class SkillStatementHandler {
         String finalProcedureDefinition = procedureDefinition;
         String finalReturnType = returnType;
         
-        // Store the procedure
+        // Store the procedure with parameters (required by ProcedureExecutor)
         Map<String, Object> procSource = new HashMap<>();
         procSource.put("procedure", finalProcedureDefinition);
         procSource.put("created_at", System.currentTimeMillis());
         procSource.put("skill", skillName); // Mark as skill-generated
+        
+        // Add parameters in the format expected by ProcedureExecutor.getProcedureAsync()
+        List<Map<String, Object>> paramsList = new ArrayList<>();
+        for (SkillDefinition.SkillParameter param : parameters) {
+            Map<String, Object> paramMap = new HashMap<>();
+            paramMap.put("name", param.getName());
+            paramMap.put("type", param.getType());
+            if (param.getDefaultValue() != null) {
+                paramMap.put("default", param.getDefaultValue());
+            }
+            paramsList.add(paramMap);
+        }
+        procSource.put("parameters", paramsList);
         
         client.prepareIndex(".elastic_script_procedures")
             .setId(skillName)

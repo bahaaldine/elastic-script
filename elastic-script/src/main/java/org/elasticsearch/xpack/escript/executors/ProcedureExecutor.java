@@ -689,12 +689,17 @@ public class ProcedureExecutor extends ElasticScriptBaseVisitor<Object> {
                         String name = response.getId();
                         @SuppressWarnings("unchecked")
                         List<Map<String, Object>> rawParams = (List<Map<String, Object>>) source.get("parameters");
-                        List<Parameter> parameters = rawParams.stream()
-                            .map(param -> new Parameter(
-                                (String) param.get("name"),
-                                (String) param.get("type"),
-                                ParameterMode.IN))
-                            .toList();
+                        List<Parameter> parameters;
+                        if (rawParams != null) {
+                            parameters = rawParams.stream()
+                                .map(param -> new Parameter(
+                                    (String) param.get("name"),
+                                    (String) param.get("type"),
+                                    ParameterMode.IN))
+                                .toList();
+                        } else {
+                            parameters = new ArrayList<>();
+                        }
 
                         String procedureText = (String) source.get("procedure");
                         ElasticScriptLexer lexer = new ElasticScriptLexer(CharStreams.fromString(procedureText));

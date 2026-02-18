@@ -891,33 +891,39 @@ load_sample_skills() {
     
     print_step "Creating sample skills..."
     
-    # Skill 1: Check cluster health
+    # First, clean up any old skills and their associated procedures
+    for skill_name in "check_cluster_health" "count_logs_by_level" "get_recent_errors" "hello_moltler" "metrics_summary"; do
+        curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d "{\"query\": \"DROP SKILL $skill_name\"}" > /dev/null 2>&1
+        curl -s $AUTH -X DELETE "$ES/.elastic_script_procedures/_doc/$skill_name" > /dev/null 2>&1
+    done
+    
+    # Skill 1: Check cluster health (simple, no external data needed)
     curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
         "query": "CREATE SKILL check_cluster_health VERSION '\''1.0'\'' DESCRIPTION '\''Check Elasticsearch cluster health status'\'' AUTHOR '\''Moltler'\'' TAGS ['\''health'\'', '\''monitoring'\''] RETURNS DOCUMENT BEGIN DECLARE health DOCUMENT; SET health = {'\''status'\'': '\''green'\'', '\''cluster'\'': '\''moltler-demo'\'', '\''checked_at'\'': CURRENT_TIMESTAMP()}; RETURN health; END SKILL;"
     }' > /dev/null 2>&1
     echo "    ✓ check_cluster_health"
     
-    # Skill 2: Count logs by level (with parameters after metadata)
+    # Skill 2: Count logs by level (fixed ESQL syntax)
     curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
-        "query": "CREATE SKILL count_logs_by_level VERSION '\''1.0'\'' DESCRIPTION '\''Count log entries grouped by severity level'\'' AUTHOR '\''Moltler'\'' TAGS ['\''logs'\'', '\''analytics'\''] (index_pattern STRING DEFAULT '\''logs-*'\'') RETURNS ARRAY BEGIN DECLARE results ARRAY; SET results = ESQL_QUERY('\''FROM '\'' || index_pattern || '\'' | STATS count = COUNT(*) BY level | SORT count DESC'\''); RETURN results; END SKILL;"
+        "query": "CREATE SKILL count_logs_by_level VERSION '\''1.0'\'' DESCRIPTION '\''Count log entries grouped by severity level'\'' AUTHOR '\''Moltler'\'' TAGS ['\''logs'\'', '\''analytics'\''] (index_pattern STRING DEFAULT '\''logs-sample'\'') RETURNS ARRAY BEGIN DECLARE results ARRAY; SET results = ESQL_QUERY('\''FROM '\'' || index_pattern || '\'' | STATS count = COUNT(*) BY level | SORT count DESC'\''); RETURN results; END SKILL;"
     }' > /dev/null 2>&1
     echo "    ✓ count_logs_by_level"
     
-    # Skill 3: Get recent errors (with parameters after metadata)
+    # Skill 3: Get recent errors (fixed ESQL == syntax)
     curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
-        "query": "CREATE SKILL get_recent_errors VERSION '\''1.0'\'' DESCRIPTION '\''Retrieve the most recent error log entries'\'' AUTHOR '\''Moltler'\'' TAGS ['\''logs'\'', '\''errors'\'', '\''debugging'\''] (limit_count NUMBER DEFAULT 10) RETURNS ARRAY BEGIN DECLARE errors ARRAY; SET errors = ESQL_QUERY('\''FROM logs-* | WHERE level = \"ERROR\" | SORT @timestamp DESC | LIMIT '\'' || limit_count); RETURN errors; END SKILL;"
+        "query": "CREATE SKILL get_recent_errors VERSION '\''1.0'\'' DESCRIPTION '\''Retrieve the most recent error log entries'\'' AUTHOR '\''Moltler'\'' TAGS ['\''logs'\'', '\''errors'\'', '\''debugging'\''] (limit_count NUMBER DEFAULT 10) RETURNS ARRAY BEGIN DECLARE errors ARRAY; SET errors = ESQL_QUERY('\''FROM logs-sample | WHERE level == \"ERROR\" | SORT @timestamp DESC | LIMIT '\'' || limit_count); RETURN errors; END SKILL;"
     }' > /dev/null 2>&1
     echo "    ✓ get_recent_errors"
     
-    # Skill 4: Simple greeting (hello world, with parameters after metadata)
+    # Skill 4: Simple greeting (hello world - simplest skill)
     curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
         "query": "CREATE SKILL hello_moltler VERSION '\''1.0'\'' DESCRIPTION '\''A friendly greeting - your first Moltler skill!'\'' AUTHOR '\''Moltler'\'' TAGS ['\''demo'\'', '\''beginner'\''] (name STRING DEFAULT '\''World'\'') RETURNS STRING BEGIN RETURN '\''Hello, '\'' || name || '\''! Welcome to Moltler.'\''; END SKILL;"
     }' > /dev/null 2>&1
     echo "    ✓ hello_moltler"
     
-    # Skill 5: System metrics summary
+    # Skill 5: Metrics summary (fixed to use actual field names from metrics-sample)
     curl -s $AUTH -X POST "$ES/_escript" -H "Content-Type: application/json" -d '{
-        "query": "CREATE SKILL metrics_summary VERSION '\''1.0'\'' DESCRIPTION '\''Get average system metrics (CPU, memory, latency)'\'' AUTHOR '\''Moltler'\'' TAGS ['\''metrics'\'', '\''monitoring'\'', '\''performance'\''] RETURNS DOCUMENT BEGIN DECLARE summary ARRAY; SET summary = ESQL_QUERY('\''FROM metrics-* | STATS avg_cpu = AVG(cpu_percent), avg_memory = AVG(memory_percent), avg_latency = AVG(latency_ms)'\''); RETURN summary[0]; END SKILL;"
+        "query": "CREATE SKILL metrics_summary VERSION '\''1.0'\'' DESCRIPTION '\''Get metrics summary by metric name'\'' AUTHOR '\''Moltler'\'' TAGS ['\''metrics'\'', '\''monitoring'\'', '\''performance'\''] RETURNS ARRAY BEGIN DECLARE summary ARRAY; SET summary = ESQL_QUERY('\''FROM metrics-sample | STATS avg_value = AVG(value), max_value = MAX(value), min_value = MIN(value) BY metric_name'\''); RETURN summary; END SKILL;"
     }' > /dev/null 2>&1
     echo "    ✓ metrics_summary"
     
