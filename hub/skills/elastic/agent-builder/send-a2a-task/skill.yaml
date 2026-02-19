@@ -1,0 +1,14 @@
+name: ab-send-a2a-task
+version: 1.0.0
+description: Send A2A task to an Agent Builder agent
+author: elastic
+category: agent-builder
+tags:
+  - agent-builder
+  - a2a
+  - task
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  kibana: ">=8.18.0"
+main: skill.sql

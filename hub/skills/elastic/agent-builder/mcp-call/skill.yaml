@@ -1,0 +1,14 @@
+name: ab-mcp-call
+version: 1.0.0
+description: Call Agent Builder MCP server endpoint
+author: elastic
+category: agent-builder
+tags:
+  - agent-builder
+  - mcp
+  - tools
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  kibana: ">=8.18.0"
+main: skill.sql

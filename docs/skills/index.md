@@ -4,7 +4,7 @@ Moltler Skills are pre-built capabilities that AI agents can use to interact wit
 
 ## Overview
 
-**130 skills** currently available across 10 categories:
+**143 skills** currently available across 12 categories:
 
 | Category | Skills | Description |
 |----------|--------|-------------|
@@ -19,6 +19,7 @@ Moltler Skills are pre-built capabilities that AI agents can use to interact wit
 | [Cluster](#cluster-skills) | 10 | Health, nodes, shards, snapshots |
 | [Integrations](#integration-skills) | 10 | Slack, Jira, PagerDuty, webhooks |
 | [Fleet](#fleet-skills) | 6 | Agents, policies, integrations |
+| [Agent Builder](#agent-builder-skills) | 13 | Kibana Agent Builder integration, A2A, MCP |
 
 **Browse all skill source code:** [hub/skills/elastic](https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic)
 
@@ -364,6 +365,57 @@ Search applications and analytics. [:material-github: Source](https://github.com
 | `get_search_analytics` | Search analytics | [:material-code-braces:](https://github.com/bahaaldine/moltler/blob/main/hub/skills/elastic/enterprise-search/get-search-analytics/skill.sql) |
 | `get_top_queries` | Most popular queries | [:material-code-braces:](https://github.com/bahaaldine/moltler/blob/main/hub/skills/elastic/enterprise-search/get-top-queries/skill.sql) |
 | `get_no_results_queries` | Queries with no results | [:material-code-braces:](https://github.com/bahaaldine/moltler/blob/main/hub/skills/elastic/enterprise-search/get-no-results-queries/skill.sql) |
+
+---
+
+## Agent Builder Skills
+
+Kibana Agent Builder integration for orchestrating AI agents. [:material-github: Source](https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder)
+
+!!! note "Requires Kibana 8.18+ with Agent Builder"
+    These skills require the Kibana Agent Builder feature (Enterprise subscription).
+
+| Skill | Description | Source |
+|-------|-------------|--------|
+| `ab_list_agents` | List all Agent Builder agents | [:material-code-braces:](https://github.com/bahaaldine/moltler/blob/main/hub/skills/elastic/agent-builder/list-agents/skill.sql) |
+| `ab_get_agent` | Get agent details by ID | [:material-code-braces:](https://github.com/bahaaldine/moltler/blob/main/hub/skills/elastic/agent-builder/get-agent/skill.sql) |
+| `ab_create_agent` | Create a new agent | [:material-code-braces:](https://github.com/bahaaldine/moltler/blob/main/hub/skills/elastic/agent-builder/create-agent/skill.sql) |
+| `ab_delete_agent` | Delete an agent | [:material-code-braces:](https://github.com/bahaaldine/moltler/blob/main/hub/skills/elastic/agent-builder/delete-agent/skill.sql) |
+| `ab_chat` | Send chat message to an agent | [:material-code-braces:](https://github.com/bahaaldine/moltler/blob/main/hub/skills/elastic/agent-builder/chat/skill.sql) |
+| `ab_list_conversations` | List all conversations | [:material-code-braces:](https://github.com/bahaaldine/moltler/blob/main/hub/skills/elastic/agent-builder/list-conversations/skill.sql) |
+| `ab_get_conversation` | Get conversation history | [:material-code-braces:](https://github.com/bahaaldine/moltler/blob/main/hub/skills/elastic/agent-builder/get-conversation/skill.sql) |
+| `ab_list_tools` | List available tools | [:material-code-braces:](https://github.com/bahaaldine/moltler/blob/main/hub/skills/elastic/agent-builder/list-tools/skill.sql) |
+| `ab_create_tool` | Create a new tool | [:material-code-braces:](https://github.com/bahaaldine/moltler/blob/main/hub/skills/elastic/agent-builder/create-tool/skill.sql) |
+| `ab_execute_tool` | Execute a tool directly | [:material-code-braces:](https://github.com/bahaaldine/moltler/blob/main/hub/skills/elastic/agent-builder/execute-tool/skill.sql) |
+| `ab_get_agent_card` | Get A2A agent card | [:material-code-braces:](https://github.com/bahaaldine/moltler/blob/main/hub/skills/elastic/agent-builder/get-agent-card/skill.sql) |
+| `ab_send_a2a_task` | Send A2A task to agent | [:material-code-braces:](https://github.com/bahaaldine/moltler/blob/main/hub/skills/elastic/agent-builder/send-a2a-task/skill.sql) |
+| `ab_mcp_call` | Call Agent Builder MCP endpoint | [:material-code-braces:](https://github.com/bahaaldine/moltler/blob/main/hub/skills/elastic/agent-builder/mcp-call/skill.sql) |
+
+### Example: Chat with an Agent Builder Agent
+
+```json
+{
+  "name": "ab_chat",
+  "arguments": {
+    "agent_id": "my-security-agent",
+    "message": "What are the top security threats today?"
+  }
+}
+```
+
+### Example: Create an Agent Programmatically
+
+```json
+{
+  "name": "ab_create_agent",
+  "arguments": {
+    "name": "Log Analyzer",
+    "description": "Analyzes logs for errors and anomalies",
+    "instructions": "You are a log analysis expert. Help users understand their logs.",
+    "model": "gpt-4"
+  }
+}
+```
 
 ---
 

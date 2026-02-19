@@ -1,0 +1,14 @@
+name: ab-delete-agent
+version: 1.0.0
+description: Delete an Agent Builder agent
+author: elastic
+category: agent-builder
+tags:
+  - agent-builder
+  - agents
+  - delete
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  kibana: ">=8.18.0"
+main: skill.sql

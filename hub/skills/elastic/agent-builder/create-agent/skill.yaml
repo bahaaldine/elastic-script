@@ -1,0 +1,15 @@
+name: ab-create-agent
+version: 1.0.0
+description: Create a new Agent Builder agent in Kibana
+author: elastic
+category: agent-builder
+tags:
+  - agent-builder
+  - agents
+  - ai
+  - create
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  kibana: ">=8.18.0"
+main: skill.sql

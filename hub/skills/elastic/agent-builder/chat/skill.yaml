@@ -1,0 +1,15 @@
+name: ab-chat
+version: 1.0.0
+description: Send a chat message to an Agent Builder agent
+author: elastic
+category: agent-builder
+tags:
+  - agent-builder
+  - chat
+  - ai
+  - converse
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  kibana: ">=8.18.0"
+main: skill.sql

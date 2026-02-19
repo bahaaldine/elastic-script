@@ -1,0 +1,14 @@
+name: ab-create-tool
+version: 1.0.0
+description: Create a new Agent Builder tool
+author: elastic
+category: agent-builder
+tags:
+  - agent-builder
+  - tools
+  - create
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  kibana: ">=8.18.0"
+main: skill.sql

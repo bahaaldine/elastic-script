@@ -1,0 +1,14 @@
+name: ab-list-conversations
+version: 1.0.0
+description: List all Agent Builder conversations
+author: elastic
+category: agent-builder
+tags:
+  - agent-builder
+  - conversations
+  - ai
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  kibana: ">=8.18.0"
+main: skill.sql
