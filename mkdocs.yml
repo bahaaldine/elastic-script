@@ -130,6 +130,9 @@ nav:
     - Skill Packs: skills/skill-packs.md
     - Skills Roadmap: skills/skills-roadmap.md
   
+  - MoltlerHub:
+    - Overview: moltlerhub/index.md
+  
   - Connectors:
     - Overview: connectors/overview.md
     - GitHub: connectors/github.md
