@@ -103,6 +103,103 @@ Tools available:
 - get_recent_errors: Get recent error log entries
 ```
 
+## How Natural Language Works
+
+You don't need to remember skill names. Just describe what you want in plain English:
+
+| You Say | AI Understands | Skill Called |
+|---------|----------------|--------------|
+| "How are my logs distributed by severity?" | Wants log level breakdown | `count_logs_by_level` |
+| "Is my cluster healthy?" | Wants health status | `check_cluster_health` |
+| "Show me recent errors" | Wants error logs | `get_recent_errors` |
+| "What metrics do I have?" | Wants metrics summary | `metrics_summary` |
+
+### The Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         You (Human)                             │
+│         "How are my logs distributed by severity?"              │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    AI Agent (Claude/GPT)                        │
+│                                                                 │
+│  1. Sees available tools via MCP:                               │
+│     - count_logs_by_level: "Count log entries grouped by        │
+│                             severity level"                     │
+│     - check_cluster_health: "Check cluster health status"       │
+│                                                                 │
+│  2. Matches your intent to the best tool:                       │
+│     "logs distributed by severity" → count_logs_by_level ✓      │
+│                                                                 │
+│  3. Calls it via MCP automatically                              │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    MCP Bridge (Python)                          │
+│         Translates MCP JSON-RPC → HTTP to Elasticsearch         │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Elasticsearch + Moltler                      │
+│                    Executes: RUN SKILL count_logs_by_level      │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### The Secret: Good Descriptions
+
+The AI matches your intent to skills based on their **descriptions**. The better your descriptions, the better the AI understands when to use each skill:
+
+```sql
+-- Basic description (works, but limited)
+CREATE SKILL analyze_logs
+  DESCRIPTION 'Analyze logs'
+  ...
+
+-- Rich description (AI understands context and use cases)
+CREATE SKILL analyze_logs
+  DESCRIPTION 'Analyze application logs for errors and patterns. 
+               Use this skill when users report issues, ask about 
+               error rates, or want to investigate incidents. 
+               Returns error counts, trends, and sample messages.'
+  ...
+```
+
+### Writing AI-Friendly Descriptions
+
+| Element | Example |
+|---------|---------|
+| **What it does** | "Counts log entries grouped by severity level" |
+| **When to use it** | "Use when investigating log distribution or error rates" |
+| **What it returns** | "Returns counts for ERROR, WARN, INFO, DEBUG levels" |
+| **Example queries** | "How many errors? What's my log breakdown?" |
+
+**Full example:**
+
+```sql
+CREATE SKILL count_logs_by_level
+  DESCRIPTION 'Count log entries grouped by severity level (ERROR, WARN, INFO, DEBUG). Use this skill when users ask about log distribution, error rates, or want to understand their logging patterns. Returns an array of counts per level.'
+  (
+    index_pattern STRING DEFAULT 'logs-*' 
+      DESCRIPTION 'Index pattern to search (e.g., logs-production-*)'
+  )
+  RETURNS ARRAY
+BEGIN
+  RETURN ESQL_QUERY('FROM ' || index_pattern || ' | STATS count=COUNT() BY level');
+END SKILL;
+```
+
+With this description, the AI will correctly invoke this skill when you ask:
+
+- "How many errors do I have?"
+- "What's the breakdown of my logs?"
+- "Show me log levels distribution"
+- "Are there more warnings than errors?"
+
 ## Environment Variables
 
 | Variable | Description | Default |
