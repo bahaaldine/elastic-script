@@ -1,0 +1,15 @@
+name: count-logs-by-level
+version: 1.0.0
+description: Count logs grouped by severity level
+author: elastic
+category: observability
+tags:
+  - logs
+  - analysis
+  - aggregation
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

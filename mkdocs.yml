@@ -122,6 +122,7 @@ nav:
     - Your First Skill: getting-started/first-skill.md
   
   - Skills:
+    - Available Skills: skills/index.md
     - Overview: skills/overview.md
     - Creating Skills: skills/creating-skills.md
     - Skill Parameters: skills/parameters.md

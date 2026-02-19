@@ -1,0 +1,16 @@
+name: threat-summary
+version: 1.0.0
+description: Get a summary of threats and security posture
+author: elastic
+category: security
+tags:
+  - security
+  - dashboard
+  - summary
+  - posture
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

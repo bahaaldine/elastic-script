@@ -1,0 +1,15 @@
+name: get-unique-values
+version: 1.0.0
+description: Get unique values for a field in an index
+author: elastic
+category: search
+tags:
+  - search
+  - cardinality
+  - exploration
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

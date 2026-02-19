@@ -1,0 +1,15 @@
+name: top-error-messages
+version: 1.0.0
+description: Get the most frequent error messages
+author: elastic
+category: observability
+tags:
+  - logs
+  - errors
+  - analysis
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

@@ -1,0 +1,13 @@
+name: recommend-skills
+version: 1.0.0
+description: Get skill recommendations based on context or goal
+author: elastic
+category: meta
+tags:
+  - discovery
+  - recommendations
+  - ai
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

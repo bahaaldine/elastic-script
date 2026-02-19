@@ -1,0 +1,15 @@
+name: logs-by-service
+version: 1.0.0
+description: Get log volume breakdown by service
+author: elastic
+category: observability
+tags:
+  - logs
+  - services
+  - aggregation
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

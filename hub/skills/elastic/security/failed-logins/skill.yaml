@@ -1,0 +1,15 @@
+name: failed-logins
+version: 1.0.0
+description: Get failed login attempts grouped by user or IP
+author: elastic
+category: security
+tags:
+  - security
+  - authentication
+  - brute-force
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

@@ -1,0 +1,15 @@
+name: search-documents
+version: 1.0.0
+description: Full-text search across any Elasticsearch index
+author: elastic
+category: search
+tags:
+  - search
+  - query
+  - full-text
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

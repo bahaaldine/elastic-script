@@ -1,0 +1,16 @@
+name: suspicious-activity
+version: 1.0.0
+description: Get recent suspicious or anomalous activity
+author: elastic
+category: security
+tags:
+  - security
+  - threats
+  - anomaly
+  - hunting
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

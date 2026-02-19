@@ -1,0 +1,15 @@
+name: slow-requests
+version: 1.0.0
+description: Find slow HTTP requests or API calls
+author: elastic
+category: observability
+tags:
+  - apm
+  - latency
+  - performance
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

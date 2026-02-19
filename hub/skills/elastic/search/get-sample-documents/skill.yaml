@@ -1,0 +1,15 @@
+name: get-sample-documents
+version: 1.0.0
+description: Get sample documents from an index
+author: elastic
+category: search
+tags:
+  - search
+  - exploration
+  - data
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

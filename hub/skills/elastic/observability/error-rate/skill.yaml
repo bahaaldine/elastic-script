@@ -1,0 +1,16 @@
+name: error-rate
+version: 1.0.0
+description: Calculate error rate as percentage of total logs
+author: elastic
+category: observability
+tags:
+  - logs
+  - errors
+  - metrics
+  - health
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

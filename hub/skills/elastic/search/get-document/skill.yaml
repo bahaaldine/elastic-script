@@ -1,0 +1,13 @@
+name: get-document
+version: 1.0.0
+description: Get a single document by ID from an index
+author: elastic
+category: search
+tags:
+  - search
+  - document
+  - get
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

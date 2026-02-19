@@ -1,0 +1,15 @@
+name: aggregate-by-field
+version: 1.0.0
+description: Aggregate documents by a specific field
+author: elastic
+category: search
+tags:
+  - search
+  - aggregation
+  - analytics
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

@@ -1,0 +1,16 @@
+name: get-security-alerts
+version: 1.0.0
+description: Get recent security alerts and detections
+author: elastic
+category: security
+tags:
+  - security
+  - alerts
+  - siem
+  - detection
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

@@ -1,0 +1,13 @@
+name: search-skills
+version: 1.0.0
+description: Search for skills by keyword or capability
+author: elastic
+category: meta
+tags:
+  - discovery
+  - search
+  - help
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

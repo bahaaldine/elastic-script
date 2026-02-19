@@ -1,0 +1,15 @@
+name: high-cpu-hosts
+version: 1.0.0
+description: Find hosts with high CPU usage
+author: elastic
+category: observability
+tags:
+  - metrics
+  - cpu
+  - alerts
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

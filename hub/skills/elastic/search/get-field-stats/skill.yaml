@@ -1,0 +1,15 @@
+name: get-field-stats
+version: 1.0.0
+description: Get statistics for a numeric field
+author: elastic
+category: search
+tags:
+  - search
+  - statistics
+  - analytics
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

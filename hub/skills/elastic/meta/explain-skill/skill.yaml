@@ -1,0 +1,13 @@
+name: explain-skill
+version: 1.0.0
+description: Get detailed explanation of a specific skill
+author: elastic
+category: meta
+tags:
+  - discovery
+  - documentation
+  - help
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

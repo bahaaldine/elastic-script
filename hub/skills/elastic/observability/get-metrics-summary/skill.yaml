@@ -1,0 +1,15 @@
+name: get-metrics-summary
+version: 1.0.0
+description: Get summary statistics for system metrics
+author: elastic
+category: observability
+tags:
+  - metrics
+  - analysis
+  - monitoring
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

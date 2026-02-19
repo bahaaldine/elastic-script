@@ -1,0 +1,16 @@
+name: user-activity
+version: 1.0.0
+description: Get activity timeline for a specific user
+author: elastic
+category: security
+tags:
+  - security
+  - user
+  - investigation
+  - audit
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

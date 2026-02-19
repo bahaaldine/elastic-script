@@ -1,0 +1,16 @@
+name: service-health
+version: 1.0.0
+description: Get health summary for a specific service
+author: elastic
+category: observability
+tags:
+  - apm
+  - services
+  - health
+  - slo
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

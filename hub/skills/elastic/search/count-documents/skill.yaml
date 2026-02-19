@@ -1,0 +1,15 @@
+name: count-documents
+version: 1.0.0
+description: Count documents in an index with optional filter
+author: elastic
+category: search
+tags:
+  - search
+  - count
+  - aggregation
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

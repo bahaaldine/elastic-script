@@ -1,0 +1,15 @@
+name: get-recent-errors
+version: 1.0.0
+description: Get recent error logs with details
+author: elastic
+category: observability
+tags:
+  - logs
+  - errors
+  - debugging
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql

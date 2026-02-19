@@ -1,0 +1,13 @@
+name: list-all-skills
+version: 1.0.0
+description: List all available skills with descriptions
+author: elastic
+category: meta
+tags:
+  - discovery
+  - navigation
+  - help
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

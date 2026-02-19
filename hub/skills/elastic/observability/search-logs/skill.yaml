@@ -1,0 +1,15 @@
+name: search-logs
+version: 1.0.0
+description: Search logs by keyword or phrase
+author: elastic
+category: observability
+tags:
+  - logs
+  - search
+  - debugging
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - esql
+main: skill.sql
