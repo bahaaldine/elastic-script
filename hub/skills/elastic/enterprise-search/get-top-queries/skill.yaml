@@ -1,0 +1,13 @@
+name: get-top-queries
+version: 1.0.0
+description: Get most popular search queries
+author: elastic
+category: enterprise-search
+tags:
+  - enterprise-search
+  - queries
+  - analytics
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

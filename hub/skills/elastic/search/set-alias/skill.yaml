@@ -1,0 +1,13 @@
+name: set-alias
+version: 1.0.0
+description: Create or update an index alias
+author: elastic
+category: search
+tags:
+  - search
+  - aliases
+  - management
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

@@ -1,0 +1,13 @@
+name: send-webhook
+version: 1.0.0
+description: Send a webhook POST request
+author: elastic
+category: integrations
+tags:
+  - integrations
+  - webhook
+  - automation
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

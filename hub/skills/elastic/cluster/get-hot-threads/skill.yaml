@@ -1,0 +1,13 @@
+name: get-hot-threads
+version: 1.0.0
+description: Get hot threads from nodes for debugging
+author: elastic
+category: cluster
+tags:
+  - cluster
+  - debugging
+  - performance
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

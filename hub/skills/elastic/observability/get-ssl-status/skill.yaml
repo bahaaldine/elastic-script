@@ -1,0 +1,13 @@
+name: get-ssl-status
+version: 1.0.0
+description: Check SSL certificate status and expiry
+author: elastic
+category: observability
+tags:
+  - observability
+  - ssl
+  - certificates
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

@@ -1,0 +1,13 @@
+name: classify-text
+version: 1.0.0
+description: Classify text using a trained classification model
+author: elastic
+category: ml
+tags:
+  - ml
+  - classification
+  - nlp
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

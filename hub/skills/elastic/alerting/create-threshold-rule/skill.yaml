@@ -1,0 +1,13 @@
+name: create-threshold-rule
+version: 1.0.0
+description: Create a threshold-based alert rule
+author: elastic
+category: alerting
+tags:
+  - alerting
+  - rules
+  - threshold
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

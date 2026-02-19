@@ -1,0 +1,13 @@
+name: list-snapshots
+version: 1.0.0
+description: List snapshots in a repository
+author: elastic
+category: cluster
+tags:
+  - cluster
+  - snapshots
+  - backup
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

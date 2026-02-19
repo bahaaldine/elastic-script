@@ -1,0 +1,13 @@
+name: delete-index
+version: 1.0.0
+description: Delete an index
+author: elastic
+category: search
+tags:
+  - search
+  - indices
+  - delete
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

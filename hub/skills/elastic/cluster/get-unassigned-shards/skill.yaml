@@ -1,0 +1,13 @@
+name: get-unassigned-shards
+version: 1.0.0
+description: Get list of unassigned shards and reasons
+author: elastic
+category: cluster
+tags:
+  - cluster
+  - shards
+  - troubleshooting
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

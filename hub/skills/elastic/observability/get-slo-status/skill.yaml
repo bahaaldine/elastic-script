@@ -1,0 +1,13 @@
+name: get-slo-status
+version: 1.0.0
+description: Get SLO (Service Level Objective) status for a service
+author: elastic
+category: observability
+tags:
+  - observability
+  - slo
+  - reliability
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

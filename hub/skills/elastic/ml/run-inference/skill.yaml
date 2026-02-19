@@ -1,0 +1,13 @@
+name: run-inference
+version: 1.0.0
+description: Run inference using a deployed ML model for text classification, embedding, or NER
+author: elastic
+category: ml
+tags:
+  - ml
+  - inference
+  - nlp
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

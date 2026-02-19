@@ -1,0 +1,13 @@
+name: get-slow-transactions
+version: 1.0.0
+description: Find the slowest transactions for a service or across all services
+author: elastic
+category: apm
+tags:
+  - apm
+  - latency
+  - performance
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

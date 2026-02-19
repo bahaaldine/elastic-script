@@ -1,92 +1,79 @@
 # MoltlerHub
 
-The central repository for Moltler skills - pre-built capabilities that AI agents can use to interact with Elasticsearch.
+The official skill repository for Moltler - exposing Elasticsearch capabilities to AI agents.
+
+## Overview
+
+**130 skills** across **10 categories** providing comprehensive Elasticsearch automation:
+
+| Category | Skills | Examples |
+|----------|--------|----------|
+| **Meta** | 8 | `list_all_skills`, `explain_skill`, `recommend_skills` |
+| **Search** | 28 | `search_documents`, `count_documents`, `top_values`, `semantic_search` |
+| **Observability** | 22 | `get_recent_errors`, `count_logs_by_level`, `get_slo_status` |
+| **APM** | 11 | `list_services`, `get_slow_transactions`, `get_trace` |
+| **Metrics** | 6 | `list_hosts`, `get_host_metrics`, `get_memory_pressure` |
+| **Security** | 20 | `suspicious_activity`, `hunt_ioc`, `get_user_risk_score` |
+| **ML** | 11 | `get_anomalies`, `embed_text`, `classify_text` |
+| **Alerting** | 8 | `list_alert_rules`, `get_active_alerts`, `acknowledge_alert` |
+| **Cluster** | 10 | `cluster_health`, `list_nodes`, `list_snapshots` |
+| **Integrations** | 10 | `send_slack_message`, `create_jira_issue`, `trigger_pagerduty` |
+| **Fleet** | 6 | `list_agents`, `get_agent_status`, `list_integrations` |
 
 ## Quick Start
 
+### Install All Skills
+
 ```bash
-# Install all skills
 ./moltler-cli.sh install --all
-
-# List available skills
-./moltler-cli.sh list
-
-# Test skills
-./moltler-cli.sh test
 ```
 
-## What's Inside
+### Test Skills
 
-### Skills by Category
+```bash
+./tests/test_all_skills.sh
+```
 
-| Category | Count | Description |
-|----------|-------|-------------|
-| **Meta** | 5 | Skills that help agents discover and use other skills |
-| **Observability** | 10 | Logs, metrics, APM, and service health |
-| **Search** | 10 | Document search, aggregations, and exploration |
-| **Security** | 5 | Security alerts, threat detection, and investigation |
+### List Installed Skills
 
-**Total: 30 skills**
+```bash
+./moltler-cli.sh list
+```
 
-### Meta Skills (Discovery)
+## Directory Structure
 
-| Skill | Description |
-|-------|-------------|
-| `list_all_skills` | List all available skills |
-| `search_skills` | Search for skills by keyword |
-| `explain_skill` | Get detailed info about a skill |
-| `recommend_skills` | Get recommendations based on goal |
-| `get_related_skills` | Find related skills |
-
-### Observability Skills
-
-| Skill | Description |
-|-------|-------------|
-| `count_logs_by_level` | Count logs by severity (DEBUG, INFO, WARN, ERROR) |
-| `get_recent_errors` | Get recent error logs |
-| `error_rate` | Calculate error rate percentage |
-| `top_error_messages` | Get most frequent errors |
-| `logs_by_service` | Log volume by service |
-| `search_logs` | Full-text log search |
-| `get_metrics_summary` | Metrics statistics |
-| `high_cpu_hosts` | Find high CPU hosts |
-| `slow_requests` | Find slow API calls |
-| `service_health` | Service health summary |
-
-### Search Skills
-
-| Skill | Description |
-|-------|-------------|
-| `search_documents` | Full-text search |
-| `get_document` | Get document by ID |
-| `count_documents` | Count documents |
-| `aggregate_by_field` | Group and count |
-| `get_field_stats` | Field statistics |
-| `get_sample_documents` | Sample data |
-| `get_unique_values` | Unique field values |
-| `recent_documents` | Latest documents |
-| `cluster_health` | Cluster status |
-| `list_indices` | Available indices |
-
-### Security Skills
-
-| Skill | Description |
-|-------|-------------|
-| `get_security_alerts` | Recent security alerts |
-| `failed_logins` | Failed login attempts |
-| `suspicious_activity` | High-risk events |
-| `user_activity` | User timeline |
-| `threat_summary` | Security posture |
+```
+hub/
+├── skills/
+│   └── elastic/
+│       ├── meta/           # Discovery & navigation skills
+│       ├── observability/  # Log & metrics skills
+│       ├── search/         # Query & document skills
+│       ├── security/       # SIEM & threat hunting skills
+│       ├── apm/            # APM & tracing skills
+│       ├── metrics/        # Infrastructure metrics
+│       ├── ml/             # Machine learning skills
+│       ├── alerting/       # Alert management skills
+│       ├── cluster/        # Cluster operations
+│       ├── integrations/   # External service integrations
+│       ├── fleet/          # Agent management
+│       └── enterprise-search/ # Search applications
+├── tests/
+│   └── test_all_skills.sh  # Comprehensive test suite
+├── moltler-cli.sh          # CLI for skill management
+├── SKILL_FORMAT.md         # Skill package format spec
+└── README.md               # This file
+```
 
 ## Skill Package Format
 
-Each skill follows a standard format:
+Each skill is a directory containing:
 
 ```
 skill-name/
-├── skill.yaml       # Metadata
-├── skill.sql        # Implementation
-└── README.md        # Documentation
+├── skill.yaml    # Metadata
+├── skill.sql     # Implementation
+└── README.md     # Documentation (optional)
 ```
 
 See [SKILL_FORMAT.md](SKILL_FORMAT.md) for full specification.
@@ -94,53 +81,102 @@ See [SKILL_FORMAT.md](SKILL_FORMAT.md) for full specification.
 ## CLI Reference
 
 ```bash
-# Install
-moltler-cli.sh install --all              # All skills
-moltler-cli.sh install count-logs-by-level # Specific skill
+# Install all skills
+./moltler-cli.sh install --all
 
-# Explore
-moltler-cli.sh list                       # List all
-moltler-cli.sh list --category observability
-moltler-cli.sh search "error"             # Search
+# Install specific skill
+./moltler-cli.sh install observability/get-recent-errors
 
-# Test
-moltler-cli.sh test                       # Run tests
-moltler-cli.sh status                     # Check connection
+# List skills
+./moltler-cli.sh list
+
+# Search skills
+./moltler-cli.sh search "error"
+
+# Check status
+./moltler-cli.sh status
+
+# Run tests
+./moltler-cli.sh test
 ```
 
-## For AI Agents
+## MCP Integration
 
-All skills are exposed via MCP (Model Context Protocol) at:
+Skills are automatically exposed via the MCP endpoint:
 
+```bash
+# List available skills
+curl -u elastic-admin:elastic-password http://localhost:9200/_escript/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}'
+
+# Call a skill
+curl -u elastic-admin:elastic-password http://localhost:9200/_escript/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+      "name": "get_recent_errors",
+      "arguments": {"index_pattern": "logs-*", "limit": 5}
+    }
+  }'
 ```
-/_escript/mcp
-```
 
-Example using Claude Desktop or Cursor:
+## Example Skills
 
+### Search for Errors
 ```json
 {
-  "mcpServers": {
-    "moltler": {
-      "command": "python3",
-      "args": ["/path/to/moltler_mcp_server.py"]
-    }
+  "name": "get_recent_errors",
+  "arguments": {
+    "index_pattern": "logs-*",
+    "limit": 10
   }
 }
 ```
 
-Skills are designed with rich descriptions that help AI agents understand when and how to use them.
+### Get Service Health
+```json
+{
+  "name": "service_health",
+  "arguments": {
+    "service": "api-gateway"
+  }
+}
+```
 
-## Testing
+### Hunt for IOC
+```json
+{
+  "name": "hunt_ioc",
+  "arguments": {
+    "ioc": "192.168.1.100",
+    "ioc_type": "ip"
+  }
+}
+```
 
-```bash
-# Run comprehensive tests
-./tests/test_all_skills.sh
+### Create Jira Ticket
+```json
+{
+  "name": "create_jira_issue",
+  "arguments": {
+    "project": "OPS",
+    "summary": "High error rate detected",
+    "priority": "high"
+  }
+}
 ```
 
 ## Contributing
 
-1. Create a new skill directory under `skills/elastic/<category>/`
-2. Add `skill.yaml`, `skill.sql`, and `README.md`
-3. Test with `moltler-cli.sh install <skill-name>`
-4. Submit a PR
+1. Create a new skill directory under the appropriate category
+2. Add `skill.yaml`, `skill.sql`, and optionally `README.md`
+3. Test with `./moltler-cli.sh test`
+4. Submit a pull request
+
+## License
+
+Elastic-2.0

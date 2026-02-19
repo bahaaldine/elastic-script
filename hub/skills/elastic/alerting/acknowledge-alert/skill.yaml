@@ -1,0 +1,13 @@
+name: acknowledge-alert
+version: 1.0.0
+description: Acknowledge an active alert
+author: elastic
+category: alerting
+tags:
+  - alerting
+  - acknowledge
+  - response
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

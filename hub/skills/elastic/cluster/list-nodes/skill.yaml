@@ -1,0 +1,13 @@
+name: list-nodes
+version: 1.0.0
+description: List all nodes in the Elasticsearch cluster
+author: elastic
+category: cluster
+tags:
+  - cluster
+  - nodes
+  - infrastructure
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

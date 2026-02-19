@@ -1,0 +1,13 @@
+name: list-hosts
+version: 1.0.0
+description: List all monitored hosts with their current status
+author: elastic
+category: metrics
+tags:
+  - metrics
+  - hosts
+  - infrastructure
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

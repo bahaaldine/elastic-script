@@ -1,0 +1,13 @@
+name: list-connectors
+version: 1.0.0
+description: List all configured alert connectors (Slack, PagerDuty, etc.)
+author: elastic
+category: alerting
+tags:
+  - alerting
+  - connectors
+  - integrations
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

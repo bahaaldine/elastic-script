@@ -1,0 +1,13 @@
+name: get-availability
+version: 1.0.0
+description: Get availability percentage for a monitor
+author: elastic
+category: observability
+tags:
+  - observability
+  - uptime
+  - availability
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

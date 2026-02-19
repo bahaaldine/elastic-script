@@ -1,0 +1,13 @@
+name: get-job-status
+version: 1.0.0
+description: Get detailed status of an ML job
+author: elastic
+category: ml
+tags:
+  - ml
+  - jobs
+  - status
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

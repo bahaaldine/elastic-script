@@ -1,0 +1,13 @@
+name: create-document
+version: 1.0.0
+description: Create a new document in an index
+author: elastic
+category: search
+tags:
+  - search
+  - documents
+  - create
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

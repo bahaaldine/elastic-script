@@ -1,0 +1,13 @@
+name: trigger-pagerduty
+version: 1.0.0
+description: Trigger a PagerDuty incident
+author: elastic
+category: integrations
+tags:
+  - integrations
+  - pagerduty
+  - incidents
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

@@ -1,0 +1,13 @@
+name: list-transforms
+version: 1.0.0
+description: List all data transforms
+author: elastic
+category: search
+tags:
+  - search
+  - transforms
+  - management
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

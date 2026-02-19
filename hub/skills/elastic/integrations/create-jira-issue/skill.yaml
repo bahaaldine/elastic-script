@@ -1,0 +1,13 @@
+name: create-jira-issue
+version: 1.0.0
+description: Create a Jira issue/ticket
+author: elastic
+category: integrations
+tags:
+  - integrations
+  - jira
+  - ticketing
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

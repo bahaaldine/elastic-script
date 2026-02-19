@@ -1,0 +1,13 @@
+name: percentiles
+version: 1.0.0
+description: Calculate percentile distributions for a numeric field
+author: elastic
+category: search
+tags:
+  - search
+  - percentiles
+  - statistics
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

@@ -1,0 +1,13 @@
+name: list-ilm-policies
+version: 1.0.0
+description: List Index Lifecycle Management policies
+author: elastic
+category: search
+tags:
+  - search
+  - ilm
+  - lifecycle
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

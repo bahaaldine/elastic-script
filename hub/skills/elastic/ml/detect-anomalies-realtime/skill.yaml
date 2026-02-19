@@ -1,0 +1,13 @@
+name: detect-anomalies-realtime
+version: 1.0.0
+description: Analyze data in real-time for anomalies using statistical methods
+author: elastic
+category: ml
+tags:
+  - ml
+  - anomaly
+  - realtime
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

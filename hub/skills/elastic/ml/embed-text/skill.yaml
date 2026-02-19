@@ -1,0 +1,13 @@
+name: embed-text
+version: 1.0.0
+description: Generate vector embeddings for text using a deployed embedding model
+author: elastic
+category: ml
+tags:
+  - ml
+  - embeddings
+  - semantic
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

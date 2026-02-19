@@ -1,0 +1,13 @@
+name: list-monitors
+version: 1.0.0
+description: List all uptime/synthetic monitors
+author: elastic
+category: observability
+tags:
+  - observability
+  - uptime
+  - monitors
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

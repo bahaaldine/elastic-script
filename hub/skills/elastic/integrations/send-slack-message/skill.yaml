@@ -1,0 +1,13 @@
+name: send-slack-message
+version: 1.0.0
+description: Send a message to a Slack channel
+author: elastic
+category: integrations
+tags:
+  - integrations
+  - slack
+  - notifications
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

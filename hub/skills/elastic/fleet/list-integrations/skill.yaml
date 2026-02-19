@@ -1,0 +1,13 @@
+name: list-integrations
+version: 1.0.0
+description: List available Fleet integrations
+author: elastic
+category: fleet
+tags:
+  - fleet
+  - integrations
+  - packages
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

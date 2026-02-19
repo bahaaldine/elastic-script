@@ -1,0 +1,13 @@
+name: list-all-indices
+version: 1.0.0
+description: List all indices with size and document count
+author: elastic
+category: search
+tags:
+  - search
+  - indices
+  - management
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

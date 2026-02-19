@@ -1,0 +1,13 @@
+name: get-active-alerts
+version: 1.0.0
+description: Get all currently active/firing alerts
+author: elastic
+category: alerting
+tags:
+  - alerting
+  - active
+  - incidents
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

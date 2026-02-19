@@ -1,0 +1,13 @@
+name: semantic-search
+version: 1.0.0
+description: Semantic/vector search using embeddings
+author: elastic
+category: search
+tags:
+  - search
+  - semantic
+  - vector
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

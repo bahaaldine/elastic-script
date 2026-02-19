@@ -1,0 +1,13 @@
+name: get-container-metrics
+version: 1.0.0
+description: Get metrics for Docker/Kubernetes containers
+author: elastic
+category: metrics
+tags:
+  - metrics
+  - containers
+  - kubernetes
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

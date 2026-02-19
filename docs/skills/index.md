@@ -1,170 +1,395 @@
 # Moltler Skills
 
-Skills are the building blocks that AI agents use to interact with Elasticsearch. Each skill is a self-contained capability with a clear description, typed parameters, and structured output.
+Moltler Skills are pre-built capabilities that AI agents can use to interact with Elasticsearch. They expose Elasticsearch's full functionality through a natural language interface.
 
-## Available Skills
+## Overview
 
-Moltler ships with **30 pre-built skills** across 4 categories:
+**130 skills** currently available across 10 categories:
 
-| Category | Count | Description |
-|----------|-------|-------------|
-| [Meta Skills](#meta-skills) | 5 | Help agents discover and use other skills |
-| [Observability](#observability-skills) | 10 | Logs, metrics, and service health |
-| [Search](#search-skills) | 10 | Document search and data exploration |
-| [Security](#security-skills) | 5 | Threat detection and investigation |
+| Category | Skills | Description |
+|----------|--------|-------------|
+| [Meta](#meta-skills) | 8 | Discovery, recommendations, skill navigation |
+| [Search](#search-skills) | 28 | Queries, aggregations, document operations |
+| [Observability](#observability-skills) | 22 | Logs, SLOs, monitors, patterns |
+| [APM](#apm-skills) | 11 | Services, traces, latency, dependencies |
+| [Metrics](#metrics-skills) | 6 | Hosts, containers, resources |
+| [Security](#security-skills) | 20 | Threats, hunting, cases, risk scores |
+| [Machine Learning](#ml-skills) | 11 | Anomalies, inference, NLP |
+| [Alerting](#alerting-skills) | 8 | Rules, alerts, connectors |
+| [Cluster](#cluster-skills) | 10 | Health, nodes, shards, snapshots |
+| [Integrations](#integration-skills) | 10 | Slack, Jira, PagerDuty, webhooks |
+| [Fleet](#fleet-skills) | 6 | Agents, policies, integrations |
 
-## Installing Skills
+---
 
-Use the Moltler CLI to install skills:
+## Quick Start
+
+### Via MCP (AI Agents)
 
 ```bash
-cd hub
+# List all available skills
+curl -u elastic-admin:elastic-password http://localhost:9200/_escript/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/list"
+  }'
 
-# Install all skills
-./moltler-cli.sh install --all
-
-# Install a specific skill
-./moltler-cli.sh install count-logs-by-level
-
-# List available skills
-./moltler-cli.sh list
-
-# Search for skills
-./moltler-cli.sh search "error"
+# Call a skill
+curl -u elastic-admin:elastic-password http://localhost:9200/_escript/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+      "name": "get_recent_errors",
+      "arguments": {"index_pattern": "logs-*", "limit": 10}
+    }
+  }'
 ```
+
+### Via CLI
+
+```bash
+# Install all skills
+./hub/moltler-cli.sh install --all
+
+# Test skills
+./hub/tests/test_all_skills.sh
+```
+
+---
 
 ## Meta Skills
 
-Skills that help AI agents discover and navigate other skills.
+Skills for discovering and navigating other skills.
 
 | Skill | Description |
 |-------|-------------|
 | `list_all_skills` | List all available skills with descriptions |
-| `search_skills` | Search for skills by keyword or capability |
-| `explain_skill` | Get detailed explanation of a specific skill |
-| `recommend_skills` | Get recommendations based on your goal |
-| `get_related_skills` | Find skills related to another skill |
+| `explain_skill` | Get detailed explanation of a skill |
+| `recommend_skills` | Get skill recommendations for a context |
+| `search_skills` | Search skills by keyword |
+| `list_skills_by_category` | List skills in a category |
+| `get_related_skills` | Find related skills |
+| `hello_moltler` | Test connectivity |
+| `check_cluster_health` | Verify Elasticsearch connection |
 
-### Example: Using Meta Skills
-
-```
-User: "I need to investigate a production incident"
-
-Agent uses: recommend_skills(goal => "investigate production incident")
-Returns: [count_logs_by_level, get_recent_errors, error_rate, service_health]
-
-Agent uses: explain_skill(skill_name => "get_recent_errors")
-Returns: Full parameter details and usage
-```
-
-## Observability Skills
-
-Skills for logs, metrics, and application monitoring.
-
-| Skill | Description | Key Parameters |
-|-------|-------------|----------------|
-| `count_logs_by_level` | Count logs by severity level | `index_pattern` |
-| `get_recent_errors` | Get recent error logs | `limit`, `service` |
-| `error_rate` | Calculate error rate percentage | `index_pattern`, `service` |
-| `top_error_messages` | Most frequent error messages | `limit` |
-| `logs_by_service` | Log volume breakdown by service | `index_pattern` |
-| `search_logs` | Full-text search in logs | `query`, `limit` |
-| `get_metrics_summary` | Statistics for system metrics | `metric_name` |
-| `high_cpu_hosts` | Find hosts with high CPU | `threshold` |
-| `slow_requests` | Find slow API calls | `threshold_ms` |
-| `service_health` | Health summary for a service | `service` |
-
-### Example: Error Investigation
-
-```
-User: "Show me what's wrong with the system"
-
-Agent uses: count_logs_by_level()
-Returns: {INFO: 40, DEBUG: 25, ERROR: 20, WARN: 15}
-
-Agent uses: error_rate()
-Returns: {total_logs: 100, error_count: 20, error_rate_percent: 20.0}
-
-Agent uses: top_error_messages(limit => 5)
-Returns: Top 5 most frequent errors
-```
-
-## Search Skills
-
-Skills for searching, aggregating, and exploring data.
-
-| Skill | Description | Key Parameters |
-|-------|-------------|----------------|
-| `search_documents` | Full-text search across indices | `query`, `index_pattern` |
-| `get_document` | Get document by ID | `index_name`, `doc_id` |
-| `count_documents` | Count documents in index | `index_pattern` |
-| `aggregate_by_field` | Group and count by field | `field`, `limit` |
-| `get_field_stats` | Min/max/avg for numeric field | `field` |
-| `get_sample_documents` | Sample documents from index | `limit` |
-| `get_unique_values` | Unique values for a field | `field` |
-| `recent_documents` | Most recently indexed docs | `limit` |
-| `cluster_health` | Cluster health status | - |
-| `list_indices` | Available indices | - |
-
-### Example: Data Exploration
-
-```
-User: "What data do we have?"
-
-Agent uses: list_indices()
-Returns: [logs-sample, metrics-sample, users-sample, ...]
-
-Agent uses: get_sample_documents(index_pattern => "logs-sample", limit => 3)
-Returns: Sample documents showing structure
-
-Agent uses: get_unique_values(index_pattern => "logs-sample", field => "service")
-Returns: All unique service names
-```
-
-## Security Skills
-
-Skills for security monitoring and investigation.
-
-| Skill | Description | Key Parameters |
-|-------|-------------|----------------|
-| `get_security_alerts` | Recent security alerts | `severity`, `limit` |
-| `failed_logins` | Failed login attempts | `group_by` |
-| `suspicious_activity` | High-risk events | `limit` |
-| `user_activity` | Activity timeline for user | `username` |
-| `threat_summary` | Security posture summary | - |
-
-### Example: Security Investigation
-
-```
-User: "Are there any security issues?"
-
-Agent uses: threat_summary()
-Returns: {total_alerts: 5, critical_alerts: 0, failed_auth: 12}
-
-Agent uses: failed_logins(group_by => "source_ip")
-Returns: IPs with most failed login attempts
-
-Agent uses: user_activity(username => "admin")
-Returns: All activity for the admin user
-```
-
-## Creating Custom Skills
-
-See [Skills Roadmap](skills-roadmap.md) for planned skills and the [Skill Format](../hub/SKILL_FORMAT.md) for creating your own.
-
-## MCP Integration
-
-All skills are automatically exposed via the Model Context Protocol. Configure your AI agent to connect to the Moltler MCP bridge:
+### Example: Discover Skills
 
 ```json
 {
-  "mcpServers": {
-    "moltler": {
-      "command": "python3",
-      "args": ["/path/to/mcp-bridge/moltler_mcp_server.py"]
-    }
+  "name": "search_skills",
+  "arguments": {"query": "security threats"}
+}
+```
+
+---
+
+## Search Skills
+
+Core Elasticsearch search and data operations.
+
+| Skill | Description |
+|-------|-------------|
+| `search_documents` | Full-text search across indices |
+| `search_logs` | Search logs with text query |
+| `count_documents` | Count documents matching criteria |
+| `fuzzy_search` | Search with typo tolerance |
+| `semantic_search` | Vector/semantic similarity search |
+| `multi_field_search` | Search across multiple fields |
+| `date_histogram` | Aggregate by time intervals |
+| `top_values` | Get top N values for a field |
+| `percentiles` | Calculate percentile distributions |
+| `get_field_stats` | Get min/max/avg for fields |
+| `get_unique_values` | Get unique values (cardinality) |
+| `aggregate_by_field` | Group by field aggregation |
+| `list_indices` | List available indices |
+| `list_all_indices` | List all indices with stats |
+| `get_index_stats` | Get detailed index statistics |
+| `list_data_streams` | List data streams |
+| `list_ilm_policies` | List ILM policies |
+| `get_mapping` | Get field mappings |
+| `create_document` | Create a new document |
+| `update_document` | Update an existing document |
+| `delete_document` | Delete a document |
+| `get_document` | Retrieve a document by ID |
+| `bulk_index` | Index multiple documents |
+| `reindex` | Copy documents between indices |
+| `create_index` | Create a new index |
+| `delete_index` | Delete an index |
+| `set_alias` | Create/update index alias |
+| `list_transforms` | List data transforms |
+| `get_transform_status` | Get transform status |
+| `list_ingest_pipelines` | List ingest pipelines |
+| `test_ingest_pipeline` | Test an ingest pipeline |
+
+### Example: Search with Aggregation
+
+```json
+{
+  "name": "top_values",
+  "arguments": {
+    "index_pattern": "logs-*",
+    "field": "level",
+    "limit": 5
   }
 }
 ```
 
-The AI agent can then discover and invoke skills using natural language.
+---
+
+## Observability Skills
+
+Log management, analysis, and monitoring.
+
+| Skill | Description |
+|-------|-------------|
+| `get_recent_errors` | Get recent error logs |
+| `count_logs_by_level` | Count logs by severity |
+| `logs_by_service` | Get logs for a service |
+| `error_rate` | Calculate error rate percentage |
+| `search_logs` | Search logs with query |
+| `get_log_patterns` | Identify common log patterns |
+| `correlate_logs` | Find correlated events by trace ID |
+| `get_error_context` | Get logs before/after an error |
+| `compare_time_periods` | Compare metrics between periods |
+| `get_slo_status` | Get SLO status for a service |
+| `list_monitors` | List uptime monitors |
+| `get_monitor_status` | Get monitor health |
+| `get_availability` | Get availability percentage |
+| `get_ssl_status` | Check SSL certificate expiry |
+| `slow_requests` | Find slow requests |
+| `top_error_messages` | Get most common errors |
+| `get_metrics_summary` | Summary of key metrics |
+| `high_cpu_hosts` | Find hosts with high CPU |
+| `metrics_summary` | Aggregated metrics view |
+| `recent_documents` | Get recent documents |
+| `get_sample_documents` | Sample documents from index |
+| `service_health` | Get service health status |
+
+### Example: SLO Monitoring
+
+```json
+{
+  "name": "get_slo_status",
+  "arguments": {
+    "service": "api-gateway",
+    "slo_target": 99.9
+  }
+}
+```
+
+---
+
+## APM Skills
+
+Application Performance Monitoring.
+
+| Skill | Description |
+|-------|-------------|
+| `list_services` | List monitored services |
+| `get_service_health` | Get service health metrics |
+| `get_slow_transactions` | Find slowest transactions |
+| `get_error_groups` | Errors grouped by type |
+| `get_service_dependencies` | Service dependency map |
+| `get_latency_percentiles` | p50/p95/p99 latencies |
+| `get_trace` | Get distributed trace |
+| `get_service_map` | Full service topology |
+| `get_throughput` | Request throughput over time |
+| `get_failed_transactions` | Failed/errored transactions |
+| `analyze_database_queries` | Slow database query analysis |
+
+### Example: Latency Analysis
+
+```json
+{
+  "name": "get_latency_percentiles",
+  "arguments": {"service": "checkout-service"}
+}
+```
+
+---
+
+## Metrics Skills
+
+Infrastructure metrics and monitoring.
+
+| Skill | Description |
+|-------|-------------|
+| `list_hosts` | List monitored hosts |
+| `get_host_metrics` | CPU/memory/disk for a host |
+| `get_container_metrics` | Container resource metrics |
+| `get_disk_usage` | Disk usage by host |
+| `get_network_metrics` | Network throughput |
+| `get_memory_pressure` | Hosts with high memory |
+
+---
+
+## Security Skills
+
+Security analysis and threat hunting.
+
+| Skill | Description |
+|-------|-------------|
+| `suspicious_activity` | Recent suspicious events |
+| `threat_summary` | Threat landscape summary |
+| `user_activity` | User activity timeline |
+| `list_detection_rules` | List SIEM rules |
+| `list_cases` | List security cases |
+| `get_user_risk_score` | User risk assessment |
+| `get_host_risk_score` | Host risk assessment |
+| `hunt_ioc` | Hunt for IOC (IP/hash/domain) |
+| `get_authentication_summary` | Login success/failure stats |
+| `search_security_events` | Search security events |
+| `get_process_events` | Process execution events |
+| `get_network_events` | Network connection events |
+| `get_file_events` | File system events |
+| `get_dns_queries` | DNS query events |
+| `get_risky_users` | Highest risk users |
+| `get_risky_hosts` | Highest risk hosts |
+| `create_case` | Create investigation case |
+| `get_security_alerts` | Active security alerts |
+| `failed_logins` | Failed login attempts |
+
+### Example: Threat Hunting
+
+```json
+{
+  "name": "hunt_ioc",
+  "arguments": {
+    "ioc": "192.168.1.100",
+    "ioc_type": "ip"
+  }
+}
+```
+
+---
+
+## ML Skills
+
+Machine Learning and AI capabilities.
+
+| Skill | Description |
+|-------|-------------|
+| `list_ml_jobs` | List ML anomaly jobs |
+| `get_anomalies` | Get detected anomalies |
+| `list_trained_models` | List trained models |
+| `run_inference` | Run model inference |
+| `embed_text` | Generate text embeddings |
+| `detect_anomalies_realtime` | Real-time anomaly detection |
+| `get_job_status` | ML job status |
+| `get_influencers` | Top anomaly influencers |
+| `explain_anomaly` | Anomaly explanation |
+| `classify_text` | Text classification |
+| `extract_entities` | Named entity recognition |
+
+---
+
+## Alerting Skills
+
+Alert management and automation.
+
+| Skill | Description |
+|-------|-------------|
+| `list_alert_rules` | List alerting rules |
+| `get_active_alerts` | Currently firing alerts |
+| `get_alert_history` | Historical alerts |
+| `acknowledge_alert` | Acknowledge an alert |
+| `list_connectors` | List alert connectors |
+| `create_threshold_rule` | Create threshold alert |
+| `mute_alert` | Temporarily mute alert |
+| `test_connector` | Test connector |
+
+---
+
+## Cluster Skills
+
+Elasticsearch cluster operations.
+
+| Skill | Description |
+|-------|-------------|
+| `cluster_health` | Cluster health status |
+| `get_cluster_health` | Detailed cluster health |
+| `list_nodes` | List cluster nodes |
+| `get_node_stats` | Node statistics |
+| `get_shard_allocation` | Shard distribution |
+| `list_snapshots` | List backup snapshots |
+| `get_pending_tasks` | Pending cluster tasks |
+| `get_unassigned_shards` | Unassigned shards |
+| `explain_allocation` | Shard allocation reason |
+| `list_running_tasks` | Running tasks |
+| `get_hot_threads` | Hot threads for debugging |
+
+---
+
+## Integration Skills
+
+External service integrations.
+
+| Skill | Description |
+|-------|-------------|
+| `send_slack_message` | Send Slack message |
+| `create_jira_issue` | Create Jira ticket |
+| `trigger_pagerduty` | Trigger PagerDuty incident |
+| `send_email` | Send email notification |
+| `send_webhook` | Send webhook POST |
+| `send_teams_message` | Microsoft Teams message |
+| `send_opsgenie_alert` | OpsGenie alert |
+| `create_servicenow_incident` | ServiceNow incident |
+| `trigger_github_workflow` | GitHub Actions workflow |
+| `invoke_aws_lambda` | Invoke AWS Lambda |
+
+---
+
+## Fleet Skills
+
+Elastic Agent management.
+
+| Skill | Description |
+|-------|-------------|
+| `list_agents` | List enrolled agents |
+| `get_agent_status` | Agent health status |
+| `list_agent_policies` | Agent policies |
+| `get_agent_logs` | Agent log output |
+| `list_integrations` | Available integrations |
+| `get_enrollment_tokens` | Enrollment tokens |
+
+---
+
+## Enterprise Search Skills
+
+Search applications and analytics.
+
+| Skill | Description |
+|-------|-------------|
+| `list_search_apps` | List search applications |
+| `get_search_analytics` | Search analytics |
+| `get_top_queries` | Most popular queries |
+| `get_no_results_queries` | Queries with no results |
+
+---
+
+## Creating Custom Skills
+
+See the [Skills Roadmap](skills-roadmap.md) for planned skills and [SKILL_FORMAT.md](../../hub/SKILL_FORMAT.md) for creating your own.
+
+```sql
+CREATE SKILL my_custom_skill
+  VERSION '1.0.0'
+  DESCRIPTION 'Description of what this skill does'
+  AUTHOR 'your-name'
+  TAGS ['category', 'tag2']
+  (
+    param1 STRING DESCRIPTION 'First parameter',
+    param2 INT DESCRIPTION 'Second parameter' DEFAULT 10
+  )
+  RETURNS ARRAY
+BEGIN
+  DECLARE result ARRAY;
+  SET result = ESQL_QUERY('FROM logs-* | LIMIT ' || param2);
+  RETURN result;
+END SKILL;
+```

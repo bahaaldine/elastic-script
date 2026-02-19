@@ -1,0 +1,13 @@
+name: get-disk-usage
+version: 1.0.0
+description: Get disk usage for hosts showing available and used space
+author: elastic
+category: metrics
+tags:
+  - metrics
+  - disk
+  - storage
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

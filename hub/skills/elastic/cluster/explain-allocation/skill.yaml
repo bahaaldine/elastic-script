@@ -1,0 +1,13 @@
+name: explain-allocation
+version: 1.0.0
+description: Explain why a shard is assigned or unassigned
+author: elastic
+category: cluster
+tags:
+  - cluster
+  - allocation
+  - debugging
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

@@ -1,0 +1,13 @@
+name: list-data-streams
+version: 1.0.0
+description: List all data streams
+author: elastic
+category: search
+tags:
+  - search
+  - datastreams
+  - management
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

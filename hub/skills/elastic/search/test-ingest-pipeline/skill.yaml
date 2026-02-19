@@ -1,0 +1,13 @@
+name: test-ingest-pipeline
+version: 1.0.0
+description: Test an ingest pipeline with sample data
+author: elastic
+category: search
+tags:
+  - search
+  - ingest
+  - testing
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

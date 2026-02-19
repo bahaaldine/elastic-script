@@ -1,0 +1,13 @@
+name: get-user-risk-score
+version: 1.0.0
+description: Get risk score for a user based on their activity
+author: elastic
+category: security
+tags:
+  - security
+  - risk
+  - ueba
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

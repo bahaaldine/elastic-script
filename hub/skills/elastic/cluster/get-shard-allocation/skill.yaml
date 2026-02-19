@@ -1,0 +1,13 @@
+name: get-shard-allocation
+version: 1.0.0
+description: Get shard allocation across nodes
+author: elastic
+category: cluster
+tags:
+  - cluster
+  - shards
+  - allocation
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

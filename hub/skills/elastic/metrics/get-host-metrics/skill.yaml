@@ -1,0 +1,13 @@
+name: get-host-metrics
+version: 1.0.0
+description: Get current CPU, memory, and disk metrics for a host
+author: elastic
+category: metrics
+tags:
+  - metrics
+  - hosts
+  - resources
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

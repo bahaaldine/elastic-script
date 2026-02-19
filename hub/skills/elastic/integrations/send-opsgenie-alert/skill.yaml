@@ -1,0 +1,13 @@
+name: send-opsgenie-alert
+version: 1.0.0
+description: Create an OpsGenie alert
+author: elastic
+category: integrations
+tags:
+  - integrations
+  - opsgenie
+  - alerts
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

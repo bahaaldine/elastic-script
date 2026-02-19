@@ -1,0 +1,13 @@
+name: invoke-aws-lambda
+version: 1.0.0
+description: Invoke an AWS Lambda function
+author: elastic
+category: integrations
+tags:
+  - integrations
+  - aws
+  - lambda
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

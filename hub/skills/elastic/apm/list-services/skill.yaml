@@ -1,0 +1,13 @@
+name: list-services
+version: 1.0.0
+description: List all APM-monitored services with their health status
+author: elastic
+category: apm
+tags:
+  - apm
+  - services
+  - observability
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

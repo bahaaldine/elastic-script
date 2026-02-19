@@ -1,0 +1,13 @@
+name: get-latency-percentiles
+version: 1.0.0
+description: Get latency percentiles (p50, p95, p99) for a service
+author: elastic
+category: apm
+tags:
+  - apm
+  - latency
+  - percentiles
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

@@ -1,0 +1,13 @@
+name: list-trained-models
+version: 1.0.0
+description: List all trained ML models including NLP models and custom models
+author: elastic
+category: ml
+tags:
+  - ml
+  - models
+  - inference
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

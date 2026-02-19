@@ -1,0 +1,13 @@
+name: get-trace
+version: 1.0.0
+description: Get full distributed trace by trace ID
+author: elastic
+category: apm
+tags:
+  - apm
+  - traces
+  - distributed
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

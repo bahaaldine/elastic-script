@@ -1,0 +1,13 @@
+name: get-alert-history
+version: 1.0.0
+description: Get historical alerts for analysis
+author: elastic
+category: alerting
+tags:
+  - alerting
+  - history
+  - analysis
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

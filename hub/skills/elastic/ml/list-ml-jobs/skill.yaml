@@ -1,0 +1,13 @@
+name: list-ml-jobs
+version: 1.0.0
+description: List all machine learning anomaly detection jobs with their status
+author: elastic
+category: ml
+tags:
+  - ml
+  - anomaly
+  - jobs
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

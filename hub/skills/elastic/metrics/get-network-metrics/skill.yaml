@@ -1,0 +1,13 @@
+name: get-network-metrics
+version: 1.0.0
+description: Get network throughput metrics (bytes in/out)
+author: elastic
+category: metrics
+tags:
+  - metrics
+  - network
+  - throughput
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

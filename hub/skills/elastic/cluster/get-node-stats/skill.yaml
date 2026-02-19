@@ -1,0 +1,13 @@
+name: get-node-stats
+version: 1.0.0
+description: Get detailed statistics for a specific node
+author: elastic
+category: cluster
+tags:
+  - cluster
+  - nodes
+  - stats
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

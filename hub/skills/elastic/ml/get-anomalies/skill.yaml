@@ -1,0 +1,13 @@
+name: get-anomalies
+version: 1.0.0
+description: Get detected anomalies from ML jobs. Use for anomaly detection and alerting.
+author: elastic
+category: ml
+tags:
+  - ml
+  - anomaly
+  - detection
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

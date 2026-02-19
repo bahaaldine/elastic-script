@@ -1,0 +1,13 @@
+name: get-failed-transactions
+version: 1.0.0
+description: Get failed/errored transactions
+author: elastic
+category: apm
+tags:
+  - apm
+  - errors
+  - transactions
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

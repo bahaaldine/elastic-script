@@ -1,0 +1,13 @@
+name: list-detection-rules
+version: 1.0.0
+description: List all security detection rules
+author: elastic
+category: security
+tags:
+  - security
+  - rules
+  - detection
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

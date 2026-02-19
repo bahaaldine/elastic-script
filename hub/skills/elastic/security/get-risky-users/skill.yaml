@@ -1,0 +1,13 @@
+name: get-risky-users
+version: 1.0.0
+description: Get users with highest risk scores
+author: elastic
+category: security
+tags:
+  - security
+  - risk
+  - ueba
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

@@ -1,0 +1,13 @@
+name: get-service-health
+version: 1.0.0
+description: Get health metrics for a specific service including error rate and latency
+author: elastic
+category: apm
+tags:
+  - apm
+  - health
+  - services
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

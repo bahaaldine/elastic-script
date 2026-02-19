@@ -1,0 +1,13 @@
+name: mute-alert
+version: 1.0.0
+description: Mute an alert temporarily
+author: elastic
+category: alerting
+tags:
+  - alerting
+  - mute
+  - management
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

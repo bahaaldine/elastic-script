@@ -1,0 +1,13 @@
+name: compare-time-periods
+version: 1.0.0
+description: Compare metrics between two time periods
+author: elastic
+category: observability
+tags:
+  - observability
+  - comparison
+  - analysis
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

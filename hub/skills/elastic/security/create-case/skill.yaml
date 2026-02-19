@@ -1,0 +1,13 @@
+name: create-case
+version: 1.0.0
+description: Create a new security investigation case
+author: elastic
+category: security
+tags:
+  - security
+  - cases
+  - investigation
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

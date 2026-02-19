@@ -1,0 +1,13 @@
+name: list-alert-rules
+version: 1.0.0
+description: List all alerting rules with their status
+author: elastic
+category: alerting
+tags:
+  - alerting
+  - rules
+  - monitoring
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

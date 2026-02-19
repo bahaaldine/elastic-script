@@ -1,0 +1,13 @@
+name: get-service-dependencies
+version: 1.0.0
+description: Get upstream and downstream service dependencies
+author: elastic
+category: apm
+tags:
+  - apm
+  - dependencies
+  - topology
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

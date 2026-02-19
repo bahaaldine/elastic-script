@@ -1,0 +1,13 @@
+name: top-values
+version: 1.0.0
+description: Get top N most common values for a field
+author: elastic
+category: search
+tags:
+  - search
+  - aggregation
+  - analytics
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

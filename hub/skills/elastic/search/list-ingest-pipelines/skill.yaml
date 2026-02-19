@@ -1,0 +1,13 @@
+name: list-ingest-pipelines
+version: 1.0.0
+description: List all ingest pipelines
+author: elastic
+category: search
+tags:
+  - search
+  - ingest
+  - pipelines
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

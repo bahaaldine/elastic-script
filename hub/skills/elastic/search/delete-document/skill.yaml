@@ -1,0 +1,13 @@
+name: delete-document
+version: 1.0.0
+description: Delete a document by ID
+author: elastic
+category: search
+tags:
+  - search
+  - documents
+  - delete
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

@@ -1,0 +1,13 @@
+name: get-network-events
+version: 1.0.0
+description: Get network connection events
+author: elastic
+category: security
+tags:
+  - security
+  - network
+  - connections
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

@@ -1,0 +1,13 @@
+name: send-email
+version: 1.0.0
+description: Send an email notification
+author: elastic
+category: integrations
+tags:
+  - integrations
+  - email
+  - notifications
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

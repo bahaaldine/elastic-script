@@ -1,0 +1,13 @@
+name: get-error-groups
+version: 1.0.0
+description: Get errors grouped by type/message for a service
+author: elastic
+category: apm
+tags:
+  - apm
+  - errors
+  - analysis
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

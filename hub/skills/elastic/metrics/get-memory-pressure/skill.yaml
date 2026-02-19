@@ -1,0 +1,13 @@
+name: get-memory-pressure
+version: 1.0.0
+description: Find hosts with high memory pressure
+author: elastic
+category: metrics
+tags:
+  - metrics
+  - memory
+  - alerts
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

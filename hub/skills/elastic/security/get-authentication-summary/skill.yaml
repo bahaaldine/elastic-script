@@ -1,0 +1,13 @@
+name: get-authentication-summary
+version: 1.0.0
+description: Get authentication success/failure summary
+author: elastic
+category: security
+tags:
+  - security
+  - authentication
+  - summary
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

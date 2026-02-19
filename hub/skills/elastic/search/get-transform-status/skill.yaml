@@ -1,0 +1,13 @@
+name: get-transform-status
+version: 1.0.0
+description: Get status of a transform
+author: elastic
+category: search
+tags:
+  - search
+  - transforms
+  - status
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

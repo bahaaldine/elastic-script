@@ -1,0 +1,13 @@
+name: get-process-events
+version: 1.0.0
+description: Get process execution events for threat hunting
+author: elastic
+category: security
+tags:
+  - security
+  - process
+  - hunting
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

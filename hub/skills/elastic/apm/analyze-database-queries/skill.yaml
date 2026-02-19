@@ -1,0 +1,13 @@
+name: analyze-database-queries
+version: 1.0.0
+description: Analyze slow database queries
+author: elastic
+category: apm
+tags:
+  - apm
+  - database
+  - performance
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

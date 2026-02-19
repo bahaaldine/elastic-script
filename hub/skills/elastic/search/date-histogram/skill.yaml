@@ -1,0 +1,13 @@
+name: date-histogram
+version: 1.0.0
+description: Aggregate documents by time intervals
+author: elastic
+category: search
+tags:
+  - search
+  - histogram
+  - timeseries
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

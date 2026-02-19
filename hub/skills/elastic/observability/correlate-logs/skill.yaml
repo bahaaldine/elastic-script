@@ -1,0 +1,13 @@
+name: correlate-logs
+version: 1.0.0
+description: Find correlated log events across services
+author: elastic
+category: observability
+tags:
+  - observability
+  - logs
+  - correlation
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

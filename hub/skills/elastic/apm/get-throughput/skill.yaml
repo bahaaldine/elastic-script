@@ -1,0 +1,13 @@
+name: get-throughput
+version: 1.0.0
+description: Get request throughput for a service over time
+author: elastic
+category: apm
+tags:
+  - apm
+  - throughput
+  - metrics
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

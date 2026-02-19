@@ -1,0 +1,13 @@
+name: get-search-analytics
+version: 1.0.0
+description: Get search analytics for an application
+author: elastic
+category: enterprise-search
+tags:
+  - enterprise-search
+  - analytics
+  - metrics
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

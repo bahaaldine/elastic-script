@@ -1,0 +1,13 @@
+name: get-cluster-health
+version: 1.0.0
+description: Get Elasticsearch cluster health status and statistics
+author: elastic
+category: cluster
+tags:
+  - cluster
+  - health
+  - status
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

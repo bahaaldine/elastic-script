@@ -1,0 +1,13 @@
+name: hunt-ioc
+version: 1.0.0
+description: Hunt for an Indicator of Compromise (IP, hash, domain)
+author: elastic
+category: security
+tags:
+  - security
+  - threat
+  - hunting
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

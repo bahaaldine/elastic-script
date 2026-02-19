@@ -1,0 +1,13 @@
+name: extract-entities
+version: 1.0.0
+description: Extract named entities from text using NER
+author: elastic
+category: ml
+tags:
+  - ml
+  - ner
+  - nlp
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

@@ -1,0 +1,13 @@
+name: get-error-context
+version: 1.0.0
+description: Get logs before and after an error for context
+author: elastic
+category: observability
+tags:
+  - observability
+  - logs
+  - debugging
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

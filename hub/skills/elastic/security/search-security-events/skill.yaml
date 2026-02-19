@@ -1,0 +1,13 @@
+name: search-security-events
+version: 1.0.0
+description: Search security events with full-text query
+author: elastic
+category: security
+tags:
+  - security
+  - search
+  - events
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

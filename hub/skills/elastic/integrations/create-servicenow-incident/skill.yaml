@@ -1,0 +1,13 @@
+name: create-servicenow-incident
+version: 1.0.0
+description: Create a ServiceNow incident
+author: elastic
+category: integrations
+tags:
+  - integrations
+  - servicenow
+  - incidents
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

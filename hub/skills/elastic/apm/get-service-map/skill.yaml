@@ -1,0 +1,13 @@
+name: get-service-map
+version: 1.0.0
+description: Get service dependency map showing all connections
+author: elastic
+category: apm
+tags:
+  - apm
+  - servicemap
+  - topology
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

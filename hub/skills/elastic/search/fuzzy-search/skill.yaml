@@ -1,0 +1,13 @@
+name: fuzzy-search
+version: 1.0.0
+description: Search with typo tolerance using fuzzy matching
+author: elastic
+category: search
+tags:
+  - search
+  - fuzzy
+  - query
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

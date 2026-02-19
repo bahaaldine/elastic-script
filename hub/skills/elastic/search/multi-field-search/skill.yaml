@@ -1,0 +1,13 @@
+name: multi-field-search
+version: 1.0.0
+description: Search across multiple fields simultaneously
+author: elastic
+category: search
+tags:
+  - search
+  - multi-field
+  - query
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

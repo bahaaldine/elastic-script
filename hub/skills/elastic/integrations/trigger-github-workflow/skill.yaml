@@ -1,0 +1,13 @@
+name: trigger-github-workflow
+version: 1.0.0
+description: Trigger a GitHub Actions workflow
+author: elastic
+category: integrations
+tags:
+  - integrations
+  - github
+  - automation
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

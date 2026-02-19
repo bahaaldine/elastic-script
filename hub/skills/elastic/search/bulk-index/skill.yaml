@@ -1,0 +1,13 @@
+name: bulk-index
+version: 1.0.0
+description: Index multiple documents in bulk
+author: elastic
+category: search
+tags:
+  - search
+  - documents
+  - bulk
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql
