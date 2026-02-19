@@ -84,6 +84,16 @@ public class AgentStatementHandler {
                 executionMode = "human_approval"; // default
             }
             
+            // Parse instructions (system prompt)
+            String instructions = null;
+            if (ctx.INSTRUCTIONS() != null) {
+                // INSTRUCTIONS is followed by a STRING, find the right one
+                int instructionsIdx = ctx.GOAL() != null ? 1 : 0;
+                if (ctx.STRING().size() > instructionsIdx) {
+                    instructions = unquoteString(ctx.STRING(instructionsIdx).getText());
+                }
+            }
+            
             // Parse triggers
             List<Map<String, Object>> triggers = new ArrayList<>();
             if (ctx.agent_trigger_list() != null) {
@@ -106,10 +116,73 @@ public class AgentStatementHandler {
                 }
             }
             
-            // Parse model
-            String model = null;
-            if (ctx.MODEL() != null && ctx.STRING().size() > 1) {
-                model = unquoteString(ctx.STRING(1).getText());
+            // Parse model configuration (INFERENCE_ENDPOINT or MODEL)
+            Map<String, Object> modelConfig = new HashMap<>();
+            if (ctx.agent_model_config() != null) {
+                ElasticScriptParser.Agent_model_configContext modelCtx = ctx.agent_model_config();
+                if (modelCtx.INFERENCE_ENDPOINT() != null) {
+                    modelConfig.put("type", "inference_endpoint");
+                    modelConfig.put("endpoint_id", unquoteString(modelCtx.STRING().getText()));
+                } else if (modelCtx.MODEL() != null) {
+                    modelConfig.put("type", "model");
+                    modelConfig.put("model_name", unquoteString(modelCtx.STRING().getText()));
+                }
+            }
+            
+            // Parse temperature - grammar: (TEMPERATURE (INT | FLOAT))?
+            Double temperature = null;
+            if (ctx.TEMPERATURE() != null) {
+                // Temperature value follows the TEMPERATURE keyword
+                // It could be INT or FLOAT - check children after TEMPERATURE
+                int tempIdx = -1;
+                for (int i = 0; i < ctx.getChildCount(); i++) {
+                    if (ctx.getChild(i).getText().equalsIgnoreCase("TEMPERATURE")) {
+                        tempIdx = i;
+                        break;
+                    }
+                }
+                if (tempIdx >= 0 && tempIdx + 1 < ctx.getChildCount()) {
+                    String tempValue = ctx.getChild(tempIdx + 1).getText();
+                    try {
+                        temperature = Double.parseDouble(tempValue);
+                    } catch (NumberFormatException e) {
+                        // Ignore parse errors
+                    }
+                }
+            }
+            
+            // Parse max_tokens - grammar: (MAX_TOKENS INT)?
+            Integer maxTokens = null;
+            if (ctx.MAX_TOKENS() != null) {
+                for (int i = 0; i < ctx.getChildCount(); i++) {
+                    if (ctx.getChild(i).getText().equalsIgnoreCase("MAX_TOKENS")) {
+                        if (i + 1 < ctx.getChildCount()) {
+                            try {
+                                maxTokens = Integer.parseInt(ctx.getChild(i + 1).getText());
+                            } catch (NumberFormatException e) {
+                                // Ignore parse errors
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            
+            // Parse max_iterations - grammar: (MAX_ITERATIONS INT)?
+            Integer maxIterations = null;
+            if (ctx.MAX_ITERATIONS() != null) {
+                for (int i = 0; i < ctx.getChildCount(); i++) {
+                    if (ctx.getChild(i).getText().equalsIgnoreCase("MAX_ITERATIONS")) {
+                        if (i + 1 < ctx.getChildCount()) {
+                            try {
+                                maxIterations = Integer.parseInt(ctx.getChild(i + 1).getText());
+                            } catch (NumberFormatException e) {
+                                // Ignore parse errors
+                            }
+                        }
+                        break;
+                    }
+                }
             }
             
             // Parse config
@@ -127,10 +200,14 @@ public class AgentStatementHandler {
             Map<String, Object> agentDoc = new HashMap<>();
             agentDoc.put("name", agentName);
             agentDoc.put("goal", goal);
+            agentDoc.put("instructions", instructions);
             agentDoc.put("skills", skills);
             agentDoc.put("execution_mode", executionMode);
             agentDoc.put("triggers", triggers);
-            agentDoc.put("model", model);
+            agentDoc.put("model_config", modelConfig);
+            agentDoc.put("temperature", temperature);
+            agentDoc.put("max_tokens", maxTokens);
+            agentDoc.put("max_iterations", maxIterations);
             agentDoc.put("config", config);
             agentDoc.put("body", body);
             agentDoc.put("status", "created");
@@ -401,6 +478,53 @@ public class AgentStatementHandler {
                 listener::onFailure
             ));
             
+        } catch (Exception e) {
+            listener.onFailure(e);
+        }
+    }
+    
+    /**
+     * Handles CHAT AGENT statement.
+     * Sends a message to an agent and returns the response.
+     */
+    public void handleChatWithAgent(ElasticScriptParser.ChatWithAgentContext ctx,
+                                    ActionListener<Object> listener) {
+        try {
+            String agentName = ctx.ID().getText();
+            String message = unquoteString(ctx.STRING().getText());
+            
+            Map<String, Object> chatContext = new HashMap<>();
+            if (ctx.documentLiteral() != null) {
+                chatContext = parseDocumentLiteral(ctx.documentLiteral());
+            }
+            
+            // Add the message to context
+            chatContext.put("message", message);
+            chatContext.put("interaction_type", "chat");
+            chatContext.put("timestamp", System.currentTimeMillis());
+            
+            // Use AgentRuntime for chat execution
+            AgentRuntime runtime = new AgentRuntime(client);
+            runtime.chat(agentName, message, chatContext, ActionListener.wrap(
+                result -> listener.onResponse(result),
+                listener::onFailure
+            ));
+            
+        } catch (Exception e) {
+            listener.onFailure(e);
+        }
+    }
+    
+    /**
+     * Handles ALTER AGENT SET INSTRUCTIONS statement.
+     */
+    public void handleAlterAgentInstructions(ElasticScriptParser.AlterAgentInstructionsContext ctx,
+                                             ActionListener<Object> listener) {
+        try {
+            String agentName = ctx.ID().getText();
+            String instructions = unquoteString(ctx.STRING().getText());
+            
+            updateAgent(agentName, "instructions", instructions, listener);
         } catch (Exception e) {
             listener.onFailure(e);
         }

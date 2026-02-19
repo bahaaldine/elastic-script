@@ -123,6 +123,12 @@ DESC: 'DESC';
 AGENT: 'AGENT';
 AGENTS: 'AGENTS';
 GOAL: 'GOAL';
+INSTRUCTIONS: 'INSTRUCTIONS';
+TEMPERATURE: 'TEMPERATURE';
+MAX_TOKENS: 'MAX_TOKENS';
+MAX_ITERATIONS: 'MAX_ITERATIONS';
+INFERENCE_ENDPOINT: 'INFERENCE_ENDPOINT';
+CHAT: 'CHAT';
 APPROVAL: 'APPROVAL';
 AUTONOMOUS: 'AUTONOMOUS';
 SUPERVISED: 'SUPERVISED';
@@ -1821,7 +1827,7 @@ query_connector_statement
     ;
 
 // ============================================================================
-// AGENT STATEMENTS (Autonomous Executors)
+// AGENT STATEMENTS (Autonomous Executors with LLM Integration)
 // ============================================================================
 
 agent_statement
@@ -1831,25 +1837,40 @@ agent_statement
     | alter_agent_statement
     | start_stop_agent_statement
     | trigger_agent_statement
+    | chat_agent_statement
     ;
 
 // CREATE AGENT name
 //   GOAL 'description'
+//   [INSTRUCTIONS 'system prompt']
 //   SKILLS [skill1, skill2, ...]
 //   [EXECUTION mode]
 //   [TRIGGERS [...]]
-//   [MODEL 'model']
+//   [INFERENCE_ENDPOINT 'endpoint_id' | MODEL 'model_name']
+//   [TEMPERATURE 0.7]
+//   [MAX_TOKENS 4096]
+//   [MAX_ITERATIONS 10]
 //   [CONFIG { ... }]
 //   BEGIN ... END AGENT
 create_agent_statement
     : CREATE AGENT ID
       GOAL STRING
+      (INSTRUCTIONS STRING)?
       SKILLS LBRACKET agent_skill_list RBRACKET
       (EXECUTION agent_execution_mode)?
       (TRIGGERS LBRACKET agent_trigger_list RBRACKET)?
-      (MODEL STRING)?
+      (agent_model_config)?
+      (TEMPERATURE (INT | FLOAT))?
+      (MAX_TOKENS INT)?
+      (MAX_ITERATIONS INT)?
       (CONFIG documentLiteral)?
       BEGIN statement+ END_AGENT
+    ;
+
+// Agent model configuration - either Elasticsearch Inference or external model
+agent_model_config
+    : INFERENCE_ENDPOINT STRING                          // Use Elasticsearch Inference API
+    | MODEL STRING                                       // Use model name directly
     ;
 
 agent_skill_list
@@ -1896,6 +1917,7 @@ show_agents_statement
 alter_agent_statement
     : ALTER AGENT ID SET CONFIG documentLiteral          # alterAgentConfig
     | ALTER AGENT ID SET EXECUTION agent_execution_mode  # alterAgentExecution
+    | ALTER AGENT ID SET INSTRUCTIONS STRING             # alterAgentInstructions
     ;
 
 // START AGENT name / STOP AGENT name
@@ -1906,4 +1928,10 @@ start_stop_agent_statement
 // Manually trigger an agent: TRIGGER AGENT name WITH { context }
 trigger_agent_statement
     : TRIGGER AGENT ID (WITH documentLiteral)?
+    ;
+
+// CHAT AGENT name 'message' - Interactive conversation with an agent
+// Returns the agent's response and updates conversation state
+chat_agent_statement
+    : CHAT AGENT ID STRING (WITH documentLiteral)?       # chatWithAgent
     ;

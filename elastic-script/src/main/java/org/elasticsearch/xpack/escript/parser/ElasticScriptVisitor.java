@@ -1802,6 +1802,12 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCreate_agent_statement(ElasticScriptParser.Create_agent_statementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link ElasticScriptParser#agent_model_config}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAgent_model_config(ElasticScriptParser.Agent_model_configContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link ElasticScriptParser#agent_skill_list}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -1880,6 +1886,13 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAlterAgentExecution(ElasticScriptParser.AlterAgentExecutionContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code alterAgentInstructions}
+	 * labeled alternative in {@link ElasticScriptParser#alter_agent_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAlterAgentInstructions(ElasticScriptParser.AlterAgentInstructionsContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code enableDisableAgent}
 	 * labeled alternative in {@link ElasticScriptParser#start_stop_agent_statement}.
 	 * @param ctx the parse tree
@@ -1892,4 +1905,11 @@ public interface ElasticScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitTrigger_agent_statement(ElasticScriptParser.Trigger_agent_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code chatWithAgent}
+	 * labeled alternative in {@link ElasticScriptParser#chat_agent_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitChatWithAgent(ElasticScriptParser.ChatWithAgentContext ctx);
 }

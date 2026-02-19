@@ -7,15 +7,31 @@ This guide covers everything you need to know about creating agents in Moltler.
 ```sql
 CREATE AGENT agent_name
 GOAL 'description'
+[INSTRUCTIONS 'system prompt']
 SKILLS [skill1, skill2, ...]
 [EXECUTION mode]
 [TRIGGERS [...]]
-[MODEL 'model_name']
+[INFERENCE_ENDPOINT 'endpoint_id' | MODEL 'model_name']
+[TEMPERATURE 0.7]
+[MAX_TOKENS 4096]
+[MAX_ITERATIONS 10]
 [CONFIG {...}]
 BEGIN
     -- Agent logic
 END AGENT;
 ```
+
+## Key Features
+
+| Feature | Description |
+|---------|-------------|
+| `GOAL` | The primary objective for the agent |
+| `INSTRUCTIONS` | System prompt that guides the LLM's behavior |
+| `SKILLS` | List of skills the agent can use |
+| `INFERENCE_ENDPOINT` | Use Elasticsearch Inference API for reasoning |
+| `TEMPERATURE` | Control LLM creativity (0.0 = deterministic, 1.0 = creative) |
+| `MAX_TOKENS` | Maximum tokens for LLM responses |
+| `MAX_ITERATIONS` | Maximum OODA loop iterations |
 
 ---
 
@@ -260,41 +276,93 @@ TRIGGERS [
 
 ---
 
-## AI Models
+## LLM Configuration
 
-### Model Selection
+### Using Elasticsearch Inference API (Recommended)
 
-Choose an AI model for decision-making:
+The recommended way to configure LLM for agents is using Elasticsearch's Inference API. This provides centralized management, security, and monitoring.
+
+First, create an inference endpoint:
+
+```sql
+-- Create an inference endpoint using Elasticsearch
+CALL INFERENCE_CREATE_ENDPOINT(
+    'my-agent-llm',
+    'chat_completion', 
+    '{
+        "service": "openai",
+        "service_settings": {
+            "api_key": "sk-...",
+            "model_id": "gpt-4o-mini"
+        }
+    }'
+);
+```
+
+Then reference it in your agent:
 
 ```sql
 CREATE AGENT smart_responder
-MODEL 'gpt-4'  -- OpenAI GPT-4
+GOAL 'Analyze incidents and suggest remediation'
+INSTRUCTIONS 'You are an SRE assistant focused on reliability. Always explain your reasoning.'
+SKILLS [analyze_logs, check_metrics, restart_service]
+INFERENCE_ENDPOINT 'my-agent-llm'
+TEMPERATURE 0.3
+MAX_TOKENS 2048
 BEGIN
-    -- Agent uses GPT-4 for complex decisions
+    -- Agent uses the inference endpoint for reasoning
 END AGENT;
 ```
 
-Available models:
+### LLM Configuration Options
 
-| Model | Best For |
-|-------|----------|
-| `gpt-4` | Complex reasoning, nuanced decisions |
-| `gpt-3.5-turbo` | Faster, simpler decisions |
-| `claude-3` | Long context, detailed analysis |
-| `local` | Privacy-sensitive, offline operation |
+```sql
+CREATE AGENT my_agent
+GOAL 'Monitor production systems'
+INSTRUCTIONS 'You are a vigilant production monitor. Be concise but thorough.'
+SKILLS [check_health, get_metrics, send_alert]
+INFERENCE_ENDPOINT 'my-openai-endpoint'
+TEMPERATURE 0.3          -- Lower = more deterministic
+MAX_TOKENS 2048          -- Maximum response length
+MAX_ITERATIONS 5         -- Maximum OODA loop cycles
+BEGIN
+    ...
+END AGENT;
+```
 
-### Model Configuration
+### Using Direct Model Reference
+
+For simpler setups, you can reference a model directly:
 
 ```sql
 CREATE AGENT my_agent
 MODEL 'gpt-4'
-MODEL_CONFIG {
-    "temperature": 0.3,      -- More deterministic
-    "max_tokens": 1000,
-    "system_prompt": "You are an SRE assistant focused on reliability."
-}
 BEGIN
-    ...
+    -- Requires OpenAI API key in environment
+END AGENT;
+```
+
+### INSTRUCTIONS (System Prompt)
+
+The `INSTRUCTIONS` clause sets the system prompt for the agent's LLM:
+
+```sql
+CREATE AGENT incident_responder
+GOAL 'Respond to production incidents'
+INSTRUCTIONS '
+You are an expert SRE with 10 years of experience.
+Your priorities are:
+1. Minimize user impact
+2. Restore service quickly  
+3. Prevent recurrence
+
+Always explain your reasoning before taking action.
+When uncertain, ask for clarification rather than guessing.
+'
+SKILLS [diagnose_issue, restart_service, scale_up, notify_team]
+INFERENCE_ENDPOINT 'my-llm'
+BEGIN
+    -- Agent follows these instructions
 END AGENT;
 ```
 
@@ -535,6 +603,121 @@ BEGIN
         END IF;
     END LOOP;
 END AGENT;
+```
+
+---
+
+## Chatting with Agents
+
+Agents support interactive conversations using the `CHAT AGENT` command:
+
+```sql
+-- Simple chat
+CHAT AGENT my_agent 'What is the current health status of production?';
+
+-- Chat with context
+CHAT AGENT my_agent 'Why did CPU spike at 3pm?' WITH {
+    "service": "api-gateway",
+    "timeframe": "last_hour"
+};
+```
+
+### Conversation State
+
+Each chat creates a conversation that maintains history:
+
+```sql
+-- Start a conversation
+CHAT AGENT incident_analyst 'We have a critical alert on api-gateway';
+
+-- Response includes conversation_id for continuity
+-- {
+--   "agent": "incident_analyst",
+--   "conversation_id": "abc123",
+--   "response": "I'll analyze the api-gateway alert. Let me check the logs..."
+-- }
+
+-- Continue the conversation
+CHAT AGENT incident_analyst 'What did you find?' WITH {
+    "conversation_id": "abc123"
+};
+```
+
+### Agent Chat Response
+
+The chat response includes:
+
+| Field | Description |
+|-------|-------------|
+| `agent` | The agent name |
+| `conversation_id` | ID for continuing the conversation |
+| `message` | Your original message |
+| `response` | The agent's response |
+| `decision` | If skills are available, the agent's skill selection |
+
+---
+
+## Managing Agents
+
+### Show Agents
+
+```sql
+-- List all agents
+SHOW AGENTS;
+
+-- Get agent details
+SHOW AGENT my_agent;
+
+-- Show execution history
+SHOW AGENT my_agent HISTORY;
+
+-- Show specific execution
+SHOW AGENT my_agent EXECUTION 'execution-id';
+```
+
+### Modify Agents
+
+```sql
+-- Update instructions
+ALTER AGENT my_agent SET INSTRUCTIONS 'New system prompt here';
+
+-- Change execution mode
+ALTER AGENT my_agent SET EXECUTION autonomous;
+
+-- Update configuration
+ALTER AGENT my_agent SET CONFIG {
+    "max_actions": 20,
+    "timeout": "10m"
+};
+```
+
+### Enable/Disable Agents
+
+```sql
+-- Disable an agent (won't respond to triggers)
+DISABLE AGENT my_agent;
+
+-- Enable an agent
+ENABLE AGENT my_agent;
+```
+
+### Trigger Agents Manually
+
+```sql
+-- Trigger an agent
+TRIGGER AGENT my_agent;
+
+-- Trigger with context
+TRIGGER AGENT my_agent WITH {
+    "alert_id": "alert-123",
+    "severity": "critical"
+};
+```
+
+### Delete Agents
+
+```sql
+DROP AGENT my_agent;
 ```
 
 ---

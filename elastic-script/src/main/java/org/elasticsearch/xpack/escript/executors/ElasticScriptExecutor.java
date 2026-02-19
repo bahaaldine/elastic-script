@@ -1185,6 +1185,8 @@ public class ElasticScriptExecutor {
                 handler.handleAlterAgentConfig((ElasticScriptParser.AlterAgentConfigContext) alterCtx, listener);
             } else if (alterCtx instanceof ElasticScriptParser.AlterAgentExecutionContext) {
                 handler.handleAlterAgentExecution((ElasticScriptParser.AlterAgentExecutionContext) alterCtx, listener);
+            } else if (alterCtx instanceof ElasticScriptParser.AlterAgentInstructionsContext) {
+                handler.handleAlterAgentInstructions((ElasticScriptParser.AlterAgentInstructionsContext) alterCtx, listener);
             } else {
                 listener.onFailure(new IllegalArgumentException("Unknown ALTER AGENT variant"));
             }
@@ -1197,6 +1199,13 @@ public class ElasticScriptExecutor {
             }
         } else if (ctx.trigger_agent_statement() != null) {
             handler.handleTriggerAgent(ctx.trigger_agent_statement(), listener);
+        } else if (ctx.chat_agent_statement() != null) {
+            ElasticScriptParser.Chat_agent_statementContext chatCtx = ctx.chat_agent_statement();
+            if (chatCtx instanceof ElasticScriptParser.ChatWithAgentContext) {
+                handler.handleChatWithAgent((ElasticScriptParser.ChatWithAgentContext) chatCtx, listener);
+            } else {
+                listener.onFailure(new IllegalArgumentException("Unknown CHAT AGENT variant"));
+            }
         } else {
             listener.onFailure(new IllegalArgumentException("Unknown AGENT statement variant"));
         }

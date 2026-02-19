@@ -3431,6 +3431,18 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterAgent_model_config(ElasticScriptParser.Agent_model_configContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAgent_model_config(ElasticScriptParser.Agent_model_configContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterAgent_skill_list(ElasticScriptParser.Agent_skill_listContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -3575,6 +3587,18 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterAlterAgentInstructions(ElasticScriptParser.AlterAgentInstructionsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAlterAgentInstructions(ElasticScriptParser.AlterAgentInstructionsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterEnableDisableAgent(ElasticScriptParser.EnableDisableAgentContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -3594,6 +3618,18 @@ public class ElasticScriptBaseListener implements ElasticScriptListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitTrigger_agent_statement(ElasticScriptParser.Trigger_agent_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterChatWithAgent(ElasticScriptParser.ChatWithAgentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitChatWithAgent(ElasticScriptParser.ChatWithAgentContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

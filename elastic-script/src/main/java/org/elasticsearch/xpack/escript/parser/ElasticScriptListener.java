@@ -3016,6 +3016,16 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitCreate_agent_statement(ElasticScriptParser.Create_agent_statementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ElasticScriptParser#agent_model_config}.
+	 * @param ctx the parse tree
+	 */
+	void enterAgent_model_config(ElasticScriptParser.Agent_model_configContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ElasticScriptParser#agent_model_config}.
+	 * @param ctx the parse tree
+	 */
+	void exitAgent_model_config(ElasticScriptParser.Agent_model_configContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ElasticScriptParser#agent_skill_list}.
 	 * @param ctx the parse tree
 	 */
@@ -3148,6 +3158,18 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 */
 	void exitAlterAgentExecution(ElasticScriptParser.AlterAgentExecutionContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code alterAgentInstructions}
+	 * labeled alternative in {@link ElasticScriptParser#alter_agent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterAlterAgentInstructions(ElasticScriptParser.AlterAgentInstructionsContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code alterAgentInstructions}
+	 * labeled alternative in {@link ElasticScriptParser#alter_agent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitAlterAgentInstructions(ElasticScriptParser.AlterAgentInstructionsContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code enableDisableAgent}
 	 * labeled alternative in {@link ElasticScriptParser#start_stop_agent_statement}.
 	 * @param ctx the parse tree
@@ -3169,4 +3191,16 @@ public interface ElasticScriptListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTrigger_agent_statement(ElasticScriptParser.Trigger_agent_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code chatWithAgent}
+	 * labeled alternative in {@link ElasticScriptParser#chat_agent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterChatWithAgent(ElasticScriptParser.ChatWithAgentContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code chatWithAgent}
+	 * labeled alternative in {@link ElasticScriptParser#chat_agent_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitChatWithAgent(ElasticScriptParser.ChatWithAgentContext ctx);
 }
