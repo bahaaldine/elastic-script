@@ -1,8 +1,8 @@
 # Moltler
 
-**Pre-built skills for Elasticsearch.** Solve real problems in seconds.
+**The skills framework for Elasticsearch.** Build, share, and run skills on your data.
 
-[![Skills](https://img.shields.io/badge/skills-155-blue)](hub/)
+[![Skills](https://img.shields.io/badge/skills-155+-blue)](hub/)
 [![Solutions](https://img.shields.io/badge/solutions-observability%20%7C%20security%20%7C%20search-green)]()
 [![MCP](https://img.shields.io/badge/MCP-compatible-purple)]()
 
@@ -10,14 +10,20 @@
 
 ## What is Moltler?
 
-Moltler is a collection of **skills** that run directly on your Elasticsearch data. Instead of writing queries from scratch, use pre-built solutions that leverage Elasticsearch's full power - search, aggregations, semantic search, and ML.
+Moltler is a **framework for building skills** that run directly on Elasticsearch. Skills are reusable operations that leverage Elasticsearch's full power - search, aggregations, semantic search, and ML.
+
+- **Build skills** using a simple SQL-like syntax
+- **Share skills** via MoltlerHub with the community
+- **Run skills** via REST API or AI agents (MCP)
+
+It ships with **155+ ready-to-use skills** for Observability, Security, and Search - because we know Elasticsearch.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │  "Find all errors in production"                                │
 │                          ↓                                      │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │  RUN SKILL get_recent_errors(service => 'api-gateway')  │   │
+│  │  RUN SKILL get_recent_errors()                           │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                          ↓                                      │
 │  [{"level": "ERROR", "message": "Connection timeout", ...}]    │
@@ -56,14 +62,14 @@ curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
 ```bash
 curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
   -H "Content-Type: application/json" \
-  -d '{"query": "RUN SKILL hunt_ioc(ioc => '\''192.168.1.100'\'')"}'
+  -d '{"query": "RUN SKILL hunt_ioc WITH ioc = '\''192.168.1.100'\''"}'
 ```
 
 **Get top search queries:**
 ```bash
 curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
   -H "Content-Type: application/json" \
-  -d '{"query": "RUN SKILL get_top_queries(limit => 10)"}'
+  -d '{"query": "RUN SKILL get_top_queries()"}'
 ```
 
 ---
@@ -110,13 +116,20 @@ Query documents, aggregations, semantic search.
 
 ## Why Moltler?
 
+| For Users | For Builders |
+|-----------|--------------|
+| Run skills without learning ES|QL | Simple SQL-like syntax |
+| 155+ skills ready to use | Full Elasticsearch power |
+| AI agents via MCP | Publish to MoltlerHub |
+| Solve real problems fast | Build once, share everywhere |
+
 **Your data is already in Elasticsearch.** Logs, metrics, traces, security events - they're all there.
 
-**Elasticsearch's power is built-in.** Skills leverage ES|QL, aggregations, semantic search, and ML - you don't need to learn it all.
+**Build skills in minutes.** Simple syntax, full power of ES|QL, aggregations, semantic search, and ML.
 
-**AI agents can use skills.** The MCP endpoint (`/_escript/mcp`) exposes all skills to AI assistants.
+**Share with the community.** Publish your skills to MoltlerHub. Help others, get feedback, iterate.
 
-**The community can contribute.** Built a useful skill? Share it with everyone via MoltlerHub.
+**AI-ready by default.** Every skill is automatically exposed to AI agents via MCP.
 
 ---
 

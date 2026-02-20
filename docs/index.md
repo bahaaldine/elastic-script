@@ -1,34 +1,39 @@
 # Moltler
 
-**Pre-built skills for Elasticsearch.** Solve real problems in seconds.
+**The skills framework for Elasticsearch.** Build, share, and run skills on your data.
 
 ---
 
 ## What is Moltler?
 
-Moltler is a collection of **skills** - pre-built solutions that run directly on your Elasticsearch data.
+Moltler is a **framework for building skills** - reusable operations that run directly on your Elasticsearch data. Create your own skills, share them with the community, and leverage 155+ ready-to-use skills.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  "Find all errors in the last hour"                             │
-│                          ↓                                      │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │  SKILL: get_recent_errors                                │   │
-│  │  ├── Uses ES|QL to query your logs                       │   │
-│  │  ├── Filters by level, service, time                     │   │
-│  │  └── Returns structured results                          │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                          ↓                                      │
-│  [{"level": "ERROR", "service": "api", "message": "..."}]      │
+│                        MOLTLER FRAMEWORK                         │
+│                                                                  │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐       │
+│  │    BUILD     │    │    SHARE     │    │     RUN      │       │
+│  │              │    │              │    │              │       │
+│  │ CREATE SKILL │───▶│  MoltlerHub  │───▶│  RUN SKILL   │       │
+│  │ simple SQL   │    │  community   │    │  REST / MCP  │       │
+│  └──────────────┘    └──────────────┘    └──────────────┘       │
+│                              │                                   │
+│                              ▼                                   │
+│                      ┌──────────────┐                           │
+│                      │ Elasticsearch │                           │
+│                      │  your data    │                           │
+│                      └──────────────┘                           │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Why skills on Elasticsearch?**
+**Why build skills on Elasticsearch?**
 
 - **Your data is already there** - Logs, metrics, traces, security events
 - **Elasticsearch's power** - Search, aggregations, semantic, ML built-in
 - **No data movement** - Skills run where the data lives
 - **AI-ready** - Skills are discoverable by AI agents via MCP
+- **Community** - Share skills, learn from others, contribute back
 
 ---
 
@@ -187,20 +192,17 @@ Share with your team or the community via [MoltlerHub](moltlerhub/index.md).
 ┌─────────────────────────────────────────────────────────────────────┐
 │                         YOUR JOURNEY                                 │
 │                                                                      │
-│  ① Pick your solution                                               │
-│     └── Observability | Security | Search                            │
+│  ① RUN existing skills                                              │
+│     └── 155+ skills for O11y, Security, Search                       │
 │                     ↓                                                │
-│  ② Run pre-built skills                                             │
-│     └── Instant value, no learning curve                             │
+│  ② BUILD your own skills                                            │
+│     └── Simple SQL-like syntax, full ES power                        │
 │                     ↓                                                │
-│  ③ Customize skills for your needs                                  │
-│     └── Copy, modify, make it yours                                  │
+│  ③ SHARE with the community                                         │
+│     └── Publish to MoltlerHub                                        │
 │                     ↓                                                │
-│  ④ Connect to AI assistants                                         │
-│     └── Natural language queries via MCP                             │
-│                     ↓                                                │
-│  ⑤ Share with the community                                         │
-│     └── Contribute to MoltlerHub                                     │
+│  ④ CONNECT to AI assistants                                         │
+│     └── Every skill is MCP-ready                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
