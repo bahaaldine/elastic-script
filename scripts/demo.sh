@@ -15,7 +15,8 @@ ES_URL="${ES_URL:-http://localhost:9200}"
 ES_USER="${ES_USER:-elastic-admin}"
 ES_PASSWORD="${ES_PASSWORD:-elastic-password}"
 
-clear
+# Only clear if running in a terminal
+[[ -t 1 ]] && clear
 echo -e "${BOLD}${CYAN}"
 echo "╔═══════════════════════════════════════════════════════════════╗"
 echo "║                                                               ║"
@@ -81,12 +82,12 @@ sleep 1
 
 # Demo 1: Observability
 echo -e "${CYAN}${BOLD}═══ OBSERVABILITY ═══${NC}"
-run_skill "get_recent_errors(limit => 3)" "Find recent errors"
+run_skill "get_recent_errors()" "Find recent errors"
 sleep 2
 
 # Demo 2: Search
 echo -e "${CYAN}${BOLD}═══ SEARCH ═══${NC}"
-run_skill "top_values(index_pattern => 'logs-*', field => 'level', limit => 5)" "What log levels exist?"
+run_skill "count_logs_by_level()" "What log levels exist?"
 sleep 2
 
 # Demo 3: Show installed skills
