@@ -2,7 +2,7 @@ CREATE SKILL get_service_map
   VERSION '1.0.0'
   DESCRIPTION 'Get service dependency map showing all connections'
   AUTHOR 'elastic'
-  TAGS ['apm,servicemap,topology']
+  TAGS ['apm', 'servicemap', 'topology']
   ()
   RETURNS ARRAY
 BEGIN

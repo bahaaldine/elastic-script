@@ -2,7 +2,7 @@ CREATE SKILL get_job_status
   VERSION '1.0.0'
   DESCRIPTION 'Get detailed status of an ML job'
   AUTHOR 'elastic'
-  TAGS ['ml,jobs,status']
+  TAGS ['ml', 'jobs', 'status']
   (job_id STRING DESCRIPTION 'ML job ID')
   RETURNS DOCUMENT
 BEGIN

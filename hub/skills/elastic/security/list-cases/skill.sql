@@ -2,7 +2,7 @@ CREATE SKILL list_cases
   VERSION '1.0.0'
   DESCRIPTION 'List security investigation cases'
   AUTHOR 'elastic'
-  TAGS ['security,cases,investigation']
+  TAGS ['security', 'cases', 'investigation']
   (status STRING DESCRIPTION 'Filter by status: open, closed, in-progress' DEFAULT NULL)
   RETURNS ARRAY
 BEGIN

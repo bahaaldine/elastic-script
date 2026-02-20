@@ -2,7 +2,7 @@ CREATE SKILL get_influencers
   VERSION '1.0.0'
   DESCRIPTION 'Get top influencers contributing to anomalies'
   AUTHOR 'elastic'
-  TAGS ['ml,anomaly,influencers']
+  TAGS ['ml', 'anomaly', 'influencers']
   (job_id STRING DESCRIPTION 'ML job ID', limit INT DESCRIPTION 'Max results' DEFAULT 10)
   RETURNS ARRAY
 BEGIN

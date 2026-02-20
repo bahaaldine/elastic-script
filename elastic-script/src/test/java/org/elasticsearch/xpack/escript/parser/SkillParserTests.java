@@ -306,4 +306,120 @@ public class SkillParserTests extends ESTestCase {
         assertNotNull(genCtx.SAVE_KW());
         assertEquals("trending_products", genCtx.ID().getText());
     }
+
+    // ========================================================================
+    // SKILL PACK Tests
+    // ========================================================================
+
+    public void testCreateSkillPackBasic() {
+        String input = """
+            CREATE SKILL PACK observability_pack VERSION '1.0.0'
+            SKILLS [get_recent_errors, count_logs, get_metrics];
+            """;
+
+        ElasticScriptParser.ProgramContext ctx = parseProgram(input);
+        assertNotNull(ctx);
+        assertNotNull(ctx.skill_statement().create_skill_pack_statement());
+
+        var packCtx = ctx.skill_statement().create_skill_pack_statement();
+        assertEquals("observability_pack", packCtx.ID().getText());
+        assertNotNull(packCtx.arrayLiteral()); // SKILLS array
+    }
+
+    public void testCreateSkillPackWithDescription() {
+        String input = """
+            CREATE SKILL PACK security_pack VERSION '2.0.0'
+            DESCRIPTION 'Security and threat hunting skills'
+            SKILLS [hunt_ioc, detect_threats, analyze_alerts];
+            """;
+
+        ElasticScriptParser.ProgramContext ctx = parseProgram(input);
+        assertNotNull(ctx);
+
+        var packCtx = ctx.skill_statement().create_skill_pack_statement();
+        assertEquals("security_pack", packCtx.ID().getText());
+        assertEquals(2, packCtx.STRING().size()); // VERSION, DESCRIPTION
+    }
+
+    public void testCreateSkillPackFull() {
+        String input = """
+            CREATE SKILL PACK complete_pack VERSION '3.0.0'
+            DESCRIPTION 'Complete monitoring pack'
+            AUTHOR 'Platform Team'
+            TAGS ['monitoring', 'sre', 'production']
+            SKILLS [skill1, skill2, skill3, skill4];
+            """;
+
+        ElasticScriptParser.ProgramContext ctx = parseProgram(input);
+        assertNotNull(ctx);
+
+        var packCtx = ctx.skill_statement().create_skill_pack_statement();
+        assertEquals("complete_pack", packCtx.ID().getText());
+        assertEquals(3, packCtx.STRING().size()); // VERSION, DESCRIPTION, AUTHOR
+        assertEquals(2, packCtx.arrayLiteral().size()); // TAGS, SKILLS
+    }
+
+    public void testDropSkillPack() {
+        String input = "DROP SKILL PACK observability_pack;";
+
+        ElasticScriptParser.ProgramContext ctx = parseProgram(input);
+        assertNotNull(ctx);
+        assertNotNull(ctx.skill_statement().drop_skill_statement());
+        assertNotNull(ctx.skill_statement().drop_skill_statement().PACK());
+        assertEquals("observability_pack", ctx.skill_statement().drop_skill_statement().ID().getText());
+    }
+
+    public void testShowAllSkillPacks() {
+        String input = "SHOW SKILL PACKS;";
+
+        ElasticScriptParser.ProgramContext ctx = parseProgram(input);
+        assertNotNull(ctx);
+        assertTrue(ctx.skill_statement().show_skills_statement() instanceof ElasticScriptParser.ShowAllSkillPacksContext);
+    }
+
+    public void testShowSkillPackDetail() {
+        String input = "SHOW SKILL PACK observability_pack;";
+
+        ElasticScriptParser.ProgramContext ctx = parseProgram(input);
+        assertNotNull(ctx);
+        assertTrue(ctx.skill_statement().show_skills_statement() instanceof ElasticScriptParser.ShowSkillPackDetailContext);
+
+        var showCtx = (ElasticScriptParser.ShowSkillPackDetailContext) ctx.skill_statement().show_skills_statement();
+        assertEquals("observability_pack", showCtx.ID().getText());
+    }
+
+    // ========================================================================
+    // RUN SKILL Tests
+    // ========================================================================
+
+    public void testRunSkillBasic() {
+        String input = "RUN SKILL my_skill;";
+
+        ElasticScriptParser.ProgramContext ctx = parseProgram(input);
+        assertNotNull(ctx);
+        assertNotNull(ctx.skill_statement().run_skill_statement());
+        assertEquals("my_skill", ctx.skill_statement().run_skill_statement().ID().getText());
+    }
+
+    public void testRunSkillWithPositionalArgs() {
+        String input = "RUN SKILL my_skill('value1', 42);";
+
+        ElasticScriptParser.ProgramContext ctx = parseProgram(input);
+        assertNotNull(ctx);
+
+        var runCtx = ctx.skill_statement().run_skill_statement();
+        assertNotNull(runCtx.expressionList());
+        assertEquals(2, runCtx.expressionList().expression().size());
+    }
+
+    public void testRunSkillWithNamedArgs() {
+        String input = "RUN SKILL my_skill WITH param1 = 'value1', param2 = 42;";
+
+        ElasticScriptParser.ProgramContext ctx = parseProgram(input);
+        assertNotNull(ctx);
+
+        var runCtx = ctx.skill_statement().run_skill_statement();
+        assertNotNull(runCtx.skill_test_args());
+        assertEquals(2, runCtx.skill_test_args().skill_test_arg().size());
+    }
 }

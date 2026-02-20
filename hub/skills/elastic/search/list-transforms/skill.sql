@@ -2,7 +2,7 @@ CREATE SKILL list_transforms
   VERSION '1.0.0'
   DESCRIPTION 'List all data transforms'
   AUTHOR 'elastic'
-  TAGS ['search,transforms,management']
+  TAGS ['search', 'transforms', 'management']
   ()
   RETURNS ARRAY
 BEGIN

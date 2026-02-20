@@ -2,7 +2,7 @@ CREATE SKILL get_dns_queries
   VERSION '1.0.0'
   DESCRIPTION 'Get DNS query events'
   AUTHOR 'elastic'
-  TAGS ['security,dns,network']
+  TAGS ['security', 'dns', 'network']
   (domain STRING DESCRIPTION 'Domain filter' DEFAULT NULL, limit INT DESCRIPTION 'Max results' DEFAULT 50)
   RETURNS ARRAY
 BEGIN

@@ -2,7 +2,7 @@ CREATE SKILL get_file_events
   VERSION '1.0.0'
   DESCRIPTION 'Get file system events'
   AUTHOR 'elastic'
-  TAGS ['security,file,monitoring']
+  TAGS ['security', 'file', 'monitoring']
   (hostname STRING DESCRIPTION 'Host to analyze' DEFAULT NULL, file_path STRING DESCRIPTION 'File path filter' DEFAULT NULL, limit INT DESCRIPTION 'Max results' DEFAULT 50)
   RETURNS ARRAY
 BEGIN

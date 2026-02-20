@@ -2,7 +2,7 @@ CREATE SKILL get_search_analytics
   VERSION '1.0.0'
   DESCRIPTION 'Get search analytics for an application'
   AUTHOR 'elastic'
-  TAGS ['enterprise-search,analytics,metrics']
+  TAGS ['enterprise-search', 'analytics', 'metrics']
   (app_name STRING DESCRIPTION 'Application name', days INT DESCRIPTION 'Number of days' DEFAULT 7)
   RETURNS DOCUMENT
 BEGIN

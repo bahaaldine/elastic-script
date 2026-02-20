@@ -2,7 +2,7 @@ CREATE SKILL get_cluster_health
   VERSION '1.0.0'
   DESCRIPTION 'Get Elasticsearch cluster health status and statistics'
   AUTHOR 'elastic'
-  TAGS ['cluster,health,status']
+  TAGS ['cluster', 'health', 'status']
   ()
   RETURNS DOCUMENT
 BEGIN

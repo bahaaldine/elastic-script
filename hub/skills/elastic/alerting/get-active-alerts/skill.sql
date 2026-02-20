@@ -2,7 +2,7 @@ CREATE SKILL get_active_alerts
   VERSION '1.0.0'
   DESCRIPTION 'Get all currently active/firing alerts'
   AUTHOR 'elastic'
-  TAGS ['alerting,active,incidents']
+  TAGS ['alerting', 'active', 'incidents']
   (severity STRING DESCRIPTION 'Filter by severity: critical, high, medium, low' DEFAULT NULL, limit INT DESCRIPTION 'Max results' DEFAULT 50)
   RETURNS ARRAY
 BEGIN

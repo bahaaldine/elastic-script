@@ -2,7 +2,7 @@ CREATE SKILL get_memory_pressure
   VERSION '1.0.0'
   DESCRIPTION 'Find hosts with high memory pressure'
   AUTHOR 'elastic'
-  TAGS ['metrics,memory,alerts']
+  TAGS ['metrics', 'memory', 'alerts']
   (threshold INT DESCRIPTION 'Memory usage threshold percent' DEFAULT 80)
   RETURNS ARRAY
 BEGIN

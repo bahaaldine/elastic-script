@@ -2,7 +2,7 @@ CREATE SKILL list_monitors
   VERSION '1.0.0'
   DESCRIPTION 'List all uptime/synthetic monitors'
   AUTHOR 'elastic'
-  TAGS ['observability,uptime,monitors']
+  TAGS ['observability', 'uptime', 'monitors']
   (status STRING DESCRIPTION 'Filter by status: up, down' DEFAULT NULL)
   RETURNS ARRAY
 BEGIN

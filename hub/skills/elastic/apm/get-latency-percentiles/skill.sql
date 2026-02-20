@@ -2,7 +2,7 @@ CREATE SKILL get_latency_percentiles
   VERSION '1.0.0'
   DESCRIPTION 'Get latency percentiles (p50, p95, p99) for a service'
   AUTHOR 'elastic'
-  TAGS ['apm,latency,percentiles']
+  TAGS ['apm', 'latency', 'percentiles']
   (service STRING DESCRIPTION 'Service name to analyze', index_pattern STRING DESCRIPTION 'Index pattern' DEFAULT 'logs-*')
   RETURNS ARRAY
 BEGIN

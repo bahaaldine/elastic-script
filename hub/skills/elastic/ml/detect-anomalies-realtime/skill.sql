@@ -2,7 +2,7 @@ CREATE SKILL detect_anomalies_realtime
   VERSION '1.0.0'
   DESCRIPTION 'Analyze data in real-time for anomalies using statistical methods'
   AUTHOR 'elastic'
-  TAGS ['ml,anomaly,realtime']
+  TAGS ['ml', 'anomaly', 'realtime']
   (index_pattern STRING DESCRIPTION 'Index to analyze', field STRING DESCRIPTION 'Numeric field to check for anomalies', threshold FLOAT DESCRIPTION 'Standard deviation threshold' DEFAULT 2.0)
   RETURNS ARRAY
 BEGIN

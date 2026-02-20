@@ -2,7 +2,7 @@ CREATE SKILL get_slo_status
   VERSION '1.0.0'
   DESCRIPTION 'Get SLO (Service Level Objective) status for a service'
   AUTHOR 'elastic'
-  TAGS ['observability,slo,reliability']
+  TAGS ['observability', 'slo', 'reliability']
   (service STRING DESCRIPTION 'Service name', slo_target FLOAT DESCRIPTION 'Target SLO percentage' DEFAULT 99.9)
   RETURNS DOCUMENT
 BEGIN

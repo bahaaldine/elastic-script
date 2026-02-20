@@ -2,7 +2,7 @@ CREATE SKILL get_failed_transactions
   VERSION '1.0.0'
   DESCRIPTION 'Get failed/errored transactions'
   AUTHOR 'elastic'
-  TAGS ['apm,errors,transactions']
+  TAGS ['apm', 'errors', 'transactions']
   (service STRING DESCRIPTION 'Service name' DEFAULT NULL, limit INT DESCRIPTION 'Max results' DEFAULT 20)
   RETURNS ARRAY
 BEGIN

@@ -4,7 +4,7 @@ The official skill repository for Moltler - exposing Elasticsearch capabilities 
 
 ## Overview
 
-**130 skills** across **10 categories** providing comprehensive Elasticsearch automation:
+**155 skills** across **13 categories** providing comprehensive Elasticsearch automation:
 
 | Category | Skills | Examples |
 |----------|--------|----------|
@@ -19,6 +19,8 @@ The official skill repository for Moltler - exposing Elasticsearch capabilities 
 | **Cluster** | 10 | `cluster_health`, `list_nodes`, `list_snapshots` |
 | **Integrations** | 10 | `send_slack_message`, `create_jira_issue`, `trigger_pagerduty` |
 | **Fleet** | 6 | `list_agents`, `get_agent_status`, `list_integrations` |
+| **Agent Builder** | 13 | `list_agents`, `create_agent`, `chat`, `list_tools` |
+| **Enterprise Search** | 4 | `list_search_apps`, `get_search_analytics`, `get_top_queries` |
 
 ## Quick Start
 
@@ -84,19 +86,40 @@ See [SKILL_FORMAT.md](SKILL_FORMAT.md) for full specification.
 # Install all skills
 ./moltler-cli.sh install --all
 
-# Install specific skill
-./moltler-cli.sh install observability/get-recent-errors
+# Install skills from a category
+./moltler-cli.sh install --all --category observability
 
-# List skills
+# Install specific skill
+./moltler-cli.sh install get-recent-errors
+
+# Uninstall a skill
+./moltler-cli.sh uninstall get-recent-errors
+
+# List available skills in the hub
 ./moltler-cli.sh list
+./moltler-cli.sh list --category security
+
+# List installed skills
+./moltler-cli.sh installed
 
 # Search skills
 ./moltler-cli.sh search "error"
 
-# Check status
+# Run a skill
+./moltler-cli.sh run get-recent-errors
+./moltler-cli.sh run hunt-ioc "'192.168.1.100'"
+
+# Skill packs
+./moltler-cli.sh pack list
+./moltler-cli.sh pack show observability_pack
+
+# Test MCP endpoint
+./moltler-cli.sh mcp
+
+# Check connection status
 ./moltler-cli.sh status
 
-# Run tests
+# Run skill tests
 ./moltler-cli.sh test
 ```
 
@@ -172,10 +195,16 @@ curl -u elastic-admin:elastic-password http://localhost:9200/_escript/mcp \
 
 ## Contributing
 
-1. Create a new skill directory under the appropriate category
-2. Add `skill.yaml`, `skill.sql`, and optionally `README.md`
-3. Test with `./moltler-cli.sh test`
-4. Submit a pull request
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide. Quick steps:
+
+1. Fork the repository
+2. Create skill directory: `hub/skills/elastic/<category>/<skill-name>/`
+3. Add required files:
+   - `skill.yaml` - Metadata (name, version, description, tags)
+   - `skill.sql` - EScript implementation with `CREATE SKILL ... END SKILL;`
+   - `README.md` - Usage documentation
+4. Test locally: `./moltler-cli.sh install <skill-name>`
+5. Submit a pull request
 
 ## License
 

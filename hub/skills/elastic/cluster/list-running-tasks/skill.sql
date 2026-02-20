@@ -2,7 +2,7 @@ CREATE SKILL list_running_tasks
   VERSION '1.0.0'
   DESCRIPTION 'List currently running cluster tasks'
   AUTHOR 'elastic'
-  TAGS ['cluster,tasks,operations']
+  TAGS ['cluster', 'tasks', 'operations']
   ()
   RETURNS ARRAY
 BEGIN

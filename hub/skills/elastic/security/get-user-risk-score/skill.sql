@@ -2,7 +2,7 @@ CREATE SKILL get_user_risk_score
   VERSION '1.0.0'
   DESCRIPTION 'Get risk score for a user based on their activity'
   AUTHOR 'elastic'
-  TAGS ['security,risk,ueba']
+  TAGS ['security', 'risk', 'ueba']
   (username STRING DESCRIPTION 'Username to check')
   RETURNS DOCUMENT
 BEGIN

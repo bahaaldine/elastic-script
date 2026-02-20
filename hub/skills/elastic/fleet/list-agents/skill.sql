@@ -2,7 +2,7 @@ CREATE SKILL list_agents
   VERSION '1.0.0'
   DESCRIPTION 'List all Elastic Agents'
   AUTHOR 'elastic'
-  TAGS ['fleet,agents,management']
+  TAGS ['fleet', 'agents', 'management']
   (status STRING DESCRIPTION 'Filter by status: online, offline, updating' DEFAULT NULL)
   RETURNS ARRAY
 BEGIN

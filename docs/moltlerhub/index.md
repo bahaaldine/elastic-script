@@ -1,12 +1,38 @@
 # MoltlerHub
 
-The community registry for discovering, sharing, and installing Moltler skills.
+The official skill repository for Moltler - **155 skills** across 13 categories.
 
 ---
 
-## Vision
+## Quick Start
 
-MoltlerHub is the central marketplace where:
+```bash
+# Install all skills
+cd hub
+./moltler-cli.sh install --all
+
+# List installed skills
+./moltler-cli.sh installed
+
+# Run a skill
+./moltler-cli.sh run get-recent-errors
+```
+
+**Want to contribute a skill?** See the [Contributing Guide](contributing.md).
+
+---
+
+## Current Status
+
+MoltlerHub is currently a **GitHub-based repository** at `hub/skills/`. Skills are:
+
+- Installed via CLI: `./moltler-cli.sh install <skill-name>`
+- Exposed via MCP endpoint: `/_escript/mcp`
+- Browsable in the `hub/` directory
+
+## Vision (Roadmap)
+
+MoltlerHub will become a full marketplace where:
 
 - **Users** discover and install skills created by the community
 - **Contributors** publish and share skills they've built

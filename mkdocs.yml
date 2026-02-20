@@ -111,103 +111,85 @@ markdown_extensions:
       custom_checkbox: true
   - pymdownx.tilde
 
-# Navigation - Moltler-first, Skills-focused
+# Navigation - Solutions first, progressive disclosure
 nav:
   - Home: index.md
   
-  - Getting Started:
-    - What is Moltler?: getting-started/what-is-moltler.md
-    - Installation: getting-started/installation.md
+  # LEVEL 1: Solutions (what users care about)
+  - Solutions:
+    - Observability: solutions/observability.md
+    - Security: solutions/security.md
+    - Search: solutions/search.md
+  
+  # LEVEL 2: Get started
+  - Get Started:
     - Quick Start: getting-started/quick-start.md
+    - Installation: getting-started/installation.md
     - Your First Skill: getting-started/first-skill.md
   
+  # LEVEL 3: Browse and use skills
   - Skills:
-    - Available Skills: skills/index.md
-    - Overview: skills/overview.md
-    - Creating Skills: skills/creating-skills.md
-    - Skill Parameters: skills/parameters.md
-    - Testing Skills: skills/testing.md
-    - Publishing Skills: skills/publishing.md
+    - Browse Skills: moltlerhub/index.md
+    - Using Skills: skills/overview.md
     - Skill Packs: skills/skill-packs.md
-    - Skills Roadmap: skills/skills-roadmap.md
   
-  - MoltlerHub:
-    - Overview: moltlerhub/index.md
+  # LEVEL 4: Build your own
+  - Build Skills:
+    - Creating Skills: skills/creating-skills.md
+    - Parameters: skills/parameters.md
+    - Testing: skills/testing.md
+    - Publishing: skills/publishing.md
+    - Contributing: moltlerhub/contributing.md
   
-  - Connectors:
-    - Overview: connectors/overview.md
-    - GitHub: connectors/github.md
-    - Jira: connectors/jira.md
-    - Datadog: connectors/datadog.md
-    - Salesforce: connectors/salesforce.md
-    - Zendesk: connectors/zendesk.md
-    - Slack: connectors/slack.md
-    - PagerDuty: connectors/pagerduty.md
-    - Building Connectors: connectors/building-connectors.md
-  
-  - Agents:
-    - Overview: agents/overview.md
-    - Creating Agents: agents/creating-agents.md
-    - Execution Model: agents/execution-model.md
-    - Human-in-the-Loop: agents/human-in-the-loop.md
-    - Monitoring Agents: agents/monitoring.md
-  
-  - AI Features:
+  # LEVEL 5: AI Integration
+  - AI Integration:
+    - MCP for AI Agents: mcp.md
     - Generate Skills: ai/generate-skills.md
-    - Improve Skills: ai/improve-skills.md
-    - Recommendations: ai/recommendations.md
+    - Agents: agents/overview.md
   
-  - Tools:
-    - CLI (moltler): tools/cli.md
-    - Python SDK: tools/python-sdk.md
-    - Jupyter Notebooks: tools/jupyter.md
-    - VSCode Extension: tools/vscode.md
-    - MCP Bridge: tools/mcp-bridge.md
+  # LEVEL 6: Advanced (hidden complexity)
+  - Advanced:
+    - Connectors:
+      - Overview: connectors/overview.md
+      - GitHub: connectors/github.md
+      - Jira: connectors/jira.md
+      - Slack: connectors/slack.md
+      - PagerDuty: connectors/pagerduty.md
+      - Building Connectors: connectors/building-connectors.md
+    - Agents:
+      - Creating Agents: agents/creating-agents.md
+      - Execution Model: agents/execution-model.md
+      - Human-in-the-Loop: agents/human-in-the-loop.md
+      - Monitoring: agents/monitoring.md
+    - Language Reference:
+      - Overview: language/overview.md
+      - Variables & Types: language/variables-types.md
+      - Control Flow: language/control-flow.md
+      - Procedures: language/procedures.md
+      - Functions: language/functions.md
+      - Error Handling: language/error-handling.md
+      - Async Execution: language/async-execution.md
+    - Function Reference:
+      - Overview: functions/overview.md
+      - String: functions/string.md
+      - Number: functions/number.md
+      - Array: functions/array.md
+      - Date: functions/date.md
+      - Document: functions/document.md
+      - Elasticsearch: functions/elasticsearch.md
+      - AI & LLM: functions/ai-llm.md
   
-  - elastic-script Language:
-    - Overview: language/overview.md
-    - Variables & Types: language/variables-types.md
-    - Control Flow: language/control-flow.md
-    - Procedures: language/procedures.md
-    - User-Defined Functions: language/functions.md
-    - Error Handling: language/error-handling.md
-    - EXECUTE IMMEDIATE: language/execute-immediate.md
-    - Cursors: language/cursors.md
-    - Bulk Operations: language/bulk-operations.md
-    - Packages: language/packages.md
-    - Async Execution: language/async-execution.md
-  
-  - Function Reference:
-    - Overview: functions/overview.md
-    - String Functions: functions/string.md
-    - Number Functions: functions/number.md
-    - Array Functions: functions/array.md
-    - Date Functions: functions/date.md
-    - Document Functions: functions/document.md
-    - MAP Functions: functions/map.md
-    - Elasticsearch: functions/elasticsearch.md
-    - AI & LLM: functions/ai-llm.md
-    - Integrations: functions/integrations.md
-  
+  # Examples
   - Examples:
-    - Observability Skills: examples/observability-skills.md
+    - Observability: examples/observability-skills.md
     - Incident Response: examples/incident-response.md
-    - Data Pipeline: examples/data-pipeline.md
     - DevOps Automation: examples/devops-automation.md
   
-  - Tutorials:
-    - Getting Started: notebooks/getting-started.md
-    - ES|QL Integration: notebooks/esql-integration.md
-    - AI & Observability: notebooks/ai-observability.md
-    - Async Execution: notebooks/async-execution.md
-    - Complete Reference: notebooks/complete-reference.md
-  
+  # For contributors
   - Development:
     - Contributing: development/contributing.md
-    - Testing: development/testing.md
     - Architecture: development/architecture.md
-  
-  - Roadmap: roadmap.md
+    - Roadmap: roadmap.md
 
 # Extra
 extra:

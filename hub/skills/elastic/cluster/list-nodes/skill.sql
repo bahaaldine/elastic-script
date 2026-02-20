@@ -2,7 +2,7 @@ CREATE SKILL list_nodes
   VERSION '1.0.0'
   DESCRIPTION 'List all nodes in the Elasticsearch cluster'
   AUTHOR 'elastic'
-  TAGS ['cluster,nodes,infrastructure']
+  TAGS ['cluster', 'nodes', 'infrastructure']
   (role STRING DESCRIPTION 'Filter by role: master, data, ingest' DEFAULT NULL)
   RETURNS ARRAY
 BEGIN

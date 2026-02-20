@@ -2,7 +2,7 @@ CREATE SKILL list_hosts
   VERSION '1.0.0'
   DESCRIPTION 'List all monitored hosts with their current status'
   AUTHOR 'elastic'
-  TAGS ['metrics,hosts,infrastructure']
+  TAGS ['metrics', 'hosts', 'infrastructure']
   (status STRING DESCRIPTION 'Filter by status' DEFAULT NULL)
   RETURNS ARRAY
 BEGIN

@@ -2,7 +2,7 @@ CREATE SKILL get_agent_logs
   VERSION '1.0.0'
   DESCRIPTION 'Get logs from a specific agent'
   AUTHOR 'elastic'
-  TAGS ['fleet,agents,logs']
+  TAGS ['fleet', 'agents', 'logs']
   (agent_id STRING DESCRIPTION 'Agent ID', limit INT DESCRIPTION 'Max log lines' DEFAULT 100)
   RETURNS ARRAY
 BEGIN

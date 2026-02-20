@@ -2,7 +2,7 @@ CREATE SKILL explain_anomaly
   VERSION '1.0.0'
   DESCRIPTION 'Get explanation for a specific anomaly'
   AUTHOR 'elastic'
-  TAGS ['ml,anomaly,explanation']
+  TAGS ['ml', 'anomaly', 'explanation']
   (job_id STRING DESCRIPTION 'ML job ID', anomaly_id STRING DESCRIPTION 'Anomaly record ID')
   RETURNS DOCUMENT
 BEGIN

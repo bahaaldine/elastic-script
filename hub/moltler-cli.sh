@@ -28,20 +28,28 @@ USAGE:
 
 COMMANDS:
     install         Install a skill or all skills from the hub
+    uninstall       Remove an installed skill
     list            List available skills in the hub
+    installed       List installed skills
     search          Search for skills by keyword
+    run             Run a skill with arguments
     test            Test installed skills
+    pack            Manage skill packs
     status          Check Elasticsearch connection
 
 OPTIONS:
     --all           Install all skills
-    --category      Filter by category (meta, observability, search, security)
+    --category      Filter by category (meta, observability, search, security, ml, apm)
     
 EXAMPLES:
     moltler install --all                    # Install all skills
-    moltler install count-logs-by-level      # Install specific skill
+    moltler install get-recent-errors        # Install specific skill
+    moltler uninstall get-recent-errors      # Remove a skill
     moltler list --category observability    # List observability skills
+    moltler installed                        # List installed skills
     moltler search "error"                   # Search for skills
+    moltler run get-recent-errors            # Run a skill
+    moltler pack list                        # List skill packs
     moltler test                             # Test all installed skills
 
 ENVIRONMENT:
@@ -213,6 +221,108 @@ status_cmd() {
     fi
 }
 
+uninstall_skill() {
+    local skill_name="$1"
+    
+    log_info "Uninstalling skill: $skill_name"
+    check_es
+    
+    local response
+    response=$(run_escript "DROP SKILL $skill_name;")
+    
+    if echo "$response" | grep -q '"deleted":\s*true'; then
+        log_success "Uninstalled: $skill_name"
+    else
+        log_warn "May have issues uninstalling: $skill_name"
+        echo "$response" | head -c 200
+        echo
+    fi
+}
+
+list_installed_skills() {
+    log_info "Listing installed skills..."
+    check_es
+    
+    local response
+    response=$(run_escript "SHOW SKILLS;")
+    
+    if echo "$response" | grep -q '"skills"'; then
+        echo "$response" | jq -r '.result.skills[] | "\(.name): \(.description // "No description")"' 2>/dev/null || echo "$response"
+    else
+        log_warn "No skills installed or error retrieving skills"
+        echo "$response"
+    fi
+}
+
+run_skill_cmd() {
+    local skill_name="$1"
+    shift
+    local args="$*"
+    
+    log_info "Running skill: $skill_name"
+    check_es
+    
+    local query
+    if [ -n "$args" ]; then
+        query="RUN SKILL $skill_name($args);"
+    else
+        query="RUN SKILL $skill_name();"
+    fi
+    
+    local response
+    response=$(run_escript "$query")
+    echo "$response" | jq '.' 2>/dev/null || echo "$response"
+}
+
+pack_cmd() {
+    local subcmd="${1:-list}"
+    shift || true
+    
+    case "$subcmd" in
+        list)
+            log_info "Listing skill packs..."
+            check_es
+            run_escript "SHOW SKILL PACKS;" | jq '.' 2>/dev/null || run_escript "SHOW SKILL PACKS;"
+            ;;
+        show)
+            local pack_name="${1:-}"
+            if [ -z "$pack_name" ]; then
+                log_error "Please specify a pack name"
+                exit 1
+            fi
+            check_es
+            run_escript "SHOW SKILL PACK $pack_name;" | jq '.' 2>/dev/null || run_escript "SHOW SKILL PACK $pack_name;"
+            ;;
+        create)
+            log_error "Use EScript directly to create skill packs: CREATE SKILL PACK ..."
+            exit 1
+            ;;
+        *)
+            log_error "Unknown pack subcommand: $subcmd"
+            echo "Usage: moltler pack [list|show <name>]"
+            exit 1
+            ;;
+    esac
+}
+
+mcp_test() {
+    log_info "Testing MCP endpoint..."
+    check_es
+    
+    echo
+    log_info "MCP Server Info:"
+    curl -s -u "$ES_USER:$ES_PASSWORD" "$ES_URL/_escript/mcp" | jq '.' 2>/dev/null || \
+        curl -s -u "$ES_USER:$ES_PASSWORD" "$ES_URL/_escript/mcp"
+    
+    echo
+    log_info "MCP Tools List:"
+    curl -s -u "$ES_USER:$ES_PASSWORD" "$ES_URL/_escript/mcp" \
+        -H "Content-Type: application/json" \
+        -d '{"jsonrpc": "2.0", "method": "tools/list", "id": 1}' | jq '.result.tools | length' 2>/dev/null || echo "Could not retrieve tools"
+    
+    log_success "MCP endpoint is functional"
+}
+
 # Main command router
 case "${1:-help}" in
     install)
@@ -246,6 +356,32 @@ case "${1:-help}" in
             exit 1
         fi
         search_skills "$2"
+        ;;
+    uninstall)
+        if [ -z "${2:-}" ]; then
+            log_error "Please specify a skill name to uninstall"
+            exit 1
+        fi
+        uninstall_skill "$2"
+        ;;
+    installed)
+        list_installed_skills
+        ;;
+    run)
+        if [ -z "${2:-}" ]; then
+            log_error "Please specify a skill name to run"
+            exit 1
+        fi
+        skill_name="$2"
+        shift 2
+        run_skill_cmd "$skill_name" "$@"
+        ;;
+    pack)
+        shift
+        pack_cmd "$@"
+        ;;
+    mcp)
+        mcp_test
         ;;
     test)
         test_skills

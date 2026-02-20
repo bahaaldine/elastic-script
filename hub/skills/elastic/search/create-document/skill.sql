@@ -2,7 +2,7 @@ CREATE SKILL create_document
   VERSION '1.0.0'
   DESCRIPTION 'Create a new document in an index'
   AUTHOR 'elastic'
-  TAGS ['search,documents,create']
+  TAGS ['search', 'documents', 'create']
   (index_name STRING DESCRIPTION 'Index name', doc_id STRING DESCRIPTION 'Document ID' DEFAULT NULL, document STRING DESCRIPTION 'JSON document')
   RETURNS DOCUMENT
 BEGIN

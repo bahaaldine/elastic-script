@@ -2,7 +2,7 @@ CREATE SKILL list_alert_rules
   VERSION '1.0.0'
   DESCRIPTION 'List all alerting rules with their status'
   AUTHOR 'elastic'
-  TAGS ['alerting,rules,monitoring']
+  TAGS ['alerting', 'rules', 'monitoring']
   (enabled STRING DESCRIPTION 'Filter: true, false, or null for all' DEFAULT NULL)
   RETURNS ARRAY
 BEGIN

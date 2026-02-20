@@ -1,263 +1,265 @@
----
-layout: default
-title: MCP Integration
----
-
 # MCP Integration
 
-Moltler exposes skills via the **Model Context Protocol (MCP)**, a standard for AI tool integration.
+**Connect AI assistants to your Elasticsearch data.** Skills become tools that any MCP-compatible AI can use.
 
-## Overview
+---
 
-The MCP endpoint (`/_escript/mcp`) allows AI agents like Claude to:
-- **Discover** available skills via `tools/list`
-- **Invoke** skills via `tools/call`
+## What is MCP?
 
-## Endpoint
+The [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) is an open standard for AI assistants to discover and use tools. Moltler exposes all installed skills as MCP tools, allowing AI agents to:
 
-```
-POST http://localhost:9200/_escript/mcp
-Content-Type: application/json
-Authorization: Basic <credentials>
-```
+- **Discover skills** - List available operations with descriptions
+- **Understand parameters** - Get input schemas with validation
+- **Call skills** - Execute skills and receive structured results
 
-## Supported Methods
+---
 
-### `initialize`
+## Quick Start
 
-Initialize an MCP session:
+### 1. List Available Tools
 
-```json
-{
-  "jsonrpc": "2.0",
-  "method": "initialize",
-  "params": {
-    "protocolVersion": "2024-11-05",
-    "clientInfo": {"name": "claude", "version": "1.0"}
-  },
-  "id": 1
-}
+```bash
+curl -u elastic-admin:elastic-password http://localhost:9200/_escript/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "tools/list", "id": 1}'
 ```
 
 Response:
-
 ```json
 {
   "jsonrpc": "2.0",
-  "result": {
-    "protocolVersion": "2024-11-05",
-    "serverInfo": {"name": "moltler", "version": "1.0"},
-    "capabilities": {"tools": {}}
-  },
-  "id": 1
-}
-```
-
-### `tools/list`
-
-List all available skills as MCP tools:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "method": "tools/list",
-  "id": 2
-}
-```
-
-Response:
-
-```json
-{
-  "jsonrpc": "2.0",
+  "id": 1,
   "result": {
     "tools": [
       {
-        "name": "analyze_logs",
-        "description": "Analyze application logs for errors and patterns",
+        "name": "get_recent_errors",
+        "description": "Get recent ERROR level logs from the specified index pattern",
         "inputSchema": {
           "type": "object",
           "properties": {
-            "index_name": {"type": "string", "description": "Index pattern to search"}
-          },
-          "required": []
+            "index_pattern": {"type": "string", "default": "logs-*"},
+            "limit": {"type": "integer", "default": 20}
+          }
         }
       }
     ]
-  },
-  "id": 2
+  }
 }
 ```
 
-### `tools/call`
+### 2. Call a Tool
 
-Invoke a skill:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "method": "tools/call",
-  "params": {
-    "name": "analyze_logs",
-    "arguments": {
-      "index_name": "logs-*"
-    }
-  },
-  "id": 3
-}
+```bash
+curl -u elastic-admin:elastic-password http://localhost:9200/_escript/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "get_recent_errors",
+      "arguments": {"limit": 5}
+    },
+    "id": 1
+  }'
 ```
 
 Response:
-
 ```json
 {
   "jsonrpc": "2.0",
+  "id": 1,
   "result": {
     "content": [
       {
         "type": "text",
-        "text": "{\"errors\": [...], \"count\": 5}"
+        "text": "[{\"level\": \"ERROR\", \"service\": \"api\", \"message\": \"Connection timeout\"}]"
       }
     ]
-  },
-  "id": 3
+  }
 }
 ```
 
-## MCP Bridge for AI Agents
+---
 
-For MCP clients that use stdio transport (Claude Desktop, Cursor, etc.), use the included MCP bridge.
+## MCP Protocol Support
 
-### Quick Setup
+| Method | Supported | Description |
+|--------|-----------|-------------|
+| `initialize` | ✅ | Handshake and capability exchange |
+| `tools/list` | ✅ | List available skills as tools |
+| `tools/call` | ✅ | Execute a skill |
+| `resources/list` | ❌ | Not yet implemented |
+| `prompts/list` | ❌ | Not yet implemented |
 
-```bash
-cd mcp-bridge
-./setup.sh
-```
+---
 
-The setup wizard will configure your preferred AI agent (Claude Desktop, Cursor, or manual).
+## Connecting AI Assistants
 
-### Manual Installation
+### Cursor IDE
 
-```bash
-# Install dependencies
-pip3 install httpx
-
-# Run the MCP server
-python3 mcp-bridge/moltler_mcp_server.py
-```
-
-### Environment Variables
-
-```bash
-export ES_URL=http://localhost:9200
-export ES_USER=elastic-admin
-export ES_PASSWORD=elastic-password
-python3 mcp-bridge/moltler_mcp_server.py
-```
-
-## Claude Desktop Integration
-
-### Configuration
-
-Run the setup wizard or manually edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
+Add to your Cursor MCP config (`.cursor/mcp.json`):
 
 ```json
 {
   "mcpServers": {
-    "moltler-skills": {
-      "command": "python3",
-      "args": ["/path/to/elastic-script/mcp-bridge/moltler_mcp_server.py"],
-      "env": {
-        "ES_URL": "http://localhost:9200",
-        "ES_USER": "elastic-admin",
-        "ES_PASSWORD": "elastic-password"
+    "moltler": {
+      "command": "curl",
+      "args": [
+        "-X", "POST",
+        "-u", "elastic-admin:elastic-password",
+        "-H", "Content-Type: application/json",
+        "http://localhost:9200/_escript/mcp"
+      ]
+    }
+  }
+}
+```
+
+### Claude Desktop
+
+Add to Claude's MCP settings:
+
+```json
+{
+  "mcpServers": {
+    "moltler": {
+      "type": "http",
+      "url": "http://localhost:9200/_escript/mcp",
+      "headers": {
+        "Authorization": "Basic ZWxhc3RpYy1hZG1pbjplbGFzdGljLXBhc3N3b3Jk"
       }
     }
   }
 }
 ```
 
-### Verification
+### Custom Integration
 
-1. Restart Claude Desktop
-2. Look for the hammer icon (🔨) - your Moltler skills will appear there
-3. Ask Claude: "What Moltler skills do you have available?"
+For any MCP-compatible client:
 
-## Cursor Integration
+```python
+import requests
+import json
 
-### Configuration
+class MoltlerMCPClient:
+    def __init__(self, url="http://localhost:9200/_escript/mcp", auth=("elastic-admin", "elastic-password")):
+        self.url = url
+        self.auth = auth
+    
+    def call(self, method, params=None):
+        payload = {
+            "jsonrpc": "2.0",
+            "method": method,
+            "id": 1
+        }
+        if params:
+            payload["params"] = params
+        
+        response = requests.post(self.url, json=payload, auth=self.auth)
+        return response.json()
+    
+    def list_tools(self):
+        return self.call("tools/list")
+    
+    def call_tool(self, name, arguments=None):
+        return self.call("tools/call", {"name": name, "arguments": arguments or {}})
 
-The setup wizard creates `~/.cursor/mcp.json`:
+# Usage
+client = MoltlerMCPClient()
 
-```json
-{
-  "mcpServers": {
-    "moltler-skills": {
-      "command": "python3",
-      "args": ["/path/to/elastic-script/mcp-bridge/moltler_mcp_server.py"],
-      "env": {
-        "ES_URL": "http://localhost:9200",
-        "ES_USER": "elastic-admin",
-        "ES_PASSWORD": "elastic-password"
-      }
-    }
-  }
-}
+# List skills
+tools = client.list_tools()
+for tool in tools["result"]["tools"]:
+    print(f"- {tool['name']}: {tool['description']}")
+
+# Call a skill
+result = client.call_tool("get_recent_errors", {"limit": 5})
+print(result["result"]["content"][0]["text"])
 ```
 
-## Example Prompts
+---
 
-Once configured, you can ask your AI agent:
+## How AI Agents Use Skills
 
-- "Use moltler to check the cluster health"
-- "Call the count_logs_by_level skill to see log distribution"
-- "Get recent errors using moltler"
-- "What metrics are available? Run the metrics_summary skill"
+When connected, an AI assistant can:
 
-## Creating MCP-Ready Skills
+**1. Understand available capabilities**
+```
+AI: "I can query your Elasticsearch data using these skills:
+     - get_recent_errors: Find ERROR logs
+     - get_slow_transactions: Find slow APM transactions
+     - hunt_ioc: Search for suspicious IPs
+     ..."
+```
 
-For best results with AI agents:
+**2. Choose the right skill for the task**
+```
+User: "Are there any errors in production?"
 
-1. **Clear Descriptions**: Write descriptions that explain what the skill does
-2. **Parameter Documentation**: Describe each parameter's purpose
-3. **Meaningful Return Types**: Use DOCUMENT for complex returns
-4. **Examples**: Provide usage examples in the description
+AI: [Internally selects get_recent_errors skill]
+    [Calls with arguments: {service: "production"}]
+```
+
+**3. Interpret results naturally**
+```
+AI: "I found 3 errors in the last hour:
+     1. API timeout connecting to database (5 occurrences)
+     2. Invalid authentication token (2 occurrences)
+     3. Rate limit exceeded (1 occurrence)
+     
+     The database timeout looks like the most critical issue."
+```
+
+---
+
+## Security
+
+### Authentication
+
+The MCP endpoint uses the same authentication as other Elasticsearch APIs:
+
+```bash
+# Basic auth
+curl -u username:password http://localhost:9200/_escript/mcp
+
+# API key
+curl -H "Authorization: ApiKey base64_encoded_key" http://localhost:9200/_escript/mcp
+```
+
+### Access Control
+
+Skills respect Elasticsearch security:
+- Index-level permissions apply to ES|QL queries within skills
+- Users only see skills they have permission to execute
+- All skill executions are logged
+
+---
+
+## Skill Discovery
+
+Skills include AI-friendly metadata:
 
 ```sql
-CREATE SKILL search_products
-  VERSION '1.0'
-  DESCRIPTION 'Search the product catalog by keyword. Returns matching products with name, price, and stock status. Use this to help users find products or answer questions about inventory.'
+CREATE SKILL analyze_errors
+  VERSION '1.0.0'
+  DESCRIPTION 'Analyze error patterns and trends. Use when investigating incidents or monitoring error rates.'
+  TAGS ['observability', 'logs', 'errors']
   (
-    keyword STRING DESCRIPTION 'Search term to match against product names and descriptions',
-    max_results NUMBER DEFAULT 10 DESCRIPTION 'Maximum number of products to return'
+    service STRING DESCRIPTION 'Service name to analyze',
+    time_range STRING DEFAULT '1h' DESCRIPTION 'Time range (e.g., 1h, 24h, 7d)'
   )
-  RETURNS ARRAY
+  RETURNS DOCUMENT
 BEGIN
-  RETURN ESQL_QUERY(
-    'FROM products | WHERE name LIKE "*' || keyword || '*" | LIMIT ' || max_results
-  );
+  -- skill implementation
 END SKILL;
 ```
 
-## Error Handling
+The description and parameter descriptions help AI agents understand when and how to use each skill.
 
-MCP errors follow JSON-RPC error format:
+---
 
-```json
-{
-  "jsonrpc": "2.0",
-  "error": {
-    "code": -32602,
-    "message": "Unknown tool: nonexistent_skill"
-  },
-  "id": 1
-}
-```
+## Next Steps
 
-Error codes:
-- `-32700`: Parse error
-- `-32600`: Invalid request
-- `-32601`: Method not found
-- `-32602`: Invalid params
-- `-32603`: Internal error
+- [Browse available skills](moltlerhub/index.md)
+- [Create custom skills](skills/creating-skills.md)
+- [Solution guides](solutions/observability.md)

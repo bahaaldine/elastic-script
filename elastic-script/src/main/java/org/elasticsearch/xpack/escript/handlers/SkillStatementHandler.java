@@ -272,18 +272,26 @@ public class SkillStatementHandler {
 
     /**
      * Handle DROP SKILL statement.
+     * Also handles DROP SKILL PACK.
      */
     public void handleDropSkill(ElasticScriptParser.Drop_skill_statementContext ctx,
                                 ActionListener<Object> listener) {
-        String skillName = ctx.ID().getText();
+        String name = ctx.ID().getText();
         
-        LOGGER.debug("Dropping skill: {}", skillName);
+        // Check if this is DROP SKILL PACK
+        if (ctx.PACK() != null) {
+            LOGGER.debug("Dropping skill pack: {}", name);
+            handleDropSkillPack(name, listener);
+            return;
+        }
         
-        registry.deleteSkill(skillName, ActionListener.wrap(
+        LOGGER.debug("Dropping skill: {}", name);
+        
+        registry.deleteSkill(name, ActionListener.wrap(
             deleted -> {
                 Map<String, Object> result = new HashMap<>();
                 result.put("action", "DROP SKILL");
-                result.put("skill", skillName);
+                result.put("skill", name);
                 result.put("deleted", deleted);
                 listener.onResponse(result);
             },
@@ -670,6 +678,216 @@ public class SkillStatementHandler {
         } catch (Exception e) {
             listener.onFailure(e);
         }
+    }
+
+    // ========================================================================
+    // SKILL PACK HANDLERS
+    // ========================================================================
+
+    private static final String SKILL_PACKS_INDEX = ".moltler_skill_packs";
+
+    /**
+     * Handle CREATE SKILL PACK statement.
+     * 
+     * CREATE SKILL PACK name VERSION 'semver'
+     *   [DESCRIPTION 'desc']
+     *   [AUTHOR 'author']
+     *   [TAGS ['tag1', 'tag2']]
+     *   SKILLS [skill1, skill2, ...]
+     *   END_PACK
+     */
+    public void handleCreateSkillPack(ElasticScriptParser.Create_skill_pack_statementContext ctx,
+                                      ActionListener<Object> listener) {
+        try {
+            String packName = ctx.ID().getText();
+            
+            List<org.antlr.v4.runtime.tree.TerminalNode> strings = ctx.STRING();
+            String version = stripQuotes(strings.get(0).getText());
+            
+            // Parse description
+            String description = null;
+            if (ctx.DESCRIPTION() != null && strings.size() > 1) {
+                description = stripQuotes(strings.get(1).getText());
+            }
+            
+            // Parse author
+            String author = null;
+            if (ctx.AUTHOR() != null) {
+                int authorIndex = ctx.DESCRIPTION() != null ? 2 : 1;
+                if (strings.size() > authorIndex) {
+                    author = stripQuotes(strings.get(authorIndex).getText());
+                }
+            }
+            
+            // Parse tags
+            List<String> tags = new ArrayList<>();
+            List<ElasticScriptParser.ArrayLiteralContext> arrays = ctx.arrayLiteral();
+            int arrayIndex = 0;
+            if (ctx.TAGS() != null && arrays.size() > arrayIndex) {
+                tags = parseStringArray(arrays.get(arrayIndex++));
+            }
+            
+            // Parse skills list (required)
+            final List<String> skills;
+            if (ctx.SKILLS() != null && arrays.size() > arrayIndex) {
+                skills = parseStringArray(arrays.get(arrayIndex));
+            } else {
+                skills = new ArrayList<>();
+            }
+            
+            LOGGER.debug("Creating skill pack: {} v{} with {} skills", packName, version, skills.size());
+            
+            // Build skill pack document
+            Map<String, Object> packDoc = new HashMap<>();
+            packDoc.put("name", packName);
+            packDoc.put("version", version);
+            packDoc.put("description", description);
+            packDoc.put("author", author);
+            packDoc.put("tags", tags);
+            packDoc.put("skills", skills);
+            packDoc.put("created_at", System.currentTimeMillis());
+            packDoc.put("updated_at", System.currentTimeMillis());
+            
+            // Ensure index exists and save
+            ensureIndexExists(SKILL_PACKS_INDEX, ActionListener.wrap(
+                created -> {
+                    client.prepareIndex(SKILL_PACKS_INDEX)
+                        .setId(packName)
+                        .setSource(packDoc)
+                        .execute(ActionListener.wrap(
+                            indexResponse -> {
+                                Map<String, Object> result = new HashMap<>();
+                                result.put("action", "CREATE SKILL PACK");
+                                result.put("pack", packName);
+                                result.put("version", version);
+                                result.put("skills_count", skills.size());
+                                result.put("skills", skills);
+                                listener.onResponse(result);
+                            },
+                            listener::onFailure
+                        ));
+                },
+                listener::onFailure
+            ));
+            
+        } catch (Exception e) {
+            listener.onFailure(e);
+        }
+    }
+
+    /**
+     * Handle SHOW SKILL PACKS statement.
+     */
+    public void handleShowAllSkillPacks(ActionListener<Object> listener) {
+        LOGGER.debug("Listing all skill packs");
+        
+        org.elasticsearch.action.search.SearchRequest searchRequest = 
+            new org.elasticsearch.action.search.SearchRequest(SKILL_PACKS_INDEX);
+        searchRequest.source(new org.elasticsearch.search.builder.SearchSourceBuilder()
+            .query(org.elasticsearch.index.query.QueryBuilders.matchAllQuery())
+            .size(1000));
+        
+        client.search(searchRequest, ActionListener.wrap(
+            response -> {
+                List<Map<String, Object>> packs = new ArrayList<>();
+                for (org.elasticsearch.search.SearchHit hit : response.getHits().getHits()) {
+                    Map<String, Object> source = hit.getSourceAsMap();
+                    Map<String, Object> pack = new HashMap<>();
+                    pack.put("name", source.get("name"));
+                    pack.put("version", source.get("version"));
+                    pack.put("description", source.get("description"));
+                    pack.put("skills_count", ((List<?>) source.getOrDefault("skills", List.of())).size());
+                    packs.add(pack);
+                }
+                
+                Map<String, Object> result = new HashMap<>();
+                result.put("action", "SHOW SKILL PACKS");
+                result.put("count", packs.size());
+                result.put("packs", packs);
+                listener.onResponse(result);
+            },
+            e -> {
+                if (e.getMessage() != null && e.getMessage().contains("no such index")) {
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("action", "SHOW SKILL PACKS");
+                    result.put("count", 0);
+                    result.put("packs", new ArrayList<>());
+                    listener.onResponse(result);
+                } else {
+                    listener.onFailure(e);
+                }
+            }
+        ));
+    }
+
+    /**
+     * Handle SHOW SKILL PACK name statement.
+     */
+    public void handleShowSkillPackDetail(ElasticScriptParser.ShowSkillPackDetailContext ctx,
+                                          ActionListener<Object> listener) {
+        String packName = ctx.ID().getText();
+        
+        LOGGER.debug("Showing skill pack detail: {}", packName);
+        
+        client.prepareGet(SKILL_PACKS_INDEX, packName).execute(ActionListener.wrap(
+            getResponse -> {
+                if (getResponse.isExists()) {
+                    Map<String, Object> source = getResponse.getSourceAsMap();
+                    
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("action", "SHOW SKILL PACK");
+                    result.put("name", source.get("name"));
+                    result.put("version", source.get("version"));
+                    result.put("description", source.get("description"));
+                    result.put("author", source.get("author"));
+                    result.put("tags", source.get("tags"));
+                    result.put("skills", source.get("skills"));
+                    result.put("created_at", source.get("created_at"));
+                    result.put("updated_at", source.get("updated_at"));
+                    
+                    listener.onResponse(result);
+                } else {
+                    listener.onFailure(new IllegalArgumentException("Skill pack not found: " + packName));
+                }
+            },
+            listener::onFailure
+        ));
+    }
+
+    /**
+     * Handle DROP SKILL PACK statement.
+     */
+    public void handleDropSkillPack(String packName, ActionListener<Object> listener) {
+        LOGGER.debug("Dropping skill pack: {}", packName);
+        
+        client.prepareDelete(SKILL_PACKS_INDEX, packName).execute(ActionListener.wrap(
+            deleteResponse -> {
+                Map<String, Object> result = new HashMap<>();
+                result.put("action", "DROP SKILL PACK");
+                result.put("pack", packName);
+                result.put("deleted", true);
+                listener.onResponse(result);
+            },
+            listener::onFailure
+        ));
+    }
+
+    private void ensureIndexExists(String indexName, ActionListener<Boolean> listener) {
+        client.admin().indices().prepareGetIndex(org.elasticsearch.core.TimeValue.timeValueSeconds(30))
+            .setIndices(indexName)
+            .execute(ActionListener.wrap(
+                response -> listener.onResponse(true),
+                e -> {
+                    if (e instanceof org.elasticsearch.index.IndexNotFoundException) {
+                        client.admin().indices().prepareCreate(indexName).execute(ActionListener.wrap(
+                            response -> listener.onResponse(true),
+                            listener::onFailure
+                        ));
+                    } else {
+                        listener.onFailure(e);
+                    }
+                }
+            ));
     }
 
     private String stripQuotes(String s) {

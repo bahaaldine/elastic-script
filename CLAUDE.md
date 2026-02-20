@@ -29,8 +29,31 @@
 - [x] `RETURNS type` - Explicit return types
 - [x] `TEST SKILL name WITH params EXPECT result` - Skill testing framework
 - [x] `GENERATE SKILL FROM 'goal'` - AI-powered skill generation
+- [x] `RUN SKILL name WITH args` - Execute skills directly
 - [x] `SHOW SKILLS`, `SHOW SKILL name` - Skill introspection
 - [x] `SkillRegistry` - Storage in `.escript_skills` index
+
+### Skill Packs
+- [x] `CREATE SKILL PACK name VERSION 'x.y.z' SKILLS [...]` - Bundle skills together
+- [x] `DROP SKILL PACK name` - Remove skill packs
+- [x] `SHOW SKILL PACKS`, `SHOW SKILL PACK name` - List and inspect packs
+- [x] Storage in `.moltler_skill_packs` index
+
+### MoltlerHub (155 Skills)
+- [x] **Meta** (8 skills) - `list_all_skills`, `explain_skill`, `recommend_skills`
+- [x] **Search** (28 skills) - `search_documents`, `top_values`, `semantic_search`
+- [x] **Observability** (22 skills) - `get_recent_errors`, `count_logs_by_level`
+- [x] **APM** (11 skills) - `list_services`, `get_slow_transactions`, `get_trace`
+- [x] **Security** (20 skills) - `hunt_ioc`, `get_user_risk_score`, `list_detections`
+- [x] **ML** (11 skills) - `get_anomalies`, `embed_text`, `classify_text`
+- [x] **Alerting** (8 skills) - `list_alert_rules`, `get_active_alerts`
+- [x] **Cluster** (10 skills) - `cluster_health`, `list_nodes`, `explain_allocation`
+- [x] **Integrations** (10 skills) - `send_slack_message`, `create_jira_issue`
+- [x] **Fleet** (6 skills) - `list_agents`, `get_agent_status`
+- [x] **Agent Builder** (13 skills) - `list_agents`, `create_agent`, `chat`
+- [x] **Enterprise Search** (4 skills) - `list_search_apps`, `get_search_analytics`
+- [x] MCP endpoint at `/_escript/mcp` for AI agent integration
+- [x] `moltler-cli.sh` for skill management (install, uninstall, search, run)
 
 ### Connector Framework
 - [x] `CREATE CONNECTOR name TYPE 'type' CONFIG {...}` - Connector creation

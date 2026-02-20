@@ -2,7 +2,7 @@ CREATE SKILL get_node_stats
   VERSION '1.0.0'
   DESCRIPTION 'Get detailed statistics for a specific node'
   AUTHOR 'elastic'
-  TAGS ['cluster,nodes,stats']
+  TAGS ['cluster', 'nodes', 'stats']
   (node_name STRING DESCRIPTION 'Node name to get stats for')
   RETURNS DOCUMENT
 BEGIN

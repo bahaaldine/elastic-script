@@ -2,7 +2,7 @@ CREATE SKILL get_service_health
   VERSION '1.0.0'
   DESCRIPTION 'Get health metrics for a specific service including error rate and latency'
   AUTHOR 'elastic'
-  TAGS ['apm,health,services']
+  TAGS ['apm', 'health', 'services']
   (service STRING DESCRIPTION 'Service name to check')
   RETURNS DOCUMENT
 BEGIN

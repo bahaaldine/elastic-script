@@ -2,7 +2,7 @@ CREATE SKILL get_host_risk_score
   VERSION '1.0.0'
   DESCRIPTION 'Get risk score for a host based on security events'
   AUTHOR 'elastic'
-  TAGS ['security,risk,hosts']
+  TAGS ['security', 'risk', 'hosts']
   (hostname STRING DESCRIPTION 'Hostname to check')
   RETURNS DOCUMENT
 BEGIN

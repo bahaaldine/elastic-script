@@ -2,7 +2,7 @@ CREATE SKILL percentiles
   VERSION '1.0.0'
   DESCRIPTION 'Calculate percentile distributions for a numeric field'
   AUTHOR 'elastic'
-  TAGS ['search,percentiles,statistics']
+  TAGS ['search', 'percentiles', 'statistics']
   (index_pattern STRING DESCRIPTION 'Index to analyze', field STRING DESCRIPTION 'Numeric field')
   RETURNS ARRAY
 BEGIN

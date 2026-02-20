@@ -2,7 +2,7 @@ CREATE SKILL compare_time_periods
   VERSION '1.0.0'
   DESCRIPTION 'Compare metrics between two time periods'
   AUTHOR 'elastic'
-  TAGS ['observability,comparison,analysis']
+  TAGS ['observability', 'comparison', 'analysis']
   (index_pattern STRING DESCRIPTION 'Index to compare' DEFAULT 'metrics-*', metric STRING DESCRIPTION 'Metric to compare')
   RETURNS DOCUMENT
 BEGIN

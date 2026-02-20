@@ -2,7 +2,7 @@ CREATE SKILL list_data_streams
   VERSION '1.0.0'
   DESCRIPTION 'List all data streams'
   AUTHOR 'elastic'
-  TAGS ['search,datastreams,management']
+  TAGS ['search', 'datastreams', 'management']
   ()
   RETURNS ARRAY
 BEGIN

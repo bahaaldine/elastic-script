@@ -1008,6 +1008,8 @@ public class ElasticScriptExecutor {
 
         if (ctx.create_skill_statement() != null) {
             handler.handleCreateSkill(ctx.create_skill_statement(), listener);
+        } else if (ctx.create_skill_pack_statement() != null) {
+            handler.handleCreateSkillPack(ctx.create_skill_pack_statement(), listener);
         } else if (ctx.drop_skill_statement() != null) {
             handler.handleDropSkill(ctx.drop_skill_statement(), listener);
         } else if (ctx.show_skills_statement() != null) {
@@ -1016,6 +1018,10 @@ public class ElasticScriptExecutor {
                 handler.handleShowAllSkills(listener);
             } else if (showCtx instanceof ElasticScriptParser.ShowSkillDetailContext) {
                 handler.handleShowSkillDetail((ElasticScriptParser.ShowSkillDetailContext) showCtx, listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowAllSkillPacksContext) {
+                handler.handleShowAllSkillPacks(listener);
+            } else if (showCtx instanceof ElasticScriptParser.ShowSkillPackDetailContext) {
+                handler.handleShowSkillPackDetail((ElasticScriptParser.ShowSkillPackDetailContext) showCtx, listener);
             } else {
                 listener.onFailure(new IllegalArgumentException("Unknown SHOW SKILL variant"));
             }

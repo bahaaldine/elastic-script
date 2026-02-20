@@ -2,7 +2,7 @@ CREATE SKILL list_snapshots
   VERSION '1.0.0'
   DESCRIPTION 'List snapshots in a repository'
   AUTHOR 'elastic'
-  TAGS ['cluster,snapshots,backup']
+  TAGS ['cluster', 'snapshots', 'backup']
   (repository STRING DESCRIPTION 'Repository name' DEFAULT 'default')
   RETURNS ARRAY
 BEGIN

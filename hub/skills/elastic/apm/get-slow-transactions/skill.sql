@@ -2,7 +2,7 @@ CREATE SKILL get_slow_transactions
   VERSION '1.0.0'
   DESCRIPTION 'Find the slowest transactions for a service or across all services'
   AUTHOR 'elastic'
-  TAGS ['apm,latency,performance']
+  TAGS ['apm', 'latency', 'performance']
   (service STRING DESCRIPTION 'Service name (optional)' DEFAULT NULL, threshold_ms INT DESCRIPTION 'Minimum duration in ms' DEFAULT 1000, limit INT DESCRIPTION 'Max results' DEFAULT 20)
   RETURNS ARRAY
 BEGIN

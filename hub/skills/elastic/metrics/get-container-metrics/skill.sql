@@ -2,7 +2,7 @@ CREATE SKILL get_container_metrics
   VERSION '1.0.0'
   DESCRIPTION 'Get metrics for Docker/Kubernetes containers'
   AUTHOR 'elastic'
-  TAGS ['metrics,containers,kubernetes']
+  TAGS ['metrics', 'containers', 'kubernetes']
   (container_id STRING DESCRIPTION 'Container ID or name' DEFAULT NULL, limit INT DESCRIPTION 'Max results' DEFAULT 20)
   RETURNS ARRAY
 BEGIN

@@ -2,7 +2,7 @@ CREATE SKILL extract_entities
   VERSION '1.0.0'
   DESCRIPTION 'Extract named entities from text using NER'
   AUTHOR 'elastic'
-  TAGS ['ml,ner,nlp']
+  TAGS ['ml', 'ner', 'nlp']
   (text STRING DESCRIPTION 'Text to extract entities from')
   RETURNS DOCUMENT
 BEGIN

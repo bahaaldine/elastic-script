@@ -2,7 +2,7 @@ CREATE SKILL list_search_apps
   VERSION '1.0.0'
   DESCRIPTION 'List all Enterprise Search applications'
   AUTHOR 'elastic'
-  TAGS ['enterprise-search,apps,search']
+  TAGS ['enterprise-search', 'apps', 'search']
   ()
   RETURNS ARRAY
 BEGIN

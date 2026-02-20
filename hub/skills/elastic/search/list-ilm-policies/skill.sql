@@ -2,7 +2,7 @@ CREATE SKILL list_ilm_policies
   VERSION '1.0.0'
   DESCRIPTION 'List Index Lifecycle Management policies'
   AUTHOR 'elastic'
-  TAGS ['search,ilm,lifecycle']
+  TAGS ['search', 'ilm', 'lifecycle']
   ()
   RETURNS ARRAY
 BEGIN

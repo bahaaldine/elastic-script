@@ -2,7 +2,7 @@ CREATE SKILL list_agent_policies
   VERSION '1.0.0'
   DESCRIPTION 'List all agent policies'
   AUTHOR 'elastic'
-  TAGS ['fleet,policies,management']
+  TAGS ['fleet', 'policies', 'management']
   ()
   RETURNS ARRAY
 BEGIN

@@ -2,7 +2,7 @@ CREATE SKILL list_ml_jobs
   VERSION '1.0.0'
   DESCRIPTION 'List all machine learning anomaly detection jobs with their status'
   AUTHOR 'elastic'
-  TAGS ['ml,anomaly,jobs']
+  TAGS ['ml', 'anomaly', 'jobs']
   (status STRING DESCRIPTION 'Filter by status: started, stopped, closed' DEFAULT NULL)
   RETURNS ARRAY
 BEGIN

@@ -2,7 +2,7 @@ CREATE SKILL send_webhook
   VERSION '1.0.0'
   DESCRIPTION 'Send a webhook POST request'
   AUTHOR 'elastic'
-  TAGS ['integrations,webhook,automation']
+  TAGS ['integrations', 'webhook', 'automation']
   (url STRING DESCRIPTION 'Webhook URL', payload STRING DESCRIPTION 'JSON payload to send')
   RETURNS DOCUMENT
 BEGIN

@@ -2,7 +2,7 @@ CREATE SKILL list_connectors
   VERSION '1.0.0'
   DESCRIPTION 'List all configured alert connectors (Slack, PagerDuty, etc.)'
   AUTHOR 'elastic'
-  TAGS ['alerting,connectors,integrations']
+  TAGS ['alerting', 'connectors', 'integrations']
   (type STRING DESCRIPTION 'Filter by connector type' DEFAULT NULL)
   RETURNS ARRAY
 BEGIN

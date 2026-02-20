@@ -2,7 +2,7 @@ CREATE SKILL list_detection_rules
   VERSION '1.0.0'
   DESCRIPTION 'List all security detection rules'
   AUTHOR 'elastic'
-  TAGS ['security,rules,detection']
+  TAGS ['security', 'rules', 'detection']
   (enabled STRING DESCRIPTION 'Filter: true or false' DEFAULT NULL)
   RETURNS ARRAY
 BEGIN

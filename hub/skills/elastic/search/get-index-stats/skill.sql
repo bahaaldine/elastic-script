@@ -2,7 +2,7 @@ CREATE SKILL get_index_stats
   VERSION '1.0.0'
   DESCRIPTION 'Get detailed statistics for an index'
   AUTHOR 'elastic'
-  TAGS ['search,indices,stats']
+  TAGS ['search', 'indices', 'stats']
   (index_name STRING DESCRIPTION 'Index name to get stats for')
   RETURNS DOCUMENT
 BEGIN

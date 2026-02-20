@@ -2,7 +2,7 @@ CREATE SKILL get_authentication_summary
   VERSION '1.0.0'
   DESCRIPTION 'Get authentication success/failure summary'
   AUTHOR 'elastic'
-  TAGS ['security,authentication,summary']
+  TAGS ['security', 'authentication', 'summary']
   (time_range STRING DESCRIPTION 'Time range to analyze' DEFAULT '24h')
   RETURNS DOCUMENT
 BEGIN

@@ -2,7 +2,7 @@ CREATE SKILL get_ssl_status
   VERSION '1.0.0'
   DESCRIPTION 'Check SSL certificate status and expiry'
   AUTHOR 'elastic'
-  TAGS ['observability,ssl,certificates']
+  TAGS ['observability', 'ssl', 'certificates']
   (monitor_id STRING DESCRIPTION 'Monitor ID' DEFAULT NULL, url STRING DESCRIPTION 'URL to check' DEFAULT NULL)
   RETURNS DOCUMENT
 BEGIN

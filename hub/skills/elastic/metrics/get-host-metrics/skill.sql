@@ -2,7 +2,7 @@ CREATE SKILL get_host_metrics
   VERSION '1.0.0'
   DESCRIPTION 'Get current CPU, memory, and disk metrics for a host'
   AUTHOR 'elastic'
-  TAGS ['metrics,hosts,resources']
+  TAGS ['metrics', 'hosts', 'resources']
   (hostname STRING DESCRIPTION 'Host name to check')
   RETURNS ARRAY
 BEGIN

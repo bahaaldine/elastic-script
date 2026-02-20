@@ -2,7 +2,7 @@ CREATE SKILL get_transform_status
   VERSION '1.0.0'
   DESCRIPTION 'Get status of a transform'
   AUTHOR 'elastic'
-  TAGS ['search,transforms,status']
+  TAGS ['search', 'transforms', 'status']
   (transform_id STRING DESCRIPTION 'Transform ID')
   RETURNS DOCUMENT
 BEGIN

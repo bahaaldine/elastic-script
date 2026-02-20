@@ -17,3 +17,14 @@ otel-collector/otelcol-contrib
 otel-collector/*.log
 otel-collector/*.pid
 kibana-plugin/kibana/
+
+# Kibana snapshots (very large)
+kibana-*/
+
+# PID files (runtime state)
+.kibana_plugin_pid
+.moltler_ui_pid
+.skills_manager_pid
+
+# IDE settings
+elastic-script/.settings/

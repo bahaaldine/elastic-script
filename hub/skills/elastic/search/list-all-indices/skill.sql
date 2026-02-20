@@ -2,7 +2,7 @@ CREATE SKILL list_all_indices
   VERSION '1.0.0'
   DESCRIPTION 'List all indices with size and document count'
   AUTHOR 'elastic'
-  TAGS ['search,indices,management']
+  TAGS ['search', 'indices', 'management']
   (pattern STRING DESCRIPTION 'Index pattern to filter' DEFAULT '*')
   RETURNS ARRAY
 BEGIN
