@@ -83,7 +83,7 @@ AWS_LAMBDA_INVOKE(...)   -- Invoke Lambda
 
 ## Calling Functions
 
-Functions are called like in SQL:
+Functions are called using standard syntax:
 
 ```sql
 DECLARE len NUMBER = LENGTH('Hello');

@@ -12,7 +12,7 @@
 
 Moltler is a **framework for building skills** that run directly on Elasticsearch. Skills are reusable operations that leverage Elasticsearch's full power - search, aggregations, semantic search, and ML.
 
-- **Build skills** using a simple SQL-like syntax
+- **Build skills** using elastic-script
 - **Share skills** via MoltlerHub with the community
 - **Run skills** via REST API or AI agents (MCP)
 
@@ -118,7 +118,7 @@ Query documents, aggregations, semantic search.
 
 | For Users | For Builders |
 |-----------|--------------|
-| Run skills without learning ES|QL | Simple SQL-like syntax |
+| Run skills without learning ES|QL | Build with elastic-script |
 | 155+ skills ready to use | Full Elasticsearch power |
 | AI agents via MCP | Publish to MoltlerHub |
 | Solve real problems fast | Build once, share everywhere |

@@ -16,7 +16,7 @@ Moltler is a **framework for building skills** - reusable operations that run di
 │  │    BUILD     │    │    SHARE     │    │     RUN      │       │
 │  │              │    │              │    │              │       │
 │  │ CREATE SKILL │───▶│  MoltlerHub  │───▶│  RUN SKILL   │       │
-│  │ simple SQL   │    │  community   │    │  REST / MCP  │       │
+│  │elastic-script│    │  community   │    │  REST / MCP  │       │
 │  └──────────────┘    └──────────────┘    └──────────────┘       │
 │                              │                                   │
 │                              ▼                                   │
@@ -196,7 +196,7 @@ Share with your team or the community via [MoltlerHub](moltlerhub/index.md).
 │     └── 155+ skills for O11y, Security, Search                       │
 │                     ↓                                                │
 │  ② BUILD your own skills                                            │
-│     └── Simple SQL-like syntax, full ES power                        │
+│     └── elastic-script with full ES power                            │
 │                     ↓                                                │
 │  ③ SHARE with the community                                         │
 │     └── Publish to MoltlerHub                                        │
