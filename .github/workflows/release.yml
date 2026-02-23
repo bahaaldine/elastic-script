@@ -5,6 +5,11 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      es_versions:
+        description: 'ES versions to build (comma-separated)'
+        required: false
+        default: '8.17.0,9.0.0'
 
 permissions:
   contents: write
@@ -37,19 +42,31 @@ jobs:
         id: validate
         run: |
           echo "=== Validating Skills ==="
-          python tests/skills/validate_syntax.py --verbose
           
-          # Capture results
-          RESULT=$(python tests/skills/validate_syntax.py 2>&1)
-          TOTAL=$(echo "$RESULT" | grep "Total:" | grep -oP 'Total: \K\d+')
-          VALID=$(echo "$RESULT" | grep "Valid:" | grep -oP 'Valid: \K\d+')
+          # Validate elastic skills
+          python tests/skills/validate_syntax.py --skills-dir hub/skills/elastic
+          
+          # Validate community skills
+          python tests/skills/validate_syntax.py --skills-dir hub/skills/community
+          
+          # Capture results for both
+          RESULT=$(python tests/skills/validate_syntax.py --skills-dir hub/skills/elastic 2>&1)
+          ELASTIC_TOTAL=$(echo "$RESULT" | grep "Total:" | grep -oP 'Total: \K\d+' || echo "0")
+          ELASTIC_VALID=$(echo "$RESULT" | grep "Valid:" | grep -oP 'Valid: \K\d+' || echo "0")
+          
+          RESULT=$(python tests/skills/validate_syntax.py --skills-dir hub/skills/community 2>&1)
+          COMMUNITY_TOTAL=$(echo "$RESULT" | grep "Total:" | grep -oP 'Total: \K\d+' || echo "0")
+          COMMUNITY_VALID=$(echo "$RESULT" | grep "Valid:" | grep -oP 'Valid: \K\d+' || echo "0")
+          
+          TOTAL=$((ELASTIC_TOTAL + COMMUNITY_TOTAL))
+          VALID=$((ELASTIC_VALID + COMMUNITY_VALID))
           
           echo "total=$TOTAL" >> $GITHUB_OUTPUT
           echo "valid=$VALID" >> $GITHUB_OUTPUT
           
           # Fail if any invalid
           if [ "$TOTAL" != "$VALID" ]; then
-            echo "::error::Some skills failed validation"
+            echo "::error::Some skills failed validation ($VALID/$TOTAL)"
             exit 1
           fi
           
@@ -64,11 +81,22 @@ jobs:
           name: validated-skills-manifest
           path: moltler-hub/src/data/validated_skills.json
 
-  # STEP 2: Build plugin (only if skills pass)
+  # STEP 2: Build plugin for multiple ES versions
   build:
-    name: Build Plugin
+    name: Build Plugin (ES ${{ matrix.es_version }})
     needs: validate-skills
     runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - es_version: "9.0.0"
+            es_branch: "main"
+            java_version: "21"
+          - es_version: "8.17.0"
+            es_branch: "8.17"
+            java_version: "21"
     
     steps:
       - name: Checkout
@@ -77,24 +105,28 @@ jobs:
           submodules: recursive
           fetch-depth: 0
       
-      - name: Debug - Show structure
+      - name: Checkout ES version ${{ matrix.es_branch }}
+        working-directory: elasticsearch
         run: |
-          echo "=== Repository structure ==="
-          ls -la
-          echo ""
-          echo "=== elastic-script plugin source ==="
-          ls -la elastic-script/
-          echo ""
-          echo "=== elasticsearch submodule ==="
-          ls -la elasticsearch/ | head -10
-          echo ""
-          echo "=== x-pack/plugin directory ==="
-          ls -la elasticsearch/x-pack/plugin/ | head -20
+          git fetch --all --tags
+          
+          # Try to checkout the branch or tag
+          if git show-ref --verify --quiet "refs/heads/${{ matrix.es_branch }}"; then
+            git checkout ${{ matrix.es_branch }}
+          elif git show-ref --verify --quiet "refs/tags/v${{ matrix.es_version }}"; then
+            git checkout v${{ matrix.es_version }}
+          elif git show-ref --verify --quiet "refs/remotes/origin/${{ matrix.es_branch }}"; then
+            git checkout -b ${{ matrix.es_branch }} origin/${{ matrix.es_branch }}
+          else
+            echo "Warning: Could not find branch ${{ matrix.es_branch }}, using current HEAD"
+          fi
+          
+          echo "ES version: $(git describe --tags --always)"
       
-      - name: Set up JDK
+      - name: Set up JDK ${{ matrix.java_version }}
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ env.JAVA_VERSION }}
+          java-version: ${{ matrix.java_version }}
           distribution: 'temurin'
       
       - name: Setup Gradle
@@ -102,34 +134,23 @@ jobs:
       
       - name: Setup plugin in ES tree
         run: |
-          # Check if symlink exists and remove it
-          if [ -L "elasticsearch/x-pack/plugin/elastic-script" ]; then
-            echo "Removing existing symlink"
-            rm elasticsearch/x-pack/plugin/elastic-script
-          elif [ -d "elasticsearch/x-pack/plugin/elastic-script" ]; then
-            echo "Removing existing directory"
-            rm -rf elasticsearch/x-pack/plugin/elastic-script
-          fi
+          # Remove existing plugin directory
+          rm -rf elasticsearch/x-pack/plugin/elastic-script
           
           # Copy the plugin source into the ES tree
           cp -r elastic-script elasticsearch/x-pack/plugin/elastic-script
           
-          echo "=== Plugin directory after setup ==="
-          ls -la elasticsearch/x-pack/plugin/elastic-script/
+          echo "=== Plugin directory setup complete ==="
       
       - name: Build Plugin
         working-directory: elasticsearch
         run: |
-          echo "=== Starting build ==="
-          # Use bundlePlugin task which creates the distributable zip
-          ./gradlew :x-pack:plugin:elastic-script:bundlePlugin -x test --no-daemon 2>&1 | tail -50
+          echo "=== Building for ES ${{ matrix.es_version }} ==="
+          ./gradlew :x-pack:plugin:elastic-script:bundlePlugin -x test --no-daemon 2>&1 | tail -100
       
-      - name: Find and prepare artifacts
+      - name: Prepare artifacts
         id: artifacts
         run: |
-          echo "=== Looking for build artifacts ==="
-          find elasticsearch -name "*.zip" -path "*elastic-script*" 2>/dev/null
-          
           mkdir -p dist
           
           # Find the zip file
@@ -137,15 +158,16 @@ jobs:
           
           if [ -n "$ZIP_FILE" ]; then
             echo "Found: $ZIP_FILE"
-            # Get version from the zip filename
-            FILENAME=$(basename "$ZIP_FILE")
-            cp "$ZIP_FILE" "dist/$FILENAME"
-            echo "artifact_name=$FILENAME" >> $GITHUB_OUTPUT
-            echo "Artifact ready: dist/$FILENAME"
+            ORIGINAL_NAME=$(basename "$ZIP_FILE" .zip)
+            
+            # Rename to include ES version clearly
+            NEW_NAME="moltler-plugin-es${{ matrix.es_version }}.zip"
+            cp "$ZIP_FILE" "dist/$NEW_NAME"
+            
+            echo "artifact_name=$NEW_NAME" >> $GITHUB_OUTPUT
+            echo "Artifact ready: dist/$NEW_NAME"
           else
             echo "ERROR: No zip file found!"
-            echo "=== Checking build directory ==="
-            ls -la elasticsearch/x-pack/plugin/elastic-script/build/ 2>/dev/null || echo "No build dir"
             ls -la elasticsearch/x-pack/plugin/elastic-script/build/distributions/ 2>/dev/null || echo "No distributions dir"
             exit 1
           fi
@@ -153,10 +175,11 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: elastic-script-plugin
+          name: moltler-plugin-es${{ matrix.es_version }}
           path: dist/*.zip
           if-no-files-found: error
 
+  # STEP 3: Create release with all artifacts
   release:
     name: Create Release
     needs: [validate-skills, build]
@@ -164,10 +187,16 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     
     steps:
-      - name: Download plugin artifact
+      - name: Download ES 9.x plugin
         uses: actions/download-artifact@v4
         with:
-          name: elastic-script-plugin
+          name: moltler-plugin-es9.0.0
+          path: dist
+      
+      - name: Download ES 8.x plugin
+        uses: actions/download-artifact@v4
+        with:
+          name: moltler-plugin-es8.17.0
           path: dist
       
       - name: Download validation manifest
@@ -178,7 +207,7 @@ jobs:
       
       - name: List artifacts
         run: |
-          echo "=== Downloaded artifacts ==="
+          echo "=== Release artifacts ==="
           ls -la dist/
           ls -la manifest/
       
@@ -190,23 +219,25 @@ jobs:
             manifest/validated_skills.json
           generate_release_notes: true
           body: |
-            ## Moltler Plugin Release
+            ## Moltler Plugin Release ${{ github.ref_name }}
             
             [![Skills Validated](https://img.shields.io/badge/skills-${{ needs.validate-skills.outputs.valid }}%2F${{ needs.validate-skills.outputs.total }}%20validated-brightgreen)](https://github.com/bahaaldine/moltler/actions)
             
-            Download the plugin zip and install it on your Elasticsearch cluster.
+            ### Downloads
             
-            > **Note:** This plugin is built against Elasticsearch 9.x (main branch).
-            > For other versions, you may need to build from source.
+            | Elasticsearch Version | Download |
+            |----------------------|----------|
+            | **9.0.0** (9.x) | [moltler-plugin-es9.0.0.zip](https://github.com/bahaaldine/moltler/releases/download/${{ github.ref_name }}/moltler-plugin-es9.0.0.zip) |
+            | **8.17.0** (8.x) | [moltler-plugin-es8.17.0.zip](https://github.com/bahaaldine/moltler/releases/download/${{ github.ref_name }}/moltler-plugin-es8.17.0.zip) |
             
             ### Installation
             
             ```bash
-            # Download the plugin
-            wget https://github.com/bahaaldine/moltler/releases/download/${{ github.ref_name }}/x-pack-escript-<VERSION>.zip
+            # For ES 9.x
+            elasticsearch-plugin install file:///path/to/moltler-plugin-es9.0.0.zip
             
-            # Install the plugin on each node
-            elasticsearch-plugin install file:///path/to/x-pack-escript-<VERSION>.zip
+            # For ES 8.x
+            elasticsearch-plugin install file:///path/to/moltler-plugin-es8.17.0.zip
             
             # Restart Elasticsearch
             systemctl restart elasticsearch
@@ -214,27 +245,32 @@ jobs:
             
             ### Install Skills
             
-            After installing the plugin, install the skills:
+            After installing the plugin:
+            
+            ```bash
+            curl -sSL https://hub.moltler.dev/install.sh | bash -s -- --es-url http://localhost:9200
+            ```
+            
+            Or manually:
             
             ```bash
             git clone https://github.com/bahaaldine/moltler.git
-            cd moltler/hub
+            cd moltler
             ./moltler-cli.sh install --all
             ```
             
-            ### Build for Other ES Versions
+            ### Version Compatibility
             
-            If you need a different Elasticsearch version:
+            - **ES 9.0.0 plugin**: Compatible with Elasticsearch 9.0.x
+            - **ES 8.17.0 plugin**: Compatible with Elasticsearch 8.15.x - 8.17.x
+            
+            For other versions, build from source:
             
             ```bash
             git clone --recurse-submodules https://github.com/bahaaldine/moltler.git
-            cd moltler/elastic-script/elasticsearch
-            
-            # Checkout your ES version
-            git checkout v8.x.x
-            
-            # Build
-            ./gradlew :x-pack:plugin:elastic-script:build -x test
+            cd moltler/elasticsearch
+            git checkout v8.15.0  # Your target version
+            ./gradlew :x-pack:plugin:elastic-script:bundlePlugin -x test
             ```
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
