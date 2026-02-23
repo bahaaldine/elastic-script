@@ -1,0 +1,11 @@
+name: check-data-freshness
+version: 1.0.0
+description: Check data freshness across indices to detect ingestion issues.
+author: sre-team
+category: observability
+tags:
+  - observability
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

@@ -1,0 +1,6 @@
+skill: get_active_alerts
+category: alerting
+tests:
+- name: default_execution
+  description: Test get_active_alerts with default/test parameters
+  expected_result_type: array

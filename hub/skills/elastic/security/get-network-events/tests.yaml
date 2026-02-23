@@ -1,0 +1,8 @@
+skill: get_network_events
+category: security
+tests:
+- name: default_execution
+  description: Test get_network_events with default/test parameters
+  fixtures_required:
+  - security-test
+  expected_result_type: array

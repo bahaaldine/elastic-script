@@ -1,0 +1,10 @@
+skill: ab_create_tool
+category: agent-builder
+tests:
+- name: default_execution
+  description: Test ab_create_tool with default/test parameters
+  parameters:
+    name: test-name
+    description: test-value
+    configuration: test-value
+  expected_result_type: object

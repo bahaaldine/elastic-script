@@ -1,0 +1,11 @@
+skill: set_alias
+category: search
+tests:
+- name: default_execution
+  description: Test set_alias with default/test parameters
+  parameters:
+    alias_name: test-name
+    index_name: logs-test
+  fixtures_required:
+  - content-test
+  expected_result_type: object

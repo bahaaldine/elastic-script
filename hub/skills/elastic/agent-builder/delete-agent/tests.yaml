@@ -1,0 +1,8 @@
+skill: ab_delete_agent
+category: agent-builder
+tests:
+- name: default_execution
+  description: Test ab_delete_agent with default/test parameters
+  parameters:
+    agent_id: test-id-001
+  expected_result_type: object

@@ -1,0 +1,6 @@
+skill: list_snapshots
+category: cluster
+tests:
+- name: default_execution
+  description: Test list_snapshots with default/test parameters
+  expected_result_type: array

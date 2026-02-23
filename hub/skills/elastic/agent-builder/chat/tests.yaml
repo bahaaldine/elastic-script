@@ -1,0 +1,6 @@
+skill: ab_chat
+category: agent-builder
+tests:
+- name: default_execution
+  description: Test ab_chat with default/test parameters
+  expected_result_type: object

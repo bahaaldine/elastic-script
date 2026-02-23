@@ -1,0 +1,11 @@
+skill: create_case
+category: security
+tests:
+- name: default_execution
+  description: Test create_case with default/test parameters
+  parameters:
+    title: test-value
+    description: test-value
+  fixtures_required:
+  - security-test
+  expected_result_type: object

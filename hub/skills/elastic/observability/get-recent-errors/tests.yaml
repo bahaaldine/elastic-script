@@ -1,0 +1,8 @@
+skill: get_recent_errors
+category: observability
+tests:
+- name: default_execution
+  description: Test get_recent_errors with default/test parameters
+  fixtures_required:
+  - logs-test
+  expected_result_type: array

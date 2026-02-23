@@ -1,0 +1,11 @@
+skill: test_ingest_pipeline
+category: search
+tests:
+- name: default_execution
+  description: Test test_ingest_pipeline with default/test parameters
+  parameters:
+    pipeline_id: test-id-001
+    sample_doc: test-value
+  fixtures_required:
+  - content-test
+  expected_result_type: object

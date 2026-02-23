@@ -1,0 +1,10 @@
+skill: invoke_aws_lambda
+category: integrations
+tests:
+- name: default_execution
+  description: Test invoke_aws_lambda with default/test parameters
+  parameters:
+    function_name: test-name
+  skip: true
+  skip_reason: Requires AWS credentials
+  expected_result_type: object

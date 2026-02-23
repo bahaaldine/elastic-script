@@ -1,0 +1,11 @@
+name: correlate-logs
+version: 1.0.0
+description: Correlate logs across multiple services using trace IDs or request IDs.
+author: sre-team
+category: observability
+tags:
+  - observability
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

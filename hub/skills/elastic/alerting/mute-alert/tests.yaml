@@ -1,0 +1,8 @@
+skill: mute_alert
+category: alerting
+tests:
+- name: default_execution
+  description: Test mute_alert with default/test parameters
+  parameters:
+    alert_id: test-id-001
+  expected_result_type: object

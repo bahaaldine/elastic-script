@@ -1,0 +1,9 @@
+skill: run_inference
+category: ml
+tests:
+- name: default_execution
+  description: Test run_inference with default/test parameters
+  parameters:
+    model_id: test-id-001
+    input_text: test-value
+  expected_result_type: object

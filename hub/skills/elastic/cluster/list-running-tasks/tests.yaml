@@ -1,0 +1,6 @@
+skill: list_running_tasks
+category: cluster
+tests:
+- name: default_execution
+  description: Test list_running_tasks with default/test parameters
+  expected_result_type: array

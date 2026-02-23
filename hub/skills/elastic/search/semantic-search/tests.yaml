@@ -1,0 +1,10 @@
+skill: semantic_search
+category: search
+tests:
+- name: default_execution
+  description: Test semantic_search with default/test parameters
+  parameters:
+    query: technology
+  fixtures_required:
+  - content-test
+  expected_result_type: array

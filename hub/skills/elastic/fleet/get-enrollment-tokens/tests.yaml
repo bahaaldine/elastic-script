@@ -1,0 +1,6 @@
+skill: get_enrollment_tokens
+category: fleet
+tests:
+- name: default_execution
+  description: Test get_enrollment_tokens with default/test parameters
+  expected_result_type: array

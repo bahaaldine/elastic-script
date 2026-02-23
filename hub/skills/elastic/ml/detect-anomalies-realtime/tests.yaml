@@ -1,0 +1,9 @@
+skill: detect_anomalies_realtime
+category: ml
+tests:
+- name: default_execution
+  description: Test detect_anomalies_realtime with default/test parameters
+  parameters:
+    index_pattern: logs-test
+    field: test-value
+  expected_result_type: array

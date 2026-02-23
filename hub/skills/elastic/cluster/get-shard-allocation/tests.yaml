@@ -1,0 +1,6 @@
+skill: get_shard_allocation
+category: cluster
+tests:
+- name: default_execution
+  description: Test get_shard_allocation with default/test parameters
+  expected_result_type: array

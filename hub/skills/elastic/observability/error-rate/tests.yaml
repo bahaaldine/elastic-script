@@ -1,0 +1,8 @@
+skill: error_rate
+category: observability
+tests:
+- name: default_execution
+  description: Test error_rate with default/test parameters
+  fixtures_required:
+  - logs-test
+  expected_result_type: object

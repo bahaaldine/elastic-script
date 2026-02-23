@@ -1,0 +1,6 @@
+skill: list_connectors
+category: alerting
+tests:
+- name: default_execution
+  description: Test list_connectors with default/test parameters
+  expected_result_type: array

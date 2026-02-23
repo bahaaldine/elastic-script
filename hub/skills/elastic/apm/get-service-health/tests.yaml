@@ -1,0 +1,10 @@
+skill: get_service_health
+category: apm
+tests:
+- name: default_execution
+  description: Test get_service_health with default/test parameters
+  parameters:
+    service: test-value
+  fixtures_required:
+  - apm-test
+  expected_result_type: object

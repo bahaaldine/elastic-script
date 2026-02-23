@@ -1,0 +1,10 @@
+skill: delete_index
+category: search
+tests:
+- name: default_execution
+  description: Test delete_index with default/test parameters
+  parameters:
+    index_name: logs-test
+  fixtures_required:
+  - content-test
+  expected_result_type: object

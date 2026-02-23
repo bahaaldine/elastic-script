@@ -1,0 +1,6 @@
+skill: get_anomalies
+category: ml
+tests:
+- name: default_execution
+  description: Test get_anomalies with default/test parameters
+  expected_result_type: array

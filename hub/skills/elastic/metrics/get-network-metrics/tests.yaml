@@ -1,0 +1,8 @@
+skill: get_network_metrics
+category: metrics
+tests:
+- name: default_execution
+  description: Test get_network_metrics with default/test parameters
+  fixtures_required:
+  - metrics-test
+  expected_result_type: array

@@ -1,0 +1,11 @@
+skill: send_slack_message
+category: integrations
+tests:
+- name: default_execution
+  description: Test send_slack_message with default/test parameters
+  parameters:
+    channel: test-value
+    message: test-value
+  skip: true
+  skip_reason: Requires Slack credentials
+  expected_result_type: object

@@ -1,0 +1,10 @@
+skill: get_index_stats
+category: search
+tests:
+- name: default_execution
+  description: Test get_index_stats with default/test parameters
+  parameters:
+    index_name: logs-test
+  fixtures_required:
+  - content-test
+  expected_result_type: object

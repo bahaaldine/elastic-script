@@ -1,0 +1,12 @@
+skill: send_email
+category: integrations
+tests:
+- name: default_execution
+  description: Test send_email with default/test parameters
+  parameters:
+    to: test-value
+    subject: test-value
+    body: test-value
+  skip: true
+  skip_reason: Requires email server
+  expected_result_type: object

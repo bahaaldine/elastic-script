@@ -1,0 +1,8 @@
+skill: explain_allocation
+category: cluster
+tests:
+- name: default_execution
+  description: Test explain_allocation with default/test parameters
+  parameters:
+    index: logs-test
+  expected_result_type: object

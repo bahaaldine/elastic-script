@@ -1,0 +1,11 @@
+skill: bulk_index
+category: search
+tests:
+- name: default_execution
+  description: Test bulk_index with default/test parameters
+  parameters:
+    index_name: logs-test
+    documents: test-value
+  fixtures_required:
+  - content-test
+  expected_result_type: object

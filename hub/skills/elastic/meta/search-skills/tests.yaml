@@ -1,0 +1,6 @@
+skill: search_skills
+category: meta
+tests:
+- name: default_execution
+  description: Test search_skills with default/test parameters
+  expected_result_type: array

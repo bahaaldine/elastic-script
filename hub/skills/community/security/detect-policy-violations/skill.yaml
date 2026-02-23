@@ -1,0 +1,11 @@
+name: detect-policy-violations
+version: 1.0.0
+description: Detect security policy violations based on configured rules.
+author: security-team
+category: security
+tags:
+  - security
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

@@ -1,0 +1,11 @@
+name: validate-schema
+version: 1.0.0
+description: Validate document schema against expected mappings.
+author: data-team
+category: cluster
+tags:
+  - cluster
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

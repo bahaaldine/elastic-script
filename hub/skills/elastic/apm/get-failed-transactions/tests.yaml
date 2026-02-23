@@ -1,0 +1,8 @@
+skill: get_failed_transactions
+category: apm
+tests:
+- name: default_execution
+  description: Test get_failed_transactions with default/test parameters
+  fixtures_required:
+  - apm-test
+  expected_result_type: array

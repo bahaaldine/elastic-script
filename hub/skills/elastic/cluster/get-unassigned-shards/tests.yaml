@@ -1,0 +1,6 @@
+skill: get_unassigned_shards
+category: cluster
+tests:
+- name: default_execution
+  description: Test get_unassigned_shards with default/test parameters
+  expected_result_type: array

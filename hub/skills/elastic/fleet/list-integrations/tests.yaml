@@ -1,0 +1,6 @@
+skill: list_integrations
+category: fleet
+tests:
+- name: default_execution
+  description: Test list_integrations with default/test parameters
+  expected_result_type: array

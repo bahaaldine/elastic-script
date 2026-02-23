@@ -1,0 +1,1690 @@
+{
+  "generated_at": "2026-02-23T20:30:35.910436Z",
+  "total_skills": 188,
+  "valid_skills": 188,
+  "skills": {
+    "ab_chat": {
+      "name": "ab_chat",
+      "slug": "chat",
+      "category": "agent-builder",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "ab_create_agent": {
+      "name": "ab_create_agent",
+      "slug": "create-agent",
+      "category": "agent-builder",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "ab_create_tool": {
+      "name": "ab_create_tool",
+      "slug": "create-tool",
+      "category": "agent-builder",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "ab_delete_agent": {
+      "name": "ab_delete_agent",
+      "slug": "delete-agent",
+      "category": "agent-builder",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "ab_execute_tool": {
+      "name": "ab_execute_tool",
+      "slug": "execute-tool",
+      "category": "agent-builder",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "ab_get_agent": {
+      "name": "ab_get_agent",
+      "slug": "get-agent",
+      "category": "agent-builder",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "ab_get_agent_card": {
+      "name": "ab_get_agent_card",
+      "slug": "get-agent-card",
+      "category": "agent-builder",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "ab_get_conversation": {
+      "name": "ab_get_conversation",
+      "slug": "get-conversation",
+      "category": "agent-builder",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "ab_list_agents": {
+      "name": "ab_list_agents",
+      "slug": "list-agents",
+      "category": "agent-builder",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "ab_list_conversations": {
+      "name": "ab_list_conversations",
+      "slug": "list-conversations",
+      "category": "agent-builder",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "ab_list_tools": {
+      "name": "ab_list_tools",
+      "slug": "list-tools",
+      "category": "agent-builder",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "ab_mcp_call": {
+      "name": "ab_mcp_call",
+      "slug": "mcp-call",
+      "category": "agent-builder",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "ab_send_a2a_task": {
+      "name": "ab_send_a2a_task",
+      "slug": "send-a2a-task",
+      "category": "agent-builder",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "acknowledge_alert": {
+      "name": "acknowledge_alert",
+      "slug": "acknowledge-alert",
+      "category": "alerting",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "create_threshold_rule": {
+      "name": "create_threshold_rule",
+      "slug": "create-threshold-rule",
+      "category": "alerting",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_active_alerts": {
+      "name": "get_active_alerts",
+      "slug": "get-active-alerts",
+      "category": "alerting",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_alert_history": {
+      "name": "get_alert_history",
+      "slug": "get-alert-history",
+      "category": "alerting",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_alert_rules": {
+      "name": "list_alert_rules",
+      "slug": "list-alert-rules",
+      "category": "alerting",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_connectors": {
+      "name": "list_connectors",
+      "slug": "list-connectors",
+      "category": "alerting",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "mute_alert": {
+      "name": "mute_alert",
+      "slug": "mute-alert",
+      "category": "alerting",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "test_connector": {
+      "name": "test_connector",
+      "slug": "test-connector",
+      "category": "alerting",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "analyze_database_queries": {
+      "name": "analyze_database_queries",
+      "slug": "analyze-database-queries",
+      "category": "apm",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_error_groups": {
+      "name": "get_error_groups",
+      "slug": "get-error-groups",
+      "category": "apm",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_failed_transactions": {
+      "name": "get_failed_transactions",
+      "slug": "get-failed-transactions",
+      "category": "apm",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_latency_percentiles": {
+      "name": "get_latency_percentiles",
+      "slug": "get-latency-percentiles",
+      "category": "apm",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_service_dependencies": {
+      "name": "get_service_dependencies",
+      "slug": "get-service-dependencies",
+      "category": "apm",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_service_health": {
+      "name": "get_service_health",
+      "slug": "get-service-health",
+      "category": "apm",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_service_map": {
+      "name": "get_service_map",
+      "slug": "get-service-map",
+      "category": "apm",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_slow_transactions": {
+      "name": "get_slow_transactions",
+      "slug": "get-slow-transactions",
+      "category": "apm",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_throughput": {
+      "name": "get_throughput",
+      "slug": "get-throughput",
+      "category": "apm",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_trace": {
+      "name": "get_trace",
+      "slug": "get-trace",
+      "category": "apm",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_services": {
+      "name": "list_services",
+      "slug": "list-services",
+      "category": "apm",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "explain_allocation": {
+      "name": "explain_allocation",
+      "slug": "explain-allocation",
+      "category": "cluster",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_cluster_health": {
+      "name": "get_cluster_health",
+      "slug": "get-cluster-health",
+      "category": "cluster",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_hot_threads": {
+      "name": "get_hot_threads",
+      "slug": "get-hot-threads",
+      "category": "cluster",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_node_stats": {
+      "name": "get_node_stats",
+      "slug": "get-node-stats",
+      "category": "cluster",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_pending_tasks": {
+      "name": "get_pending_tasks",
+      "slug": "get-pending-tasks",
+      "category": "cluster",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_shard_allocation": {
+      "name": "get_shard_allocation",
+      "slug": "get-shard-allocation",
+      "category": "cluster",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_unassigned_shards": {
+      "name": "get_unassigned_shards",
+      "slug": "get-unassigned-shards",
+      "category": "cluster",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_nodes": {
+      "name": "list_nodes",
+      "slug": "list-nodes",
+      "category": "cluster",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_running_tasks": {
+      "name": "list_running_tasks",
+      "slug": "list-running-tasks",
+      "category": "cluster",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_snapshots": {
+      "name": "list_snapshots",
+      "slug": "list-snapshots",
+      "category": "cluster",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_no_results_queries": {
+      "name": "get_no_results_queries",
+      "slug": "get-no-results-queries",
+      "category": "enterprise-search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_search_analytics": {
+      "name": "get_search_analytics",
+      "slug": "get-search-analytics",
+      "category": "enterprise-search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_top_queries": {
+      "name": "get_top_queries",
+      "slug": "get-top-queries",
+      "category": "enterprise-search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_search_apps": {
+      "name": "list_search_apps",
+      "slug": "list-search-apps",
+      "category": "enterprise-search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_agent_logs": {
+      "name": "get_agent_logs",
+      "slug": "get-agent-logs",
+      "category": "fleet",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_agent_status": {
+      "name": "get_agent_status",
+      "slug": "get-agent-status",
+      "category": "fleet",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_enrollment_tokens": {
+      "name": "get_enrollment_tokens",
+      "slug": "get-enrollment-tokens",
+      "category": "fleet",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_agent_policies": {
+      "name": "list_agent_policies",
+      "slug": "list-agent-policies",
+      "category": "fleet",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_agents": {
+      "name": "list_agents",
+      "slug": "list-agents",
+      "category": "fleet",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_integrations": {
+      "name": "list_integrations",
+      "slug": "list-integrations",
+      "category": "fleet",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "create_jira_issue": {
+      "name": "create_jira_issue",
+      "slug": "create-jira-issue",
+      "category": "integrations",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "create_servicenow_incident": {
+      "name": "create_servicenow_incident",
+      "slug": "create-servicenow-incident",
+      "category": "integrations",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "invoke_aws_lambda": {
+      "name": "invoke_aws_lambda",
+      "slug": "invoke-aws-lambda",
+      "category": "integrations",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "send_email": {
+      "name": "send_email",
+      "slug": "send-email",
+      "category": "integrations",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "send_opsgenie_alert": {
+      "name": "send_opsgenie_alert",
+      "slug": "send-opsgenie-alert",
+      "category": "integrations",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "send_slack_message": {
+      "name": "send_slack_message",
+      "slug": "send-slack-message",
+      "category": "integrations",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "send_teams_message": {
+      "name": "send_teams_message",
+      "slug": "send-teams-message",
+      "category": "integrations",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "send_webhook": {
+      "name": "send_webhook",
+      "slug": "send-webhook",
+      "category": "integrations",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "trigger_github_workflow": {
+      "name": "trigger_github_workflow",
+      "slug": "trigger-github-workflow",
+      "category": "integrations",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "trigger_pagerduty": {
+      "name": "trigger_pagerduty",
+      "slug": "trigger-pagerduty",
+      "category": "integrations",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "explain_skill": {
+      "name": "explain_skill",
+      "slug": "explain-skill",
+      "category": "meta",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_related_skills": {
+      "name": "get_related_skills",
+      "slug": "get-related-skills",
+      "category": "meta",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_all_skills": {
+      "name": "list_all_skills",
+      "slug": "list-all-skills",
+      "category": "meta",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "recommend_skills": {
+      "name": "recommend_skills",
+      "slug": "recommend-skills",
+      "category": "meta",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "search_skills": {
+      "name": "search_skills",
+      "slug": "search-skills",
+      "category": "meta",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_container_metrics": {
+      "name": "get_container_metrics",
+      "slug": "get-container-metrics",
+      "category": "metrics",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_disk_usage": {
+      "name": "get_disk_usage",
+      "slug": "get-disk-usage",
+      "category": "metrics",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_host_metrics": {
+      "name": "get_host_metrics",
+      "slug": "get-host-metrics",
+      "category": "metrics",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_memory_pressure": {
+      "name": "get_memory_pressure",
+      "slug": "get-memory-pressure",
+      "category": "metrics",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_network_metrics": {
+      "name": "get_network_metrics",
+      "slug": "get-network-metrics",
+      "category": "metrics",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_hosts": {
+      "name": "list_hosts",
+      "slug": "list-hosts",
+      "category": "metrics",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "classify_text": {
+      "name": "classify_text",
+      "slug": "classify-text",
+      "category": "ml",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "detect_anomalies_realtime": {
+      "name": "detect_anomalies_realtime",
+      "slug": "detect-anomalies-realtime",
+      "category": "ml",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "embed_text": {
+      "name": "embed_text",
+      "slug": "embed-text",
+      "category": "ml",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "explain_anomaly": {
+      "name": "explain_anomaly",
+      "slug": "explain-anomaly",
+      "category": "ml",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "extract_entities": {
+      "name": "extract_entities",
+      "slug": "extract-entities",
+      "category": "ml",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_anomalies": {
+      "name": "get_anomalies",
+      "slug": "get-anomalies",
+      "category": "ml",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_influencers": {
+      "name": "get_influencers",
+      "slug": "get-influencers",
+      "category": "ml",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_job_status": {
+      "name": "get_job_status",
+      "slug": "get-job-status",
+      "category": "ml",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_ml_jobs": {
+      "name": "list_ml_jobs",
+      "slug": "list-ml-jobs",
+      "category": "ml",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_trained_models": {
+      "name": "list_trained_models",
+      "slug": "list-trained-models",
+      "category": "ml",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "run_inference": {
+      "name": "run_inference",
+      "slug": "run-inference",
+      "category": "ml",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "compare_time_periods": {
+      "name": "compare_time_periods",
+      "slug": "compare-time-periods",
+      "category": "observability",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "correlate_logs": {
+      "name": "correlate_logs",
+      "slug": "correlate-logs",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "count_logs_by_level": {
+      "name": "count_logs_by_level",
+      "slug": "count-logs-by-level",
+      "category": "observability",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "error_rate": {
+      "name": "error_rate",
+      "slug": "error-rate",
+      "category": "observability",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_availability": {
+      "name": "get_availability",
+      "slug": "get-availability",
+      "category": "observability",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_error_context": {
+      "name": "get_error_context",
+      "slug": "get-error-context",
+      "category": "observability",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_log_patterns": {
+      "name": "get_log_patterns",
+      "slug": "get-log-patterns",
+      "category": "observability",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_metrics_summary": {
+      "name": "get_metrics_summary",
+      "slug": "get-metrics-summary",
+      "category": "observability",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_monitor_status": {
+      "name": "get_monitor_status",
+      "slug": "get-monitor-status",
+      "category": "observability",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_recent_errors": {
+      "name": "get_recent_errors",
+      "slug": "get-recent-errors",
+      "category": "observability",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_slo_status": {
+      "name": "get_slo_status",
+      "slug": "get-slo-status",
+      "category": "observability",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_ssl_status": {
+      "name": "get_ssl_status",
+      "slug": "get-ssl-status",
+      "category": "observability",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "high_cpu_hosts": {
+      "name": "high_cpu_hosts",
+      "slug": "high-cpu-hosts",
+      "category": "observability",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_monitors": {
+      "name": "list_monitors",
+      "slug": "list-monitors",
+      "category": "observability",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "logs_by_service": {
+      "name": "logs_by_service",
+      "slug": "logs-by-service",
+      "category": "observability",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "search_logs": {
+      "name": "search_logs",
+      "slug": "search-logs",
+      "category": "observability",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "service_health": {
+      "name": "service_health",
+      "slug": "service-health",
+      "category": "observability",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "slow_requests": {
+      "name": "slow_requests",
+      "slug": "slow-requests",
+      "category": "observability",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "top_error_messages": {
+      "name": "top_error_messages",
+      "slug": "top-error-messages",
+      "category": "observability",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "aggregate_by_field": {
+      "name": "aggregate_by_field",
+      "slug": "aggregate-by-field",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "bulk_index": {
+      "name": "bulk_index",
+      "slug": "bulk-index",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "cluster_health": {
+      "name": "cluster_health",
+      "slug": "cluster-health",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "count_documents": {
+      "name": "count_documents",
+      "slug": "count-documents",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "create_document": {
+      "name": "create_document",
+      "slug": "create-document",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "create_index": {
+      "name": "create_index",
+      "slug": "create-index",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "date_histogram": {
+      "name": "date_histogram",
+      "slug": "date-histogram",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "delete_document": {
+      "name": "delete_document",
+      "slug": "delete-document",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "delete_index": {
+      "name": "delete_index",
+      "slug": "delete-index",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "fuzzy_search": {
+      "name": "fuzzy_search",
+      "slug": "fuzzy-search",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_document": {
+      "name": "get_document",
+      "slug": "get-document",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_field_stats": {
+      "name": "get_field_stats",
+      "slug": "get-field-stats",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_index_stats": {
+      "name": "get_index_stats",
+      "slug": "get-index-stats",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_mapping": {
+      "name": "get_mapping",
+      "slug": "get-mapping",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_sample_documents": {
+      "name": "get_sample_documents",
+      "slug": "get-sample-documents",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_transform_status": {
+      "name": "get_transform_status",
+      "slug": "get-transform-status",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_unique_values": {
+      "name": "get_unique_values",
+      "slug": "get-unique-values",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_all_indices": {
+      "name": "list_all_indices",
+      "slug": "list-all-indices",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_data_streams": {
+      "name": "list_data_streams",
+      "slug": "list-data-streams",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_ilm_policies": {
+      "name": "list_ilm_policies",
+      "slug": "list-ilm-policies",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_indices": {
+      "name": "list_indices",
+      "slug": "list-indices",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_ingest_pipelines": {
+      "name": "list_ingest_pipelines",
+      "slug": "list-ingest-pipelines",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_transforms": {
+      "name": "list_transforms",
+      "slug": "list-transforms",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "multi_field_search": {
+      "name": "multi_field_search",
+      "slug": "multi-field-search",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "percentiles": {
+      "name": "percentiles",
+      "slug": "percentiles",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "recent_documents": {
+      "name": "recent_documents",
+      "slug": "recent-documents",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "reindex": {
+      "name": "reindex",
+      "slug": "reindex",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "search_documents": {
+      "name": "search_documents",
+      "slug": "search-documents",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "semantic_search": {
+      "name": "semantic_search",
+      "slug": "semantic-search",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "set_alias": {
+      "name": "set_alias",
+      "slug": "set-alias",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "test_ingest_pipeline": {
+      "name": "test_ingest_pipeline",
+      "slug": "test-ingest-pipeline",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "top_values": {
+      "name": "top_values",
+      "slug": "top-values",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "update_document": {
+      "name": "update_document",
+      "slug": "update-document",
+      "category": "search",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "create_case": {
+      "name": "create_case",
+      "slug": "create-case",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "failed_logins": {
+      "name": "failed_logins",
+      "slug": "failed-logins",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_authentication_summary": {
+      "name": "get_authentication_summary",
+      "slug": "get-authentication-summary",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_dns_queries": {
+      "name": "get_dns_queries",
+      "slug": "get-dns-queries",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_file_events": {
+      "name": "get_file_events",
+      "slug": "get-file-events",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_host_risk_score": {
+      "name": "get_host_risk_score",
+      "slug": "get-host-risk-score",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_network_events": {
+      "name": "get_network_events",
+      "slug": "get-network-events",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_process_events": {
+      "name": "get_process_events",
+      "slug": "get-process-events",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_risky_hosts": {
+      "name": "get_risky_hosts",
+      "slug": "get-risky-hosts",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_risky_users": {
+      "name": "get_risky_users",
+      "slug": "get-risky-users",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_security_alerts": {
+      "name": "get_security_alerts",
+      "slug": "get-security-alerts",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_user_risk_score": {
+      "name": "get_user_risk_score",
+      "slug": "get-user-risk-score",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "hunt_ioc": {
+      "name": "hunt_ioc",
+      "slug": "hunt-ioc",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_cases": {
+      "name": "list_cases",
+      "slug": "list-cases",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_detection_rules": {
+      "name": "list_detection_rules",
+      "slug": "list-detection-rules",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "search_security_events": {
+      "name": "search_security_events",
+      "slug": "search-security-events",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "suspicious_activity": {
+      "name": "suspicious_activity",
+      "slug": "suspicious-activity",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "threat_summary": {
+      "name": "threat_summary",
+      "slug": "threat-summary",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "user_activity": {
+      "name": "user_activity",
+      "slug": "user-activity",
+      "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "auto_acknowledge": {
+      "name": "auto_acknowledge",
+      "slug": "auto-acknowledge",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "dedupe_alerts": {
+      "name": "dedupe_alerts",
+      "slug": "dedupe-alerts",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "escalate_alert": {
+      "name": "escalate_alert",
+      "slug": "escalate-alert",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "notify_oncall": {
+      "name": "notify_oncall",
+      "slug": "notify-oncall",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "route_to_team": {
+      "name": "route_to_team",
+      "slug": "route-to-team",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "trigger_runbook": {
+      "name": "trigger_runbook",
+      "slug": "trigger-runbook",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "compare_deployments": {
+      "name": "compare_deployments",
+      "slug": "compare-deployments",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "detect_performance_regression": {
+      "name": "detect_performance_regression",
+      "slug": "detect-performance-regression",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_service_latency": {
+      "name": "get_service_latency",
+      "slug": "get-service-latency",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_throughput_stats": {
+      "name": "get_throughput_stats",
+      "slug": "get-throughput-stats",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "validate_schema": {
+      "name": "validate_schema",
+      "slug": "validate-schema",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "detect_anomalies": {
+      "name": "detect_anomalies",
+      "slug": "detect-anomalies",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "generate_embeddings": {
+      "name": "generate_embeddings",
+      "slug": "generate-embeddings",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "calculate_quality_score": {
+      "name": "calculate_quality_score",
+      "slug": "calculate-quality-score",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "check_data_freshness": {
+      "name": "check_data_freshness",
+      "slug": "check-data-freshness",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "create_postmortem": {
+      "name": "create_postmortem",
+      "slug": "create-postmortem",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "detect_incident": {
+      "name": "detect_incident",
+      "slug": "detect-incident",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "detect_log_patterns": {
+      "name": "detect_log_patterns",
+      "slug": "detect-log-patterns",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "get_error_trends": {
+      "name": "get_error_trends",
+      "slug": "get-error-trends",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "track_resolution": {
+      "name": "track_resolution",
+      "slug": "track-resolution",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "triage_incident": {
+      "name": "triage_incident",
+      "slug": "triage-incident",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "detect_duplicates": {
+      "name": "detect_duplicates",
+      "slug": "detect-duplicates",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "find_missing_fields": {
+      "name": "find_missing_fields",
+      "slug": "find-missing-fields",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "hybrid_search": {
+      "name": "hybrid_search",
+      "slug": "hybrid-search",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "rerank_results": {
+      "name": "rerank_results",
+      "slug": "rerank-results",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "search_with_filters": {
+      "name": "search_with_filters",
+      "slug": "search-with-filters",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "audit_user_access": {
+      "name": "audit_user_access",
+      "slug": "audit-user-access",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "correlate_alerts": {
+      "name": "correlate_alerts",
+      "slug": "correlate-alerts",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "detect_policy_violations": {
+      "name": "detect_policy_violations",
+      "slug": "detect-policy-violations",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "enrich_threat_intel": {
+      "name": "enrich_threat_intel",
+      "slug": "enrich-threat-intel",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "generate_compliance_report": {
+      "name": "generate_compliance_report",
+      "slug": "generate-compliance-report",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "track_privileged_actions": {
+      "name": "track_privileged_actions",
+      "slug": "track-privileged-actions",
+      "category": "unknown",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    }
+  }
+}

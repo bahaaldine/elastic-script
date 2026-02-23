@@ -1,0 +1,5 @@
+skill: ab_list_agents
+category: agent-builder
+tests:
+- name: default_execution
+  description: Test ab_list_agents with default/test parameters

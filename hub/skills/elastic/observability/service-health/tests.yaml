@@ -1,0 +1,11 @@
+skill: service_health
+category: observability
+tests:
+- name: default_execution
+  description: Test service_health with default/test parameters
+  parameters:
+    service: test-value
+    index_pattern: logs-test
+  fixtures_required:
+  - logs-test
+  expected_result_type: object

@@ -1,0 +1,10 @@
+skill: get_sample_documents
+category: search
+tests:
+- name: default_execution
+  description: Test get_sample_documents with default/test parameters
+  parameters:
+    index_pattern: logs-test
+  fixtures_required:
+  - content-test
+  expected_result_type: array

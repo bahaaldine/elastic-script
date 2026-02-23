@@ -1,0 +1,10 @@
+skill: get_user_risk_score
+category: security
+tests:
+- name: default_execution
+  description: Test get_user_risk_score with default/test parameters
+  parameters:
+    username: test-name
+  fixtures_required:
+  - security-test
+  expected_result_type: object

@@ -1,0 +1,10 @@
+skill: date_histogram
+category: search
+tests:
+- name: default_execution
+  description: Test date_histogram with default/test parameters
+  parameters:
+    index_pattern: logs-test
+  fixtures_required:
+  - content-test
+  expected_result_type: array

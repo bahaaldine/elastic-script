@@ -1,0 +1,10 @@
+skill: get_latency_percentiles
+category: apm
+tests:
+- name: default_execution
+  description: Test get_latency_percentiles with default/test parameters
+  parameters:
+    service: test-value
+  fixtures_required:
+  - apm-test
+  expected_result_type: array

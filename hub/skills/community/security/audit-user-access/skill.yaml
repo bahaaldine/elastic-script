@@ -1,0 +1,11 @@
+name: audit-user-access
+version: 1.0.0
+description: Audit user access patterns and identify anomalies or policy violations.
+author: security-team
+category: security
+tags:
+  - security
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

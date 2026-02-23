@@ -1,0 +1,11 @@
+name: route-to-team
+version: 1.0.0
+description: Route alerts to the appropriate team based on service ownership.
+author: sre-team
+category: alerting
+tags:
+  - alerting
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

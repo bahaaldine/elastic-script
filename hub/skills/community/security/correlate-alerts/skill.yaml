@@ -1,0 +1,11 @@
+name: correlate-alerts
+version: 1.0.0
+description: Correlate security alerts across multiple sources to identify attack patterns.
+author: security-team
+category: security
+tags:
+  - security
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

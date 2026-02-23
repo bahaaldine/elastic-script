@@ -1,0 +1,7 @@
+skill: ab_get_conversation
+category: agent-builder
+tests:
+- name: default_execution
+  description: Test ab_get_conversation with default/test parameters
+  parameters:
+    conversation_id: test-id-001

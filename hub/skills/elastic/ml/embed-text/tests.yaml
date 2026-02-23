@@ -1,0 +1,8 @@
+skill: embed_text
+category: ml
+tests:
+- name: default_execution
+  description: Test embed_text with default/test parameters
+  parameters:
+    text: test-value
+  expected_result_type: object

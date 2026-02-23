@@ -1,0 +1,11 @@
+skill: search_logs
+category: observability
+tests:
+- name: default_execution
+  description: Test search_logs with default/test parameters
+  parameters:
+    query: test query
+    index_pattern: logs-test
+  fixtures_required:
+  - logs-test
+  expected_result_type: array

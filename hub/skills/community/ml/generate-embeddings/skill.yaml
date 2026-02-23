@@ -1,0 +1,11 @@
+name: generate-embeddings
+version: 1.0.0
+description: Generate text embeddings using Elasticsearch inference API.
+author: ml-team
+category: ml
+tags:
+  - ml
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

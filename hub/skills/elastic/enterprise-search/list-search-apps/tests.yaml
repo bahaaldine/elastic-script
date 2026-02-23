@@ -1,0 +1,6 @@
+skill: list_search_apps
+category: enterprise-search
+tests:
+- name: default_execution
+  description: Test list_search_apps with default/test parameters
+  expected_result_type: array

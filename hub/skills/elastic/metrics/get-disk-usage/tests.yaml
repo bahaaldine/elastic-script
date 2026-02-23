@@ -1,0 +1,8 @@
+skill: get_disk_usage
+category: metrics
+tests:
+- name: default_execution
+  description: Test get_disk_usage with default/test parameters
+  fixtures_required:
+  - metrics-test
+  expected_result_type: array

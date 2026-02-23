@@ -1,0 +1,8 @@
+skill: get_agent_logs
+category: fleet
+tests:
+- name: default_execution
+  description: Test get_agent_logs with default/test parameters
+  parameters:
+    agent_id: test-id-001
+  expected_result_type: array

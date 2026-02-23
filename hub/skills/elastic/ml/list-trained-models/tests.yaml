@@ -1,0 +1,6 @@
+skill: list_trained_models
+category: ml
+tests:
+- name: default_execution
+  description: Test list_trained_models with default/test parameters
+  expected_result_type: array

@@ -1,0 +1,10 @@
+skill: get_log_patterns
+category: observability
+tests:
+- name: default_execution
+  description: Test get_log_patterns with default/test parameters
+  parameters:
+    index_pattern: logs-test
+  fixtures_required:
+  - logs-test
+  expected_result_type: array

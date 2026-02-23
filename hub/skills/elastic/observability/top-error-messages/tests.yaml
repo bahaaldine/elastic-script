@@ -1,0 +1,10 @@
+skill: top_error_messages
+category: observability
+tests:
+- name: default_execution
+  description: Test top_error_messages with default/test parameters
+  parameters:
+    index_pattern: logs-test
+  fixtures_required:
+  - logs-test
+  expected_result_type: array

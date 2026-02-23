@@ -1,0 +1,8 @@
+skill: ab_mcp_call
+category: agent-builder
+tests:
+- name: default_execution
+  description: Test ab_mcp_call with default/test parameters
+  parameters:
+    method: test-value
+  expected_result_type: object

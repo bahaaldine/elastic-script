@@ -1,0 +1,8 @@
+skill: get_related_skills
+category: meta
+tests:
+- name: default_execution
+  description: Test get_related_skills with default/test parameters
+  parameters:
+    skill_name: test-name
+  expected_result_type: array

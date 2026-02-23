@@ -1,0 +1,8 @@
+skill: search_documents
+category: search
+tests:
+- name: default_execution
+  description: Test search_documents with default/test parameters
+  fixtures_required:
+  - content-test
+  expected_result_type: array

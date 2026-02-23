@@ -1,0 +1,11 @@
+skill: create_threshold_rule
+category: alerting
+tests:
+- name: default_execution
+  description: Test create_threshold_rule with default/test parameters
+  parameters:
+    name: test-name
+    index_pattern: logs-test
+    field: test-value
+    threshold: 50
+  expected_result_type: object

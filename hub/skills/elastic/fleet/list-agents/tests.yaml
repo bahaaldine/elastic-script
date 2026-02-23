@@ -1,0 +1,6 @@
+skill: list_agents
+category: fleet
+tests:
+- name: default_execution
+  description: Test list_agents with default/test parameters
+  expected_result_type: array

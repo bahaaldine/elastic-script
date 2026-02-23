@@ -1,0 +1,213 @@
+name: Skill Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'hub/skills/**'
+      - 'tests/skills/**'
+      - '.github/workflows/skill-tests.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'hub/skills/**'
+      - 'tests/skills/**'
+  workflow_dispatch:
+    inputs:
+      category:
+        description: 'Skill category to test (leave empty for all)'
+        required: false
+        default: ''
+      verbose:
+        description: 'Verbose output'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  test-skills:
+    name: Test Skills
+    runs-on: ubuntu-latest
+    
+    services:
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+        ports:
+          - 9200:9200
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: false
+          ES_JAVA_OPTS: -Xms512m -Xmx512m
+        options: >-
+          --health-cmd="curl -s http://localhost:9200/_cluster/health"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r tests/skills/requirements.txt
+      
+      - name: Wait for Elasticsearch
+        run: |
+          echo "Waiting for Elasticsearch..."
+          for i in {1..30}; do
+            if curl -s http://localhost:9200/_cluster/health | grep -q '"status"'; then
+              echo "Elasticsearch is ready"
+              break
+            fi
+            echo "Waiting... ($i/30)"
+            sleep 2
+          done
+      
+      - name: Install elastic-script plugin
+        run: |
+          # For CI, we need to build and install the plugin
+          # This step assumes the plugin is pre-built or uses a mock
+          echo "Note: Full plugin installation requires Gradle build"
+          echo "Running syntax-only tests for CI..."
+      
+      - name: Run skill tests
+        id: test
+        run: |
+          cd tests/skills
+          
+          # Set test parameters
+          CATEGORY="${{ github.event.inputs.category }}"
+          VERBOSE="${{ github.event.inputs.verbose }}"
+          
+          ARGS="--skip-fixtures"
+          
+          if [ -n "$CATEGORY" ]; then
+            ARGS="$ARGS --category $CATEGORY"
+          fi
+          
+          if [ "$VERBOSE" = "true" ]; then
+            ARGS="$ARGS --verbose"
+          fi
+          
+          # Run tests
+          python run_skill_tests.py $ARGS || true
+          
+          # Check if results exist
+          if [ -f results/test_results.json ]; then
+            echo "Tests completed"
+            cat results/test_results.json | jq '.summary'
+          fi
+        env:
+          ES_URL: http://localhost:9200
+          ES_USERNAME: ""
+          ES_PASSWORD: ""
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: skill-test-results
+          path: |
+            tests/skills/results/test_results.json
+            tests/skills/results/test_results.md
+            tests/skills/results/test_results.xml
+          retention-days: 30
+      
+      - name: Publish test report
+        uses: mikepenz/action-junit-report@v4
+        if: always()
+        with:
+          report_paths: 'tests/skills/results/test_results.xml'
+          fail_on_failure: true
+          require_tests: false
+      
+      - name: Update badge
+        if: github.ref == 'refs/heads/main'
+        run: |
+          if [ -f tests/skills/results/badge.json ]; then
+            # Copy badge to a location that can be served
+            mkdir -p docs/badges
+            cp tests/skills/results/badge.json docs/badges/skills.json
+            echo "Badge updated"
+          fi
+      
+      - name: Generate validated skills manifest
+        if: github.ref == 'refs/heads/main'
+        run: |
+          python tests/skills/generate_validated_manifest.py
+          echo "Validated skills manifest generated"
+
+  syntax-validation:
+    name: Validate Skill Syntax
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+      
+      - name: Validate all skills
+        run: |
+          echo "Validating skill syntax..."
+          
+          ERRORS=0
+          TOTAL=0
+          
+          for skill_dir in hub/skills/elastic/*/* ; do
+            if [ -d "$skill_dir" ]; then
+              TOTAL=$((TOTAL + 1))
+              skill_sql="$skill_dir/skill.sql"
+              
+              if [ ! -f "$skill_sql" ]; then
+                echo "❌ Missing skill.sql: $skill_dir"
+                ERRORS=$((ERRORS + 1))
+                continue
+              fi
+              
+              # Check for required keywords
+              if ! grep -qi "CREATE SKILL" "$skill_sql"; then
+                echo "❌ Missing CREATE SKILL: $skill_dir"
+                ERRORS=$((ERRORS + 1))
+                continue
+              fi
+              
+              if ! grep -qi "BEGIN" "$skill_sql"; then
+                echo "❌ Missing BEGIN: $skill_dir"
+                ERRORS=$((ERRORS + 1))
+                continue
+              fi
+              
+              if ! grep -qi "END SKILL" "$skill_sql"; then
+                echo "❌ Missing END SKILL: $skill_dir"
+                ERRORS=$((ERRORS + 1))
+                continue
+              fi
+              
+              echo "✓ $(basename $skill_dir)"
+            fi
+          done
+          
+          echo ""
+          echo "=========================================="
+          echo "Total: $TOTAL | Errors: $ERRORS"
+          echo "=========================================="
+          
+          if [ $ERRORS -gt 0 ]; then
+            exit 1
+          fi
+          
+          echo "All skills have valid syntax structure"

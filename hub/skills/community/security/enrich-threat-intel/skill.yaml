@@ -1,0 +1,11 @@
+name: enrich-threat-intel
+version: 1.0.0
+description: Enrich security events with threat intelligence from configured feeds.
+author: security-team
+category: security
+tags:
+  - security
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

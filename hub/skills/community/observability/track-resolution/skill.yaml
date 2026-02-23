@@ -1,0 +1,11 @@
+name: track-resolution
+version: 1.0.0
+description: Track incident resolution progress, update status, and record resolution actions.
+author: sre-team
+category: observability
+tags:
+  - observability
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

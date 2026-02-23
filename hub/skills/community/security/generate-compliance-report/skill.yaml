@@ -1,0 +1,11 @@
+name: generate-compliance-report
+version: 1.0.0
+description: Generate compliance reports for security standards (SOC2, PCI, HIPAA).
+author: security-team
+category: security
+tags:
+  - security
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

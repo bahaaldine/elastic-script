@@ -1,0 +1,11 @@
+skill: get_unique_values
+category: search
+tests:
+- name: default_execution
+  description: Test get_unique_values with default/test parameters
+  parameters:
+    index_pattern: logs-test
+    field: test-value
+  fixtures_required:
+  - content-test
+  expected_result_type: array

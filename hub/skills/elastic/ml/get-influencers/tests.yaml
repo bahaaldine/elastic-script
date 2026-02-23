@@ -1,0 +1,8 @@
+skill: get_influencers
+category: ml
+tests:
+- name: default_execution
+  description: Test get_influencers with default/test parameters
+  parameters:
+    job_id: test-job
+  expected_result_type: array

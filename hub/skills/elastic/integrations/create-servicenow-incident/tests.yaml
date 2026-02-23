@@ -1,0 +1,11 @@
+skill: create_servicenow_incident
+category: integrations
+tests:
+- name: default_execution
+  description: Test create_servicenow_incident with default/test parameters
+  parameters:
+    short_description: test-value
+    description: test-value
+  skip: true
+  skip_reason: Requires ServiceNow credentials
+  expected_result_type: object

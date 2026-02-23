@@ -1,0 +1,10 @@
+skill: multi_field_search
+category: search
+tests:
+- name: default_execution
+  description: Test multi_field_search with default/test parameters
+  parameters:
+    query: technology
+  fixtures_required:
+  - content-test
+  expected_result_type: array

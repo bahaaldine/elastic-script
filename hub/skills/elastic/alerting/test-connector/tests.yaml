@@ -1,0 +1,8 @@
+skill: test_connector
+category: alerting
+tests:
+- name: default_execution
+  description: Test test_connector with default/test parameters
+  parameters:
+    connector_id: test-id-001
+  expected_result_type: object

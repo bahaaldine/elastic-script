@@ -1,0 +1,5 @@
+skill: list_all_skills
+category: meta
+tests:
+- name: default_execution
+  description: Test list_all_skills with default/test parameters

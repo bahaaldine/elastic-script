@@ -1,0 +1,14 @@
+name: triage-incident
+version: 1.0.0
+description: Automatically triage and prioritize incidents
+author: sre-team
+category: observability
+tags:
+  - observability
+  - incident
+  - triage
+  - sre
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

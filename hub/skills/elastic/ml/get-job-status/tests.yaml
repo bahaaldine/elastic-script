@@ -1,0 +1,8 @@
+skill: get_job_status
+category: ml
+tests:
+- name: default_execution
+  description: Test get_job_status with default/test parameters
+  parameters:
+    job_id: test-job
+  expected_result_type: object

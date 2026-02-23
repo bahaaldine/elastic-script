@@ -1,0 +1,8 @@
+skill: list_ilm_policies
+category: search
+tests:
+- name: default_execution
+  description: Test list_ilm_policies with default/test parameters
+  fixtures_required:
+  - content-test
+  expected_result_type: array

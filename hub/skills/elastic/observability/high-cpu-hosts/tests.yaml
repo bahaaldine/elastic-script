@@ -1,0 +1,8 @@
+skill: high_cpu_hosts
+category: observability
+tests:
+- name: default_execution
+  description: Test high_cpu_hosts with default/test parameters
+  fixtures_required:
+  - logs-test
+  expected_result_type: array

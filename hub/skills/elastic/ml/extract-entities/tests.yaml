@@ -1,0 +1,8 @@
+skill: extract_entities
+category: ml
+tests:
+- name: default_execution
+  description: Test extract_entities with default/test parameters
+  parameters:
+    text: test-value
+  expected_result_type: object

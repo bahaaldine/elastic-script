@@ -1,0 +1,8 @@
+skill: ab_get_agent_card
+category: agent-builder
+tests:
+- name: default_execution
+  description: Test ab_get_agent_card with default/test parameters
+  parameters:
+    agent_id: test-id-001
+  expected_result_type: object

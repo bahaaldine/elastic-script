@@ -1,0 +1,8 @@
+skill: list_data_streams
+category: search
+tests:
+- name: default_execution
+  description: Test list_data_streams with default/test parameters
+  fixtures_required:
+  - content-test
+  expected_result_type: array

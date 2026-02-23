@@ -1,0 +1,11 @@
+name: detect-performance-regression
+version: 1.0.0
+description: Detect performance regressions by comparing current metrics to baseline.
+author: apm-team
+category: apm
+tags:
+  - apm
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

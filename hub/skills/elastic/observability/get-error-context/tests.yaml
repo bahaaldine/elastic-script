@@ -1,0 +1,11 @@
+skill: get_error_context
+category: observability
+tests:
+- name: default_execution
+  description: Test get_error_context with default/test parameters
+  parameters:
+    timestamp: test-value
+    service: test-value
+  fixtures_required:
+  - logs-test
+  expected_result_type: array

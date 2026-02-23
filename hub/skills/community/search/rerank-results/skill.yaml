@@ -1,0 +1,11 @@
+name: rerank-results
+version: 1.0.0
+description: Rerank search results using a cross-encoder model for improved relevance.
+author: search-team
+category: search
+tags:
+  - search
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

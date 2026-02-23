@@ -1,0 +1,11 @@
+name: find-missing-fields
+version: 1.0.0
+description: Find documents with missing required fields for data quality analysis.
+author: search-team
+category: search
+tags:
+  - search
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

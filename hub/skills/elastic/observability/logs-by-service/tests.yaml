@@ -1,0 +1,10 @@
+skill: logs_by_service
+category: observability
+tests:
+- name: default_execution
+  description: Test logs_by_service with default/test parameters
+  parameters:
+    index_pattern: logs-test
+  fixtures_required:
+  - logs-test
+  expected_result_type: array

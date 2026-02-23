@@ -1,0 +1,9 @@
+skill: ab_send_a2a_task
+category: agent-builder
+tests:
+- name: default_execution
+  description: Test ab_send_a2a_task with default/test parameters
+  parameters:
+    agent_id: test-id-001
+    task: test-value
+  expected_result_type: object

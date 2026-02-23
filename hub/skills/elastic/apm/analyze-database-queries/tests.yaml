@@ -1,0 +1,10 @@
+skill: analyze_database_queries
+category: apm
+tests:
+- name: default_execution
+  description: Test analyze_database_queries with default/test parameters
+  parameters:
+    threshold_ms: 1000
+  fixtures_required:
+  - apm-test
+  expected_result_type: array

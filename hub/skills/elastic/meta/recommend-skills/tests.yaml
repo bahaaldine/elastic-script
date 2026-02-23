@@ -1,0 +1,6 @@
+skill: recommend_skills
+category: meta
+tests:
+- name: default_execution
+  description: Test recommend_skills with default/test parameters
+  expected_result_type: array

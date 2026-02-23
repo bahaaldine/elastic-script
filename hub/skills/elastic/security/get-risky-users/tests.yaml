@@ -1,0 +1,8 @@
+skill: get_risky_users
+category: security
+tests:
+- name: default_execution
+  description: Test get_risky_users with default/test parameters
+  fixtures_required:
+  - security-test
+  expected_result_type: array

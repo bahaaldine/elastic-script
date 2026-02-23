@@ -1,0 +1,11 @@
+name: detect-duplicates
+version: 1.0.0
+description: Detect duplicate or near-duplicate documents based on content similarity.
+author: search-team
+category: search
+tags:
+  - search
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

@@ -1,0 +1,6 @@
+skill: get_hot_threads
+category: cluster
+tests:
+- name: default_execution
+  description: Test get_hot_threads with default/test parameters
+  expected_result_type: object

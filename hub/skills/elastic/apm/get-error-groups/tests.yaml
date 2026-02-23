@@ -1,0 +1,10 @@
+skill: get_error_groups
+category: apm
+tests:
+- name: default_execution
+  description: Test get_error_groups with default/test parameters
+  parameters:
+    service: test-value
+  fixtures_required:
+  - apm-test
+  expected_result_type: array

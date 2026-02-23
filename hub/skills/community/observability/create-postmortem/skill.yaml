@@ -1,0 +1,11 @@
+name: create-postmortem
+version: 1.0.0
+description: Generate a postmortem document from incident data including timeline, impact analysis, and action items.
+author: sre-team
+category: observability
+tags:
+  - observability
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

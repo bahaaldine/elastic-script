@@ -1,0 +1,11 @@
+name: compare-deployments
+version: 1.0.0
+description: Compare performance metrics between two deployments or versions.
+author: apm-team
+category: apm
+tags:
+  - apm
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

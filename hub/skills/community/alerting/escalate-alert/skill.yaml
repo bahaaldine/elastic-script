@@ -1,0 +1,11 @@
+name: escalate-alert
+version: 1.0.0
+description: Escalate an alert to the next tier based on escalation policies.
+author: sre-team
+category: alerting
+tags:
+  - alerting
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

@@ -1,0 +1,8 @@
+skill: list_services
+category: apm
+tests:
+- name: default_execution
+  description: Test list_services with default/test parameters
+  fixtures_required:
+  - apm-test
+  expected_result_type: array

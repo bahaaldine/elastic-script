@@ -1,0 +1,11 @@
+name: detect-log-patterns
+version: 1.0.0
+description: Detect common log patterns and categorize log messages.
+author: sre-team
+category: observability
+tags:
+  - observability
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

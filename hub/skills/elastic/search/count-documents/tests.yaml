@@ -1,0 +1,8 @@
+skill: count_documents
+category: search
+tests:
+- name: default_execution
+  description: Test count_documents with default/test parameters
+  fixtures_required:
+  - content-test
+  expected_result_type: object

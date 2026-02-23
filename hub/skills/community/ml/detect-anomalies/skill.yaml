@@ -1,0 +1,11 @@
+name: detect-anomalies
+version: 1.0.0
+description: Detect anomalies in time-series data using statistical methods.
+author: ml-team
+category: ml
+tags:
+  - ml
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

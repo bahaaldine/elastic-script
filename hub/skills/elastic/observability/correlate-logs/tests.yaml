@@ -1,0 +1,11 @@
+skill: correlate_logs
+category: observability
+tests:
+- name: default_execution
+  description: Test correlate_logs with default/test parameters
+  parameters:
+    trace_id: test-id-001
+    index_pattern: logs-test
+  fixtures_required:
+  - logs-test
+  expected_result_type: array

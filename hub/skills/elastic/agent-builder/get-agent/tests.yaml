@@ -1,0 +1,7 @@
+skill: ab_get_agent
+category: agent-builder
+tests:
+- name: default_execution
+  description: Test ab_get_agent with default/test parameters
+  parameters:
+    agent_id: test-id-001

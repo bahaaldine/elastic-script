@@ -1,0 +1,10 @@
+skill: get_host_metrics
+category: metrics
+tests:
+- name: default_execution
+  description: Test get_host_metrics with default/test parameters
+  parameters:
+    hostname: test-name
+  fixtures_required:
+  - metrics-test
+  expected_result_type: array

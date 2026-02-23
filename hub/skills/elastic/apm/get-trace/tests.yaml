@@ -1,0 +1,10 @@
+skill: get_trace
+category: apm
+tests:
+- name: default_execution
+  description: Test get_trace with default/test parameters
+  parameters:
+    trace_id: test-id-001
+  fixtures_required:
+  - apm-test
+  expected_result_type: array

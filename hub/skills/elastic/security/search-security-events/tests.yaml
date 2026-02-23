@@ -1,0 +1,10 @@
+skill: search_security_events
+category: security
+tests:
+- name: default_execution
+  description: Test search_security_events with default/test parameters
+  parameters:
+    query: test query
+  fixtures_required:
+  - security-test
+  expected_result_type: array

@@ -1,0 +1,8 @@
+skill: get_alert_history
+category: alerting
+tests:
+- name: default_execution
+  description: Test get_alert_history with default/test parameters
+  parameters:
+    rule_id: test-rule
+  expected_result_type: array

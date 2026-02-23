@@ -1,0 +1,6 @@
+skill: get_pending_tasks
+category: cluster
+tests:
+- name: default_execution
+  description: Test get_pending_tasks with default/test parameters
+  expected_result_type: array

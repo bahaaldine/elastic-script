@@ -1,0 +1,11 @@
+name: get-throughput-stats
+version: 1.0.0
+description: Get service throughput statistics including requests per minute.
+author: apm-team
+category: apm
+tags:
+  - apm
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

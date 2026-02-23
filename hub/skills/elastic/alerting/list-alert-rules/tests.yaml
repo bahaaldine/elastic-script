@@ -1,0 +1,6 @@
+skill: list_alert_rules
+category: alerting
+tests:
+- name: default_execution
+  description: Test list_alert_rules with default/test parameters
+  expected_result_type: array

@@ -1,0 +1,10 @@
+skill: get_throughput
+category: apm
+tests:
+- name: default_execution
+  description: Test get_throughput with default/test parameters
+  parameters:
+    service: test-value
+  fixtures_required:
+  - apm-test
+  expected_result_type: array

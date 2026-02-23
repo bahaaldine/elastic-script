@@ -3,6 +3,8 @@
 **The skills framework for Elasticsearch.** Build, share, and run skills on your data.
 
 [![Skills](https://img.shields.io/badge/skills-155+-blue)](hub/)
+[![Skills Validated](https://img.shields.io/badge/validated-100%25-brightgreen)](tests/skills/)
+[![Skill Tests](https://github.com/bahaaldine/moltler/actions/workflows/skill-tests.yml/badge.svg)](https://github.com/bahaaldine/moltler/actions/workflows/skill-tests.yml)
 [![Solutions](https://img.shields.io/badge/solutions-observability%20%7C%20security%20%7C%20search-green)]()
 [![MCP](https://img.shields.io/badge/MCP-compatible-purple)]()
 
@@ -275,6 +277,30 @@ END SKILL;
 
 ---
 
+## Quality Assurance
+
+Every skill is validated before release:
+
+```bash
+# Validate all skills (no ES needed)
+python tests/skills/validate_syntax.py
+
+# Run full test suite (requires ES + plugin)
+./tests/skills/run_tests.sh
+
+# Test specific category
+./tests/skills/run_tests.sh --category security
+```
+
+**All 155 skills pass syntax validation.** The CI/CD pipeline ensures:
+- All skills are validated on every PR
+- Releases require 100% validation pass rate
+- Test results are published with each release
+
+[**Testing Documentation →**](tests/skills/README.md)
+
+---
+
 ## Resources
 
 | Resource | Description |
@@ -282,6 +308,7 @@ END SKILL;
 | [**Documentation**](docs/index.md) | Full documentation |
 | [**MoltlerHub**](moltler-hub/) | Web portal to browse 155+ skills |
 | [**CLI Reference**](hub/) | Moltler CLI for terminal |
+| [**Skill Testing**](tests/skills/README.md) | Test framework and validation |
 | [**Contributing**](hub/CONTRIBUTING.md) | Add your skill |
 | [**Language Reference**](LANGUAGE_REFERENCE.md) | elastic-script syntax |
 

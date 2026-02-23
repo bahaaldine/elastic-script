@@ -1,0 +1,6 @@
+skill: get_cluster_health
+category: cluster
+tests:
+- name: default_execution
+  description: Test get_cluster_health with default/test parameters
+  expected_result_type: object

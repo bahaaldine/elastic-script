@@ -2508,5 +2508,477 @@
     "parameters": [],
     "returns": "ARRAY",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/user-activity"
+  },
+  {
+    "name": "detect_incident",
+    "displayName": "Detect Incident",
+    "description": "Automatically detect incidents from logs, metrics, and alerts. Identifies patterns indicative of service degradation or failures.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "observability",
+    "tags": ["incident", "detection", "sre", "automation"],
+    "parameters": [
+      {"name": "severity_threshold", "type": "STRING", "description": "Minimum severity to detect", "default": "warning", "required": false}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/observability/detect-incident"
+  },
+  {
+    "name": "triage_incident",
+    "displayName": "Triage Incident",
+    "description": "Automatically triage and prioritize incidents based on impact, affected services, and historical patterns.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "observability",
+    "tags": ["incident", "triage", "sre", "prioritization"],
+    "parameters": [
+      {"name": "incident_id", "type": "STRING", "description": "Incident ID to triage", "required": true}
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/observability/triage-incident"
+  },
+  {
+    "name": "notify_oncall",
+    "displayName": "Notify On-Call",
+    "description": "Send notifications to on-call engineers via PagerDuty, Slack, or other configured channels.",
+    "version": "2.0.0",
+    "author": "sre-team",
+    "category": "alerting",
+    "tags": ["notification", "oncall", "pagerduty", "slack"],
+    "parameters": [
+      {"name": "message", "type": "STRING", "description": "Message to send", "required": true},
+      {"name": "channel", "type": "STRING", "description": "Notification channel", "default": "default", "required": false}
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/alerting/notify-oncall"
+  },
+  {
+    "name": "create_postmortem",
+    "displayName": "Create Postmortem",
+    "description": "Generate a postmortem document from incident data including timeline, impact analysis, and action items.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "observability",
+    "tags": ["incident", "postmortem", "documentation", "sre"],
+    "parameters": [
+      {"name": "incident_id", "type": "STRING", "description": "Incident ID", "required": true}
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/observability/create-postmortem"
+  },
+  {
+    "name": "track_resolution",
+    "displayName": "Track Resolution",
+    "description": "Track incident resolution progress, update status, and record resolution actions.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "observability",
+    "tags": ["incident", "resolution", "tracking", "sre"],
+    "parameters": [
+      {"name": "incident_id", "type": "STRING", "description": "Incident ID", "required": true},
+      {"name": "status", "type": "STRING", "description": "Resolution status", "required": true}
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/observability/track-resolution"
+  },
+  {
+    "name": "detect_anomalies",
+    "displayName": "Detect Anomalies",
+    "description": "Use ML to detect anomalies in metrics, logs, or user behavior patterns.",
+    "version": "1.0.0",
+    "author": "security-team",
+    "category": "ml",
+    "tags": ["anomaly", "detection", "ml", "ueba"],
+    "parameters": [
+      {"name": "data_source", "type": "STRING", "description": "Data source to analyze", "required": true}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/ml/detect-anomalies"
+  },
+  {
+    "name": "correlate_alerts",
+    "displayName": "Correlate Alerts",
+    "description": "Correlate related alerts to reduce noise and identify root causes.",
+    "version": "1.2.0",
+    "author": "security-team",
+    "category": "security",
+    "tags": ["alerts", "correlation", "noise-reduction", "siem"],
+    "parameters": [
+      {"name": "time_window", "type": "STRING", "description": "Time window for correlation", "default": "15m", "required": false}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/security/correlate-alerts"
+  },
+  {
+    "name": "enrich_with_threat_intel",
+    "displayName": "Enrich with Threat Intel",
+    "description": "Enrich security data with external threat intelligence feeds.",
+    "version": "1.0.0",
+    "author": "security-team",
+    "category": "security",
+    "tags": ["threat-intel", "enrichment", "ioc", "siem"],
+    "parameters": [
+      {"name": "ioc", "type": "STRING", "description": "Indicator to enrich", "required": true}
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/security/enrich-threat-intel"
+  },
+  {
+    "name": "correlate_logs",
+    "displayName": "Correlate Logs",
+    "description": "Correlate logs across multiple services using trace IDs, request IDs, or timestamps.",
+    "version": "1.1.0",
+    "author": "platform-team",
+    "category": "observability",
+    "tags": ["logs", "correlation", "tracing", "debugging"],
+    "parameters": [
+      {"name": "correlation_id", "type": "STRING", "description": "Trace or request ID", "required": true}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/observability/correlate-logs"
+  },
+  {
+    "name": "detect_log_patterns",
+    "displayName": "Detect Log Patterns",
+    "description": "Use ML to identify common log patterns and surface unusual messages.",
+    "version": "1.0.0",
+    "author": "platform-team",
+    "category": "observability",
+    "tags": ["logs", "patterns", "ml", "categorization"],
+    "parameters": [
+      {"name": "index_pattern", "type": "STRING", "description": "Log index pattern", "default": "logs-*", "required": false}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/observability/detect-log-patterns"
+  },
+  {
+    "name": "get_error_trends",
+    "displayName": "Get Error Trends",
+    "description": "Analyze error rate trends over time to identify regressions or improvements.",
+    "version": "1.0.0",
+    "author": "platform-team",
+    "category": "observability",
+    "tags": ["errors", "trends", "analytics", "monitoring"],
+    "parameters": [
+      {"name": "time_range", "type": "STRING", "description": "Time range to analyze", "default": "24h", "required": false}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/observability/get-error-trends"
+  },
+  {
+    "name": "get_service_latency",
+    "displayName": "Get Service Latency",
+    "description": "Get latency percentiles (p50, p95, p99) for a service over time.",
+    "version": "1.0.0",
+    "author": "observability-team",
+    "category": "apm",
+    "tags": ["latency", "percentiles", "performance", "apm"],
+    "parameters": [
+      {"name": "service_name", "type": "STRING", "description": "Service name", "required": true}
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/apm/get-service-latency"
+  },
+  {
+    "name": "get_throughput_stats",
+    "displayName": "Get Throughput Stats",
+    "description": "Get request throughput statistics (requests per second) for services.",
+    "version": "1.0.0",
+    "author": "observability-team",
+    "category": "apm",
+    "tags": ["throughput", "rps", "performance", "metrics"],
+    "parameters": [
+      {"name": "service_name", "type": "STRING", "description": "Service name", "required": false}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/apm/get-throughput-stats"
+  },
+  {
+    "name": "detect_performance_regression",
+    "displayName": "Detect Performance Regression",
+    "description": "Compare current performance against baseline to detect regressions.",
+    "version": "1.0.0",
+    "author": "observability-team",
+    "category": "apm",
+    "tags": ["performance", "regression", "comparison", "baseline"],
+    "parameters": [
+      {"name": "service_name", "type": "STRING", "description": "Service name", "required": true},
+      {"name": "baseline_period", "type": "STRING", "description": "Baseline time period", "default": "7d", "required": false}
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/apm/detect-performance-regression"
+  },
+  {
+    "name": "compare_deployments",
+    "displayName": "Compare Deployments",
+    "description": "Compare performance metrics between two deployments or time periods.",
+    "version": "1.0.0",
+    "author": "observability-team",
+    "category": "apm",
+    "tags": ["deployment", "comparison", "canary", "performance"],
+    "parameters": [
+      {"name": "deployment_a", "type": "STRING", "description": "First deployment ID", "required": true},
+      {"name": "deployment_b", "type": "STRING", "description": "Second deployment ID", "required": true}
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/apm/compare-deployments"
+  },
+  {
+    "name": "hybrid_search",
+    "displayName": "Hybrid Search",
+    "description": "Combine keyword and semantic search for best-of-both-worlds retrieval.",
+    "version": "1.0.0",
+    "author": "search-team",
+    "category": "search",
+    "tags": ["search", "hybrid", "vector", "bm25"],
+    "parameters": [
+      {"name": "query", "type": "STRING", "description": "Search query", "required": true},
+      {"name": "index", "type": "STRING", "description": "Index to search", "required": true}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/search/hybrid-search"
+  },
+  {
+    "name": "rerank_results",
+    "displayName": "Rerank Results",
+    "description": "Rerank search results using a cross-encoder model for improved relevance.",
+    "version": "1.0.0",
+    "author": "search-team",
+    "category": "search",
+    "tags": ["search", "reranking", "relevance", "ml"],
+    "parameters": [
+      {"name": "query", "type": "STRING", "description": "Original query", "required": true},
+      {"name": "results", "type": "ARRAY", "description": "Results to rerank", "required": true}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/search/rerank-results"
+  },
+  {
+    "name": "generate_embeddings",
+    "displayName": "Generate Embeddings",
+    "description": "Generate vector embeddings for text using configured embedding model.",
+    "version": "1.0.0",
+    "author": "search-team",
+    "category": "ml",
+    "tags": ["embeddings", "vector", "ml", "nlp"],
+    "parameters": [
+      {"name": "text", "type": "STRING", "description": "Text to embed", "required": true}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/ml/generate-embeddings"
+  },
+  {
+    "name": "search_with_filters",
+    "displayName": "Search with Filters",
+    "description": "Perform filtered search with faceted navigation support.",
+    "version": "1.0.0",
+    "author": "search-team",
+    "category": "search",
+    "tags": ["search", "filters", "facets", "navigation"],
+    "parameters": [
+      {"name": "query", "type": "STRING", "description": "Search query", "required": true},
+      {"name": "filters", "type": "DOCUMENT", "description": "Filter criteria", "required": false}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/search/search-with-filters"
+  },
+  {
+    "name": "audit_user_access",
+    "displayName": "Audit User Access",
+    "description": "Audit user access patterns and permissions for compliance reviews.",
+    "version": "1.0.0",
+    "author": "compliance-team",
+    "category": "security",
+    "tags": ["audit", "access", "compliance", "rbac"],
+    "parameters": [
+      {"name": "user_id", "type": "STRING", "description": "User ID to audit", "required": false}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/security/audit-user-access"
+  },
+  {
+    "name": "detect_policy_violations",
+    "displayName": "Detect Policy Violations",
+    "description": "Detect security policy violations based on configured rules.",
+    "version": "1.0.0",
+    "author": "compliance-team",
+    "category": "security",
+    "tags": ["policy", "violations", "compliance", "governance"],
+    "parameters": [
+      {"name": "policy_id", "type": "STRING", "description": "Policy ID to check", "required": false}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/security/detect-policy-violations"
+  },
+  {
+    "name": "generate_compliance_report",
+    "displayName": "Generate Compliance Report",
+    "description": "Generate compliance reports for SOC2, HIPAA, PCI-DSS, or custom frameworks.",
+    "version": "1.0.0",
+    "author": "compliance-team",
+    "category": "security",
+    "tags": ["compliance", "report", "soc2", "hipaa"],
+    "parameters": [
+      {"name": "framework", "type": "STRING", "description": "Compliance framework", "default": "SOC2", "required": false}
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/security/generate-compliance-report"
+  },
+  {
+    "name": "track_privileged_actions",
+    "displayName": "Track Privileged Actions",
+    "description": "Track and audit privileged user actions for security monitoring.",
+    "version": "1.0.0",
+    "author": "compliance-team",
+    "category": "security",
+    "tags": ["privileged", "audit", "admin", "monitoring"],
+    "parameters": [
+      {"name": "time_range", "type": "STRING", "description": "Time range to search", "default": "24h", "required": false}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/security/track-privileged-actions"
+  },
+  {
+    "name": "detect_duplicates",
+    "displayName": "Detect Duplicates",
+    "description": "Find duplicate or near-duplicate documents in an index.",
+    "version": "1.0.0",
+    "author": "data-team",
+    "category": "search",
+    "tags": ["duplicates", "data-quality", "deduplication"],
+    "parameters": [
+      {"name": "index", "type": "STRING", "description": "Index to check", "required": true},
+      {"name": "field", "type": "STRING", "description": "Field to check for duplicates", "required": true}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/search/detect-duplicates"
+  },
+  {
+    "name": "validate_schema",
+    "displayName": "Validate Schema",
+    "description": "Validate documents against expected schema and report violations.",
+    "version": "1.0.0",
+    "author": "data-team",
+    "category": "cluster",
+    "tags": ["schema", "validation", "data-quality", "mapping"],
+    "parameters": [
+      {"name": "index", "type": "STRING", "description": "Index to validate", "required": true}
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/cluster/validate-schema"
+  },
+  {
+    "name": "check_data_freshness",
+    "displayName": "Check Data Freshness",
+    "description": "Check if data is being ingested and identify stale data sources.",
+    "version": "1.0.0",
+    "author": "data-team",
+    "category": "observability",
+    "tags": ["freshness", "ingestion", "monitoring", "data-quality"],
+    "parameters": [
+      {"name": "index_pattern", "type": "STRING", "description": "Index pattern to check", "default": "*", "required": false}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/observability/check-data-freshness"
+  },
+  {
+    "name": "find_missing_fields",
+    "displayName": "Find Missing Fields",
+    "description": "Find documents with missing required fields for data quality checks.",
+    "version": "1.0.0",
+    "author": "data-team",
+    "category": "search",
+    "tags": ["missing", "fields", "data-quality", "validation"],
+    "parameters": [
+      {"name": "index", "type": "STRING", "description": "Index to check", "required": true},
+      {"name": "fields", "type": "ARRAY", "description": "Required fields", "required": true}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/search/find-missing-fields"
+  },
+  {
+    "name": "calculate_quality_score",
+    "displayName": "Calculate Quality Score",
+    "description": "Calculate overall data quality score for an index based on multiple metrics.",
+    "version": "1.0.0",
+    "author": "data-team",
+    "category": "observability",
+    "tags": ["quality", "score", "metrics", "data-quality"],
+    "parameters": [
+      {"name": "index", "type": "STRING", "description": "Index to analyze", "required": true}
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/observability/calculate-quality-score"
+  },
+  {
+    "name": "dedupe_alerts",
+    "displayName": "Dedupe Alerts",
+    "description": "Deduplicate similar alerts to reduce noise and alert fatigue.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "alerting",
+    "tags": ["alerts", "deduplication", "noise-reduction"],
+    "parameters": [
+      {"name": "time_window", "type": "STRING", "description": "Deduplication window", "default": "5m", "required": false}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/alerting/dedupe-alerts"
+  },
+  {
+    "name": "escalate_alert",
+    "displayName": "Escalate Alert",
+    "description": "Escalate an alert to the next tier based on escalation policies.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "alerting",
+    "tags": ["alerts", "escalation", "oncall", "routing"],
+    "parameters": [
+      {"name": "alert_id", "type": "STRING", "description": "Alert ID to escalate", "required": true}
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/alerting/escalate-alert"
+  },
+  {
+    "name": "auto_acknowledge",
+    "displayName": "Auto Acknowledge",
+    "description": "Automatically acknowledge alerts matching specified criteria.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "alerting",
+    "tags": ["alerts", "acknowledge", "automation"],
+    "parameters": [
+      {"name": "criteria", "type": "DOCUMENT", "description": "Match criteria", "required": true}
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/alerting/auto-acknowledge"
+  },
+  {
+    "name": "route_to_team",
+    "displayName": "Route to Team",
+    "description": "Route alerts to the appropriate team based on service ownership.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "alerting",
+    "tags": ["alerts", "routing", "teams", "ownership"],
+    "parameters": [
+      {"name": "alert_id", "type": "STRING", "description": "Alert ID", "required": true}
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/alerting/route-to-team"
+  },
+  {
+    "name": "trigger_runbook",
+    "displayName": "Trigger Runbook",
+    "description": "Automatically trigger a runbook in response to an alert.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "alerting",
+    "tags": ["runbook", "automation", "remediation"],
+    "parameters": [
+      {"name": "runbook_id", "type": "STRING", "description": "Runbook ID to execute", "required": true},
+      {"name": "alert_context", "type": "DOCUMENT", "description": "Alert context data", "required": false}
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/alerting/trigger-runbook"
   }
 ]

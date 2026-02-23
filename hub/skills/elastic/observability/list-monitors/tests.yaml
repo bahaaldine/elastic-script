@@ -1,0 +1,8 @@
+skill: list_monitors
+category: observability
+tests:
+- name: default_execution
+  description: Test list_monitors with default/test parameters
+  fixtures_required:
+  - logs-test
+  expected_result_type: array

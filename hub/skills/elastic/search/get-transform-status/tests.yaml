@@ -1,0 +1,10 @@
+skill: get_transform_status
+category: search
+tests:
+- name: default_execution
+  description: Test get_transform_status with default/test parameters
+  parameters:
+    transform_id: test-id-001
+  fixtures_required:
+  - content-test
+  expected_result_type: object

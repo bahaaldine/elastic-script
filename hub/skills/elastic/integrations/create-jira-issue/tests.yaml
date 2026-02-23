@@ -1,0 +1,12 @@
+skill: create_jira_issue
+category: integrations
+tests:
+- name: default_execution
+  description: Test create_jira_issue with default/test parameters
+  parameters:
+    project: test-value
+    summary: test-value
+    description: test-value
+  skip: true
+  skip_reason: Requires Jira credentials
+  expected_result_type: object

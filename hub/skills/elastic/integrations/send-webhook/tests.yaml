@@ -1,0 +1,11 @@
+skill: send_webhook
+category: integrations
+tests:
+- name: default_execution
+  description: Test send_webhook with default/test parameters
+  parameters:
+    url: test-value
+    payload: test-value
+  skip: true
+  skip_reason: Requires external webhook endpoint
+  expected_result_type: object

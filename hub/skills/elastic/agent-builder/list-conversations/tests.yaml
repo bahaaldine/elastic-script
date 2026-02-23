@@ -1,0 +1,5 @@
+skill: ab_list_conversations
+category: agent-builder
+tests:
+- name: default_execution
+  description: Test ab_list_conversations with default/test parameters

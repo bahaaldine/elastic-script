@@ -1,0 +1,6 @@
+skill: ab_list_tools
+category: agent-builder
+tests:
+- name: default_execution
+  description: Test ab_list_tools with default/test parameters
+  expected_result_type: array

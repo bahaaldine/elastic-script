@@ -1,0 +1,11 @@
+name: calculate-quality-score
+version: 1.0.0
+description: Calculate data quality score based on completeness and consistency.
+author: sre-team
+category: observability
+tags:
+  - observability
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

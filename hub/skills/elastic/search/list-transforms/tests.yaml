@@ -1,0 +1,8 @@
+skill: list_transforms
+category: search
+tests:
+- name: default_execution
+  description: Test list_transforms with default/test parameters
+  fixtures_required:
+  - content-test
+  expected_result_type: array

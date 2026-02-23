@@ -4,6 +4,13 @@ import { useState, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { SAMPLE_SKILLS, CATEGORIES, searchSkills, filterByCategory, type Skill } from '@/lib/skills';
+import validatedSkills from '@/data/validated_skills.json';
+
+function isSkillVerified(skillName: string): boolean {
+  const skills = (validatedSkills as any).skills;
+  const info = skills[skillName.replace(/-/g, '_')] || skills[skillName];
+  return info?.syntax_valid && info?.tested;
+}
 
 function SkillsContent() {
   const searchParams = useSearchParams();
@@ -150,20 +157,29 @@ function SkillsContent() {
 }
 
 function SkillCard({ skill }: { skill: Skill }) {
+  const verified = isSkillVerified(skill.name);
+  
   return (
     <Link
       href={`/skills/${skill.name}`}
       className="p-6 bg-gray-800 rounded-lg hover:bg-gray-750 border border-gray-700 hover:border-purple-500 transition block"
     >
       <div className="flex items-start justify-between mb-3">
-        <div>
+        <div className="flex items-center gap-2">
           <h3 className="font-semibold">{skill.displayName}</h3>
-          <p className="text-sm text-gray-500">@elastic/{skill.name}</p>
+          {verified && (
+            <span className="flex items-center gap-0.5 text-green-400" title="Verified - Syntax validated and tested">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </span>
+          )}
         </div>
         <span className="text-xs bg-purple-600/20 text-purple-400 px-2 py-1 rounded">
           {CATEGORIES[skill.category]?.icon} {skill.category}
         </span>
       </div>
+      <p className="text-sm text-gray-500 mb-1">@elastic/{skill.name}</p>
       <p className="text-sm text-gray-400 mb-4 line-clamp-2">{skill.description}</p>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs text-gray-500">

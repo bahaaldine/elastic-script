@@ -1,0 +1,11 @@
+name: notify-oncall
+version: 1.0.0
+description: Send notifications to on-call engineers via PagerDuty, Slack, or other configured channels.
+author: sre-team
+category: alerting
+tags:
+  - alerting
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

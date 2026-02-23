@@ -1,0 +1,6 @@
+skill: list_ml_jobs
+category: ml
+tests:
+- name: default_execution
+  description: Test list_ml_jobs with default/test parameters
+  expected_result_type: array

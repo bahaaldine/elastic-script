@@ -1,0 +1,14 @@
+name: detect-incident
+version: 1.0.0
+description: Automatically detect incidents from logs, metrics, and alerts
+author: sre-team
+category: observability
+tags:
+  - observability
+  - incident
+  - detection
+  - sre
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

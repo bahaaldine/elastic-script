@@ -1,0 +1,11 @@
+name: dedupe-alerts
+version: 1.0.0
+description: Deduplicate similar alerts to reduce noise and alert fatigue.
+author: sre-team
+category: alerting
+tags:
+  - alerting
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

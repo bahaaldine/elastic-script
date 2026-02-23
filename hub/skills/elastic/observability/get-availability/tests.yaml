@@ -1,0 +1,10 @@
+skill: get_availability
+category: observability
+tests:
+- name: default_execution
+  description: Test get_availability with default/test parameters
+  parameters:
+    monitor_id: test-id-001
+  fixtures_required:
+  - logs-test
+  expected_result_type: object

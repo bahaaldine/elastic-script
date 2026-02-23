@@ -1,0 +1,10 @@
+skill: user_activity
+category: security
+tests:
+- name: default_execution
+  description: Test user_activity with default/test parameters
+  parameters:
+    username: test-name
+  fixtures_required:
+  - security-test
+  expected_result_type: array

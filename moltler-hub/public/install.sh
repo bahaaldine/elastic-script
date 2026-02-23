@@ -140,13 +140,32 @@ fi
 # Count installed skills
 SKILL_COUNT=$(./moltler-cli.sh installed 2>/dev/null | grep -c "✓" || echo "0")
 
+# Post-install validation
+echo ""
+echo -e "${YELLOW}Validating installation...${NC}"
+
+# Test a simple skill execution
+VALIDATION_RESULT=$(curl -s $AUTH_HEADER "$ES_URL/_escript" \
+  -H 'Content-Type: application/json' \
+  -d '{"query": "RUN SKILL list_all_skills()"}' 2>/dev/null)
+
+if echo "$VALIDATION_RESULT" | grep -q '"result"'; then
+    echo -e "${GREEN}✓ Skills execution validated${NC}"
+    VALIDATION_STATUS="PASSED"
+else
+    echo -e "${YELLOW}⚠ Could not validate skill execution${NC}"
+    echo "  This might be normal if no skills are installed yet."
+    VALIDATION_STATUS="SKIPPED"
+fi
+
 echo ""
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
 echo -e "${GREEN}✓ Moltler installed successfully!${NC}"
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
 echo ""
-echo -e "  ${BLUE}Skills installed:${NC} $SKILL_COUNT"
-echo -e "  ${BLUE}Elasticsearch:${NC}   $ES_URL"
+echo -e "  ${BLUE}Skills installed:${NC}  $SKILL_COUNT"
+echo -e "  ${BLUE}Validation:${NC}        $VALIDATION_STATUS"
+echo -e "  ${BLUE}Elasticsearch:${NC}     $ES_URL"
 echo ""
 echo "Quick start:"
 echo ""

@@ -1,0 +1,8 @@
+skill: get_ssl_status
+category: observability
+tests:
+- name: default_execution
+  description: Test get_ssl_status with default/test parameters
+  fixtures_required:
+  - logs-test
+  expected_result_type: object

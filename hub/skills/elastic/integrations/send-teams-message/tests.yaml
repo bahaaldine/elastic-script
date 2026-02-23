@@ -1,0 +1,11 @@
+skill: send_teams_message
+category: integrations
+tests:
+- name: default_execution
+  description: Test send_teams_message with default/test parameters
+  parameters:
+    webhook_url: test-value
+    message: test-value
+  skip: true
+  skip_reason: Requires Teams webhook
+  expected_result_type: object

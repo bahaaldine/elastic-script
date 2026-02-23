@@ -1,0 +1,8 @@
+skill: get_top_queries
+category: enterprise-search
+tests:
+- name: default_execution
+  description: Test get_top_queries with default/test parameters
+  parameters:
+    app_name: test-name
+  expected_result_type: array

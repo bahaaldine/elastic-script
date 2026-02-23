@@ -1,0 +1,11 @@
+skill: trigger_pagerduty
+category: integrations
+tests:
+- name: default_execution
+  description: Test trigger_pagerduty with default/test parameters
+  parameters:
+    service_key: test-value
+    description: test-value
+  skip: true
+  skip_reason: Requires PagerDuty API key
+  expected_result_type: object

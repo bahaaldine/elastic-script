@@ -1,0 +1,10 @@
+skill: send_opsgenie_alert
+category: integrations
+tests:
+- name: default_execution
+  description: Test send_opsgenie_alert with default/test parameters
+  parameters:
+    message: test-value
+  skip: true
+  skip_reason: Requires OpsGenie API key
+  expected_result_type: object

@@ -1,0 +1,8 @@
+skill: list_ingest_pipelines
+category: search
+tests:
+- name: default_execution
+  description: Test list_ingest_pipelines with default/test parameters
+  fixtures_required:
+  - content-test
+  expected_result_type: array

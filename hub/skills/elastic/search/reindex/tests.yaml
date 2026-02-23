@@ -1,0 +1,11 @@
+skill: reindex
+category: search
+tests:
+- name: default_execution
+  description: Test reindex with default/test parameters
+  parameters:
+    source_index: logs-test
+    dest_index: logs-test
+  fixtures_required:
+  - content-test
+  expected_result_type: object

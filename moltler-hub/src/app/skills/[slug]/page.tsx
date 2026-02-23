@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { SAMPLE_SKILLS, CATEGORIES } from '@/lib/skills';
+import validatedSkills from '@/data/validated_skills.json';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -15,6 +16,11 @@ export default async function SkillDetailPage({ params }: Props) {
   }
 
   const category = CATEGORIES[skill.category];
+  
+  // Check if skill is validated
+  const validationInfo = (validatedSkills as any).skills[skill.name.replace(/-/g, '_')] || 
+                         (validatedSkills as any).skills[skill.name];
+  const isVerified = validationInfo?.syntax_valid && validationInfo?.tested;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-950 text-white">
@@ -67,7 +73,17 @@ export default async function SkillDetailPage({ params }: Props) {
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-3xl">{category?.icon || '📦'}</span>
                 <div>
-                  <h1 className="text-3xl font-bold">{skill.displayName}</h1>
+                  <div className="flex items-center gap-3">
+                    <h1 className="text-3xl font-bold">{skill.displayName}</h1>
+                    {isVerified && (
+                      <span className="flex items-center gap-1 px-2 py-0.5 bg-green-600/20 text-green-400 rounded-full text-sm border border-green-600/30">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        Verified
+                      </span>
+                    )}
+                  </div>
                   <p className="text-gray-400">@elastic/{skill.name}</p>
                 </div>
               </div>

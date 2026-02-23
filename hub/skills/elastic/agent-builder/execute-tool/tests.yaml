@@ -1,0 +1,9 @@
+skill: ab_execute_tool
+category: agent-builder
+tests:
+- name: default_execution
+  description: Test ab_execute_tool with default/test parameters
+  parameters:
+    tool_id: test-id-001
+    arguments: test-value
+  expected_result_type: object

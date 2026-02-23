@@ -1,0 +1,11 @@
+name: auto-acknowledge
+version: 1.0.0
+description: Automatically acknowledge alerts matching specified criteria.
+author: sre-team
+category: alerting
+tags:
+  - alerting
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

@@ -1,0 +1,3 @@
+# Moltler Skill Testing Framework Requirements
+requests>=2.28.0
+pyyaml>=6.0

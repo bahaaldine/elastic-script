@@ -1,0 +1,11 @@
+skill: trigger_github_workflow
+category: integrations
+tests:
+- name: default_execution
+  description: Test trigger_github_workflow with default/test parameters
+  parameters:
+    repo: test-value
+    workflow: test-value
+  skip: true
+  skip_reason: Requires GitHub token
+  expected_result_type: object

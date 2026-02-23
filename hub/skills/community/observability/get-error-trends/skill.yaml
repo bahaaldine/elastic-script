@@ -1,0 +1,11 @@
+name: get-error-trends
+version: 1.0.0
+description: Analyze error trends over time to identify emerging issues.
+author: sre-team
+category: observability
+tags:
+  - observability
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

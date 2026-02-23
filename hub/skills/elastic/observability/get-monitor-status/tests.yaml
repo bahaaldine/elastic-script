@@ -1,0 +1,10 @@
+skill: get_monitor_status
+category: observability
+tests:
+- name: default_execution
+  description: Test get_monitor_status with default/test parameters
+  parameters:
+    monitor_id: test-id-001
+  fixtures_required:
+  - logs-test
+  expected_result_type: object

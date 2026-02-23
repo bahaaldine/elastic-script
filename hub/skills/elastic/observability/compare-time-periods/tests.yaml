@@ -1,0 +1,11 @@
+skill: compare_time_periods
+category: observability
+tests:
+- name: default_execution
+  description: Test compare_time_periods with default/test parameters
+  parameters:
+    index_pattern: logs-test
+    metric: test-value
+  fixtures_required:
+  - logs-test
+  expected_result_type: object
