@@ -65,7 +65,8 @@ jobs:
         working-directory: elasticsearch
         run: |
           echo "=== Starting build ==="
-          ./gradlew :x-pack:plugin:elastic-script:build -x test --no-daemon --info 2>&1 | tail -100
+          # Use bundlePlugin task which creates the distributable zip
+          ./gradlew :x-pack:plugin:elastic-script:bundlePlugin -x test --no-daemon 2>&1 | tail -50
       
       - name: Find and prepare artifacts
         id: artifacts
