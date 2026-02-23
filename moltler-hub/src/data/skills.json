@@ -1,0 +1,2512 @@
+[
+  {
+    "name": "chat",
+    "displayName": "Chat",
+    "description": "Send a chat message to an Agent Builder agent and get a response. This is the main way to interact with agents programmatically.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "agent-builder",
+    "tags": [
+      "agent-builder",
+      "chat",
+      "ai",
+      "converse"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/chat"
+  },
+  {
+    "name": "create-agent",
+    "displayName": "Create Agent",
+    "description": "Create a new Agent Builder agent in Kibana with specified name, description, instructions, and tools.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "agent-builder",
+    "tags": [
+      "agent-builder",
+      "agents",
+      "ai",
+      "create"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/create-agent"
+  },
+  {
+    "name": "create-tool",
+    "displayName": "Create Tool",
+    "description": "Create a new tool in Agent Builder. Tools define capabilities that agents can invoke.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "agent-builder",
+    "tags": [
+      "agent-builder",
+      "tools",
+      "ai",
+      "create"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/create-tool"
+  },
+  {
+    "name": "delete-agent",
+    "displayName": "Delete Agent",
+    "description": "Delete an Agent Builder agent by ID.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "agent-builder",
+    "tags": [
+      "agent-builder",
+      "agents",
+      "ai",
+      "delete"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/delete-agent"
+  },
+  {
+    "name": "execute-tool",
+    "displayName": "Execute Tool",
+    "description": "Execute an Agent Builder tool directly with provided arguments. Useful for testing tools or running them outside of agent context.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "agent-builder",
+    "tags": [
+      "agent-builder",
+      "tools",
+      "ai",
+      "execute"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/execute-tool"
+  },
+  {
+    "name": "get-agent",
+    "displayName": "Get Agent",
+    "description": "Get details of a specific Agent Builder agent by ID. Returns full agent configuration including tools, instructions, and model settings.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "agent-builder",
+    "tags": [
+      "agent-builder",
+      "agents",
+      "ai"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/get-agent"
+  },
+  {
+    "name": "get-agent-card",
+    "displayName": "Get Agent Card",
+    "description": "Get the A2A (Agent-to-Agent) card for an agent. This JSON-LD document describes the agent capabilities for A2A protocol.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "agent-builder",
+    "tags": [
+      "agent-builder",
+      "a2a",
+      "ai",
+      "interop"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/get-agent-card"
+  },
+  {
+    "name": "get-conversation",
+    "displayName": "Get Conversation",
+    "description": "Get full conversation history by ID. Returns all messages exchanged with the agent.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "agent-builder",
+    "tags": [
+      "agent-builder",
+      "conversations",
+      "ai",
+      "history"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/get-conversation"
+  },
+  {
+    "name": "list-agents",
+    "displayName": "List Agents",
+    "description": "List all Agent Builder agents configured in Kibana. Returns agent IDs, names, descriptions, and configurations.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "agent-builder",
+    "tags": [
+      "agent-builder",
+      "agents",
+      "ai"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/list-agents"
+  },
+  {
+    "name": "list-conversations",
+    "displayName": "List Conversations",
+    "description": "List all conversations with Agent Builder agents. Returns conversation IDs, titles, and metadata.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "agent-builder",
+    "tags": [
+      "agent-builder",
+      "conversations",
+      "ai"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/list-conversations"
+  },
+  {
+    "name": "list-tools",
+    "displayName": "List Tools",
+    "description": "List all tools available in Agent Builder. Tools are capabilities that agents can use.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "agent-builder",
+    "tags": [
+      "agent-builder",
+      "tools",
+      "ai"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/list-tools"
+  },
+  {
+    "name": "mcp-call",
+    "displayName": "Mcp Call",
+    "description": "Call the Agent Builder MCP server endpoint. This enables MCP-based tool discovery and execution through Agent Builder.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "agent-builder",
+    "tags": [
+      "agent-builder",
+      "mcp",
+      "ai",
+      "tools"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/mcp-call"
+  },
+  {
+    "name": "send-a2a-task",
+    "displayName": "Send A2a Task",
+    "description": "Send a task to an Agent Builder agent using A2A (Agent-to-Agent) protocol. This enables agent-to-agent communication.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "agent-builder",
+    "tags": [
+      "agent-builder",
+      "a2a",
+      "ai",
+      "task"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/send-a2a-task"
+  },
+  {
+    "name": "acknowledge-alert",
+    "displayName": "Acknowledge Alert",
+    "description": "Acknowledge an active alert",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "alerting",
+    "tags": [
+      "alerting",
+      "acknowledge",
+      "response"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/alerting/acknowledge-alert"
+  },
+  {
+    "name": "create-threshold-rule",
+    "displayName": "Create Threshold Rule",
+    "description": "Create a threshold-based alert rule",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "alerting",
+    "tags": [
+      "alerting",
+      "rules",
+      "threshold"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/alerting/create-threshold-rule"
+  },
+  {
+    "name": "get-active-alerts",
+    "displayName": "Get Active Alerts",
+    "description": "Get all currently active/firing alerts",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "alerting",
+    "tags": [
+      "alerting",
+      "active",
+      "incidents"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/alerting/get-active-alerts"
+  },
+  {
+    "name": "get-alert-history",
+    "displayName": "Get Alert History",
+    "description": "Get historical alerts for analysis",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "alerting",
+    "tags": [
+      "alerting",
+      "history",
+      "analysis"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/alerting/get-alert-history"
+  },
+  {
+    "name": "list-alert-rules",
+    "displayName": "List Alert Rules",
+    "description": "List all alerting rules with their status",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "alerting",
+    "tags": [
+      "alerting",
+      "rules",
+      "monitoring"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/alerting/list-alert-rules"
+  },
+  {
+    "name": "list-connectors",
+    "displayName": "List Connectors",
+    "description": "List all configured alert connectors (Slack, PagerDuty, etc.)",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "alerting",
+    "tags": [
+      "alerting",
+      "connectors",
+      "integrations"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/alerting/list-connectors"
+  },
+  {
+    "name": "mute-alert",
+    "displayName": "Mute Alert",
+    "description": "Mute an alert temporarily",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "alerting",
+    "tags": [
+      "alerting",
+      "mute",
+      "management"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/alerting/mute-alert"
+  },
+  {
+    "name": "test-connector",
+    "displayName": "Test Connector",
+    "description": "Test an alerting connector",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "alerting",
+    "tags": [
+      "alerting",
+      "connectors",
+      "testing"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/alerting/test-connector"
+  },
+  {
+    "name": "analyze-database-queries",
+    "displayName": "Analyze Database Queries",
+    "description": "Analyze slow database queries",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "apm",
+    "tags": [
+      "apm",
+      "database",
+      "performance"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/analyze-database-queries"
+  },
+  {
+    "name": "get-error-groups",
+    "displayName": "Get Error Groups",
+    "description": "Get errors grouped by type/message for a service",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "apm",
+    "tags": [
+      "apm",
+      "errors",
+      "analysis"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-error-groups"
+  },
+  {
+    "name": "get-failed-transactions",
+    "displayName": "Get Failed Transactions",
+    "description": "Get failed/errored transactions",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "apm",
+    "tags": [
+      "apm",
+      "errors",
+      "transactions"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-failed-transactions"
+  },
+  {
+    "name": "get-latency-percentiles",
+    "displayName": "Get Latency Percentiles",
+    "description": "Get latency percentiles (p50, p95, p99) for a service",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "apm",
+    "tags": [
+      "apm",
+      "latency",
+      "percentiles"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-latency-percentiles"
+  },
+  {
+    "name": "get-service-dependencies",
+    "displayName": "Get Service Dependencies",
+    "description": "Get upstream and downstream service dependencies",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "apm",
+    "tags": [
+      "apm",
+      "dependencies",
+      "topology"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-service-dependencies"
+  },
+  {
+    "name": "get-service-health",
+    "displayName": "Get Service Health",
+    "description": "Get health metrics for a specific service including error rate and latency",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "apm",
+    "tags": [
+      "apm",
+      "health",
+      "services"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-service-health"
+  },
+  {
+    "name": "get-service-map",
+    "displayName": "Get Service Map",
+    "description": "Get service dependency map showing all connections",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "apm",
+    "tags": [
+      "apm",
+      "servicemap",
+      "topology"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-service-map"
+  },
+  {
+    "name": "get-slow-transactions",
+    "displayName": "Get Slow Transactions",
+    "description": "Find the slowest transactions for a service or across all services",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "apm",
+    "tags": [
+      "apm",
+      "latency",
+      "performance"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-slow-transactions"
+  },
+  {
+    "name": "get-throughput",
+    "displayName": "Get Throughput",
+    "description": "Get request throughput for a service over time",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "apm",
+    "tags": [
+      "apm",
+      "throughput",
+      "metrics"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-throughput"
+  },
+  {
+    "name": "get-trace",
+    "displayName": "Get Trace",
+    "description": "Get full distributed trace by trace ID",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "apm",
+    "tags": [
+      "apm",
+      "traces",
+      "distributed"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-trace"
+  },
+  {
+    "name": "list-services",
+    "displayName": "List Services",
+    "description": "List all APM-monitored services with their health status",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "apm",
+    "tags": [
+      "apm",
+      "services",
+      "observability"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/list-services"
+  },
+  {
+    "name": "explain-allocation",
+    "displayName": "Explain Allocation",
+    "description": "Explain why a shard is assigned or unassigned",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "cluster",
+    "tags": [
+      "cluster",
+      "allocation",
+      "debugging"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/explain-allocation"
+  },
+  {
+    "name": "get-cluster-health",
+    "displayName": "Get Cluster Health",
+    "description": "Get Elasticsearch cluster health status and statistics",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "cluster",
+    "tags": [
+      "cluster",
+      "health",
+      "status"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/get-cluster-health"
+  },
+  {
+    "name": "get-hot-threads",
+    "displayName": "Get Hot Threads",
+    "description": "Get hot threads from nodes for debugging",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "cluster",
+    "tags": [
+      "cluster",
+      "debugging",
+      "performance"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/get-hot-threads"
+  },
+  {
+    "name": "get-node-stats",
+    "displayName": "Get Node Stats",
+    "description": "Get detailed statistics for a specific node",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "cluster",
+    "tags": [
+      "cluster",
+      "nodes",
+      "stats"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/get-node-stats"
+  },
+  {
+    "name": "get-pending-tasks",
+    "displayName": "Get Pending Tasks",
+    "description": "Get pending cluster tasks",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "cluster",
+    "tags": [
+      "cluster",
+      "tasks",
+      "operations"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/get-pending-tasks"
+  },
+  {
+    "name": "get-shard-allocation",
+    "displayName": "Get Shard Allocation",
+    "description": "Get shard allocation across nodes",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "cluster",
+    "tags": [
+      "cluster",
+      "shards",
+      "allocation"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/get-shard-allocation"
+  },
+  {
+    "name": "get-unassigned-shards",
+    "displayName": "Get Unassigned Shards",
+    "description": "Get list of unassigned shards and reasons",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "cluster",
+    "tags": [
+      "cluster",
+      "shards",
+      "troubleshooting"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/get-unassigned-shards"
+  },
+  {
+    "name": "list-nodes",
+    "displayName": "List Nodes",
+    "description": "List all nodes in the Elasticsearch cluster",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "cluster",
+    "tags": [
+      "cluster",
+      "nodes",
+      "infrastructure"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/list-nodes"
+  },
+  {
+    "name": "list-running-tasks",
+    "displayName": "List Running Tasks",
+    "description": "List currently running cluster tasks",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "cluster",
+    "tags": [
+      "cluster",
+      "tasks",
+      "operations"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/list-running-tasks"
+  },
+  {
+    "name": "list-snapshots",
+    "displayName": "List Snapshots",
+    "description": "List snapshots in a repository",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "cluster",
+    "tags": [
+      "cluster",
+      "snapshots",
+      "backup"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/list-snapshots"
+  },
+  {
+    "name": "get-no-results-queries",
+    "displayName": "Get No Results Queries",
+    "description": "Get queries that returned no results",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "enterprise-search",
+    "tags": [
+      "enterprise-search",
+      "queries",
+      "improvements"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/enterprise-search/get-no-results-queries"
+  },
+  {
+    "name": "get-search-analytics",
+    "displayName": "Get Search Analytics",
+    "description": "Get search analytics for an application",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "enterprise-search",
+    "tags": [
+      "enterprise-search",
+      "analytics",
+      "metrics"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/enterprise-search/get-search-analytics"
+  },
+  {
+    "name": "get-top-queries",
+    "displayName": "Get Top Queries",
+    "description": "Get most popular search queries",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "enterprise-search",
+    "tags": [
+      "enterprise-search",
+      "queries",
+      "analytics"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/enterprise-search/get-top-queries"
+  },
+  {
+    "name": "list-search-apps",
+    "displayName": "List Search Apps",
+    "description": "List all Enterprise Search applications",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "enterprise-search",
+    "tags": [
+      "enterprise-search",
+      "apps",
+      "search"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/enterprise-search/list-search-apps"
+  },
+  {
+    "name": "get-agent-logs",
+    "displayName": "Get Agent Logs",
+    "description": "Get logs from a specific agent",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "fleet",
+    "tags": [
+      "fleet",
+      "agents",
+      "logs"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/fleet/get-agent-logs"
+  },
+  {
+    "name": "get-agent-status",
+    "displayName": "Get Agent Status",
+    "description": "Get status and health of a specific agent",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "fleet",
+    "tags": [
+      "fleet",
+      "agents",
+      "health"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/fleet/get-agent-status"
+  },
+  {
+    "name": "get-enrollment-tokens",
+    "displayName": "Get Enrollment Tokens",
+    "description": "List enrollment tokens for agent onboarding",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "fleet",
+    "tags": [
+      "fleet",
+      "enrollment",
+      "onboarding"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/fleet/get-enrollment-tokens"
+  },
+  {
+    "name": "list-agent-policies",
+    "displayName": "List Agent Policies",
+    "description": "List all agent policies",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "fleet",
+    "tags": [
+      "fleet",
+      "policies",
+      "management"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/fleet/list-agent-policies"
+  },
+  {
+    "name": "list-agents",
+    "displayName": "List Agents",
+    "description": "List all Elastic Agents",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "fleet",
+    "tags": [
+      "fleet",
+      "agents",
+      "management"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/fleet/list-agents"
+  },
+  {
+    "name": "list-integrations",
+    "displayName": "List Integrations",
+    "description": "List available Fleet integrations",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "fleet",
+    "tags": [
+      "fleet",
+      "integrations",
+      "packages"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/fleet/list-integrations"
+  },
+  {
+    "name": "create-jira-issue",
+    "displayName": "Create Jira Issue",
+    "description": "Create a Jira issue/ticket",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "integrations",
+    "tags": [
+      "integrations",
+      "jira",
+      "ticketing"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/create-jira-issue"
+  },
+  {
+    "name": "create-servicenow-incident",
+    "displayName": "Create Servicenow Incident",
+    "description": "Create a ServiceNow incident",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "integrations",
+    "tags": [
+      "integrations",
+      "servicenow",
+      "incidents"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/create-servicenow-incident"
+  },
+  {
+    "name": "invoke-aws-lambda",
+    "displayName": "Invoke Aws Lambda",
+    "description": "Invoke an AWS Lambda function",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "integrations",
+    "tags": [
+      "integrations",
+      "aws",
+      "lambda"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/invoke-aws-lambda"
+  },
+  {
+    "name": "send-email",
+    "displayName": "Send Email",
+    "description": "Send an email notification",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "integrations",
+    "tags": [
+      "integrations",
+      "email",
+      "notifications"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/send-email"
+  },
+  {
+    "name": "send-opsgenie-alert",
+    "displayName": "Send Opsgenie Alert",
+    "description": "Create an OpsGenie alert",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "integrations",
+    "tags": [
+      "integrations",
+      "opsgenie",
+      "alerts"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/send-opsgenie-alert"
+  },
+  {
+    "name": "send-slack-message",
+    "displayName": "Send Slack Message",
+    "description": "Send a message to a Slack channel",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "integrations",
+    "tags": [
+      "integrations",
+      "slack",
+      "notifications"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/send-slack-message"
+  },
+  {
+    "name": "send-teams-message",
+    "displayName": "Send Teams Message",
+    "description": "Send a Microsoft Teams message",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "integrations",
+    "tags": [
+      "integrations",
+      "teams",
+      "notifications"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/send-teams-message"
+  },
+  {
+    "name": "send-webhook",
+    "displayName": "Send Webhook",
+    "description": "Send a webhook POST request",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "integrations",
+    "tags": [
+      "integrations",
+      "webhook",
+      "automation"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/send-webhook"
+  },
+  {
+    "name": "trigger-github-workflow",
+    "displayName": "Trigger Github Workflow",
+    "description": "Trigger a GitHub Actions workflow",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "integrations",
+    "tags": [
+      "integrations",
+      "github",
+      "automation"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/trigger-github-workflow"
+  },
+  {
+    "name": "trigger-pagerduty",
+    "displayName": "Trigger Pagerduty",
+    "description": "Trigger a PagerDuty incident",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "integrations",
+    "tags": [
+      "integrations",
+      "pagerduty",
+      "incidents"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/trigger-pagerduty"
+  },
+  {
+    "name": "explain-skill",
+    "displayName": "Explain Skill",
+    "description": "Get detailed explanation of a specific skill including all parameters, return type, and usage examples. Use this when you found a skill and want to understand exactly how to use it.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "meta",
+    "tags": [
+      "meta",
+      "discovery",
+      "documentation",
+      "help"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/meta/explain-skill"
+  },
+  {
+    "name": "get-related-skills",
+    "displayName": "Get Related Skills",
+    "description": "Find skills related to a given skill. Use this to discover complementary skills that work well together, or to find alternative approaches to the same task.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "meta",
+    "tags": [
+      "meta",
+      "discovery",
+      "navigation",
+      "help"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/meta/get-related-skills"
+  },
+  {
+    "name": "list-all-skills",
+    "displayName": "List All Skills",
+    "description": "List all available skills with their descriptions. Use this first when exploring what Moltler can do, or when unsure which skill to use. Returns a categorized list of all skills.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "meta",
+    "tags": [
+      "meta",
+      "discovery",
+      "navigation",
+      "help"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/meta/list-all-skills"
+  },
+  {
+    "name": "recommend-skills",
+    "displayName": "Recommend Skills",
+    "description": "Get skill recommendations based on your goal or context. Describe what you are trying to achieve and get a prioritized list of relevant skills. Great for complex tasks that may require multiple skills.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "meta",
+    "tags": [
+      "meta",
+      "discovery",
+      "recommendations",
+      "ai"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/meta/recommend-skills"
+  },
+  {
+    "name": "search-skills",
+    "displayName": "Search Skills",
+    "description": "Search for skills by keyword or capability. Use when you know what you want to do but not which skill to use. Examples: search for logs, find errors, security alerts.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "meta",
+    "tags": [
+      "meta",
+      "discovery",
+      "search",
+      "help"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/meta/search-skills"
+  },
+  {
+    "name": "get-container-metrics",
+    "displayName": "Get Container Metrics",
+    "description": "Get metrics for Docker/Kubernetes containers",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "metrics",
+    "tags": [
+      "metrics",
+      "containers",
+      "kubernetes"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/metrics/get-container-metrics"
+  },
+  {
+    "name": "get-disk-usage",
+    "displayName": "Get Disk Usage",
+    "description": "Get disk usage for hosts showing available and used space",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "metrics",
+    "tags": [
+      "metrics",
+      "disk",
+      "storage"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/metrics/get-disk-usage"
+  },
+  {
+    "name": "get-host-metrics",
+    "displayName": "Get Host Metrics",
+    "description": "Get current CPU, memory, and disk metrics for a host",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "metrics",
+    "tags": [
+      "metrics",
+      "hosts",
+      "resources"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/metrics/get-host-metrics"
+  },
+  {
+    "name": "get-memory-pressure",
+    "displayName": "Get Memory Pressure",
+    "description": "Find hosts with high memory pressure",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "metrics",
+    "tags": [
+      "metrics",
+      "memory",
+      "alerts"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/metrics/get-memory-pressure"
+  },
+  {
+    "name": "get-network-metrics",
+    "displayName": "Get Network Metrics",
+    "description": "Get network throughput metrics (bytes in/out)",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "metrics",
+    "tags": [
+      "metrics",
+      "network",
+      "throughput"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/metrics/get-network-metrics"
+  },
+  {
+    "name": "list-hosts",
+    "displayName": "List Hosts",
+    "description": "List all monitored hosts with their current status",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "metrics",
+    "tags": [
+      "metrics",
+      "hosts",
+      "infrastructure"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/metrics/list-hosts"
+  },
+  {
+    "name": "classify-text",
+    "displayName": "Classify Text",
+    "description": "Classify text using a trained classification model",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "ml",
+    "tags": [
+      "ml",
+      "classification",
+      "nlp"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/classify-text"
+  },
+  {
+    "name": "detect-anomalies-realtime",
+    "displayName": "Detect Anomalies Realtime",
+    "description": "Analyze data in real-time for anomalies using statistical methods",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "ml",
+    "tags": [
+      "ml",
+      "anomaly",
+      "realtime"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/detect-anomalies-realtime"
+  },
+  {
+    "name": "embed-text",
+    "displayName": "Embed Text",
+    "description": "Generate vector embeddings for text using a deployed embedding model",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "ml",
+    "tags": [
+      "ml",
+      "embeddings",
+      "semantic"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/embed-text"
+  },
+  {
+    "name": "explain-anomaly",
+    "displayName": "Explain Anomaly",
+    "description": "Get explanation for a specific anomaly",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "ml",
+    "tags": [
+      "ml",
+      "anomaly",
+      "explanation"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/explain-anomaly"
+  },
+  {
+    "name": "extract-entities",
+    "displayName": "Extract Entities",
+    "description": "Extract named entities from text using NER",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "ml",
+    "tags": [
+      "ml",
+      "ner",
+      "nlp"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/extract-entities"
+  },
+  {
+    "name": "get-anomalies",
+    "displayName": "Get Anomalies",
+    "description": "Get detected anomalies from ML jobs. Use for anomaly detection and alerting.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "ml",
+    "tags": [
+      "ml",
+      "anomaly",
+      "detection"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/get-anomalies"
+  },
+  {
+    "name": "get-influencers",
+    "displayName": "Get Influencers",
+    "description": "Get top influencers contributing to anomalies",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "ml",
+    "tags": [
+      "ml",
+      "anomaly",
+      "influencers"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/get-influencers"
+  },
+  {
+    "name": "get-job-status",
+    "displayName": "Get Job Status",
+    "description": "Get detailed status of an ML job",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "ml",
+    "tags": [
+      "ml",
+      "jobs",
+      "status"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/get-job-status"
+  },
+  {
+    "name": "list-ml-jobs",
+    "displayName": "List Ml Jobs",
+    "description": "List all machine learning anomaly detection jobs with their status",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "ml",
+    "tags": [
+      "ml",
+      "anomaly",
+      "jobs"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/list-ml-jobs"
+  },
+  {
+    "name": "list-trained-models",
+    "displayName": "List Trained Models",
+    "description": "List all trained ML models including NLP models and custom models",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "ml",
+    "tags": [
+      "ml",
+      "models",
+      "inference"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/list-trained-models"
+  },
+  {
+    "name": "run-inference",
+    "displayName": "Run Inference",
+    "description": "Run inference using a deployed ML model for text classification, embedding, or NER",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "ml",
+    "tags": [
+      "ml",
+      "inference",
+      "nlp"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/run-inference"
+  },
+  {
+    "name": "compare-time-periods",
+    "displayName": "Compare Time Periods",
+    "description": "Compare metrics between two time periods",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "comparison",
+      "analysis"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/compare-time-periods"
+  },
+  {
+    "name": "correlate-logs",
+    "displayName": "Correlate Logs",
+    "description": "Find correlated log events across services",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "logs",
+      "correlation"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/correlate-logs"
+  },
+  {
+    "name": "count-logs-by-level",
+    "displayName": "Count Logs By Level",
+    "description": "Count logs grouped by severity level (DEBUG, INFO, WARN, ERROR). Use this to get a quick overview of log distribution and identify if there are unusual spikes in errors or warnings.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "logs",
+      "analysis",
+      "aggregation"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/count-logs-by-level"
+  },
+  {
+    "name": "error-rate",
+    "displayName": "Error Rate",
+    "description": "Calculate the error rate as a percentage of total logs. Use this to monitor application health, set up alerts, or compare error rates across different time periods or services.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "logs",
+      "errors",
+      "metrics",
+      "health"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/error-rate"
+  },
+  {
+    "name": "get-availability",
+    "displayName": "Get Availability",
+    "description": "Get availability percentage for a monitor",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "uptime",
+      "availability"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/get-availability"
+  },
+  {
+    "name": "get-error-context",
+    "displayName": "Get Error Context",
+    "description": "Get logs before and after an error for context",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "logs",
+      "debugging"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/get-error-context"
+  },
+  {
+    "name": "get-log-patterns",
+    "displayName": "Get Log Patterns",
+    "description": "Identify common log patterns using ML categorization",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "logs",
+      "patterns"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/get-log-patterns"
+  },
+  {
+    "name": "get-metrics-summary",
+    "displayName": "Get Metrics Summary",
+    "description": "Get summary statistics for system metrics (CPU, memory, latency). Use this for health checks, capacity planning, or identifying resource bottlenecks.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "metrics",
+      "analysis",
+      "monitoring"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/get-metrics-summary"
+  },
+  {
+    "name": "get-monitor-status",
+    "displayName": "Get Monitor Status",
+    "description": "Get current status of a monitor",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "uptime",
+      "status"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/get-monitor-status"
+  },
+  {
+    "name": "get-recent-errors",
+    "displayName": "Get Recent Errors",
+    "description": "Get recent error logs with full details including message, timestamp, and service. Use this when investigating issues, debugging production problems, or responding to alerts about errors.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "logs",
+      "errors",
+      "debugging"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/get-recent-errors"
+  },
+  {
+    "name": "get-slo-status",
+    "displayName": "Get Slo Status",
+    "description": "Get SLO (Service Level Objective) status for a service",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "slo",
+      "reliability"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/get-slo-status"
+  },
+  {
+    "name": "get-ssl-status",
+    "displayName": "Get Ssl Status",
+    "description": "Check SSL certificate status and expiry",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "ssl",
+      "certificates"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/get-ssl-status"
+  },
+  {
+    "name": "high-cpu-hosts",
+    "displayName": "High Cpu Hosts",
+    "description": "Find hosts with high CPU usage. Use this to identify overloaded servers, detect resource contention, or prioritize scaling decisions.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "metrics",
+      "cpu",
+      "alerts"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/high-cpu-hosts"
+  },
+  {
+    "name": "list-monitors",
+    "displayName": "List Monitors",
+    "description": "List all uptime/synthetic monitors",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "uptime",
+      "monitors"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/list-monitors"
+  },
+  {
+    "name": "logs-by-service",
+    "displayName": "Logs By Service",
+    "description": "Get log volume breakdown by service. Use this to understand which services are generating the most logs, identify noisy services, or detect services with unusual activity.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "logs",
+      "services",
+      "aggregation"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/logs-by-service"
+  },
+  {
+    "name": "search-logs",
+    "displayName": "Search Logs",
+    "description": "Search logs by keyword or phrase. Use this for full-text search across log messages to find specific events, trace requests, or investigate issues mentioned in alerts.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "logs",
+      "search",
+      "debugging"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/search-logs"
+  },
+  {
+    "name": "service-health",
+    "displayName": "Service Health",
+    "description": "Get health summary for a specific service including error rate, request volume, and latency. Use this for service-level monitoring, SLO tracking, or incident response.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "apm",
+      "services",
+      "health",
+      "slo"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/service-health"
+  },
+  {
+    "name": "slow-requests",
+    "displayName": "Slow Requests",
+    "description": "Find slow HTTP requests or API calls. Use this to identify performance bottlenecks, slow endpoints, or services that need optimization.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "apm",
+      "latency",
+      "performance"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/slow-requests"
+  },
+  {
+    "name": "top-error-messages",
+    "displayName": "Top Error Messages",
+    "description": "Get the most frequent error messages. Use this to identify recurring issues, prioritize bug fixes, or understand the most impactful errors affecting your system.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "logs",
+      "errors",
+      "analysis"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/top-error-messages"
+  },
+  {
+    "name": "aggregate-by-field",
+    "displayName": "Aggregate By Field",
+    "description": "Aggregate documents by a specific field and get counts. Use this for grouping, categorization, or getting distribution of values in your data.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "aggregation",
+      "analytics"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/aggregate-by-field"
+  },
+  {
+    "name": "bulk-index",
+    "displayName": "Bulk Index",
+    "description": "Index multiple documents in bulk",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "documents",
+      "bulk"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/bulk-index"
+  },
+  {
+    "name": "cluster-health",
+    "displayName": "Cluster Health",
+    "description": "Get Elasticsearch cluster health status. Use this to check if the cluster is healthy, see number of nodes, or verify shards are properly allocated.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "cluster",
+      "health",
+      "management"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/cluster-health"
+  },
+  {
+    "name": "count-documents",
+    "displayName": "Count Documents",
+    "description": "Count documents in an index, optionally filtered by a condition. Use this to get quick counts, verify data ingestion, or check index sizes.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "count",
+      "aggregation"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/count-documents"
+  },
+  {
+    "name": "create-document",
+    "displayName": "Create Document",
+    "description": "Create a new document in an index",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "documents",
+      "create"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/create-document"
+  },
+  {
+    "name": "create-index",
+    "displayName": "Create Index",
+    "description": "Create a new index with settings and mappings",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "indices",
+      "create"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/create-index"
+  },
+  {
+    "name": "date-histogram",
+    "displayName": "Date Histogram",
+    "description": "Aggregate documents by time intervals",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "histogram",
+      "timeseries"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/date-histogram"
+  },
+  {
+    "name": "delete-document",
+    "displayName": "Delete Document",
+    "description": "Delete a document by ID",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "documents",
+      "delete"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/delete-document"
+  },
+  {
+    "name": "delete-index",
+    "displayName": "Delete Index",
+    "description": "Delete an index",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "indices",
+      "delete"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/delete-index"
+  },
+  {
+    "name": "fuzzy-search",
+    "displayName": "Fuzzy Search",
+    "description": "Search with typo tolerance using fuzzy matching",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "fuzzy",
+      "query"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/fuzzy-search"
+  },
+  {
+    "name": "get-document",
+    "displayName": "Get Document",
+    "description": "Get a single document by ID from an index. Use this when you know the exact document ID and need to retrieve its full contents.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "document",
+      "get"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/get-document"
+  },
+  {
+    "name": "get-field-stats",
+    "displayName": "Get Field Stats",
+    "description": "Get statistics (min, max, avg, sum) for a numeric field. Use this for data analysis, understanding value distributions, or calculating metrics.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "statistics",
+      "analytics"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/get-field-stats"
+  },
+  {
+    "name": "get-index-stats",
+    "displayName": "Get Index Stats",
+    "description": "Get detailed statistics for an index",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "indices",
+      "stats"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/get-index-stats"
+  },
+  {
+    "name": "get-mapping",
+    "displayName": "Get Mapping",
+    "description": "Get field mappings for an index",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "mappings",
+      "schema"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/get-mapping"
+  },
+  {
+    "name": "get-sample-documents",
+    "displayName": "Get Sample Documents",
+    "description": "Get sample documents from an index to understand its structure. Use this when exploring a new index, understanding field mappings, or seeing what data looks like.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "exploration",
+      "data"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/get-sample-documents"
+  },
+  {
+    "name": "get-transform-status",
+    "displayName": "Get Transform Status",
+    "description": "Get status of a transform",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "transforms",
+      "status"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/get-transform-status"
+  },
+  {
+    "name": "get-unique-values",
+    "displayName": "Get Unique Values",
+    "description": "Get unique values for a field in an index. Use this to understand possible values, find categories, or check data cardinality.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "cardinality",
+      "exploration"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/get-unique-values"
+  },
+  {
+    "name": "list-all-indices",
+    "displayName": "List All Indices",
+    "description": "List all indices with size and document count",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "indices",
+      "management"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/list-all-indices"
+  },
+  {
+    "name": "list-data-streams",
+    "displayName": "List Data Streams",
+    "description": "List all data streams",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "datastreams",
+      "management"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/list-data-streams"
+  },
+  {
+    "name": "list-ilm-policies",
+    "displayName": "List Ilm Policies",
+    "description": "List Index Lifecycle Management policies",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "ilm",
+      "lifecycle"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/list-ilm-policies"
+  },
+  {
+    "name": "list-indices",
+    "displayName": "List Indices",
+    "description": "List sample indices that are available for querying. Use this to explore what data is available in the cluster.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "indices",
+      "management"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/list-indices"
+  },
+  {
+    "name": "list-ingest-pipelines",
+    "displayName": "List Ingest Pipelines",
+    "description": "List all ingest pipelines",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "ingest",
+      "pipelines"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/list-ingest-pipelines"
+  },
+  {
+    "name": "list-transforms",
+    "displayName": "List Transforms",
+    "description": "List all data transforms",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "transforms",
+      "management"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/list-transforms"
+  },
+  {
+    "name": "multi-field-search",
+    "displayName": "Multi Field Search",
+    "description": "Search across multiple fields simultaneously",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "multi-field",
+      "query"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/multi-field-search"
+  },
+  {
+    "name": "percentiles",
+    "displayName": "Percentiles",
+    "description": "Calculate percentile distributions for a numeric field",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "percentiles",
+      "statistics"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/percentiles"
+  },
+  {
+    "name": "recent-documents",
+    "displayName": "Recent Documents",
+    "description": "Get the most recently indexed documents from an index. Use this to see latest data, verify real-time ingestion, or check recent activity.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "recent",
+      "real-time"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/recent-documents"
+  },
+  {
+    "name": "reindex",
+    "displayName": "Reindex",
+    "description": "Copy documents from one index to another",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "reindex",
+      "management"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/reindex"
+  },
+  {
+    "name": "search-documents",
+    "displayName": "Search Documents",
+    "description": "Full-text search across any Elasticsearch index. Use this to search for documents by keywords, find specific records, or explore data using natural language queries.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "query",
+      "full-text"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/search-documents"
+  },
+  {
+    "name": "semantic-search",
+    "displayName": "Semantic Search",
+    "description": "Semantic/vector search using embeddings",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "semantic",
+      "vector"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/semantic-search"
+  },
+  {
+    "name": "set-alias",
+    "displayName": "Set Alias",
+    "description": "Create or update an index alias",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "aliases",
+      "management"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/set-alias"
+  },
+  {
+    "name": "test-ingest-pipeline",
+    "displayName": "Test Ingest Pipeline",
+    "description": "Test an ingest pipeline with sample data",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "ingest",
+      "testing"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/test-ingest-pipeline"
+  },
+  {
+    "name": "top-values",
+    "displayName": "Top Values",
+    "description": "Get top N most common values for a field",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "aggregation",
+      "analytics"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/top-values"
+  },
+  {
+    "name": "update-document",
+    "displayName": "Update Document",
+    "description": "Update an existing document",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "search",
+    "tags": [
+      "search",
+      "documents",
+      "update"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/update-document"
+  },
+  {
+    "name": "create-case",
+    "displayName": "Create Case",
+    "description": "Create a new security investigation case",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "cases",
+      "investigation"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/create-case"
+  },
+  {
+    "name": "failed-logins",
+    "displayName": "Failed Logins",
+    "description": "Get failed login attempts, grouped by user or source IP. Use this to detect brute force attacks, credential stuffing, or compromised accounts.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "authentication",
+      "brute-force"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/failed-logins"
+  },
+  {
+    "name": "get-authentication-summary",
+    "displayName": "Get Authentication Summary",
+    "description": "Get authentication success/failure summary",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "authentication",
+      "summary"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-authentication-summary"
+  },
+  {
+    "name": "get-dns-queries",
+    "displayName": "Get Dns Queries",
+    "description": "Get DNS query events",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "dns",
+      "network"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-dns-queries"
+  },
+  {
+    "name": "get-file-events",
+    "displayName": "Get File Events",
+    "description": "Get file system events",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "file",
+      "monitoring"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-file-events"
+  },
+  {
+    "name": "get-host-risk-score",
+    "displayName": "Get Host Risk Score",
+    "description": "Get risk score for a host based on security events",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "risk",
+      "hosts"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-host-risk-score"
+  },
+  {
+    "name": "get-network-events",
+    "displayName": "Get Network Events",
+    "description": "Get network connection events",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "network",
+      "connections"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-network-events"
+  },
+  {
+    "name": "get-process-events",
+    "displayName": "Get Process Events",
+    "description": "Get process execution events for threat hunting",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "process",
+      "hunting"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-process-events"
+  },
+  {
+    "name": "get-risky-hosts",
+    "displayName": "Get Risky Hosts",
+    "description": "Get hosts with highest risk scores",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "risk",
+      "hosts"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-risky-hosts"
+  },
+  {
+    "name": "get-risky-users",
+    "displayName": "Get Risky Users",
+    "description": "Get users with highest risk scores",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "risk",
+      "ueba"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-risky-users"
+  },
+  {
+    "name": "get-security-alerts",
+    "displayName": "Get Security Alerts",
+    "description": "Get recent security alerts and detections. Use this to review threats, check for active incidents, or respond to security events.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "alerts",
+      "siem",
+      "detection"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-security-alerts"
+  },
+  {
+    "name": "get-user-risk-score",
+    "displayName": "Get User Risk Score",
+    "description": "Get risk score for a user based on their activity",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "risk",
+      "ueba"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-user-risk-score"
+  },
+  {
+    "name": "hunt-ioc",
+    "displayName": "Hunt Ioc",
+    "description": "Hunt for an Indicator of Compromise (IP, hash, domain)",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "threat",
+      "hunting"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/hunt-ioc"
+  },
+  {
+    "name": "list-cases",
+    "displayName": "List Cases",
+    "description": "List security investigation cases",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "cases",
+      "investigation"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/list-cases"
+  },
+  {
+    "name": "list-detection-rules",
+    "displayName": "List Detection Rules",
+    "description": "List all security detection rules",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "rules",
+      "detection"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/list-detection-rules"
+  },
+  {
+    "name": "search-security-events",
+    "displayName": "Search Security Events",
+    "description": "Search security events with full-text query",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "search",
+      "events"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/search-security-events"
+  },
+  {
+    "name": "suspicious-activity",
+    "displayName": "Suspicious Activity",
+    "description": "Get recent suspicious or anomalous activity from security events. Use this during incident response, threat hunting, or when investigating potential breaches.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "threats",
+      "anomaly",
+      "hunting"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/suspicious-activity"
+  },
+  {
+    "name": "threat-summary",
+    "displayName": "Threat Summary",
+    "description": "Get a summary of threats and security posture. Use this for security dashboards, executive briefings, or quick health checks of your security status.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "dashboard",
+      "summary",
+      "posture"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/threat-summary"
+  },
+  {
+    "name": "user-activity",
+    "displayName": "User Activity",
+    "description": "Get activity timeline for a specific user. Use this during user investigations, access reviews, or when tracking potentially compromised accounts.",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "security",
+    "tags": [
+      "security",
+      "user",
+      "investigation",
+      "audit"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/user-activity"
+  }
+]
