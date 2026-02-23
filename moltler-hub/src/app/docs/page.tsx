@@ -228,14 +228,12 @@ export ES_PASSWORD="your-password"
         <section id="ai-agents" className="mb-12">
           <h2 className="text-2xl font-semibold mb-4">Connect AI Agents (MCP)</h2>
           
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <p className="text-gray-400 mb-4">
-              Skills are exposed via the Model Context Protocol (MCP). Connect AI assistants like Claude or Cursor.
-            </p>
-            <h4 className="font-semibold mb-2">For Cursor IDE</h4>
-            <p className="text-gray-400 text-sm mb-2">Add to <code className="bg-gray-900 px-1 rounded">.cursor/mcp.json</code>:</p>
-            <pre className="bg-gray-900 p-4 rounded text-sm overflow-x-auto">
-              <code className="text-green-400">{`{
+          <div className="space-y-6">
+            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <h4 className="font-semibold mb-2">For Cursor IDE</h4>
+              <p className="text-gray-400 text-sm mb-2">Add to <code className="bg-gray-900 px-1 rounded">.cursor/mcp.json</code>:</p>
+              <pre className="bg-gray-900 p-4 rounded text-sm overflow-x-auto">
+                <code className="text-green-400">{`{
   "mcpServers": {
     "moltler": {
       "url": "http://localhost:9200/_escript/mcp",
@@ -245,10 +243,38 @@ export ES_PASSWORD="your-password"
     }
   }
 }`}</code>
-            </pre>
-            <p className="text-gray-400 text-sm mt-4">
-              Now you can ask your AI assistant things like: "Find recent errors in my logs" or "Hunt for this suspicious IP"
-            </p>
+              </pre>
+              <p className="text-gray-400 text-sm mt-3">
+                Works with: <span className="text-purple-400">Cursor</span>, <span className="text-purple-400">Claude Desktop</span>, <span className="text-purple-400">Cline</span>, and any MCP-compatible agent.
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-r from-purple-900/30 to-gray-800 rounded-lg p-6 border border-purple-700/50">
+              <h4 className="font-semibold mb-4 text-purple-300">✨ The Magic Moment</h4>
+              <div className="space-y-4 text-sm">
+                <div className="flex gap-3">
+                  <span className="text-blue-400 font-medium">You:</span>
+                  <span className="text-gray-300">"I got paged for a production incident. Payment service seems down."</span>
+                </div>
+                <div className="flex gap-3">
+                  <span className="text-green-400 font-medium">Agent:</span>
+                  <span className="text-gray-400 italic">Uses get_recent_errors skill...</span>
+                </div>
+                <div className="bg-gray-900/50 p-3 rounded text-gray-300">
+                  "I found 47 errors in payment-service. Most are 'Connection timeout to gateway'. Let me check transaction latency..."
+                </div>
+                <div className="flex gap-3">
+                  <span className="text-green-400 font-medium">Agent:</span>
+                  <span className="text-gray-400 italic">Uses get_slow_transactions skill...</span>
+                </div>
+                <div className="bg-gray-900/50 p-3 rounded text-gray-300">
+                  "Payment gateway calls averaging 12s (10x normal). Issue started at 9:45 AM. Want me to correlate with recent deployments?"
+                </div>
+              </div>
+              <p className="text-purple-300 text-sm mt-4">
+                Your AI assistant can now investigate your Elasticsearch data like a senior engineer.
+              </p>
+            </div>
           </div>
         </section>
 

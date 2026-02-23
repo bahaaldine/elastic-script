@@ -64,33 +64,52 @@ curl -sSL https://hub.moltler.dev/install.sh | bash -s -- --category security
 
 ---
 
-## Step 3: Run Your First Skill
+## Step 3: Connect Your AI Agent
 
-```bash
-# Find recent errors
-curl -u elastic:password http://localhost:9200/_escript \
-  -H "Content-Type: application/json" \
-  -d '{"query": "RUN SKILL get_recent_errors()"}'
+This is where the magic happens. Connect your favorite AI assistant and start querying your data with natural language.
+
+**For Cursor IDE**, create `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "moltler": {
+      "url": "http://localhost:9200/_escript/mcp",
+      "headers": {
+        "Authorization": "Basic ZWxhc3RpYy1hZG1pbjplbGFzdGljLXBhc3N3b3Jk"
+      }
+    }
+  }
+}
 ```
 
-**More examples:**
+Restart Cursor, then start asking:
 
-```bash
-# Hunt for an IOC (security)
-curl -u elastic:password http://localhost:9200/_escript \
-  -H "Content-Type: application/json" \
-  -d '{"query": "RUN SKILL hunt_ioc WITH ioc = '\''192.168.1.100'\''"}'
+> "Find all errors in production from the last hour"
 
-# Get slow transactions (observability)
-curl -u elastic:password http://localhost:9200/_escript \
-  -H "Content-Type: application/json" \
-  -d '{"query": "RUN SKILL get_slow_transactions()"}'
+> "Hunt for this suspicious IP: 192.168.1.100"
 
-# Semantic search (search)
-curl -u elastic:password http://localhost:9200/_escript \
-  -H "Content-Type: application/json" \
-  -d '{"query": "RUN SKILL semantic_search WITH query = '\''pricing information'\''"}'
-```
+> "Show me the slowest API transactions"
+
+[**Full Agent Setup Guide →**](connect-agent.md)
+
+---
+
+## The Experience
+
+After connecting your agent, you can have conversations like:
+
+> **You:** "I got paged for a production incident. The payment service seems down."
+>
+> **Agent:** *Uses `get_recent_errors` skill*
+>
+> "I found 47 errors in payment-service. Most are 'Connection timeout to gateway'. Let me check transaction latency..."
+>
+> *Uses `get_slow_transactions` skill*
+>
+> "Payment gateway calls are averaging 12s (10x normal). Issue started at 9:45 AM. Want me to check if there's a related deployment?"
+
+**Your AI assistant can now investigate your Elasticsearch data like a senior engineer.**
 
 ---
 
@@ -99,7 +118,8 @@ curl -u elastic:password http://localhost:9200/_escript \
 You now have:
 - ✅ elastic-script plugin running in your cluster
 - ✅ 155+ skills installed
-- ✅ Ready to run skills via REST API
+- ✅ AI agent connected and ready
+- ✅ Query your data with natural language
 
 ---
 

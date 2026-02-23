@@ -125,6 +125,7 @@ nav:
   - Get Started:
     - Quick Start: getting-started/quick-start.md
     - Installation: getting-started/installation.md
+    - Connect Your AI Agent: getting-started/connect-agent.md
     - Your First Skill: getting-started/first-skill.md
   
   # LEVEL 3: Browse and use skills
