@@ -1,11 +1,21 @@
 ---
 layout: default
-title: Skills Manager UI
+title: Skills Manager UI (Deprecated)
 ---
 
 # Moltler Skills Manager UI
 
-A modern React-based web interface for managing elastic-script skills, procedures, and functions.
+!!! warning "Deprecated"
+    **This component has been superseded by [MoltlerHub](moltlerhub/index.md).**
+    
+    MoltlerHub provides a richer experience for browsing, discovering, and installing skills. 
+    The Skills Manager UI (`moltler-ui`) is kept for local development but is no longer recommended for end users.
+    
+    **Use MoltlerHub instead**: `cd moltler-hub && npm run dev`
+
+---
+
+A local React-based web interface for managing elastic-script skills, procedures, and functions.
 
 ## Overview
 

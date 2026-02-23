@@ -1149,10 +1149,14 @@ show_help() {
     echo "  --load-skills     Load sample Moltler skills"
     echo "  --notebooks       Start Jupyter notebooks"
     echo ""
-    echo "Moltler Skills Manager:"
-    echo "  --moltler         Full setup: ES + demo data + Skills Manager UI (recommended)"
-    echo "  --ui              Start Skills Manager web UI only (http://localhost:3000)"
-    echo "  --stop-ui         Stop the web UI"
+    echo "MoltlerHub (Web Portal):"
+    echo "  --hub             Start MoltlerHub web portal (http://localhost:3000) [recommended]"
+    echo "  --stop-hub        Stop MoltlerHub"
+    echo ""
+    echo "Legacy Skills Manager (deprecated):"
+    echo "  --moltler         Full setup: ES + demo data + Legacy Skills Manager UI"
+    echo "  --ui              Start Legacy Skills Manager web UI only (http://localhost:3000)"
+    echo "  --stop-ui         Stop the Legacy UI"
     echo ""
     echo "Kibana:"
     echo "  --kibana          Start pre-built Kibana (for APM/observability)"
@@ -1218,6 +1222,7 @@ stop_all() {
     stop_otel_collector
     stop_apm_server
     stop_kibana
+    stop_moltler_hub
     stop_moltler_ui
     stop_elasticsearch
 }
@@ -1587,6 +1592,128 @@ stop_moltler_ui() {
             print_success "Moltler UI stopped (port $MOLTLER_UI_PORT)"
         else
             print_warning "Moltler UI not running"
+        fi
+    fi
+}
+
+# =============================================================================
+# MoltlerHub (Web Portal) - RECOMMENDED
+# =============================================================================
+
+MOLTLER_HUB_DIR="$PROJECT_ROOT/moltler-hub"
+MOLTLER_HUB_PORT=3000
+MOLTLER_HUB_PID="$PROJECT_ROOT/.moltler_hub_pid"
+MOLTLER_HUB_LOG="$PROJECT_ROOT/moltler-hub.log"
+
+# Setup MoltlerHub (install dependencies)
+setup_moltler_hub() {
+    print_header "Setting up MoltlerHub"
+    
+    if [ ! -d "$MOLTLER_HUB_DIR" ]; then
+        print_error "MoltlerHub directory not found: $MOLTLER_HUB_DIR"
+        return 1
+    fi
+    
+    cd "$MOLTLER_HUB_DIR"
+    
+    # Check if node_modules exists
+    if [ ! -d "node_modules" ]; then
+        print_step "Installing dependencies..."
+        npm install
+    else
+        print_success "Dependencies already installed"
+    fi
+    
+    # Generate skills data from local hub/skills directory
+    if [ -f "scripts/generate-skills.ts" ]; then
+        print_step "Generating skills data..."
+        npx ts-node scripts/generate-skills.ts 2>/dev/null || true
+    fi
+    
+    cd "$PROJECT_ROOT"
+    print_success "MoltlerHub setup complete"
+}
+
+# Start MoltlerHub
+start_moltler_hub() {
+    print_header "Starting MoltlerHub"
+    
+    # Stop legacy UI if running (same port)
+    if [ -f "$MOLTLER_UI_PID" ]; then
+        stop_moltler_ui
+    fi
+    
+    # Check if already running
+    if [ -f "$MOLTLER_HUB_PID" ]; then
+        PID=$(cat "$MOLTLER_HUB_PID")
+        if kill -0 $PID 2>/dev/null; then
+            print_success "MoltlerHub already running (PID: $PID)"
+            echo "  Open http://localhost:$MOLTLER_HUB_PORT"
+            return 0
+        fi
+    fi
+    
+    # Setup if needed
+    setup_moltler_hub
+    
+    cd "$MOLTLER_HUB_DIR"
+    
+    print_step "Starting MoltlerHub on port $MOLTLER_HUB_PORT..."
+    npm run dev > "$MOLTLER_HUB_LOG" 2>&1 &
+    echo $! > "$MOLTLER_HUB_PID"
+    
+    # Wait for startup
+    print_step "Waiting for MoltlerHub to start"
+    for i in {1..30}; do
+        if curl -s http://localhost:$MOLTLER_HUB_PORT > /dev/null 2>&1; then
+            echo ""
+            print_success "MoltlerHub started!"
+            echo ""
+            echo "  Browse skills at: http://localhost:$MOLTLER_HUB_PORT"
+            echo ""
+            echo "  MoltlerHub features:"
+            echo "    - Browse 155+ skills"
+            echo "    - Search and filter by category"
+            echo "    - View skill documentation"
+            echo "    - Get install commands"
+            echo ""
+            cd "$PROJECT_ROOT"
+            return 0
+        fi
+        sleep 1
+        echo -n "."
+    done
+    
+    echo ""
+    print_warning "MoltlerHub taking longer than expected. Check moltler-hub.log"
+    print_step "Tail of log:"
+    tail -10 "$MOLTLER_HUB_LOG" 2>/dev/null || true
+    cd "$PROJECT_ROOT"
+    return 1
+}
+
+# Stop MoltlerHub
+stop_moltler_hub() {
+    print_header "Stopping MoltlerHub"
+    
+    if [ -f "$MOLTLER_HUB_PID" ]; then
+        PID=$(cat "$MOLTLER_HUB_PID")
+        if kill -0 $PID 2>/dev/null; then
+            kill $PID
+            rm "$MOLTLER_HUB_PID"
+            print_success "MoltlerHub stopped"
+        else
+            print_warning "MoltlerHub process not found"
+            rm "$MOLTLER_HUB_PID"
+        fi
+    else
+        # Try to find and kill by port
+        PID=$(lsof -ti:$MOLTLER_HUB_PORT 2>/dev/null)
+        if [ -n "$PID" ]; then
+            kill $PID 2>/dev/null
+            print_success "MoltlerHub stopped (port $MOLTLER_HUB_PORT)"
+        else
+            print_warning "MoltlerHub not running"
         fi
     fi
 }
@@ -1981,13 +2108,19 @@ check_status() {
         print_warning "Not running"
     fi
     
-    # Moltler UI
+    # Web Portal (MoltlerHub or legacy UI)
     echo ""
-    echo "Moltler Skills Manager UI (port 3000):"
+    echo "Web Portal (port 3000):"
     if curl -s http://localhost:3000 > /dev/null 2>&1; then
-        print_success "Running at http://localhost:3000"
+        if [ -f "$MOLTLER_HUB_PID" ]; then
+            print_success "MoltlerHub running at http://localhost:3000"
+        elif [ -f "$MOLTLER_UI_PID" ]; then
+            print_success "Legacy Skills Manager running at http://localhost:3000"
+        else
+            print_success "Running at http://localhost:3000"
+        fi
     else
-        print_warning "Not running"
+        print_warning "Not running (start with --hub)"
     fi
     
     # Jupyter
@@ -2095,6 +2228,12 @@ case "${1:-}" in
         echo ""
         echo "  Open the Skills Manager to view, edit, and run your skills!"
         echo ""
+        ;;
+    --hub)
+        start_moltler_hub
+        ;;
+    --stop-hub)
+        stop_moltler_hub
         ;;
     --ui)
         start_moltler_ui

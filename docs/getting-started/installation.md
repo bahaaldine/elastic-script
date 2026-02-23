@@ -1,172 +1,237 @@
 # Installation
 
-## Prerequisites
+Get Moltler running in your environment.
 
-Before installing elastic-script, ensure you have:
+---
 
-- **Java 21+** - Required for Elasticsearch 9.x
-- **Git** - For cloning the repository
-- **8GB+ RAM** - Elasticsearch needs memory
+## Architecture Overview
 
-Optional for development:
-- **Python 3.9+** - For Jupyter notebooks
-- **OpenAI API Key** - For AI/LLM features
+Moltler consists of three components:
 
-## Quick Start (Recommended)
+| Component | Purpose | Required |
+|-----------|---------|----------|
+| **elastic-script plugin** | Runs skills inside Elasticsearch | ✅ Yes |
+| **Moltler CLI** | Install/manage skills from terminal | ✅ Yes |
+| **MoltlerHub** | Web portal to browse/discover skills | Optional |
+| **Moltler MCP** | Bridge for AI agents to use skills | Optional |
 
-The fastest way to get started:
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        USER / AI AGENT                          │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        ▼                     ▼                     ▼
+┌───────────────┐    ┌───────────────┐    ┌───────────────┐
+│  MoltlerHub   │    │  Moltler CLI  │    │  Moltler MCP  │
+│  (Web Portal) │    │  (Terminal)   │    │  (AI Bridge)  │
+└───────────────┘    └───────────────┘    └───────────────┘
+        │                     │                     │
+        └─────────────────────┼─────────────────────┘
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│               Elasticsearch + elastic-script plugin             │
+│                        (Skills Runtime)                         │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Quick Start (All-in-One)
+
+The fastest way to get everything running:
 
 ```bash
 # Clone the repository
-git clone https://github.com/bahaaldine/moltler.git
-cd elastic-script
+git clone --recurse-submodules https://github.com/bahaaldine/moltler.git
+cd moltler
 
-# Run the quick-start script
+# Start Elasticsearch with the plugin + install all skills
+./scripts/quick-start.sh
+
+# (Optional) Start MoltlerHub web portal
+cd moltler-hub && npm install && npm run dev
+```
+
+This gives you:
+- ✅ Elasticsearch on `http://localhost:9200`
+- ✅ 155+ skills installed
+- ✅ MoltlerHub on `http://localhost:3000` (optional)
+
+---
+
+## Step-by-Step Installation
+
+### 1. Elasticsearch + elastic-script Plugin
+
+**Option A: Use the provided setup (recommended)**
+
+```bash
+git clone --recurse-submodules https://github.com/bahaaldine/moltler.git
+cd moltler
 ./scripts/quick-start.sh
 ```
 
-This will:
-
-1. ✅ Check prerequisites
-2. ✅ Build the elastic-script plugin
-3. ✅ Start Elasticsearch with the plugin
-4. ✅ Start OTEL Collector for distributed tracing
-5. ✅ Start Kibana for visualization
-6. ✅ Load sample data (360 documents across 6 indices)
-7. ✅ Set up Jupyter notebooks
-8. ✅ Open Jupyter and Kibana APM in your browser
-
-**Services started:**
-
-| Service | URL/Port | Description |
-|---------|----------|-------------|
-| Elasticsearch | http://localhost:9200 | Data store and query engine |
-| OTEL Collector | localhost:4317, :4318 | Receives OTLP traces |
-| Kibana | http://localhost:5601 | Visualization and APM |
-| Jupyter | http://localhost:8888 | Interactive notebooks |
-
-!!! tip "OpenAI API Key"
-    The script will prompt for your OpenAI API key (optional).
-    This enables AI functions like `LLM_COMPLETE()` and `LLM_SUMMARIZE()`.
-
-## Manual Installation
-
-### 1. Clone the Repository
+**Option B: Install plugin on existing Elasticsearch**
 
 ```bash
-git clone https://github.com/bahaaldine/moltler.git
-cd elastic-script
+# Build the plugin
+cd elastic-script/elasticsearch
+./gradlew :x-pack:plugin:elastic-script:build
 
-# Initialize the Elasticsearch submodule
-git submodule init
-git submodule update
+# Install on your ES cluster
+elasticsearch-plugin install file:///path/to/elastic-script-*.zip
 ```
 
-### 2. Build the Plugin
+**Verify installation:**
 
 ```bash
-cd elasticsearch
-./gradlew :x-pack:plugin:elastic-script:assemble
-```
-
-The plugin ZIP will be at:
-```
-x-pack/plugin/elastic-script/build/distributions/elastic-script-*.zip
-```
-
-### 3. Start Elasticsearch
-
-For development:
-
-```bash
-./gradlew :run
-```
-
-For production, install the plugin:
-
-```bash
-bin/elasticsearch-plugin install file:///path/to/elastic-script-9.4.0-SNAPSHOT.zip
-bin/elasticsearch
-```
-
-## Verify Installation
-
-Check that elastic-script is working:
-
-```bash
-# Health check
 curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
   -H "Content-Type: application/json" \
-  -d '{"query": "CREATE PROCEDURE test() BEGIN RETURN 42; END PROCEDURE;"}'
+  -d '{"query": "PRINT '\''Hello Moltler!'\''"}'
+```
 
-# Expected: {"result":{"id":"test","index":".elastic_script_procedures","result":"created"}}
+---
 
-curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
+### 2. Moltler CLI
+
+The CLI is a bash script included in the repository:
+
+```bash
+cd moltler/hub
+
+# List available skills
+./moltler-cli.sh list
+
+# Install all skills
+./moltler-cli.sh install --all
+
+# Install specific skill
+./moltler-cli.sh install get-recent-errors
+
+# Run a skill
+./moltler-cli.sh run get-recent-errors
+```
+
+**Make it globally available (optional):**
+
+```bash
+# Add to your PATH
+echo 'export PATH="$PATH:/path/to/moltler/hub"' >> ~/.zshrc
+source ~/.zshrc
+
+# Now use from anywhere
+moltler-cli.sh list
+```
+
+---
+
+### 3. MoltlerHub (Web Portal)
+
+Browse and discover skills through a web interface:
+
+```bash
+cd moltler/moltler-hub
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+Open `http://localhost:3000` to browse skills.
+
+**For production deployment:**
+
+```bash
+# Deploy to Vercel
+npx vercel
+
+# Or build static site
+npm run build
+```
+
+---
+
+### 4. Moltler MCP (AI Agent Bridge)
+
+Connect AI assistants (Claude, Cursor, etc.) to your skills:
+
+**The MCP endpoint is built into the elastic-script plugin:**
+
+```bash
+# List available skills via MCP
+curl -u elastic-admin:elastic-password http://localhost:9200/_escript/mcp \
   -H "Content-Type: application/json" \
-  -d '{"query": "CALL test()"}'
+  -d '{"jsonrpc": "2.0", "method": "tools/list", "id": 1}'
 
-# Expected: {"result": 42}
+# Call a skill via MCP
+curl -u elastic-admin:elastic-password http://localhost:9200/_escript/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {"name": "get_recent_errors", "arguments": {}},
+    "id": 1
+  }'
 ```
 
-## Default Credentials
+**Connect to Cursor IDE:**
 
-When using `./gradlew :run` (development mode):
+Add to `.cursor/mcp.json`:
 
-| Setting | Value |
-|---------|-------|
-| URL | `http://localhost:9200` |
-| Username | `elastic-admin` |
-| Password | `elastic-password` |
+```json
+{
+  "mcpServers": {
+    "moltler": {
+      "url": "http://localhost:9200/_escript/mcp",
+      "headers": {
+        "Authorization": "Basic ZWxhc3RpYy1hZG1pbjplbGFzdGljLXBhc3N3b3Jk"
+      }
+    }
+  }
+}
+```
 
-## Sample Data
+---
 
-The quick-start script loads sample data into these indices:
+## What's Next?
 
-| Index | Documents | Description |
-|-------|-----------|-------------|
-| `logs-sample` | 100 | Application logs with ERROR, WARN, INFO levels |
-| `metrics-sample` | 80 | System metrics (CPU, memory, latency) |
-| `users-sample` | 30 | User profiles with roles |
-| `orders-sample` | 50 | E-commerce orders |
-| `products-sample` | 40 | Product catalog |
-| `security-events` | 60 | Audit events |
+| I want to... | Do this |
+|--------------|---------|
+| Run my first skill | [Quick Start Guide](quick-start.md) |
+| Browse available skills | [MoltlerHub](https://hub.moltler.dev) or `./moltler-cli.sh list` |
+| Build my own skill | [Creating Skills](../skills/creating-skills.md) |
+| Connect an AI assistant | [MCP Integration](../mcp.md) |
 
-## Stopping Services
+---
+
+## Troubleshooting
+
+### Plugin not loading
 
 ```bash
-# Stop everything (ES, OTEL, Kibana, Jupyter)
-./scripts/quick-start.sh --stop
+# Check plugin is installed
+curl -u elastic-admin:elastic-password http://localhost:9200/_cat/plugins
 
-# Stop individual services
-./scripts/quick-start.sh --stop-notebooks
-./scripts/quick-start.sh --stop-kibana
-./scripts/quick-start.sh --stop-otel
+# Should show: elastic-script
 ```
 
-## Check Status
+### Skills not found
 
 ```bash
-./scripts/quick-start.sh --status
+# Install skills first
+cd hub && ./moltler-cli.sh install --all
+
+# Verify
+./moltler-cli.sh installed
 ```
 
-Output:
+### MCP connection issues
+
+```bash
+# Test MCP endpoint directly
+curl http://localhost:9200/_escript/mcp \
+  -d '{"jsonrpc": "2.0", "method": "initialize", "id": 1}'
 ```
-Elasticsearch (port 9200):
-✓ Running
-
-OTEL Collector (ports 4317/4318):
-✓ Running (gRPC: 4317, HTTP: 4318)
-
-Kibana (port 5601):
-✓ Running at http://localhost:5601
-
-Jupyter (port 8888):
-✓ Running at http://localhost:8888
-```
-
-## Next Steps
-
-- [Quick Start Guide](quick-start.md) - Your first procedure
-- [Jupyter Setup](jupyter-setup.md) - Interactive development
-- [Language Overview](../language/overview.md) - Learn the syntax
-- [OpenTelemetry Tracing](../observability/opentelemetry.md) - Distributed tracing

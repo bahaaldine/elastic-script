@@ -18,33 +18,91 @@ Moltler is a **framework for building skills** that run directly on Elasticsearc
 
 It ships with **155+ ready-to-use skills** for Observability, Security, and Search - because we know Elasticsearch.
 
+---
+
+## Architecture
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  "Find all errors in production"                                │
-│                          ↓                                      │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │  RUN SKILL get_recent_errors()                           │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                          ↓                                      │
-│  [{"level": "ERROR", "message": "Connection timeout", ...}]    │
+│                        USER / AI AGENT                          │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        ▼                     ▼                     ▼
+┌───────────────┐    ┌───────────────┐    ┌───────────────┐
+│  MoltlerHub   │    │  Moltler CLI  │    │  Moltler MCP  │
+│  (Web Portal) │    │  (Terminal)   │    │  (AI Bridge)  │
+└───────────────┘    └───────────────┘    └───────────────┘
+        │                     │                     │
+        └─────────────────────┼─────────────────────┘
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│               Elasticsearch + elastic-script plugin             │
+│                        (Skills Runtime)                         │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+| Component | Purpose |
+|-----------|---------|
+| **elastic-script plugin** | Elasticsearch plugin that executes skills |
+| **Moltler CLI** | Install and manage skills from your terminal |
+| **MoltlerHub** | Web portal to browse, search, and discover skills |
+| **Moltler MCP** | Bridge for AI agents (Claude, Cursor, etc.) |
 
 ---
 
 ## Quick Start
 
+### 1. Start Elasticsearch with the Plugin
+
 ```bash
-# 1. Clone and start
-git clone --recurse-submodules https://github.com/bahaaldine/elastic-script.git
-cd elastic-script
+git clone --recurse-submodules https://github.com/bahaaldine/moltler.git
+cd moltler
 ./scripts/quick-start.sh
+```
 
-# 2. Install skills (155 available)
-cd hub && ./moltler-cli.sh install --all
+### 2. Install Skills via CLI
 
-# 3. Run the demo
-./scripts/demo.sh
+```bash
+cd hub
+./moltler-cli.sh install --all    # Install all 155 skills
+./moltler-cli.sh installed        # Verify installation
+```
+
+### 3. Run Skills
+
+```bash
+./moltler-cli.sh run get-recent-errors
+
+# Or via curl
+curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
+  -H "Content-Type: application/json" \
+  -d '{"query": "RUN SKILL get_recent_errors()"}'
+```
+
+### 4. (Optional) Browse Skills via MoltlerHub
+
+```bash
+cd moltler-hub
+npm install && npm run dev
+# Open http://localhost:3000
+```
+
+### 5. (Optional) Connect AI Agents via MCP
+
+Add to your `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "moltler": {
+      "url": "http://localhost:9200/_escript/mcp",
+      "headers": {
+        "Authorization": "Basic ZWxhc3RpYy1hZG1pbjplbGFzdGljLXBhc3N3b3Jk"
+      }
+    }
+  }
+}
 ```
 
 ---
@@ -201,9 +259,10 @@ END SKILL;
 | Resource | Description |
 |----------|-------------|
 | [**Documentation**](docs/index.md) | Full documentation |
-| [**MoltlerHub**](hub/) | Browse 155 skills |
+| [**MoltlerHub**](moltler-hub/) | Web portal to browse 155+ skills |
+| [**CLI Reference**](hub/) | Moltler CLI for terminal |
 | [**Contributing**](hub/CONTRIBUTING.md) | Add your skill |
-| [**Language Reference**](LANGUAGE_REFERENCE.md) | EScript syntax |
+| [**Language Reference**](LANGUAGE_REFERENCE.md) | elastic-script syntax |
 
 ---
 

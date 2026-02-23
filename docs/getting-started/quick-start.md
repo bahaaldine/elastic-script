@@ -1,179 +1,188 @@
 # Quick Start
 
-This guide will have you running elastic-script procedures in 5 minutes.
+Get Moltler running and execute your first skill in 5 minutes.
 
-## Hello World
+---
 
-Create your first procedure:
+## Prerequisites
+
+- Git
+- Java 17+ (for building the Elasticsearch plugin)
+- Node.js 18+ (for MoltlerHub)
+
+---
+
+## Step 1: Start Elasticsearch with the Plugin
+
+```bash
+git clone --recurse-submodules https://github.com/bahaaldine/moltler.git
+cd moltler
+./scripts/quick-start.sh
+```
+
+This builds the elastic-script plugin and starts Elasticsearch on port 9200.
+
+**Verify it's running:**
 
 ```bash
 curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
   -H "Content-Type: application/json" \
-  -d '{
-    "query": "CREATE PROCEDURE hello_world() BEGIN RETURN '\''Hello, World!'\''; END PROCEDURE;"
-  }'
+  -d '{"query": "PRINT '\''Hello Moltler!'\''"}'
 ```
 
-Call it:
+---
+
+## Step 2: Install Skills
 
 ```bash
-curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
-  -H "Content-Type: application/json" \
-  -d '{"query": "CALL hello_world()"}'
+cd hub
+./moltler-cli.sh install --all
 ```
 
-Response:
+This installs all 155+ skills into your Elasticsearch cluster.
+
+**Verify skills are installed:**
+
+```bash
+./moltler-cli.sh installed
+```
+
+---
+
+## Step 3: Run Your First Skill
+
+```bash
+# Via CLI
+./moltler-cli.sh run get-recent-errors
+
+# Or via curl
+curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
+  -H "Content-Type: application/json" \
+  -d '{"query": "RUN SKILL get_recent_errors()"}'
+```
+
+---
+
+## Step 4: Browse Skills on MoltlerHub
+
+```bash
+./scripts/quick-start.sh --hub
+# Open http://localhost:3000
+```
+
+MoltlerHub lets you:
+- Browse all 155+ skills
+- Search and filter by category
+- View documentation and parameters
+- Get install commands
+
+---
+
+## Step 5 (Optional): Connect AI Agents
+
+Skills are exposed via the Model Context Protocol (MCP).
+
+**For Cursor IDE**, add to `.cursor/mcp.json`:
+
 ```json
-{"result": "Hello, World!"}
+{
+  "mcpServers": {
+    "moltler": {
+      "url": "http://localhost:9200/_escript/mcp",
+      "headers": {
+        "Authorization": "Basic ZWxhc3RpYy1hZG1pbjplbGFzdGljLXBhc3N3b3Jk"
+      }
+    }
+  }
+}
 ```
 
-## With Parameters
+Now your AI assistant can run skills using natural language.
 
-```sql
-CREATE PROCEDURE greet(name STRING)
-BEGIN
-    RETURN 'Hello, ' || name || '!';
-END PROCEDURE;
+---
+
+## What Just Happened?
+
 ```
+┌─────────────────────────────────────────────────────────────────┐
+│                        YOU / AI AGENT                           │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        ▼                     ▼                     ▼
+┌───────────────┐    ┌───────────────┐    ┌───────────────┐
+│  MoltlerHub   │    │  Moltler CLI  │    │  Moltler MCP  │
+│  (Web Portal) │    │  (Terminal)   │    │  (AI Bridge)  │
+└───────────────┘    └───────────────┘    └───────────────┘
+        │                     │                     │
+        └─────────────────────┼─────────────────────┘
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│               Elasticsearch + elastic-script plugin             │
+│                        (Skills Runtime)                         │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+You now have:
+- **Elasticsearch** running with the elastic-script plugin
+- **155+ skills** installed and ready to use
+- **MoltlerHub** to browse and discover skills
+- **MCP endpoint** for AI agents
+
+---
+
+## Common Skills by Solution
+
+### Observability
 
 ```bash
+# Find recent errors
 curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
   -H "Content-Type: application/json" \
-  -d '{"query": "CALL greet('\''Alice'\'')"}'
+  -d '{"query": "RUN SKILL get_recent_errors()"}'
+
+# Get slow transactions
+curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
+  -H "Content-Type: application/json" \
+  -d '{"query": "RUN SKILL get_slow_transactions()"}'
 ```
 
-Response:
-```json
-{"result": "Hello, Alice!"}
-```
-
-## Variables and Types
-
-```sql
-CREATE PROCEDURE demo_types()
-BEGIN
-    -- String
-    DECLARE message STRING = 'Hello';
-    
-    -- Number
-    DECLARE count NUMBER = 42;
-    
-    -- Boolean
-    DECLARE is_active BOOLEAN = TRUE;
-    
-    -- Array
-    DECLARE items ARRAY = ['apple', 'banana', 'cherry'];
-    
-    -- Document (JSON object)
-    DECLARE user DOCUMENT = {"name": "John", "age": 30};
-    
-    PRINT 'Message: ' || message;
-    PRINT 'Count: ' || count;
-    PRINT 'Active: ' || is_active;
-    PRINT 'First item: ' || items[0];
-    PRINT 'User name: ' || user.name;
-    
-    RETURN 'Demo complete!';
-END PROCEDURE;
-```
-
-## Control Flow
-
-### IF/THEN/ELSE
-
-```sql
-CREATE PROCEDURE check_severity(error_count NUMBER)
-BEGIN
-    DECLARE status STRING;
-    
-    IF error_count == 0 THEN
-        SET status = 'Healthy';
-    ELSEIF error_count < 10 THEN
-        SET status = 'Warning';
-    ELSE
-        SET status = 'Critical';
-    END IF;
-    
-    RETURN status;
-END PROCEDURE;
-```
-
-### FOR Loop
-
-```sql
-CREATE PROCEDURE count_to(n NUMBER)
-BEGIN
-    FOR i IN 1..n LOOP
-        PRINT 'Count: ' || i;
-    END LOOP;
-    
-    RETURN 'Done!';
-END PROCEDURE;
-```
-
-### Array Iteration
-
-```sql
-CREATE PROCEDURE process_items()
-BEGIN
-    DECLARE fruits ARRAY = ['apple', 'banana', 'cherry'];
-    
-    FOR fruit IN fruits LOOP
-        PRINT 'Processing: ' || fruit;
-    END LOOP;
-    
-    RETURN ARRAY_LENGTH(fruits) || ' items processed';
-END PROCEDURE;
-```
-
-## Query Elasticsearch
-
-```sql
-CREATE PROCEDURE get_recent_logs()
-BEGIN
-    -- Execute ES|QL query
-    DECLARE logs ARRAY = ESQL_QUERY('FROM logs-sample | LIMIT 10');
-    
-    PRINT 'Found ' || ARRAY_LENGTH(logs) || ' logs';
-    
-    RETURN logs;
-END PROCEDURE;
-```
-
-## Error Handling
-
-```sql
-CREATE PROCEDURE safe_divide(a NUMBER, b NUMBER)
-BEGIN
-    TRY
-        IF b == 0 THEN
-            THROW 'Division by zero!';
-        END IF;
-        RETURN a / b;
-    CATCH
-        RETURN 'Error: Cannot divide by zero';
-    END TRY;
-END PROCEDURE;
-```
-
-## Distributed Tracing
-
-Traces are collected automatically via the OTEL Collector. Any OTEL-instrumented app can send traces:
+### Security
 
 ```bash
-# Configure your app
-export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
-export OTEL_SERVICE_NAME=my-service
+# Hunt for an IOC
+curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
+  -H "Content-Type: application/json" \
+  -d '{"query": "RUN SKILL hunt_ioc WITH ioc = '\''192.168.1.100'\''"}'
 
-# View traces in Kibana APM
-open http://localhost:5601/app/apm
+# Get risky users
+curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
+  -H "Content-Type: application/json" \
+  -d '{"query": "RUN SKILL get_risky_users()"}'
 ```
 
-See [OpenTelemetry Tracing](../observability/opentelemetry.md) for complete documentation.
+### Search
+
+```bash
+# Semantic search
+curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
+  -H "Content-Type: application/json" \
+  -d '{"query": "RUN SKILL semantic_search WITH query = '\''pricing information'\''"}'
+
+# Top values
+curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
+  -H "Content-Type: application/json" \
+  -d '{"query": "RUN SKILL top_values WITH field = '\''category'\''"}'
+```
+
+---
 
 ## Next Steps
 
-- [Jupyter Setup](jupyter-setup.md) - Interactive development
-- [Language Overview](../language/overview.md) - Full syntax guide
-- [Function Reference](../functions/overview.md) - All 118 functions
-- [OpenTelemetry Tracing](../observability/opentelemetry.md) - Distributed tracing
+| I want to... | Go here |
+|--------------|---------|
+| Browse all skills | [MoltlerHub](../moltlerhub/index.md) or `./moltler-cli.sh list` |
+| Build my own skill | [Creating Skills](../skills/creating-skills.md) |
+| Learn the language | [Language Reference](../language/overview.md) |
+| Connect AI agents | [MCP Integration](../mcp.md) |
+| Contribute a skill | [Contributing Guide](../moltlerhub/contributing.md) |
