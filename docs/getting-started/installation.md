@@ -59,38 +59,58 @@ cd .. && ./scripts/quick-start.sh --hub
 - Admin access to install plugins
 - Java 17+ (for building the plugin)
 
-### Step 1: Build the Plugin
+### Step 1: Download the Plugin
+
+Download the pre-built plugin that matches your Elasticsearch version:
+
+**[📦 Download from GitHub Releases](https://github.com/bahaaldine/moltler/releases)**
+
+| Elasticsearch | Download |
+|---------------|----------|
+| 9.4.0 | `elastic-script-9.4.0.zip` |
+| 9.3.0 | `elastic-script-9.3.0.zip` |
+| 9.2.0 | `elastic-script-9.2.0.zip` |
+| 9.1.0 | `elastic-script-9.1.0.zip` |
+| 9.0.0 | `elastic-script-9.0.0.zip` |
+| 8.17.0 | `elastic-script-8.17.0.zip` |
+| 8.16.0 | `elastic-script-8.16.0.zip` |
+| 8.15.0 | `elastic-script-8.15.0.zip` |
 
 ```bash
-# Clone and build
-git clone --recurse-submodules https://github.com/bahaaldine/moltler.git
-cd moltler/elastic-script/elasticsearch
-
-# Build the plugin (creates a zip file)
-./gradlew :x-pack:plugin:elastic-script:build -x test
-
-# Find the plugin zip
-ls -la x-pack/plugin/elastic-script/build/distributions/
-# Output: elastic-script-<version>-SNAPSHOT.zip
+# Example: Download for ES 9.4.0
+wget https://github.com/bahaaldine/moltler/releases/download/v1.0.0/elastic-script-9.4.0.zip
 ```
+
+??? note "Build from Source (alternative)"
+    If you need to build from source (custom version, modifications):
+    
+    ```bash
+    git clone --recurse-submodules https://github.com/bahaaldine/moltler.git
+    cd moltler/elastic-script/elasticsearch
+    ./gradlew :x-pack:plugin:elastic-script:build -x test
+    ls -la x-pack/plugin/elastic-script/build/distributions/
+    ```
 
 ### Step 2: Install on Each Node
 
 ```bash
 # Copy the plugin zip to each Elasticsearch node
-scp x-pack/plugin/elastic-script/build/distributions/elastic-script-*.zip \
-    user@es-node:/tmp/
+scp elastic-script-9.4.0.zip user@es-node:/tmp/
 
 # SSH to each node and install
 ssh user@es-node
 
 # Install the plugin
 sudo /usr/share/elasticsearch/bin/elasticsearch-plugin install \
-    file:///tmp/elastic-script-<version>-SNAPSHOT.zip
+    file:///tmp/elastic-script-9.4.0.zip
 
 # Restart Elasticsearch
 sudo systemctl restart elasticsearch
 ```
+
+!!! warning "Repeat for each node"
+    The plugin must be installed on **every node** in your cluster.
+    After installing on all nodes, restart them one at a time (rolling restart).
 
 ### Step 3: Verify Installation
 

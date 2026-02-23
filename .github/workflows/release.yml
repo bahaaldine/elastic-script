@@ -1,0 +1,135 @@
+name: Build & Release Plugin
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      es_version:
+        description: 'Elasticsearch version to build against'
+        required: true
+        default: '9.0.0'
+        type: string
+
+env:
+  JAVA_VERSION: '21'
+
+jobs:
+  build:
+    name: Build Plugin
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        es_version:
+          - '8.15.0'
+          - '8.16.0'
+          - '8.17.0'
+          - '9.0.0'
+          - '9.1.0'
+          - '9.2.0'
+          - '9.3.0'
+          - '9.4.0'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+      
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+      
+      - name: Checkout ES version
+        working-directory: elastic-script/elasticsearch
+        run: |
+          # Fetch all tags
+          git fetch --all --tags
+          
+          # Try to checkout the exact version tag, fall back to branch
+          if git rev-parse "v${{ matrix.es_version }}" >/dev/null 2>&1; then
+            git checkout "v${{ matrix.es_version }}"
+          elif git rev-parse "${{ matrix.es_version }}" >/dev/null 2>&1; then
+            git checkout "${{ matrix.es_version }}"
+          else
+            echo "Warning: Could not find exact version, using main"
+          fi
+      
+      - name: Build Plugin
+        working-directory: elastic-script/elasticsearch
+        run: |
+          ./gradlew :x-pack:plugin:elastic-script:build -x test
+      
+      - name: Rename artifact
+        run: |
+          mkdir -p dist
+          cp elastic-script/elasticsearch/x-pack/plugin/elastic-script/build/distributions/*.zip \
+             dist/elastic-script-${{ matrix.es_version }}.zip
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: elastic-script-${{ matrix.es_version }}
+          path: dist/elastic-script-${{ matrix.es_version }}.zip
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: artifacts/**/*.zip
+          generate_release_notes: true
+          body: |
+            ## Moltler Plugin Release
+            
+            Download the plugin zip that matches your Elasticsearch version:
+            
+            | Elasticsearch Version | Download |
+            |----------------------|----------|
+            | 9.4.0 | `elastic-script-9.4.0.zip` |
+            | 9.3.0 | `elastic-script-9.3.0.zip` |
+            | 9.2.0 | `elastic-script-9.2.0.zip` |
+            | 9.1.0 | `elastic-script-9.1.0.zip` |
+            | 9.0.0 | `elastic-script-9.0.0.zip` |
+            | 8.17.0 | `elastic-script-8.17.0.zip` |
+            | 8.16.0 | `elastic-script-8.16.0.zip` |
+            | 8.15.0 | `elastic-script-8.15.0.zip` |
+            
+            ### Installation
+            
+            ```bash
+            # Download the plugin for your ES version
+            wget https://github.com/bahaaldine/moltler/releases/download/${{ github.ref_name }}/elastic-script-<ES_VERSION>.zip
+            
+            # Install the plugin
+            elasticsearch-plugin install file:///path/to/elastic-script-<ES_VERSION>.zip
+            
+            # Restart Elasticsearch
+            systemctl restart elasticsearch
+            ```
+            
+            ### Install Skills
+            
+            ```bash
+            git clone https://github.com/bahaaldine/moltler.git
+            cd moltler/hub
+            ./moltler-cli.sh install --all
+            ```
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
