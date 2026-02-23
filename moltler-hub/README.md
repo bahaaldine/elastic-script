@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MoltlerHub
 
-## Getting Started
+**The Skills Marketplace for Elasticsearch.**
 
-First, run the development server:
+MoltlerHub is a web application for discovering, browsing, and sharing Moltler skills.
+
+## Features
+
+- 📦 **155+ Skills** - Browse all available skills
+- 🔍 **Search** - Find skills by name, description, or tags
+- 📂 **Categories** - Filter by Observability, Security, Search, and more
+- 📄 **Skill Details** - Full documentation for each skill
+- 🌙 **Dark Theme** - Modern, eye-friendly design
+
+## Development
 
 ```bash
+# Install dependencies
+npm install
+
+# Generate skills data from hub
+node -e "$(cat scripts/generate-skills.ts)"
+
+# Start dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Build for production
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Deployment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Vercel (Recommended)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# Install Vercel CLI
+npm i -g vercel
 
-## Learn More
+# Deploy
+cd moltler-hub
+vercel
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Static Export
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Add to next.config.ts:
+# output: 'export'
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+npm run build
+# Static files in ./out directory
+```
 
-## Deploy on Vercel
+### GitHub Pages
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The app can be deployed to GitHub Pages using the workflow in `.github/workflows/`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Stack
+
+- **Next.js 16** - React framework with App Router
+- **TailwindCSS** - Styling
+- **TypeScript** - Type safety
+- **Static Generation** - All pages pre-rendered
+
+## Data
+
+Skills are loaded from `hub/skills/elastic/` at build time. Run the generate script to update:
+
+```bash
+npm run generate-skills
+```
+
+## Links
+
+- [MoltlerHub Live](https://hub.moltler.dev) (coming soon)
+- [Moltler Documentation](https://bahaaldine.github.io/moltler/)
+- [GitHub Repository](https://github.com/bahaaldine/moltler)
