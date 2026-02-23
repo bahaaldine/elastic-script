@@ -69,22 +69,20 @@ export default function DocsPage() {
           
           <div className="space-y-6">
             <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <h3 className="font-semibold mb-3">1. Clone and Start</h3>
+              <h3 className="font-semibold mb-3">One Command Setup</h3>
               <pre className="bg-gray-900 p-4 rounded text-sm overflow-x-auto">
                 <code className="text-green-400">{`git clone --recurse-submodules https://github.com/bahaaldine/moltler.git
-cd moltler
-./scripts/quick-start.sh`}</code>
+cd moltler && ./scripts/quick-start.sh`}</code>
               </pre>
               <p className="text-gray-400 text-sm mt-3">
-                This builds the plugin and starts Elasticsearch on localhost:9200
+                Builds the plugin, starts Elasticsearch, and you're ready to go.
               </p>
             </div>
 
             <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <h3 className="font-semibold mb-3">2. Install Skills</h3>
+              <h3 className="font-semibold mb-3">Install Skills</h3>
               <pre className="bg-gray-900 p-4 rounded text-sm overflow-x-auto">
-                <code className="text-green-400">{`cd hub
-./moltler-cli.sh install --all`}</code>
+                <code className="text-green-400">{`cd hub && ./moltler-cli.sh install --all`}</code>
               </pre>
               <p className="text-gray-400 text-sm mt-3">
                 Installs all 155+ skills into your cluster
@@ -92,14 +90,8 @@ cd moltler
             </div>
 
             <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <h3 className="font-semibold mb-3">3. Run Your First Skill</h3>
+              <h3 className="font-semibold mb-3">Run Your First Skill</h3>
               <pre className="bg-gray-900 p-4 rounded text-sm overflow-x-auto">
-                <code className="text-green-400">{`./moltler-cli.sh run get-recent-errors`}</code>
-              </pre>
-              <p className="text-gray-400 text-sm mt-3">
-                Or use curl:
-              </p>
-              <pre className="bg-gray-900 p-4 rounded text-sm overflow-x-auto mt-2">
                 <code className="text-green-400">{`curl -u elastic-admin:elastic-password http://localhost:9200/_escript \\
   -H "Content-Type: application/json" \\
   -d '{"query": "RUN SKILL get_recent_errors()"}'`}</code>
