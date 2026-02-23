@@ -43,52 +43,56 @@ Moltler is a **framework for building skills** - reusable operations that run di
 
 ## Getting Started
 
-### Step 1: Start Elasticsearch with the Plugin
+Choose your installation path:
+
+<div class="grid cards" markdown>
+
+-   :material-rocket-launch:{ .lg .middle } **Try It Out**
+
+    Demo, evaluation, or development
+
+    [:octicons-arrow-right-24: Quick Start](#quick-start)
+
+    ```bash
+    git clone --recurse-submodules https://github.com/bahaaldine/moltler.git
+    cd moltler && ./scripts/quick-start.sh
+    ```
+
+-   :material-server:{ .lg .middle } **Existing Cluster**
+
+    Install on production Elasticsearch
+
+    [:octicons-arrow-right-24: Production Install](getting-started/installation.md#path-b-existing-elasticsearch-cluster)
+
+    ```bash
+    # Build plugin, install on each node
+    elasticsearch-plugin install elastic-script.zip
+    ```
+
+</div>
+
+---
+
+## Quick Start
+
+**5 minutes to first skill:**
 
 ```bash
+# 1. Clone and start (builds plugin + starts ES)
 git clone --recurse-submodules https://github.com/bahaaldine/moltler.git
-cd moltler
-./scripts/quick-start.sh
-```
+cd moltler && ./scripts/quick-start.sh
 
-### Step 2: Install Skills via CLI
+# 2. Install skills
+cd hub && ./moltler-cli.sh install --all
 
-```bash
-cd hub
-./moltler-cli.sh install --all    # Install all 155 skills
-./moltler-cli.sh installed        # Verify installation
-```
-
-### Step 3: Run Your First Skill
-
-```bash
+# 3. Run your first skill
 ./moltler-cli.sh run get-recent-errors
+
+# 4. (Optional) Browse skills on MoltlerHub
+cd ../moltler-hub && npm install && npm run dev
 ```
 
-### Step 4 (Optional): Browse Skills on MoltlerHub
-
-```bash
-cd moltler-hub
-npm install && npm run dev
-# Open http://localhost:3000
-```
-
-### Step 5 (Optional): Connect AI Agents
-
-Add to `.cursor/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "moltler": {
-      "url": "http://localhost:9200/_escript/mcp",
-      "headers": {
-        "Authorization": "Basic ZWxhc3RpYy1hZG1pbjplbGFzdGljLXBhc3N3b3Jk"
-      }
-    }
-  }
-}
-```
+**Result:** Elasticsearch on `localhost:9200` with 155+ skills.
 
 [**Full Installation Guide →**](getting-started/installation.md)
 

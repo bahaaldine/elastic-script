@@ -1,19 +1,147 @@
 # Installation
 
-Get Moltler running in your environment.
+Choose your installation path based on your use case.
+
+---
+
+## Choose Your Path
+
+| I want to... | Path |
+|--------------|------|
+| Try Moltler quickly (demo/development) | [Path A: Quick Start](#path-a-quick-start-demoevaluation) |
+| Install on my existing Elasticsearch cluster | [Path B: Existing Cluster](#path-b-existing-elasticsearch-cluster) |
+
+---
+
+## Path A: Quick Start (Demo/Evaluation)
+
+**Best for:** Trying Moltler, development, demos, learning
+
+This path runs a local Elasticsearch instance with the plugin pre-installed.
+
+### Prerequisites
+
+- Git
+- Java 17+
+- Node.js 18+ (for MoltlerHub)
+
+### Steps
+
+```bash
+# 1. Clone the repository
+git clone --recurse-submodules https://github.com/bahaaldine/moltler.git
+cd moltler
+
+# 2. Start Elasticsearch with the plugin (builds automatically)
+./scripts/quick-start.sh
+
+# 3. Install skills
+cd hub && ./moltler-cli.sh install --all
+
+# 4. Run your first skill
+./moltler-cli.sh run get-recent-errors
+
+# 5. (Optional) Start MoltlerHub web portal
+cd .. && ./scripts/quick-start.sh --hub
+```
+
+**Result:** Elasticsearch on `localhost:9200` with 155+ skills installed.
+
+---
+
+## Path B: Existing Elasticsearch Cluster
+
+**Best for:** Production deployments, adding Moltler to existing infrastructure
+
+### Prerequisites
+
+- Elasticsearch 8.x cluster (running)
+- Admin access to install plugins
+- Java 17+ (for building the plugin)
+
+### Step 1: Build the Plugin
+
+```bash
+# Clone and build
+git clone --recurse-submodules https://github.com/bahaaldine/moltler.git
+cd moltler/elastic-script/elasticsearch
+
+# Build the plugin (creates a zip file)
+./gradlew :x-pack:plugin:elastic-script:build -x test
+
+# Find the plugin zip
+ls -la x-pack/plugin/elastic-script/build/distributions/
+# Output: elastic-script-<version>-SNAPSHOT.zip
+```
+
+### Step 2: Install on Each Node
+
+```bash
+# Copy the plugin zip to each Elasticsearch node
+scp x-pack/plugin/elastic-script/build/distributions/elastic-script-*.zip \
+    user@es-node:/tmp/
+
+# SSH to each node and install
+ssh user@es-node
+
+# Install the plugin
+sudo /usr/share/elasticsearch/bin/elasticsearch-plugin install \
+    file:///tmp/elastic-script-<version>-SNAPSHOT.zip
+
+# Restart Elasticsearch
+sudo systemctl restart elasticsearch
+```
+
+### Step 3: Verify Installation
+
+```bash
+# Check plugin is loaded
+curl -u elastic:password https://your-cluster:9200/_cat/plugins
+
+# Test the plugin
+curl -u elastic:password https://your-cluster:9200/_escript \
+  -H "Content-Type: application/json" \
+  -d '{"query": "PRINT '\''Hello Moltler!'\''"}'
+```
+
+### Step 4: Configure the CLI
+
+```bash
+# Back on your local machine
+cd moltler/hub
+
+# Set environment variables for your cluster
+export ES_URL="https://your-cluster:9200"
+export ES_USER="elastic"
+export ES_PASSWORD="your-password"
+
+# Install skills
+./moltler-cli.sh install --all
+
+# Verify
+./moltler-cli.sh installed
+```
+
+### Step 5: (Optional) Deploy MoltlerHub
+
+For team access to browse skills, deploy MoltlerHub:
+
+```bash
+cd moltler/moltler-hub
+
+# Configure for your cluster
+echo "NEXT_PUBLIC_ES_URL=https://your-cluster:9200" > .env.local
+
+# Build and deploy
+npm install
+npm run build
+
+# Deploy to your preferred platform (Vercel, Docker, etc.)
+```
 
 ---
 
 ## Architecture Overview
-
-Moltler consists of three components:
-
-| Component | Purpose | Required |
-|-----------|---------|----------|
-| **elastic-script plugin** | Runs skills inside Elasticsearch | ✅ Yes |
-| **Moltler CLI** | Install/manage skills from terminal | ✅ Yes |
-| **MoltlerHub** | Web portal to browse/discover skills | Optional |
-| **Moltler MCP** | Bridge for AI agents to use skills | Optional |
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -35,175 +163,35 @@ Moltler consists of three components:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
----
-
-## Quick Start (All-in-One)
-
-The fastest way to get everything running:
-
-```bash
-# Clone the repository
-git clone --recurse-submodules https://github.com/bahaaldine/moltler.git
-cd moltler
-
-# Start Elasticsearch with the plugin + install all skills
-./scripts/quick-start.sh
-
-# (Optional) Start MoltlerHub web portal
-cd moltler-hub && npm install && npm run dev
-```
-
-This gives you:
-- ✅ Elasticsearch on `http://localhost:9200`
-- ✅ 155+ skills installed
-- ✅ MoltlerHub on `http://localhost:3000` (optional)
+| Component | Where it runs | Required |
+|-----------|---------------|----------|
+| **elastic-script plugin** | On each ES node | ✅ Yes |
+| **Moltler CLI** | Your laptop/CI server | ✅ Yes |
+| **MoltlerHub** | Web server or localhost | Optional |
+| **Moltler MCP** | Built into the plugin | Optional |
 
 ---
 
-## Step-by-Step Installation
+## Cloud Deployments
 
-### 1. Elasticsearch + elastic-script Plugin
+### Elastic Cloud
 
-**Option A: Use the provided setup (recommended)**
+!!! note "Coming Soon"
+    Native Elastic Cloud support is on the roadmap. For now, use self-managed clusters.
 
-```bash
-git clone --recurse-submodules https://github.com/bahaaldine/moltler.git
-cd moltler
-./scripts/quick-start.sh
+### Kubernetes / ECK
+
+For Elastic Cloud on Kubernetes (ECK), add the plugin to your custom image:
+
+```dockerfile
+FROM docker.elastic.co/elasticsearch/elasticsearch:8.x.x
+
+# Copy pre-built plugin
+COPY elastic-script-*.zip /tmp/
+
+# Install plugin
+RUN bin/elasticsearch-plugin install file:///tmp/elastic-script-*.zip
 ```
-
-**Option B: Install plugin on existing Elasticsearch**
-
-```bash
-# Build the plugin
-cd elastic-script/elasticsearch
-./gradlew :x-pack:plugin:elastic-script:build
-
-# Install on your ES cluster
-elasticsearch-plugin install file:///path/to/elastic-script-*.zip
-```
-
-**Verify installation:**
-
-```bash
-curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
-  -H "Content-Type: application/json" \
-  -d '{"query": "PRINT '\''Hello Moltler!'\''"}'
-```
-
----
-
-### 2. Moltler CLI
-
-The CLI is a bash script included in the repository:
-
-```bash
-cd moltler/hub
-
-# List available skills
-./moltler-cli.sh list
-
-# Install all skills
-./moltler-cli.sh install --all
-
-# Install specific skill
-./moltler-cli.sh install get-recent-errors
-
-# Run a skill
-./moltler-cli.sh run get-recent-errors
-```
-
-**Make it globally available (optional):**
-
-```bash
-# Add to your PATH
-echo 'export PATH="$PATH:/path/to/moltler/hub"' >> ~/.zshrc
-source ~/.zshrc
-
-# Now use from anywhere
-moltler-cli.sh list
-```
-
----
-
-### 3. MoltlerHub (Web Portal)
-
-Browse and discover skills through a web interface:
-
-```bash
-cd moltler/moltler-hub
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
-
-Open `http://localhost:3000` to browse skills.
-
-**For production deployment:**
-
-```bash
-# Deploy to Vercel
-npx vercel
-
-# Or build static site
-npm run build
-```
-
----
-
-### 4. Moltler MCP (AI Agent Bridge)
-
-Connect AI assistants (Claude, Cursor, etc.) to your skills:
-
-**The MCP endpoint is built into the elastic-script plugin:**
-
-```bash
-# List available skills via MCP
-curl -u elastic-admin:elastic-password http://localhost:9200/_escript/mcp \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc": "2.0", "method": "tools/list", "id": 1}'
-
-# Call a skill via MCP
-curl -u elastic-admin:elastic-password http://localhost:9200/_escript/mcp \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "method": "tools/call",
-    "params": {"name": "get_recent_errors", "arguments": {}},
-    "id": 1
-  }'
-```
-
-**Connect to Cursor IDE:**
-
-Add to `.cursor/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "moltler": {
-      "url": "http://localhost:9200/_escript/mcp",
-      "headers": {
-        "Authorization": "Basic ZWxhc3RpYy1hZG1pbjplbGFzdGljLXBhc3N3b3Jk"
-      }
-    }
-  }
-}
-```
-
----
-
-## What's Next?
-
-| I want to... | Do this |
-|--------------|---------|
-| Run my first skill | [Quick Start Guide](quick-start.md) |
-| Browse available skills | [MoltlerHub](https://hub.moltler.dev) or `./moltler-cli.sh list` |
-| Build my own skill | [Creating Skills](../skills/creating-skills.md) |
-| Connect an AI assistant | [MCP Integration](../mcp.md) |
 
 ---
 
@@ -213,25 +201,52 @@ Add to `.cursor/mcp.json`:
 
 ```bash
 # Check plugin is installed
-curl -u elastic-admin:elastic-password http://localhost:9200/_cat/plugins
+curl -u elastic:password https://your-cluster:9200/_cat/plugins
 
-# Should show: elastic-script
+# Check ES logs for errors
+tail -100 /var/log/elasticsearch/elasticsearch.log | grep -i escript
+```
+
+### Version mismatch
+
+The plugin must match your Elasticsearch version. Build against the matching branch:
+
+```bash
+cd moltler/elastic-script/elasticsearch
+git checkout 8.x  # Match your ES version
+./gradlew :x-pack:plugin:elastic-script:build -x test
 ```
 
 ### Skills not found
 
 ```bash
-# Install skills first
-cd hub && ./moltler-cli.sh install --all
+# Verify CLI is configured for your cluster
+echo $ES_URL  # Should show your cluster URL
 
-# Verify
+# Install skills
+./moltler-cli.sh install --all
+
+# List installed
 ./moltler-cli.sh installed
 ```
 
-### MCP connection issues
+### Connection issues
 
 ```bash
-# Test MCP endpoint directly
-curl http://localhost:9200/_escript/mcp \
-  -d '{"jsonrpc": "2.0", "method": "initialize", "id": 1}'
+# Test basic connectivity
+curl -u elastic:password https://your-cluster:9200
+
+# Check TLS settings if using HTTPS
+curl -k -u elastic:password https://your-cluster:9200  # Skip cert validation
 ```
+
+---
+
+## Next Steps
+
+| I want to... | Go here |
+|--------------|---------|
+| Run my first skill | [Quick Start Guide](quick-start.md) |
+| Browse available skills | [MoltlerHub](../moltlerhub/index.md) or `./moltler-cli.sh list` |
+| Build my own skill | [Creating Skills](../skills/creating-skills.md) |
+| Connect an AI assistant | [MCP Integration](../mcp.md) |

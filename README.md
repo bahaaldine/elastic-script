@@ -51,44 +51,65 @@ It ships with **155+ ready-to-use skills** for Observability, Security, and Sear
 
 ---
 
-## Quick Start
+## Installation
 
-### 1. Start Elasticsearch with the Plugin
+Choose your path:
+
+| I want to... | Do this |
+|--------------|---------|
+| **Try it out** (demo/dev) | [Quick Start](#quick-start-tryevaluation) - 5 minutes |
+| **Install on existing cluster** | [Production Install](docs/getting-started/installation.md#path-b-existing-elasticsearch-cluster) |
+
+---
+
+## Quick Start (Try/Evaluation)
 
 ```bash
+# 1. Clone and start (builds plugin + starts ES)
 git clone --recurse-submodules https://github.com/bahaaldine/moltler.git
-cd moltler
-./scripts/quick-start.sh
-```
+cd moltler && ./scripts/quick-start.sh
 
-### 2. Install Skills via CLI
+# 2. Install skills
+cd hub && ./moltler-cli.sh install --all
 
-```bash
-cd hub
-./moltler-cli.sh install --all    # Install all 155 skills
-./moltler-cli.sh installed        # Verify installation
-```
-
-### 3. Run Skills
-
-```bash
+# 3. Run your first skill
 ./moltler-cli.sh run get-recent-errors
 
-# Or via curl
-curl -u elastic-admin:elastic-password http://localhost:9200/_escript \
-  -H "Content-Type: application/json" \
-  -d '{"query": "RUN SKILL get_recent_errors()"}'
+# 4. (Optional) Browse skills on MoltlerHub
+cd ../moltler-hub && npm install && npm run dev
 ```
 
-### 4. (Optional) Browse Skills via MoltlerHub
+**Result:** Elasticsearch on `localhost:9200` with 155+ skills installed.
+
+[**Full Installation Guide →**](docs/getting-started/installation.md)
+
+---
+
+## For Existing Clusters
+
+Already have Elasticsearch running? Install the plugin on your nodes:
 
 ```bash
-cd moltler-hub
-npm install && npm run dev
-# Open http://localhost:3000
+# Build the plugin
+cd moltler/elastic-script/elasticsearch
+./gradlew :x-pack:plugin:elastic-script:build -x test
+
+# Install on each ES node
+elasticsearch-plugin install file:///path/to/elastic-script-*.zip
+
+# Restart ES, then install skills
+cd ../../hub
+export ES_URL="https://your-cluster:9200"
+export ES_USER="elastic"
+export ES_PASSWORD="your-password"
+./moltler-cli.sh install --all
 ```
 
-### 5. (Optional) Connect AI Agents via MCP
+[**Full Production Install Guide →**](docs/getting-started/installation.md#path-b-existing-elasticsearch-cluster)
+
+---
+
+## Connect AI Agents (MCP)
 
 Add to your `.cursor/mcp.json`:
 
