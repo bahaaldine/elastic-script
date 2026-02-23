@@ -5,12 +5,6 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
-    inputs:
-      es_version:
-        description: 'Elasticsearch version to build against'
-        required: true
-        default: '9.0.0'
-        type: string
 
 env:
   JAVA_VERSION: '21'
@@ -19,18 +13,6 @@ jobs:
   build:
     name: Build Plugin
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        es_version:
-          - '8.15.0'
-          - '8.16.0'
-          - '8.17.0'
-          - '9.0.0'
-          - '9.1.0'
-          - '9.2.0'
-          - '9.3.0'
-          - '9.4.0'
     
     steps:
       - name: Checkout
@@ -39,16 +21,19 @@ jobs:
           submodules: recursive
           fetch-depth: 0
       
-      - name: Debug - List directories
+      - name: Debug - Show structure
         run: |
-          echo "=== Root directory ==="
+          echo "=== Repository structure ==="
           ls -la
-          echo "=== elastic-script directory ==="
-          ls -la elastic-script/ || echo "Not found"
-          echo "=== elasticsearch directory ==="
-          ls -la elasticsearch/ | head -20 || echo "Not found"
-          echo "=== elasticsearch/x-pack/plugin ==="
-          ls -la elasticsearch/x-pack/plugin/ | head -20 || echo "Not found"
+          echo ""
+          echo "=== elastic-script plugin source ==="
+          ls -la elastic-script/
+          echo ""
+          echo "=== elasticsearch submodule ==="
+          ls -la elasticsearch/ | head -10
+          echo ""
+          echo "=== x-pack/plugin directory ==="
+          ls -la elasticsearch/x-pack/plugin/ | head -20
       
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -59,65 +44,60 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
       
-      - name: Checkout ES version
-        working-directory: elasticsearch
-        run: |
-          # Fetch all tags
-          git fetch --all --tags
-          
-          # Try to checkout the exact version tag, fall back to branch
-          if git rev-parse "v${{ matrix.es_version }}" >/dev/null 2>&1; then
-            echo "Checking out tag v${{ matrix.es_version }}"
-            git checkout "v${{ matrix.es_version }}"
-          elif git rev-parse "${{ matrix.es_version }}" >/dev/null 2>&1; then
-            echo "Checking out ${{ matrix.es_version }}"
-            git checkout "${{ matrix.es_version }}"
-          else
-            echo "Warning: Could not find exact version, trying main branch"
-            git checkout main || git checkout master || true
-          fi
-      
       - name: Setup plugin in ES tree
         run: |
-          # Remove the symlink if it exists
-          rm -rf elasticsearch/x-pack/plugin/elastic-script
+          # Check if symlink exists and remove it
+          if [ -L "elasticsearch/x-pack/plugin/elastic-script" ]; then
+            echo "Removing existing symlink"
+            rm elasticsearch/x-pack/plugin/elastic-script
+          elif [ -d "elasticsearch/x-pack/plugin/elastic-script" ]; then
+            echo "Removing existing directory"
+            rm -rf elasticsearch/x-pack/plugin/elastic-script
+          fi
           
           # Copy the plugin source into the ES tree
           cp -r elastic-script elasticsearch/x-pack/plugin/elastic-script
           
-          # Verify the copy
-          echo "=== Plugin directory after copy ==="
+          echo "=== Plugin directory after setup ==="
           ls -la elasticsearch/x-pack/plugin/elastic-script/
       
       - name: Build Plugin
         working-directory: elasticsearch
         run: |
-          ./gradlew :x-pack:plugin:elastic-script:build -x test --no-daemon
-        continue-on-error: true
+          echo "=== Starting build ==="
+          ./gradlew :x-pack:plugin:elastic-script:build -x test --no-daemon --info 2>&1 | tail -100
       
-      - name: Check build output
+      - name: Find and prepare artifacts
+        id: artifacts
         run: |
           echo "=== Looking for build artifacts ==="
-          find elasticsearch -name "*.zip" -path "*elastic-script*" 2>/dev/null || echo "No zip found"
-          ls -la elasticsearch/x-pack/plugin/elastic-script/build/distributions/ 2>/dev/null || echo "No distributions dir"
-      
-      - name: Rename artifact
-        run: |
+          find elasticsearch -name "*.zip" -path "*elastic-script*" 2>/dev/null
+          
           mkdir -p dist
-          if ls elasticsearch/x-pack/plugin/elastic-script/build/distributions/*.zip 1>/dev/null 2>&1; then
-            cp elasticsearch/x-pack/plugin/elastic-script/build/distributions/*.zip \
-               dist/elastic-script-${{ matrix.es_version }}.zip
-            echo "Artifact created: elastic-script-${{ matrix.es_version }}.zip"
+          
+          # Find the zip file
+          ZIP_FILE=$(find elasticsearch/x-pack/plugin/elastic-script/build/distributions -name "*.zip" 2>/dev/null | head -1)
+          
+          if [ -n "$ZIP_FILE" ]; then
+            echo "Found: $ZIP_FILE"
+            # Get version from the zip filename
+            FILENAME=$(basename "$ZIP_FILE")
+            cp "$ZIP_FILE" "dist/$FILENAME"
+            echo "artifact_name=$FILENAME" >> $GITHUB_OUTPUT
+            echo "Artifact ready: dist/$FILENAME"
           else
             echo "ERROR: No zip file found!"
+            echo "=== Checking build directory ==="
+            ls -la elasticsearch/x-pack/plugin/elastic-script/build/ 2>/dev/null || echo "No build dir"
+            ls -la elasticsearch/x-pack/plugin/elastic-script/build/distributions/ 2>/dev/null || echo "No distributions dir"
             exit 1
           fi
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: elastic-script-${{ matrix.es_version }}
-          path: dist/elastic-script-${{ matrix.es_version }}.zip
+          name: elastic-script-plugin
+          path: dist/*.zip
           if-no-files-found: error
 
   release:
@@ -127,45 +107,38 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     
     steps:
-      - name: Download all artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
+          name: elastic-script-plugin
+          path: dist
       
       - name: List artifacts
         run: |
           echo "=== Downloaded artifacts ==="
-          find artifacts -type f -name "*.zip"
+          ls -la dist/
       
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: artifacts/**/*.zip
+          files: dist/*.zip
           generate_release_notes: true
           body: |
             ## Moltler Plugin Release
             
-            Download the plugin zip that matches your Elasticsearch version:
+            Download the plugin zip and install it on your Elasticsearch cluster.
             
-            | Elasticsearch Version | Download |
-            |----------------------|----------|
-            | 9.4.0 | `elastic-script-9.4.0.zip` |
-            | 9.3.0 | `elastic-script-9.3.0.zip` |
-            | 9.2.0 | `elastic-script-9.2.0.zip` |
-            | 9.1.0 | `elastic-script-9.1.0.zip` |
-            | 9.0.0 | `elastic-script-9.0.0.zip` |
-            | 8.17.0 | `elastic-script-8.17.0.zip` |
-            | 8.16.0 | `elastic-script-8.16.0.zip` |
-            | 8.15.0 | `elastic-script-8.15.0.zip` |
+            > **Note:** This plugin is built against Elasticsearch 9.x (main branch).
+            > For other versions, you may need to build from source.
             
             ### Installation
             
             ```bash
-            # Download the plugin for your ES version
-            wget https://github.com/bahaaldine/moltler/releases/download/${{ github.ref_name }}/elastic-script-<ES_VERSION>.zip
+            # Download the plugin
+            wget https://github.com/bahaaldine/moltler/releases/download/${{ github.ref_name }}/x-pack-escript-<VERSION>.zip
             
-            # Install the plugin
-            elasticsearch-plugin install file:///path/to/elastic-script-<ES_VERSION>.zip
+            # Install the plugin on each node
+            elasticsearch-plugin install file:///path/to/x-pack-escript-<VERSION>.zip
             
             # Restart Elasticsearch
             systemctl restart elasticsearch
@@ -173,10 +146,27 @@ jobs:
             
             ### Install Skills
             
+            After installing the plugin, install the skills:
+            
             ```bash
             git clone https://github.com/bahaaldine/moltler.git
             cd moltler/hub
             ./moltler-cli.sh install --all
+            ```
+            
+            ### Build for Other ES Versions
+            
+            If you need a different Elasticsearch version:
+            
+            ```bash
+            git clone --recurse-submodules https://github.com/bahaaldine/moltler.git
+            cd moltler/elastic-script/elasticsearch
+            
+            # Checkout your ES version
+            git checkout v8.x.x
+            
+            # Build
+            ./gradlew :x-pack:plugin:elastic-script:build -x test
             ```
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
