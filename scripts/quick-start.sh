@@ -1150,13 +1150,8 @@ show_help() {
     echo "  --notebooks       Start Jupyter notebooks"
     echo ""
     echo "MoltlerHub (Web Portal):"
-    echo "  --hub             Start MoltlerHub web portal (http://localhost:3000) [recommended]"
+    echo "  --hub             Start MoltlerHub web portal (http://localhost:3000)"
     echo "  --stop-hub        Stop MoltlerHub"
-    echo ""
-    echo "Legacy Skills Manager (deprecated):"
-    echo "  --moltler         Full setup: ES + demo data + Legacy Skills Manager UI"
-    echo "  --ui              Start Legacy Skills Manager web UI only (http://localhost:3000)"
-    echo "  --stop-ui         Stop the Legacy UI"
     echo ""
     echo "Kibana:"
     echo "  --kibana          Start pre-built Kibana (for APM/observability)"
@@ -1223,7 +1218,6 @@ stop_all() {
     stop_apm_server
     stop_kibana
     stop_moltler_hub
-    stop_moltler_ui
     stop_elasticsearch
 }
 
@@ -2184,8 +2178,8 @@ case "${1:-}" in
         start_kibana_background
         ;;
     --moltler)
-        # Full setup: ES + Demo + Moltler UI - ONE COMMAND
-        print_header "⚡ Moltler Full Setup (ES + Skills Manager UI)"
+        # Full setup: ES + Demo + MoltlerHub - ONE COMMAND
+        print_header "⚡ Moltler Full Setup (ES + MoltlerHub)"
         
         # 1. Check prerequisites (includes submodule init)
         check_prerequisites
@@ -2214,32 +2208,26 @@ case "${1:-}" in
         # 4. Load sample data
         load_sample_data
         
-        # 5. Load demo procedures for the Skills Manager
+        # 5. Load demo procedures
         load_demo_procedures
         
-        # 6. Start Moltler Skills Manager UI
-        start_moltler_ui
+        # 6. Start MoltlerHub
+        start_moltler_hub
         
         # 7. Final summary
         echo ""
         print_header "🎉 Moltler is Ready!"
-        echo "  Elasticsearch:        http://localhost:9200"
-        echo "  Skills Manager UI:    http://localhost:$MOLTLER_UI_PORT"
+        echo "  Elasticsearch:   http://localhost:9200"
+        echo "  MoltlerHub:      http://localhost:$MOLTLER_HUB_PORT"
         echo ""
-        echo "  Open the Skills Manager to view, edit, and run your skills!"
+        echo "  Open MoltlerHub to browse skills, get started, and connect your AI agent!"
         echo ""
         ;;
-    --hub)
+    --hub|--ui|--moltler-ui)
         start_moltler_hub
         ;;
-    --stop-hub)
+    --stop-hub|--stop-ui)
         stop_moltler_hub
-        ;;
-    --ui)
-        start_moltler_ui
-        ;;
-    --stop-ui)
-        stop_moltler_ui
         ;;
     --no-otel)
         EDOT_ENABLED=false
