@@ -20,6 +20,7 @@ jobs:
     name: Build Plugin
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         es_version:
           - '8.15.0'
@@ -36,6 +37,18 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
+      
+      - name: Debug - List directories
+        run: |
+          echo "=== Root directory ==="
+          ls -la
+          echo "=== elastic-script directory ==="
+          ls -la elastic-script/ || echo "Not found"
+          echo "=== elasticsearch directory ==="
+          ls -la elasticsearch/ | head -20 || echo "Not found"
+          echo "=== elasticsearch/x-pack/plugin ==="
+          ls -la elasticsearch/x-pack/plugin/ | head -20 || echo "Not found"
       
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -47,36 +60,65 @@ jobs:
         uses: gradle/gradle-build-action@v3
       
       - name: Checkout ES version
-        working-directory: elastic-script/elasticsearch
+        working-directory: elasticsearch
         run: |
           # Fetch all tags
           git fetch --all --tags
           
           # Try to checkout the exact version tag, fall back to branch
           if git rev-parse "v${{ matrix.es_version }}" >/dev/null 2>&1; then
+            echo "Checking out tag v${{ matrix.es_version }}"
             git checkout "v${{ matrix.es_version }}"
           elif git rev-parse "${{ matrix.es_version }}" >/dev/null 2>&1; then
+            echo "Checking out ${{ matrix.es_version }}"
             git checkout "${{ matrix.es_version }}"
           else
-            echo "Warning: Could not find exact version, using main"
+            echo "Warning: Could not find exact version, trying main branch"
+            git checkout main || git checkout master || true
           fi
       
-      - name: Build Plugin
-        working-directory: elastic-script/elasticsearch
+      - name: Setup plugin in ES tree
         run: |
-          ./gradlew :x-pack:plugin:elastic-script:build -x test
+          # Remove the symlink if it exists
+          rm -rf elasticsearch/x-pack/plugin/elastic-script
+          
+          # Copy the plugin source into the ES tree
+          cp -r elastic-script elasticsearch/x-pack/plugin/elastic-script
+          
+          # Verify the copy
+          echo "=== Plugin directory after copy ==="
+          ls -la elasticsearch/x-pack/plugin/elastic-script/
+      
+      - name: Build Plugin
+        working-directory: elasticsearch
+        run: |
+          ./gradlew :x-pack:plugin:elastic-script:build -x test --no-daemon
+        continue-on-error: true
+      
+      - name: Check build output
+        run: |
+          echo "=== Looking for build artifacts ==="
+          find elasticsearch -name "*.zip" -path "*elastic-script*" 2>/dev/null || echo "No zip found"
+          ls -la elasticsearch/x-pack/plugin/elastic-script/build/distributions/ 2>/dev/null || echo "No distributions dir"
       
       - name: Rename artifact
         run: |
           mkdir -p dist
-          cp elastic-script/elasticsearch/x-pack/plugin/elastic-script/build/distributions/*.zip \
-             dist/elastic-script-${{ matrix.es_version }}.zip
+          if ls elasticsearch/x-pack/plugin/elastic-script/build/distributions/*.zip 1>/dev/null 2>&1; then
+            cp elasticsearch/x-pack/plugin/elastic-script/build/distributions/*.zip \
+               dist/elastic-script-${{ matrix.es_version }}.zip
+            echo "Artifact created: elastic-script-${{ matrix.es_version }}.zip"
+          else
+            echo "ERROR: No zip file found!"
+            exit 1
+          fi
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: elastic-script-${{ matrix.es_version }}
           path: dist/elastic-script-${{ matrix.es_version }}.zip
+          if-no-files-found: error
 
   release:
     name: Create Release
@@ -89,6 +131,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+      
+      - name: List artifacts
+        run: |
+          echo "=== Downloaded artifacts ==="
+          find artifacts -type f -name "*.zip"
       
       - name: Create Release
         uses: softprops/action-gh-release@v1
