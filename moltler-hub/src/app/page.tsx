@@ -39,6 +39,7 @@ export default function Home() {
           <nav className="flex items-center gap-6">
             <Link href="/skills" className="hover:text-purple-400 transition">Skills</Link>
             <Link href="/packs" className="hover:text-purple-400 transition">Packs</Link>
+            <Link href="/builder" className="hover:text-purple-400 transition">Builder</Link>
             <a href="https://bahaaldine.github.io/moltler/" target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition">Docs</a>
             <a href="https://github.com/bahaaldine/moltler" target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition">GitHub</a>
           </nav>
@@ -174,6 +175,28 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Skill Builder CTA */}
+      <section className="py-12 px-4">
+        <div className="container mx-auto max-w-3xl">
+          <div className="bg-gradient-to-r from-purple-900/50 to-purple-800/30 rounded-2xl border border-purple-700 p-8 text-center">
+            <div className="inline-block px-3 py-1 bg-purple-600/30 text-purple-300 rounded-full text-sm mb-4">
+              New
+            </div>
+            <h2 className="text-2xl font-bold mb-3">Create Your Own Skill</h2>
+            <p className="text-gray-400 mb-6 max-w-lg mx-auto">
+              Describe what you need in plain English and get working skill code. No syntax to memorize.
+            </p>
+            <Link
+              href="/builder"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-lg font-semibold transition"
+            >
+              Open Skill Builder
+              <span className="text-purple-300">✨</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Browse by Category */}
       <section className="py-12 px-4 bg-gray-900/50">
         <div className="container mx-auto max-w-5xl">
@@ -220,6 +243,7 @@ export default function Home() {
             <div className="flex items-center gap-6 text-sm text-gray-400">
               <Link href="/skills" className="hover:text-white transition">Skills</Link>
               <Link href="/packs" className="hover:text-white transition">Packs</Link>
+              <Link href="/builder" className="hover:text-white transition">Builder</Link>
               <a href="https://bahaaldine.github.io/moltler/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">Docs</a>
               <a href="https://github.com/bahaaldine/moltler" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">GitHub</a>
             </div>

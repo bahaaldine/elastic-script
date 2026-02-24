@@ -1,0 +1,17 @@
+name: generate-skill
+version: 1.0.0
+description: Generate a new skill from natural language using Elasticsearch Inference API
+author: elastic
+category: meta
+tags:
+  - meta
+  - ai
+  - generation
+  - inference
+  - nlp
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  features:
+    - inference
+main: skill.sql

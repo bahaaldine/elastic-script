@@ -1,0 +1,13 @@
+name: validate-syntax
+version: 1.0.0
+description: Validate skill syntax before installation
+author: elastic
+category: meta
+tags:
+  - meta
+  - validation
+  - development
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql
