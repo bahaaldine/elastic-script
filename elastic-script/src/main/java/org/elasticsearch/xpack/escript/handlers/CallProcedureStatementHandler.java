@@ -27,6 +27,7 @@ import org.elasticsearch.xpack.escript.functions.builtin.runbooks.TerraformFunct
 import org.elasticsearch.xpack.escript.functions.builtin.runbooks.CICDFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.runbooks.AWSFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.runbooks.GenericFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.workflows.WorkflowFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.introspection.IntrospectionFunctions;
 import org.elasticsearch.xpack.escript.parser.ElasticScriptParser;
 import org.elasticsearch.xpack.escript.primitives.ReturnValue;
@@ -93,6 +94,7 @@ public class CallProcedureStatementHandler {
                         CICDFunctions.registerAll(childContext);
                         AWSFunctions.registerAll(childContext);
                         GenericFunctions.registerAll(childContext);
+                        WorkflowFunctions.registerAll(childContext);
                         IntrospectionFunctions.registerAll(childContext, executor.getClient());
                         EsqlBuiltInFunctions.registerAll(childContext,executor,executor.getClient());
 

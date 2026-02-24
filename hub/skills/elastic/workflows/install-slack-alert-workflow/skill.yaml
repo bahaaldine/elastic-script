@@ -1,0 +1,17 @@
+name: install-slack-alert-workflow
+version: 1.0.0
+description: Install a Slack notification workflow for alerts
+author: elastic
+category: workflows
+tags:
+  - workflows
+  - slack
+  - alerting
+  - notifications
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  kibana: ">=8.0.0"
+  features:
+    - workflows
+main: skill.sql

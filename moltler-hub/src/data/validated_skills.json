@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-02-24T00:41:24.819314Z",
-  "total_skills": 192,
-  "valid_skills": 192,
+  "generated_at": "2026-02-24T01:30:10.681170Z",
+  "total_skills": 199,
+  "valid_skills": 199,
   "skills": {
     "ab_chat": {
       "name": "ab_chat",
@@ -1429,6 +1429,69 @@
       "name": "user_activity",
       "slug": "user-activity",
       "category": "security",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "install_esql_report_workflow": {
+      "name": "install_esql_report_workflow",
+      "slug": "install-esql-report-workflow",
+      "category": "workflows",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "install_ip_reputation_workflow": {
+      "name": "install_ip_reputation_workflow",
+      "slug": "install-ip-reputation-workflow",
+      "category": "workflows",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "install_slack_alert_workflow": {
+      "name": "install_slack_alert_workflow",
+      "slug": "install-slack-alert-workflow",
+      "category": "workflows",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "install_workflow": {
+      "name": "install_workflow",
+      "slug": "install-workflow",
+      "category": "workflows",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "list_workflows": {
+      "name": "list_workflows",
+      "slug": "list-workflows",
+      "category": "workflows",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "trigger_workflow": {
+      "name": "trigger_workflow",
+      "slug": "trigger-workflow",
+      "category": "workflows",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "workflow_status": {
+      "name": "workflow_status",
+      "slug": "workflow-status",
+      "category": "workflows",
       "syntax_valid": true,
       "tested": true,
       "errors": [],

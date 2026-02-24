@@ -39,7 +39,7 @@
 - [x] `SHOW SKILL PACKS`, `SHOW SKILL PACK name` - List and inspect packs
 - [x] Storage in `.moltler_skill_packs` index
 
-### MoltlerHub (192 Skills)
+### MoltlerHub (199 Skills)
 - [x] **Meta** (10 skills) - `list_all_skills`, `explain_skill`, `recommend_skills`, `generate_skill`, `validate_skill_syntax`, `what_can_i_do`, `analyze_my_cluster`
 - [x] **Search** (28 skills) - `search_documents`, `top_values`, `semantic_search`
 - [x] **Observability** (22 skills) - `get_recent_errors`, `count_logs_by_level`
@@ -62,6 +62,18 @@
 - [x] **AI_SKILL_GENERATION.md** - Comprehensive prompts for AI agents
 - [x] **Skill Builder UI** - MoltlerHub `/builder` page with wizard flow
 - [x] Starter packs - Role-based skill bundles (SRE, Security, Search, Platform)
+
+### Elastic Workflows Integration (NEW)
+- [x] **WorkflowFunctions.java** - 6 built-in functions for workflow management
+- [x] `WORKFLOW_TRIGGER(id, inputs)` - Trigger workflow execution
+- [x] `WORKFLOW_LIST()` - List all available workflows
+- [x] `WORKFLOW_GET(id)` - Get workflow details
+- [x] `WORKFLOW_STATUS(execution_id)` - Check execution status
+- [x] `WORKFLOW_CREATE(yaml)` - Install workflow from YAML
+- [x] `WORKFLOW_DELETE(id)` - Remove workflow
+- [x] **7 Workflow Skills** - `list_workflows`, `trigger_workflow`, `install_workflow`, `workflow_status`
+- [x] **Pre-built Templates** - `install_ip_reputation_workflow`, `install_slack_alert_workflow`, `install_esql_report_workflow`
+- [x] **WORKFLOWS_INTEGRATION.md** - Complete integration documentation
 
 ### Connector Framework
 - [x] `CREATE CONNECTOR name TYPE 'type' CONFIG {...}` - Connector creation

@@ -1,0 +1,17 @@
+name: workflow-status
+version: 1.0.0
+description: Get the execution status of a workflow run
+author: elastic
+category: workflows
+tags:
+  - workflows
+  - automation
+  - kibana
+  - monitoring
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+  kibana: ">=8.0.0"
+  features:
+    - workflows
+main: skill.sql

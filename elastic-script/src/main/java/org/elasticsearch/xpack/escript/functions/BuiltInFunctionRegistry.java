@@ -31,6 +31,7 @@ import org.elasticsearch.xpack.escript.functions.builtin.runbooks.TerraformFunct
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.OpenAIFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.S3Functions;
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.SlackFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.workflows.WorkflowFunctions;
 import org.elasticsearch.xpack.escript.functions.community.FunctionLoader;
 
 import java.util.HashMap;
@@ -140,6 +141,7 @@ public class BuiltInFunctionRegistry {
             CICDFunctions.registerAll(tempContext);
             AWSFunctions.registerAll(tempContext);
             GenericFunctions.registerAll(tempContext);
+            WorkflowFunctions.registerAll(tempContext);
             
             // Copy registered functions to cache
             statelessFunctions.putAll(tempContext.getAllFunctions());
