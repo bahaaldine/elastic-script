@@ -1,0 +1,15 @@
+name: analyze-my-cluster
+version: 1.0.0
+description: Analyze your Elasticsearch cluster and get actionable insights
+author: elastic
+category: cluster
+tags:
+  - cluster
+  - analysis
+  - health
+  - getting-started
+  - recommendations
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.0.0"
+main: skill.sql

@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-02-23T20:30:35.910436Z",
-  "total_skills": 188,
-  "valid_skills": 188,
+  "generated_at": "2026-02-24T00:11:21.828660Z",
+  "total_skills": 190,
+  "valid_skills": 190,
   "skills": {
     "ab_chat": {
       "name": "ab_chat",
@@ -286,6 +286,15 @@
       "name": "list_services",
       "slug": "list-services",
       "category": "apm",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "analyze_my_cluster": {
+      "name": "analyze_my_cluster",
+      "slug": "analyze-my-cluster",
+      "category": "cluster",
       "syntax_valid": true,
       "tested": true,
       "errors": [],
@@ -600,6 +609,15 @@
     "search_skills": {
       "name": "search_skills",
       "slug": "search-skills",
+      "category": "meta",
+      "syntax_valid": true,
+      "tested": true,
+      "errors": [],
+      "warnings": []
+    },
+    "what_can_i_do": {
+      "name": "what_can_i_do",
+      "slug": "what-can-i-do",
       "category": "meta",
       "syntax_valid": true,
       "tested": true,

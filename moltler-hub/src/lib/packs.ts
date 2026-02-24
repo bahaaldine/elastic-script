@@ -4,13 +4,109 @@ export interface SkillPack {
   version: string;
   description: string;
   author: string;
-  category: 'observability' | 'security' | 'search' | 'automation';
+  category: 'observability' | 'security' | 'search' | 'automation' | 'starter';
   skills: string[];
   installCount?: number;
   icon: string;
+  isStarter?: boolean;
 }
 
 export const SKILL_PACKS: SkillPack[] = [
+  // === STARTER PACKS (Role-based) ===
+  {
+    id: 'sre-starter',
+    name: 'SRE Starter',
+    version: '1.0.0',
+    description: 'Essential skills for Site Reliability Engineers - error analysis, latency monitoring, incident response, and SLOs',
+    author: 'elastic',
+    category: 'starter',
+    isStarter: true,
+    skills: [
+      'what_can_i_do@1.0.0',
+      'analyze_my_cluster@1.0.0',
+      'get_recent_errors@1.0.0',
+      'get_slow_transactions@1.0.0',
+      'service_health@1.0.0',
+      'high_cpu_hosts@1.0.0',
+      'get_cluster_health@1.0.0',
+      'list_services@1.0.0',
+      'get_slo_status@1.0.0',
+      'detect_incident@1.0.0',
+      'create_postmortem@1.0.0'
+    ],
+    installCount: 3421,
+    icon: '🚀'
+  },
+  {
+    id: 'security-starter',
+    name: 'Security Analyst Starter',
+    version: '1.0.0',
+    description: 'Essential skills for Security Analysts - threat hunting, SIEM, alerts, and compliance',
+    author: 'elastic',
+    category: 'starter',
+    isStarter: true,
+    skills: [
+      'what_can_i_do@1.0.0',
+      'get_security_alerts@1.0.0',
+      'hunt_ioc@1.0.0',
+      'failed_logins@1.0.0',
+      'threat_summary@1.0.0',
+      'get_risky_users@1.0.0',
+      'get_risky_hosts@1.0.0',
+      'search_security_events@1.0.0',
+      'list_detection_rules@1.0.0',
+      'create_case@1.0.0'
+    ],
+    installCount: 2876,
+    icon: '🛡️'
+  },
+  {
+    id: 'search-starter',
+    name: 'Search Engineer Starter',
+    version: '1.0.0',
+    description: 'Essential skills for Search Engineers - indexing, querying, relevance tuning, and analytics',
+    author: 'elastic',
+    category: 'starter',
+    isStarter: true,
+    skills: [
+      'what_can_i_do@1.0.0',
+      'list_indices@1.0.0',
+      'search_documents@1.0.0',
+      'semantic_search@1.0.0',
+      'get_mapping@1.0.0',
+      'get_field_stats@1.0.0',
+      'get_index_stats@1.0.0',
+      'fuzzy_search@1.0.0',
+      'aggregate_by_field@1.0.0',
+      'get_search_analytics@1.0.0'
+    ],
+    installCount: 1987,
+    icon: '🔍'
+  },
+  {
+    id: 'platform-starter',
+    name: 'Platform Engineer Starter',
+    version: '1.0.0',
+    description: 'Essential skills for Platform Engineers - cluster management, capacity planning, and operations',
+    author: 'elastic',
+    category: 'starter',
+    isStarter: true,
+    skills: [
+      'what_can_i_do@1.0.0',
+      'analyze_my_cluster@1.0.0',
+      'get_cluster_health@1.0.0',
+      'list_nodes@1.0.0',
+      'get_node_stats@1.0.0',
+      'get_shard_allocation@1.0.0',
+      'list_snapshots@1.0.0',
+      'list_indices@1.0.0',
+      'get_hot_threads@1.0.0',
+      'explain_allocation@1.0.0'
+    ],
+    installCount: 1543,
+    icon: '⚙️'
+  },
+  // === USE-CASE PACKS ===
   {
     id: 'incident-response',
     name: 'Incident Response',
@@ -150,6 +246,7 @@ export const SKILL_PACKS: SkillPack[] = [
 ];
 
 export const PACK_CATEGORIES = [
+  { id: 'starter', name: 'Starter Packs', icon: '🚀', color: 'yellow' },
   { id: 'observability', name: 'Observability', icon: '📊', color: 'purple' },
   { id: 'security', name: 'Security', icon: '🛡️', color: 'red' },
   { id: 'search', name: 'Search', icon: '🔍', color: 'blue' },
