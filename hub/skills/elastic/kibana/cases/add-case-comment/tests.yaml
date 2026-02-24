@@ -1,0 +1,9 @@
+tests:
+  - name: test_add_case_comment
+    skip: true
+    skip_reason: Requires running Kibana with Cases enabled
+    inputs:
+      case_id: test-case-123
+      comment: This is a test comment
+    expected:
+      status: added

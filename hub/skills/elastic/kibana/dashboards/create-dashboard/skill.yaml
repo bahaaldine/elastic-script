@@ -1,0 +1,26 @@
+name: create_dashboard
+version: 1.0.0
+description: Create a new Kibana dashboard
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - dashboards
+  - visualization
+  - create
+parameters:
+  - name: title
+    type: STRING
+    description: Dashboard title
+    required: true
+  - name: panels
+    type: ARRAY
+    description: Array of panel configurations
+    required: false
+    default: []
+  - name: options
+    type: DOCUMENT
+    description: Dashboard options
+    required: false
+    default: {}
+returns: DOCUMENT

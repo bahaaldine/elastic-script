@@ -1,0 +1,30 @@
+name: create_space
+version: 1.0.0
+description: Create a new Kibana space for multi-tenancy
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - spaces
+  - multi-tenancy
+  - create
+parameters:
+  - name: id
+    type: STRING
+    description: Unique space ID (lowercase, no spaces)
+    required: true
+  - name: name
+    type: STRING
+    description: Display name for the space
+    required: true
+  - name: description
+    type: STRING
+    description: Description of the space
+    required: false
+    default: ''
+  - name: color
+    type: STRING
+    description: Color for the space avatar
+    required: false
+    default: '#00bfb3'
+returns: DOCUMENT

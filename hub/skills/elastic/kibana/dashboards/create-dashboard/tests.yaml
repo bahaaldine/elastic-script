@@ -1,0 +1,8 @@
+tests:
+  - name: test_create_dashboard
+    skip: true
+    skip_reason: Requires running Kibana
+    inputs:
+      title: Test Dashboard
+    expected:
+      status: created

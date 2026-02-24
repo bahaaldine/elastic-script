@@ -1,0 +1,7 @@
+tests:
+  - name: test_list_fleet_agents
+    skip: true
+    skip_reason: Requires running Kibana with Fleet enabled
+    inputs: {}
+    expected:
+      status: success

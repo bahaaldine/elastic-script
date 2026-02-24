@@ -1,0 +1,20 @@
+name: execute_connector
+version: 1.0.0
+description: Execute an action connector (send message, create ticket, etc.)
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - connectors
+  - actions
+  - execute
+parameters:
+  - name: connector_id
+    type: STRING
+    description: ID of the connector to execute
+    required: true
+  - name: params
+    type: DOCUMENT
+    description: Parameters for the connector action
+    required: true
+returns: DOCUMENT

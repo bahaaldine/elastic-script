@@ -1,0 +1,8 @@
+tests:
+  - name: test_enable_alert_rule
+    skip: true
+    skip_reason: Requires running Kibana with alerting enabled
+    inputs:
+      rule_id: test-rule-123
+    expected:
+      status: enabled

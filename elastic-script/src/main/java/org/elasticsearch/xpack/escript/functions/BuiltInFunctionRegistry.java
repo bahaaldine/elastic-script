@@ -32,6 +32,21 @@ import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.OpenAIFuncti
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.S3Functions;
 import org.elasticsearch.xpack.escript.functions.builtin.thirdparty.SlackFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.workflows.WorkflowFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.kibana.AlertingFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.kibana.ApmFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.kibana.CaseFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.kibana.ConnectorFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.kibana.DashboardFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.kibana.DataViewFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.kibana.DetectionFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.kibana.EntityStoreFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.kibana.FleetFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.kibana.KibanaFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.kibana.MlFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.kibana.SavedObjectFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.kibana.SloFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.kibana.SpaceFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.kibana.SyntheticsFunctions;
 import org.elasticsearch.xpack.escript.functions.community.FunctionLoader;
 
 import java.util.HashMap;
@@ -142,6 +157,23 @@ public class BuiltInFunctionRegistry {
             AWSFunctions.registerAll(tempContext);
             GenericFunctions.registerAll(tempContext);
             WorkflowFunctions.registerAll(tempContext);
+            
+            // Kibana API functions (stateless HTTP-based)
+            KibanaFunctions.registerAll(tempContext);
+            AlertingFunctions.registerAll(tempContext);
+            ApmFunctions.registerAll(tempContext);
+            CaseFunctions.registerAll(tempContext);
+            ConnectorFunctions.registerAll(tempContext);
+            DashboardFunctions.registerAll(tempContext);
+            DataViewFunctions.registerAll(tempContext);
+            DetectionFunctions.registerAll(tempContext);
+            EntityStoreFunctions.registerAll(tempContext);
+            FleetFunctions.registerAll(tempContext);
+            MlFunctions.registerAll(tempContext);
+            SavedObjectFunctions.registerAll(tempContext);
+            SloFunctions.registerAll(tempContext);
+            SpaceFunctions.registerAll(tempContext);
+            SyntheticsFunctions.registerAll(tempContext);
             
             // Copy registered functions to cache
             statelessFunctions.putAll(tempContext.getAllFunctions());

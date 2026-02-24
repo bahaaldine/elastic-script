@@ -1,0 +1,9 @@
+tests:
+  - name: test_upgrade_fleet_agent
+    skip: true
+    skip_reason: Requires running Kibana with Fleet enabled and valid agent
+    inputs:
+      agent_id: test-agent-123
+      version: '8.12.0'
+    expected:
+      status: upgrading

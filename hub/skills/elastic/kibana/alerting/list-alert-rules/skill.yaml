@@ -1,0 +1,26 @@
+name: list_alert_rules
+version: 1.0.0
+description: List all Kibana alert rules with optional filtering
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - alerting
+  - rules
+  - monitoring
+parameters:
+  - name: filter
+    type: STRING
+    description: KQL filter query
+    required: false
+  - name: per_page
+    type: INTEGER
+    description: Results per page
+    required: false
+    default: 20
+  - name: page
+    type: INTEGER
+    description: Page number
+    required: false
+    default: 1
+returns: DOCUMENT

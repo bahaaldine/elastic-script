@@ -1,0 +1,16 @@
+name: create_slo
+version: 1.0.0
+description: Create a new Service Level Objective
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - observability
+  - slo
+  - create
+parameters:
+  - name: config
+    type: DOCUMENT
+    description: SLO configuration including name, indicator, budgetingMethod, objective
+    required: true
+returns: DOCUMENT

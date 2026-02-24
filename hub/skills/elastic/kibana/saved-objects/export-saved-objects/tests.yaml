@@ -1,0 +1,9 @@
+tests:
+  - name: test_export_saved_objects
+    skip: true
+    skip_reason: Requires running Kibana
+    inputs:
+      types:
+        - dashboard
+    expected:
+      status: success

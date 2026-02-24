@@ -1,0 +1,16 @@
+name: create_alert_rule
+version: 1.0.0
+description: Create a new Kibana alert rule
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - alerting
+  - rules
+  - create
+parameters:
+  - name: rule_config
+    type: DOCUMENT
+    description: Alert rule configuration including name, rule_type_id, schedule, params, actions
+    required: true
+returns: DOCUMENT

@@ -1,0 +1,16 @@
+name: enable_alert_rule
+version: 1.0.0
+description: Enable a Kibana alert rule
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - alerting
+  - rules
+  - enable
+parameters:
+  - name: rule_id
+    type: STRING
+    description: The ID of the alert rule to enable
+    required: true
+returns: DOCUMENT

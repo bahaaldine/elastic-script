@@ -1,0 +1,9 @@
+tests:
+  - name: test_create_case
+    skip: true
+    skip_reason: Requires running Kibana with Cases enabled
+    inputs:
+      title: Test Case
+      description: Test description
+    expected:
+      status: created

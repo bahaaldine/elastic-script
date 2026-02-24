@@ -1,0 +1,21 @@
+name: list_cases
+version: 1.0.0
+description: List Kibana cases with optional status filter
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - cases
+  - incident-management
+  - security
+parameters:
+  - name: status
+    type: STRING
+    description: "Filter by status: open, in-progress, closed"
+    required: false
+  - name: per_page
+    type: INTEGER
+    description: Results per page
+    required: false
+    default: 20
+returns: DOCUMENT

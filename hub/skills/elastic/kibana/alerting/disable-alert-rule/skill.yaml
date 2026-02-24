@@ -1,0 +1,16 @@
+name: disable_alert_rule
+version: 1.0.0
+description: Disable a Kibana alert rule
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - alerting
+  - rules
+  - disable
+parameters:
+  - name: rule_id
+    type: STRING
+    description: The ID of the alert rule to disable
+    required: true
+returns: DOCUMENT

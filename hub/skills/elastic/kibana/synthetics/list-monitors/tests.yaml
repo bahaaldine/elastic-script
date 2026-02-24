@@ -1,0 +1,7 @@
+tests:
+  - name: test_list_synthetics_monitors
+    skip: true
+    skip_reason: Requires running Kibana with Synthetics enabled
+    inputs: {}
+    expected:
+      status: success

@@ -1,0 +1,12 @@
+name: entity_store_status
+version: 1.0.0
+description: Get Security Entity Store status
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - security
+  - entity-store
+  - status
+parameters: []
+returns: DOCUMENT

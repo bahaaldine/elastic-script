@@ -1,0 +1,20 @@
+name: list_dashboards
+version: 1.0.0
+description: List all Kibana dashboards
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - dashboards
+  - visualization
+parameters:
+  - name: search
+    type: STRING
+    description: Search term to filter dashboards
+    required: false
+  - name: per_page
+    type: INTEGER
+    description: Results per page
+    required: false
+    default: 20
+returns: DOCUMENT

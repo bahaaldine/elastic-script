@@ -1,0 +1,11 @@
+tests:
+  - name: test_create_slo
+    skip: true
+    skip_reason: Requires running Kibana with SLO enabled
+    inputs:
+      config:
+        name: Test SLO
+        indicator:
+          type: sli.kql.custom
+    expected:
+      status: created

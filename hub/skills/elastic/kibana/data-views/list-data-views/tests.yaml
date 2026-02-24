@@ -1,0 +1,7 @@
+tests:
+  - name: test_list_data_views
+    skip: true
+    skip_reason: Requires running Kibana
+    inputs: {}
+    expected:
+      status: success

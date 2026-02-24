@@ -1,0 +1,24 @@
+name: create_data_view
+version: 1.0.0
+description: Create a new Kibana data view (index pattern)
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - data-views
+  - index-patterns
+  - create
+parameters:
+  - name: title
+    type: STRING
+    description: Index pattern (e.g., logs-* or metrics-*)
+    required: true
+  - name: name
+    type: STRING
+    description: Display name for the data view
+    required: false
+  - name: time_field
+    type: STRING
+    description: Name of the time field (e.g., @timestamp)
+    required: false
+returns: DOCUMENT

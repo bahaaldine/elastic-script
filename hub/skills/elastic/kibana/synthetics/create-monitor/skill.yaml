@@ -1,0 +1,17 @@
+name: create_synthetics_monitor
+version: 1.0.0
+description: Create a new Synthetics uptime monitor
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - synthetics
+  - uptime
+  - monitoring
+  - create
+parameters:
+  - name: config
+    type: DOCUMENT
+    description: Monitor configuration including name, type, urls, schedule, locations
+    required: true
+returns: DOCUMENT

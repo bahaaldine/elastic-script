@@ -102,6 +102,11 @@ export const CATEGORIES: Record<string, { name: string; description: string; ico
     description: 'Elastic Workflows automation and management',
     icon: '⚡',
   },
+  kibana: {
+    name: 'Kibana',
+    description: 'Kibana API management - alerting, cases, dashboards, Fleet, ML, and more',
+    icon: '🎯',
+  },
 };
 
 // Parse skill.yaml content

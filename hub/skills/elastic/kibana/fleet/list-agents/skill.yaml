@@ -1,0 +1,21 @@
+name: list_fleet_agents
+version: 1.0.0
+description: List all Fleet agents
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - fleet
+  - agents
+  - monitoring
+parameters:
+  - name: per_page
+    type: INTEGER
+    description: Results per page
+    required: false
+    default: 20
+  - name: kuery
+    type: STRING
+    description: KQL filter query
+    required: false
+returns: DOCUMENT

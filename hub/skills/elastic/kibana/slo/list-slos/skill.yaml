@@ -1,0 +1,21 @@
+name: list_slos
+version: 1.0.0
+description: List all Service Level Objectives
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - observability
+  - slo
+  - monitoring
+parameters:
+  - name: name
+    type: STRING
+    description: Filter by SLO name
+    required: false
+  - name: per_page
+    type: INTEGER
+    description: Results per page
+    required: false
+    default: 25
+returns: DOCUMENT

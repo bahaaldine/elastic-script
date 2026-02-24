@@ -1,0 +1,8 @@
+tests:
+  - name: test_deploy_trained_model
+    skip: true
+    skip_reason: Requires running Kibana with ML enabled and valid model
+    inputs:
+      model_id: .elser_model_2
+    expected:
+      status: deployed

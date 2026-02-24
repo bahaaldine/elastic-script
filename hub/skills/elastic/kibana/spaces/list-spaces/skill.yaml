@@ -1,0 +1,11 @@
+name: list_spaces
+version: 1.0.0
+description: List all Kibana spaces
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - spaces
+  - multi-tenancy
+parameters: []
+returns: DOCUMENT

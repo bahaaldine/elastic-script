@@ -1,0 +1,7 @@
+tests:
+  - name: test_list_detection_rules
+    skip: true
+    skip_reason: Requires running Kibana with Security enabled
+    inputs: {}
+    expected:
+      status: success

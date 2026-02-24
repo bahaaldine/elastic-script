@@ -1,0 +1,12 @@
+name: list_ml_anomaly_jobs
+version: 1.0.0
+description: List all ML anomaly detection jobs
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - ml
+  - anomaly-detection
+  - machine-learning
+parameters: []
+returns: DOCUMENT

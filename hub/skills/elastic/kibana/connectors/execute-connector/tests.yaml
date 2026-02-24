@@ -1,0 +1,10 @@
+tests:
+  - name: test_execute_connector
+    skip: true
+    skip_reason: Requires running Kibana with valid connector
+    inputs:
+      connector_id: test-connector-123
+      params:
+        message: Test message
+    expected:
+      status: executed

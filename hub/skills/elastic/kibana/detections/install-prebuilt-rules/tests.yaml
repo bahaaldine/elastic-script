@@ -1,0 +1,7 @@
+tests:
+  - name: test_install_prebuilt_rules
+    skip: true
+    skip_reason: Requires running Kibana with Security enabled
+    inputs: {}
+    expected:
+      status: installed

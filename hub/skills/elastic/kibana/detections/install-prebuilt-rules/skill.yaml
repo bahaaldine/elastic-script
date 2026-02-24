@@ -1,0 +1,13 @@
+name: install_prebuilt_rules
+version: 1.0.0
+description: Install Elastic prebuilt detection rules
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - security
+  - detections
+  - rules
+  - prebuilt
+parameters: []
+returns: DOCUMENT

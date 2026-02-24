@@ -1,0 +1,17 @@
+name: deploy_trained_model
+version: 1.0.0
+description: Deploy a trained ML model for inference
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - ml
+  - trained-models
+  - deploy
+  - inference
+parameters:
+  - name: model_id
+    type: STRING
+    description: ID of the trained model to deploy
+    required: true
+returns: DOCUMENT

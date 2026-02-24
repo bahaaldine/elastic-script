@@ -1,0 +1,11 @@
+name: list_data_views
+version: 1.0.0
+description: List all Kibana data views (index patterns)
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - data-views
+  - index-patterns
+parameters: []
+returns: DOCUMENT

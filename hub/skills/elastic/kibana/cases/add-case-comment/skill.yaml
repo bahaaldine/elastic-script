@@ -1,0 +1,20 @@
+name: add_case_comment
+version: 1.0.0
+description: Add a comment to an existing Kibana case
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - cases
+  - incident-management
+  - comment
+parameters:
+  - name: case_id
+    type: STRING
+    description: The ID of the case
+    required: true
+  - name: comment
+    type: STRING
+    description: The comment text to add
+    required: true
+returns: DOCUMENT

@@ -1,0 +1,22 @@
+name: list_detection_rules
+version: 1.0.0
+description: List security detection rules
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - security
+  - detections
+  - rules
+  - siem
+parameters:
+  - name: per_page
+    type: INTEGER
+    description: Results per page
+    required: false
+    default: 20
+  - name: filter
+    type: STRING
+    description: Filter query
+    required: false
+returns: DOCUMENT

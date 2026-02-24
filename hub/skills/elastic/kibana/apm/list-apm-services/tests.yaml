@@ -1,0 +1,7 @@
+tests:
+  - name: test_list_apm_services
+    skip: true
+    skip_reason: Requires running Kibana with APM enabled
+    inputs: {}
+    expected:
+      status: success

@@ -1330,6 +1330,202 @@
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/trigger-pagerduty"
   },
   {
+    "name": "alerting",
+    "displayName": "Alerting",
+    "description": "Alerting skill for kibana",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "kibana",
+    "tags": [
+      "kibana"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/alerting"
+  },
+  {
+    "name": "apm",
+    "displayName": "Apm",
+    "description": "Apm skill for kibana",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "kibana",
+    "tags": [
+      "kibana"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/apm"
+  },
+  {
+    "name": "cases",
+    "displayName": "Cases",
+    "description": "Cases skill for kibana",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "kibana",
+    "tags": [
+      "kibana"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/cases"
+  },
+  {
+    "name": "connectors",
+    "displayName": "Connectors",
+    "description": "Connectors skill for kibana",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "kibana",
+    "tags": [
+      "kibana"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/connectors"
+  },
+  {
+    "name": "dashboards",
+    "displayName": "Dashboards",
+    "description": "Dashboards skill for kibana",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "kibana",
+    "tags": [
+      "kibana"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/dashboards"
+  },
+  {
+    "name": "data-views",
+    "displayName": "Data Views",
+    "description": "Data Views skill for kibana",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "kibana",
+    "tags": [
+      "kibana"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/data-views"
+  },
+  {
+    "name": "detections",
+    "displayName": "Detections",
+    "description": "Detections skill for kibana",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "kibana",
+    "tags": [
+      "kibana"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/detections"
+  },
+  {
+    "name": "entity-store",
+    "displayName": "Entity Store",
+    "description": "Entity Store skill for kibana",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "kibana",
+    "tags": [
+      "kibana"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/entity-store"
+  },
+  {
+    "name": "fleet",
+    "displayName": "Fleet",
+    "description": "Fleet skill for kibana",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "kibana",
+    "tags": [
+      "kibana"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/fleet"
+  },
+  {
+    "name": "ml",
+    "displayName": "Ml",
+    "description": "Ml skill for kibana",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "kibana",
+    "tags": [
+      "kibana"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/ml"
+  },
+  {
+    "name": "saved-objects",
+    "displayName": "Saved Objects",
+    "description": "Saved Objects skill for kibana",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "kibana",
+    "tags": [
+      "kibana"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/saved-objects"
+  },
+  {
+    "name": "slo",
+    "displayName": "Slo",
+    "description": "Slo skill for kibana",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "kibana",
+    "tags": [
+      "kibana"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/slo"
+  },
+  {
+    "name": "spaces",
+    "displayName": "Spaces",
+    "description": "Spaces skill for kibana",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "kibana",
+    "tags": [
+      "kibana"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/spaces"
+  },
+  {
+    "name": "synthetics",
+    "displayName": "Synthetics",
+    "description": "Synthetics skill for kibana",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "kibana",
+    "tags": [
+      "kibana"
+    ],
+    "parameters": [],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/synthetics"
+  },
+  {
     "name": "explain-skill",
     "displayName": "Explain Skill",
     "description": "Get detailed explanation of a specific skill",

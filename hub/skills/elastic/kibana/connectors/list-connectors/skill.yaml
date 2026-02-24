@@ -1,0 +1,12 @@
+name: list_connectors
+version: 1.0.0
+description: List all Kibana action connectors
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - connectors
+  - actions
+  - integrations
+parameters: []
+returns: DOCUMENT

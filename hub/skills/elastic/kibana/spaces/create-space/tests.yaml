@@ -1,0 +1,9 @@
+tests:
+  - name: test_create_space
+    skip: true
+    skip_reason: Requires running Kibana
+    inputs:
+      id: test-space
+      name: Test Space
+    expected:
+      status: created

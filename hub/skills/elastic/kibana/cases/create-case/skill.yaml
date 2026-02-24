@@ -1,0 +1,32 @@
+name: create_case
+version: 1.0.0
+description: Create a new Kibana case for incident management
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - cases
+  - incident-management
+  - security
+  - create
+parameters:
+  - name: title
+    type: STRING
+    description: Case title
+    required: true
+  - name: description
+    type: STRING
+    description: Case description
+    required: false
+    default: ''
+  - name: tags
+    type: ARRAY
+    description: Tags for the case
+    required: false
+    default: []
+  - name: severity
+    type: STRING
+    description: "Severity: low, medium, high, critical"
+    required: false
+    default: low
+returns: DOCUMENT

@@ -1,0 +1,9 @@
+tests:
+  - name: test_create_data_view
+    skip: true
+    skip_reason: Requires running Kibana
+    inputs:
+      title: logs-*
+      time_field: '@timestamp'
+    expected:
+      status: created

@@ -1,0 +1,12 @@
+tests:
+  - name: test_create_alert_rule
+    skip: true
+    skip_reason: Requires running Kibana with alerting enabled
+    inputs:
+      rule_config:
+        name: Test Rule
+        rule_type_id: .es-query
+        schedule:
+          interval: 1m
+    expected:
+      status: created

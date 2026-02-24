@@ -1,0 +1,26 @@
+name: list_apm_services
+version: 1.0.0
+description: List all APM monitored services
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - apm
+  - observability
+  - services
+parameters:
+  - name: start
+    type: STRING
+    description: Start time (e.g., now-24h)
+    required: false
+    default: now-24h
+  - name: end_time
+    type: STRING
+    description: End time (e.g., now)
+    required: false
+    default: now
+  - name: environment
+    type: STRING
+    description: Filter by environment
+    required: false
+returns: DOCUMENT

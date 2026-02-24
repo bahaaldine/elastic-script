@@ -1,0 +1,22 @@
+name: export_saved_objects
+version: 1.0.0
+description: Export Kibana saved objects (dashboards, visualizations, etc.)
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - saved-objects
+  - export
+  - backup
+parameters:
+  - name: types
+    type: ARRAY
+    description: Types to export (e.g., ["dashboard", "visualization"])
+    required: false
+    default: []
+  - name: objects
+    type: ARRAY
+    description: Specific objects to export [{type, id}]
+    required: false
+    default: []
+returns: DOCUMENT

@@ -1,0 +1,17 @@
+name: list_synthetics_monitors
+version: 1.0.0
+description: List all Synthetics uptime monitors
+author: elastic
+category: kibana
+tags:
+  - kibana
+  - synthetics
+  - uptime
+  - monitoring
+parameters:
+  - name: per_page
+    type: INTEGER
+    description: Results per page
+    required: false
+    default: 25
+returns: DOCUMENT

@@ -63,7 +63,7 @@
 - [x] **Skill Builder UI** - MoltlerHub `/builder` page with wizard flow
 - [x] Starter packs - Role-based skill bundles (SRE, Security, Search, Platform)
 
-### Elastic Workflows Integration (NEW)
+### Elastic Workflows Integration
 - [x] **WorkflowFunctions.java** - 6 built-in functions for workflow management
 - [x] `WORKFLOW_TRIGGER(id, inputs)` - Trigger workflow execution
 - [x] `WORKFLOW_LIST()` - List all available workflows
@@ -74,6 +74,28 @@
 - [x] **7 Workflow Skills** - `list_workflows`, `trigger_workflow`, `install_workflow`, `workflow_status`
 - [x] **Pre-built Templates** - `install_ip_reputation_workflow`, `install_slack_alert_workflow`, `install_esql_report_workflow`
 - [x] **WORKFLOWS_INTEGRATION.md** - Complete integration documentation
+
+### Kibana API Integration (NEW)
+- [x] **150+ built-in functions** across 15 Kibana API categories
+- [x] **15 Java function classes** in `functions/builtin/kibana/`:
+  - `KibanaFunctions.java` - Core Kibana API (status, features, generic requests)
+  - `AlertingFunctions.java` - Alert rules management (12 functions)
+  - `CaseFunctions.java` - Case management (10 functions)
+  - `ConnectorFunctions.java` - Action connectors (7 functions)
+  - `DashboardFunctions.java` - Dashboard/visualization management (10 functions)
+  - `DataViewFunctions.java` - Data views/index patterns (10 functions)
+  - `DetectionFunctions.java` - Security detection rules (18 functions)
+  - `EntityStoreFunctions.java` - Entity store & risk scores (10 functions)
+  - `FleetFunctions.java` - Fleet agent management (22 functions)
+  - `MlFunctions.java` - ML jobs and trained models (18 functions)
+  - `SavedObjectFunctions.java` - Saved object management (8 functions)
+  - `SloFunctions.java` - SLO management (9 functions)
+  - `SpaceFunctions.java` - Spaces multi-tenancy (6 functions)
+  - `SyntheticsFunctions.java` - Synthetics monitors (11 functions)
+  - `ApmFunctions.java` - APM services (9 functions)
+- [x] **30+ Moltler Skills** in `hub/skills/elastic/kibana/`
+- [x] **KIBANA_INTEGRATION.md** - Complete API documentation
+- [x] **KibanaFunctionsTests.java** - Unit tests for all function registrations
 
 ### Connector Framework
 - [x] `CREATE CONNECTOR name TYPE 'type' CONFIG {...}` - Connector creation

@@ -1,0 +1,8 @@
+tests:
+  - name: test_install_integration
+    skip: true
+    skip_reason: Requires running Kibana with Fleet enabled
+    inputs:
+      package_name: nginx
+    expected:
+      status: installed

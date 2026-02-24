@@ -1,0 +1,12 @@
+tests:
+  - name: test_create_synthetics_monitor
+    skip: true
+    skip_reason: Requires running Kibana with Synthetics enabled
+    inputs:
+      config:
+        name: Test Monitor
+        type: http
+        urls:
+          - https://example.com
+    expected:
+      status: created
