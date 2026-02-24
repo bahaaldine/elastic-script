@@ -39,6 +39,7 @@ export default function Home() {
           <nav className="flex items-center gap-6">
             <Link href="/skills" className="hover:text-purple-400 transition">Skills</Link>
             <Link href="/packs" className="hover:text-purple-400 transition">Packs</Link>
+            <Link href="/connect" className="hover:text-purple-400 transition">Connect</Link>
             <Link href="/builder" className="hover:text-purple-400 transition">Builder</Link>
             <a href="https://bahaaldine.github.io/moltler/" target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition">Docs</a>
             <a href="https://github.com/bahaaldine/moltler" target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition">GitHub</a>
@@ -81,10 +82,10 @@ export default function Home() {
               Browse {totalSkills} Skills
             </Link>
             <Link
-              href="/docs#cursor-setup"
+              href="/connect"
               className="px-6 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg font-semibold transition flex items-center gap-2"
             >
-              <span>🤖</span> Connect to Cursor
+              <span>🤖</span> Connect AI Tools
             </Link>
           </div>
 
@@ -249,6 +250,7 @@ export default function Home() {
             <div className="flex items-center gap-6 text-sm text-gray-400">
               <Link href="/skills" className="hover:text-white transition">Skills</Link>
               <Link href="/packs" className="hover:text-white transition">Packs</Link>
+              <Link href="/connect" className="hover:text-white transition">Connect</Link>
               <Link href="/builder" className="hover:text-white transition">Builder</Link>
               <a href="https://bahaaldine.github.io/moltler/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">Docs</a>
               <a href="https://github.com/bahaaldine/moltler" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">GitHub</a>

@@ -2,11 +2,19 @@
 
 **The skills framework for Elasticsearch.** Build, share, and run skills on your data.
 
-[![Skills](https://img.shields.io/badge/skills-155+-blue)](hub/)
+[![Skills](https://img.shields.io/badge/skills-180+-blue)](https://hub.moltler.dev/skills)
 [![Skills Validated](https://img.shields.io/badge/validated-100%25-brightgreen)](tests/skills/)
 [![Skill Tests](https://github.com/bahaaldine/moltler/actions/workflows/skill-tests.yml/badge.svg)](https://github.com/bahaaldine/moltler/actions/workflows/skill-tests.yml)
-[![Solutions](https://img.shields.io/badge/solutions-observability%20%7C%20security%20%7C%20search-green)]()
-[![MCP](https://img.shields.io/badge/MCP-compatible-purple)]()
+[![MoltlerHub](https://img.shields.io/badge/hub-hub.moltler.dev-purple)](https://hub.moltler.dev)
+
+### Connect to your favorite AI tools
+
+[![Cursor](https://img.shields.io/badge/Cursor-Connect-blue?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6Ii8+PC9zdmc+)](https://hub.moltler.dev/connect?client=cursor)
+[![Claude](https://img.shields.io/badge/Claude-Connect-orange)](https://hub.moltler.dev/connect?client=claude-desktop)
+[![VS Code](https://img.shields.io/badge/VS%20Code-Connect-007ACC?logo=visualstudiocode&logoColor=white)](https://hub.moltler.dev/connect?client=vscode)
+[![Windsurf](https://img.shields.io/badge/Windsurf-Connect-00D4AA)](https://hub.moltler.dev/connect?client=windsurf)
+[![Cline](https://img.shields.io/badge/Cline-Connect-green)](https://hub.moltler.dev/connect?client=cline)
+[![Zed](https://img.shields.io/badge/Zed-Connect-yellow)](https://hub.moltler.dev/connect?client=zed)
 
 ---
 
@@ -113,20 +121,36 @@ export ES_PASSWORD="your-password"
 
 ## Connect AI Agents (MCP)
 
-Add to your `.cursor/mcp.json`:
+Give your AI assistant access to all 180+ Moltler skills. Works with Cursor, Claude Desktop, VS Code, Windsurf, Cline, Zed, and any MCP-compatible client.
+
+**[Open Connect Page →](https://hub.moltler.dev/connect)**
+
+Or manually configure - add to your MCP config:
 
 ```json
 {
   "mcpServers": {
     "moltler": {
-      "url": "http://localhost:9200/_escript/mcp",
-      "headers": {
-        "Authorization": "Basic ZWxhc3RpYy1hZG1pbjplbGFzdGljLXBhc3N3b3Jk"
+      "command": "python",
+      "args": ["<path-to-moltler>/mcp-bridge/moltler_mcp_server.py"],
+      "env": {
+        "ES_URL": "http://localhost:9200",
+        "ES_USER": "elastic-admin",
+        "ES_PASSWORD": "elastic-password"
       }
     }
   }
 }
 ```
+
+| Client | Config Location |
+|--------|-----------------|
+| **Cursor** | `.cursor/mcp.json` |
+| **Claude Desktop** | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| **VS Code** | `.vscode/mcp.json` |
+| **Claude Code** | `claude mcp add moltler ...` |
+
+After connecting, ask your AI: *"What Moltler skills are available?"*
 
 ---
 
