@@ -53,11 +53,11 @@ export default function Home() {
             Skills as Code
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Operational Knowledge,{' '}
-            <span className="text-purple-400">Codified</span>
+            The Skills Framework for{' '}
+            <span className="text-purple-400">Elasticsearch</span>
           </h1>
           <p className="text-xl text-gray-400 mb-2">
-            Define your Elasticsearch operations as testable, versioned, shareable skills.
+            Build, share, and run skills on your data.
           </p>
           <p className="text-gray-500 mb-8">
             Works with Cursor, Claude, Cline, Jupyter, REST API, and more.
@@ -237,7 +237,7 @@ export default function Home() {
               </div>
               <div>
                 <span className="font-bold">Moltler</span>
-                <span className="text-xs text-gray-500 ml-2">Skills as Code for Elasticsearch</span>
+                <span className="text-xs text-gray-500 ml-2">The skills framework for Elasticsearch</span>
               </div>
             </div>
             <div className="flex items-center gap-6 text-sm text-gray-400">
