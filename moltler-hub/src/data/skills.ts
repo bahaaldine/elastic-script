@@ -1,4 +1,7 @@
-[
+// Auto-generated - do not edit
+import type { Skill } from '@/lib/skills';
+
+export const SKILLS: Skill[] = [
   {
     "name": "ab-chat",
     "displayName": "Chat",
@@ -3709,4 +3712,6 @@
     "returns": "step",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/workflows/workflow-status"
   }
-]
+];
+
+export const SKILL_COUNT = 166;

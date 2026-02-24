@@ -97,6 +97,11 @@ export const CATEGORIES: Record<string, { name: string; description: string; ico
     description: 'Skills about skills',
     icon: '🔧',
   },
+  workflows: {
+    name: 'Workflows',
+    description: 'Elastic Workflows automation and management',
+    icon: '⚡',
+  },
 };
 
 // Parse skill.yaml content
