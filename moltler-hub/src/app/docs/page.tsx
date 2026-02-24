@@ -36,7 +36,7 @@ export default function DocsPage() {
         <section className="mb-12">
           <h2 className="text-2xl font-semibold mb-4">Choose Your Installation Path</h2>
           
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             <div className="p-6 bg-gray-800 rounded-lg border border-gray-700">
               <div className="text-3xl mb-3">🚀</div>
               <h3 className="text-xl font-semibold mb-2">Quick Start</h3>
@@ -58,6 +58,18 @@ export default function DocsPage() {
               <p className="text-sm text-gray-500 mb-4">Best for: Production, enterprise</p>
               <a href="#existing-cluster" className="text-purple-400 hover:text-purple-300">
                 Install on existing cluster →
+              </a>
+            </div>
+
+            <div className="p-6 bg-gradient-to-br from-purple-900/50 to-gray-800 rounded-lg border border-purple-600/50">
+              <div className="text-3xl mb-3">🤖</div>
+              <h3 className="text-xl font-semibold mb-2">Connect to Cursor</h3>
+              <p className="text-gray-400 mb-4">
+                Add Moltler skills to Cursor IDE. Your AI assistant gets access to all 180+ skills.
+              </p>
+              <p className="text-sm text-gray-500 mb-4">Best for: AI-assisted workflows</p>
+              <a href="#cursor-setup" className="text-purple-400 hover:text-purple-300">
+                Connect Cursor →
               </a>
             </div>
           </div>
@@ -224,14 +236,63 @@ export ES_PASSWORD="your-password"
           </div>
         </section>
 
-        {/* Connect AI Agents */}
-        <section id="ai-agents" className="mb-12">
-          <h2 className="text-2xl font-semibold mb-4">Connect AI Agents (MCP)</h2>
+        {/* Connect to Cursor */}
+        <section id="cursor-setup" className="mb-12">
+          <h2 className="text-2xl font-semibold mb-4">Connect to Cursor IDE</h2>
           
+          <div className="bg-gradient-to-r from-purple-900/20 to-gray-800 rounded-lg p-6 border border-purple-600/30 mb-6">
+            <p className="text-gray-300">
+              <strong className="text-purple-300">One config, all skills.</strong> When you connect Cursor to Moltler, 
+              your AI assistant automatically gets access to all 180+ skills. No need to install skills individually.
+            </p>
+          </div>
+
           <div className="space-y-6">
             <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <h4 className="font-semibold mb-2">For Cursor IDE</h4>
-              <p className="text-gray-400 text-sm mb-2">Add to <code className="bg-gray-900 px-1 rounded">.cursor/mcp.json</code>:</p>
+              <h3 className="font-semibold mb-3">Step 1: Create MCP Config File</h3>
+              <p className="text-gray-400 text-sm mb-3">
+                Create <code className="bg-gray-900 px-1 rounded">.cursor/mcp.json</code> in your project root (or global config):
+              </p>
+              <pre className="bg-gray-900 p-4 rounded text-sm overflow-x-auto">
+                <code className="text-green-400">{`{
+  "mcpServers": {
+    "moltler": {
+      "command": "python",
+      "args": ["/path/to/moltler/mcp-bridge/moltler_mcp_server.py"],
+      "env": {
+        "ES_URL": "http://localhost:9200",
+        "ES_USER": "elastic-admin",
+        "ES_PASSWORD": "elastic-password"
+      }
+    }
+  }
+}`}</code>
+              </pre>
+              <p className="text-gray-400 text-sm mt-3">
+                Update the path and credentials for your environment.
+              </p>
+            </div>
+
+            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <h3 className="font-semibold mb-3">Step 2: Install Dependencies</h3>
+              <pre className="bg-gray-900 p-4 rounded text-sm overflow-x-auto">
+                <code className="text-green-400">{`pip install httpx`}</code>
+              </pre>
+            </div>
+
+            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <h3 className="font-semibold mb-3">Step 3: Restart Cursor</h3>
+              <p className="text-gray-400">
+                Restart Cursor IDE. The Moltler MCP server will appear in your MCP servers list.
+                Your AI assistant now has access to all skills.
+              </p>
+            </div>
+
+            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <h3 className="font-semibold mb-3">Alternative: Direct HTTP (if supported)</h3>
+              <p className="text-gray-400 text-sm mb-3">
+                If your MCP client supports HTTP endpoints directly:
+              </p>
               <pre className="bg-gray-900 p-4 rounded text-sm overflow-x-auto">
                 <code className="text-green-400">{`{
   "mcpServers": {
@@ -244,13 +305,17 @@ export ES_PASSWORD="your-password"
   }
 }`}</code>
               </pre>
-              <p className="text-gray-400 text-sm mt-3">
-                Works with: <span className="text-purple-400">Cursor</span>, <span className="text-purple-400">Claude Desktop</span>, <span className="text-purple-400">Cline</span>, and any MCP-compatible agent.
-              </p>
             </div>
+          </div>
+        </section>
 
+        {/* Connect AI Agents */}
+        <section id="ai-agents" className="mb-12">
+          <h2 className="text-2xl font-semibold mb-4">What Your AI Can Do</h2>
+          
+          <div className="space-y-6">
             <div className="bg-gradient-to-r from-purple-900/30 to-gray-800 rounded-lg p-6 border border-purple-700/50">
-              <h4 className="font-semibold mb-4 text-purple-300">✨ The Magic Moment</h4>
+              <h4 className="font-semibold mb-4 text-purple-300">The Magic Moment</h4>
               <div className="space-y-4 text-sm">
                 <div className="flex gap-3">
                   <span className="text-blue-400 font-medium">You:</span>
@@ -275,6 +340,43 @@ export ES_PASSWORD="your-password"
                 Your AI assistant can now investigate your Elasticsearch data like a senior engineer.
               </p>
             </div>
+
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <div className="text-2xl mb-2">🔍</div>
+                <h4 className="font-semibold mb-1">Observability</h4>
+                <p className="text-sm text-gray-400">Query logs, analyze errors, find slow services</p>
+              </div>
+              <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <div className="text-2xl mb-2">🛡️</div>
+                <h4 className="font-semibold mb-1">Security</h4>
+                <p className="text-sm text-gray-400">Detect threats, investigate incidents, manage alerts</p>
+              </div>
+              <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <div className="text-2xl mb-2">⚙️</div>
+                <h4 className="font-semibold mb-1">Cluster Ops</h4>
+                <p className="text-sm text-gray-400">Health checks, index management, ILM policies</p>
+              </div>
+              <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <div className="text-2xl mb-2">🎯</div>
+                <h4 className="font-semibold mb-1">Kibana</h4>
+                <p className="text-sm text-gray-400">Dashboards, alerts, cases, Fleet, ML jobs</p>
+              </div>
+              <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <div className="text-2xl mb-2">🤖</div>
+                <h4 className="font-semibold mb-1">AI/LLM</h4>
+                <p className="text-sm text-gray-400">Summarize, classify, generate with inference API</p>
+              </div>
+              <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <div className="text-2xl mb-2">🔧</div>
+                <h4 className="font-semibold mb-1">Runbooks</h4>
+                <p className="text-sm text-gray-400">Slack, PagerDuty, AWS, Kubernetes, Terraform</p>
+              </div>
+            </div>
+
+            <p className="text-gray-400 text-sm">
+              Works with: <span className="text-purple-400">Cursor</span>, <span className="text-purple-400">Claude Desktop</span>, <span className="text-purple-400">Cline</span>, <span className="text-purple-400">Windsurf</span>, and any MCP-compatible agent.
+            </p>
           </div>
         </section>
 
