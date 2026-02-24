@@ -37,19 +37,60 @@ export default function SkillBuilder() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [validationResult, setValidationResult] = useState<null | { valid: boolean; errors: string[]; warnings: string[] }>(null);
   const [esUrl, setEsUrl] = useState('http://localhost:9200');
+  const [esUser, setEsUser] = useState('elastic-admin');
+  const [esPassword, setEsPassword] = useState('elastic-password');
   const [copySuccess, setCopySuccess] = useState(false);
   const [step, setStep] = useState(1);
+  const [generationError, setGenerationError] = useState('');
+  const [showEsConfig, setShowEsConfig] = useState(false);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
     setValidationResult(null);
+    setGenerationError('');
     
-    // Simulate AI generation (in real app, this would call the ES endpoint)
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Generate a mock skill based on the description
     const name = skillName || 'custom_skill';
-    const generated = `CREATE SKILL ${name}
+    
+    try {
+      // Call the generate_skill skill via Elasticsearch
+      const query = `RUN SKILL generate_skill(
+        '${description.replace(/'/g, "''")}',
+        '${name}'
+      )`;
+      
+      const response = await fetch(`${esUrl}/_escript`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Basic ' + btoa(`${esUser}:${esPassword}`),
+        },
+        body: JSON.stringify({ query }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Elasticsearch returned ${response.status}: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      
+      // Extract generated code from the skill response
+      if (result.result?.generated_code) {
+        setGeneratedCode(result.result.generated_code);
+        setStep(2);
+      } else if (result.result?.rows?.[0]?.generated_code) {
+        setGeneratedCode(result.result.rows[0].generated_code);
+        setStep(2);
+      } else {
+        // Fallback to local generation if no LLM response
+        throw new Error('No generated code in response. Using local template.');
+      }
+    } catch (error) {
+      console.error('Generation error:', error);
+      
+      // Fallback: Generate locally without LLM
+      setGenerationError(`Could not connect to Elasticsearch for AI generation. Using template instead. (${error instanceof Error ? error.message : 'Unknown error'})`);
+      
+      const generated = `CREATE SKILL ${name}
   VERSION '1.0.0'
   DESCRIPTION '${description}'
   AUTHOR 'user'
@@ -62,17 +103,20 @@ export default function SkillBuilder() {
 BEGIN
   DECLARE results ARRAY;
   
-  -- Generated based on: ${description}
+  -- TODO: Implement based on: ${description}
+  -- Connect to Elasticsearch with inference API for AI-powered generation
   SET results = ESQL_QUERY(
     'FROM logs-* | WHERE @timestamp > NOW() - INTERVAL 1 HOUR | LIMIT ' || limit
   );
   
   RETURN results;
 END SKILL;`;
+      
+      setGeneratedCode(generated);
+      setStep(2);
+    }
     
-    setGeneratedCode(generated);
     setIsGenerating(false);
-    setStep(2);
   };
 
   const validateCode = () => {
@@ -223,6 +267,65 @@ END SKILL;`;
                     </div>
                   </div>
 
+                  {/* Elasticsearch Connection */}
+                  <div className="border-t border-gray-700 pt-4">
+                    <button
+                      onClick={() => setShowEsConfig(!showEsConfig)}
+                      className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition"
+                    >
+                      <svg className={`w-4 h-4 transition ${showEsConfig ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      Elasticsearch Connection (for AI generation)
+                    </button>
+                    
+                    {showEsConfig && (
+                      <div className="mt-3 p-4 bg-gray-900 rounded-lg space-y-3">
+                        <p className="text-xs text-gray-500">
+                          Connect to your Elasticsearch with the Moltler plugin and an inference endpoint configured for AI-powered generation.
+                        </p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="col-span-2">
+                            <label className="text-xs text-gray-400 block mb-1">URL</label>
+                            <input
+                              type="text"
+                              value={esUrl}
+                              onChange={(e) => setEsUrl(e.target.value)}
+                              placeholder="http://localhost:9200"
+                              className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:border-purple-500 focus:outline-none"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-gray-400 block mb-1">Username</label>
+                            <input
+                              type="text"
+                              value={esUser}
+                              onChange={(e) => setEsUser(e.target.value)}
+                              placeholder="elastic"
+                              className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:border-purple-500 focus:outline-none"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-gray-400 block mb-1">Password</label>
+                            <input
+                              type="password"
+                              value={esPassword}
+                              onChange={(e) => setEsPassword(e.target.value)}
+                              placeholder="••••••••"
+                              className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:border-purple-500 focus:outline-none"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {generationError && (
+                    <div className="p-3 bg-yellow-900/30 border border-yellow-700 rounded-lg">
+                      <p className="text-sm text-yellow-300">{generationError}</p>
+                    </div>
+                  )}
+
                   <button
                     onClick={handleGenerate}
                     disabled={!description || isGenerating}
@@ -234,7 +337,7 @@ END SKILL;`;
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                         </svg>
-                        Generating...
+                        Generating with AI...
                       </>
                     ) : (
                       <>

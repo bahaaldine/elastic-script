@@ -80,6 +80,12 @@ export default function Home() {
             >
               Browse {totalSkills} Skills
             </Link>
+            <Link
+              href="/docs#cursor-setup"
+              className="px-6 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg font-semibold transition flex items-center gap-2"
+            >
+              <span>🤖</span> Connect to Cursor
+            </Link>
           </div>
 
           {/* Expandable Install */}
