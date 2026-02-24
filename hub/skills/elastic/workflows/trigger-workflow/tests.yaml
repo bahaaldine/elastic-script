@@ -1,0 +1,21 @@
+tests:
+  - name: trigger_workflow_returns_document
+    description: Test that trigger_workflow returns a document with status
+    skip: true
+    skip_reason: Requires Kibana Workflows API
+    call: "RUN SKILL trigger_workflow(workflow_id => 'test-workflow', inputs => {'test': true})"
+    expect:
+      type: DOCUMENT
+      contains_keys:
+        - status
+        - workflow_id
+
+  - name: trigger_workflow_handles_missing_workflow
+    description: Test error handling for missing workflow
+    skip: true
+    skip_reason: Requires Kibana Workflows API
+    call: "RUN SKILL trigger_workflow(workflow_id => 'nonexistent-workflow')"
+    expect:
+      type: DOCUMENT
+      contains_keys:
+        - status

@@ -1,0 +1,10 @@
+tests:
+  - name: install_slack_alert_workflow_requires_webhook
+    description: Test that Slack alert workflow requires webhook URL
+    skip: true
+    skip_reason: Requires Kibana Workflows API
+    call: "RUN SKILL install_slack_alert_workflow(slack_webhook_url => 'https://hooks.slack.com/test')"
+    expect:
+      type: DOCUMENT
+      contains_keys:
+        - status

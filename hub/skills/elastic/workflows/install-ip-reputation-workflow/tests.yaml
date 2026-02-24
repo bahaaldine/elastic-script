@@ -1,0 +1,10 @@
+tests:
+  - name: install_ip_reputation_workflow_requires_api_key
+    description: Test that IP reputation workflow requires API key
+    skip: true
+    skip_reason: Requires Kibana Workflows API and AbuseIPDB key
+    call: "RUN SKILL install_ip_reputation_workflow(abuseipdb_api_key => 'test-key')"
+    expect:
+      type: DOCUMENT
+      contains_keys:
+        - status

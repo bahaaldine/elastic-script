@@ -1,0 +1,21 @@
+tests:
+  - name: install_workflow_validates_yaml
+    description: Test that install_workflow validates YAML input
+    skip: true
+    skip_reason: Requires Kibana Workflows API
+    call: |
+      RUN SKILL install_workflow(yaml => 'invalid yaml without required fields')
+    expect:
+      type: DOCUMENT
+      field_equals:
+        success: false
+
+  - name: install_workflow_rejects_empty_yaml
+    description: Test that empty YAML is rejected
+    skip: true
+    skip_reason: Requires Kibana Workflows API
+    call: "RUN SKILL install_workflow(yaml => '')"
+    expect:
+      type: DOCUMENT
+      field_equals:
+        success: false

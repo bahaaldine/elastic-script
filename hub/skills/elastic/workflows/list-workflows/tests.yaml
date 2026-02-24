@@ -1,0 +1,8 @@
+tests:
+  - name: list_workflows_returns_array
+    description: Test that list_workflows returns an array
+    skip: true
+    skip_reason: Requires Kibana Workflows API
+    call: "RUN SKILL list_workflows()"
+    expect:
+      type: ARRAY

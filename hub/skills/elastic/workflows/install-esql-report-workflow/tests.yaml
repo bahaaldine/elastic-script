@@ -1,0 +1,11 @@
+tests:
+  - name: install_esql_report_workflow_default_params
+    description: Test that ES|QL report workflow works with default params
+    skip: true
+    skip_reason: Requires Kibana Workflows API
+    call: "RUN SKILL install_esql_report_workflow()"
+    expect:
+      type: DOCUMENT
+      contains_keys:
+        - status
+        - workflow_name

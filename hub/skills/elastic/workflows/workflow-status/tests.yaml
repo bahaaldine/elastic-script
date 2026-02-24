@@ -1,0 +1,8 @@
+tests:
+  - name: workflow_status_returns_document
+    description: Test that workflow_status returns a document
+    skip: true
+    skip_reason: Requires Kibana Workflows API
+    call: "RUN SKILL workflow_status(execution_id => 'test-execution-id')"
+    expect:
+      type: DOCUMENT
