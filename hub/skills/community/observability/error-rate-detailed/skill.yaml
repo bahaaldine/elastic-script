@@ -1,0 +1,20 @@
+name: error-rate-detailed
+version: 1.0.0
+description: Single-query error rate calculation with per-service breakdown using WHERE on aggregation.
+author: observability-team
+category: observability
+tags:
+  - observability
+  - logs
+  - errors
+  - metrics
+  - health
+  - advanced
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=9.1.0"
+main: skill.sql
+related_skills:
+  - name: error_rate
+    relationship: simple_version
+    note: "Use for basic error rate on older ES versions (uses two separate queries)"

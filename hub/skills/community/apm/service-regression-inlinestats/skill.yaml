@@ -1,0 +1,19 @@
+name: service-regression-inlinestats
+version: 1.0.0
+description: Single-query performance regression detection using INLINE STATS to compute baseline inline.
+author: apm-team
+category: apm
+tags:
+  - apm
+  - regression
+  - performance
+  - inlinestats
+  - advanced
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=9.2.0"
+main: skill.sql
+related_skills:
+  - name: detect_performance_regression
+    relationship: simple_version
+    note: "Use for basic two-query regression detection on older ES versions"

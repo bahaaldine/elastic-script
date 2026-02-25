@@ -1,0 +1,19 @@
+name: aggregate-field-detailed
+version: 1.0.0
+description: Rich field aggregation with count, distinct count, and top sample values per group.
+author: search-team
+category: search
+tags:
+  - search
+  - aggregation
+  - analytics
+  - cardinality
+  - advanced
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.14.0"
+main: skill.sql
+related_skills:
+  - name: aggregate_by_field
+    relationship: simple_version
+    note: "Use for basic COUNT(*) BY field on older ES versions"

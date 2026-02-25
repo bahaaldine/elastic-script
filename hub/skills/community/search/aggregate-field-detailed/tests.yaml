@@ -1,0 +1,13 @@
+skill: aggregate_field_detailed
+category: search
+tests:
+- name: default_execution
+  description: Aggregate with cardinality and top values
+  parameters:
+    index_pattern: logs-test
+    group_field: service.name
+    value_field: host.name
+    limit: 10
+  fixtures_required:
+  - logs-test
+  expected_result_type: array
