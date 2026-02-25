@@ -32,7 +32,7 @@ BEGIN
   
   -- Build celebration message
   DECLARE amount_formatted STRING;
-  SET amount_formatted = '$' || CAST(opp.Amount AS STRING);
+  SET amount_formatted = '$' || TO_STRING(opp.Amount);
   
   DECLARE message_blocks ARRAY;
   SET message_blocks = [

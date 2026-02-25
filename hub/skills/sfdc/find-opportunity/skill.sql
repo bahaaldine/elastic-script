@@ -26,7 +26,7 @@ BEGIN
   
   SET search_query = search_query || '
     | SORT CloseDate DESC
-    | LIMIT ' || CAST(limit AS STRING);
+    | LIMIT ' || TO_STRING(limit);
   
   SET results = ESQL_QUERY(search_query);
   

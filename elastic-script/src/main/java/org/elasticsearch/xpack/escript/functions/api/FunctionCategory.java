@@ -20,5 +20,6 @@ public enum FunctionCategory {
     NETWORK,
     STATS,
     UTILITY,
-    RUNBOOK
+    RUNBOOK,
+    CONVERSION
 }

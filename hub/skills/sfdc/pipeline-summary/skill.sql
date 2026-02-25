@@ -15,7 +15,7 @@ BEGIN
   -- Build query for open pipeline
   SET search_query = 'FROM sfdc-opportunities-* 
     | WHERE IsClosed == false 
-      AND Amount >= ' || CAST(min_amount AS STRING);
+      AND Amount >= ' || TO_STRING(min_amount);
   
   IF owner IS NOT NULL THEN
     SET search_query = search_query || ' AND Owner.Name LIKE "*' || owner || '*"';

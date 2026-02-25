@@ -18,7 +18,7 @@ BEGIN
        OR Website LIKE "*' || query || '*"
        OR Id == "' || query || '"
     | SORT LastModifiedDate DESC
-    | LIMIT ' || CAST(limit AS STRING);
+    | LIMIT ' || TO_STRING(limit);
   
   SET results = ESQL_QUERY(search_query);
   

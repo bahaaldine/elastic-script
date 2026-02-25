@@ -16,7 +16,7 @@ BEGIN
     | WHERE IsClosed == false 
       AND CloseDate >= DATE_TRUNC("month", NOW())
       AND CloseDate < DATE_TRUNC("month", NOW()) + INTERVAL 1 MONTH
-      AND Probability >= ' || CAST(min_probability AS STRING);
+      AND Probability >= ' || TO_STRING(min_probability);
   
   IF owner IS NOT NULL THEN
     SET search_query = search_query || ' AND Owner.Name LIKE "*' || owner || '*"';

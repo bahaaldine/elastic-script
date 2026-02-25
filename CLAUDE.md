@@ -187,7 +187,15 @@
 - [x] Unit tests for async syntax parsing
 - [x] Unit tests for continuation bindings
 
-### 3. Built-in Functions (118 functions across 13 categories)
+### 3. Built-in Functions (124 functions across 14 categories)
+
+#### Conversion Functions (6) - NEW
+- `CAST(value, type)` - Convert value to specified type (STRING, NUMBER, INT, FLOAT, BOOLEAN)
+- `TO_STRING(value)` - Convert any value to string
+- `TO_NUMBER(value)` - Convert to double
+- `TO_INT(value)` - Convert to integer
+- `TO_FLOAT(value)` - Convert to float
+- `TO_BOOLEAN(value)` - Convert to boolean (accepts true/yes/1/on)
 
 #### String Functions (18)
 - `LENGTH`, `SUBSTR`, `UPPER`, `LOWER`, `TRIM`, `LTRIM`, `RTRIM`

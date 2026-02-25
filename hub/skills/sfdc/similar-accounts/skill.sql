@@ -25,7 +25,7 @@ BEGIN
   DECLARE search_text STRING;
   SET search_text = COALESCE(ref.Industry, '') || ' ' || 
                     COALESCE(ref.Description, '') || ' ' ||
-                    COALESCE(CAST(ref.NumberOfEmployees AS STRING), '') || ' employees ' ||
+                    COALESCE(TO_STRING(ref.NumberOfEmployees), '') || ' employees ' ||
                     COALESCE(ref.BillingCountry, '');
   
   -- Use semantic search to find similar accounts
@@ -43,7 +43,7 @@ BEGIN
     | WHERE MATCH(Description, "' || REPLACE(search_text, '"', '') || '")
        OR Industry == "' || COALESCE(ref.Industry, 'NONE') || '"
     | SORT _score DESC
-    | LIMIT ' || CAST(limit AS STRING));
+    | LIMIT ' || TO_STRING(limit));
   
   -- Format results with similarity reasoning
   DECLARE results ARRAY;

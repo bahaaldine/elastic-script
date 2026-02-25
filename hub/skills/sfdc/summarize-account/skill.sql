@@ -68,16 +68,16 @@ BEGIN
   SET context = 'Account: ' || acct.Name || '
 Industry: ' || COALESCE(acct.Industry, 'Unknown') || '
 Type: ' || COALESCE(acct.Type, 'Unknown') || '
-Annual Revenue: $' || COALESCE(CAST(acct.AnnualRevenue AS STRING), 'Unknown') || '
-Employees: ' || COALESCE(CAST(acct.NumberOfEmployees AS STRING), 'Unknown') || '
+Annual Revenue: $' || COALESCE(TO_STRING(acct.AnnualRevenue), 'Unknown') || '
+Employees: ' || COALESCE(TO_STRING(acct.NumberOfEmployees), 'Unknown') || '
 Owner: ' || acct.Owner.Name || '
 
-Revenue from this account: $' || CAST(total_revenue AS STRING) || '
-Open pipeline: $' || CAST(open_pipeline AS STRING) || '
-Won deals: ' || CAST(win_count AS STRING) || '
-Lost deals: ' || CAST(loss_count AS STRING) || '
-Open support cases: ' || CAST(ARRAY_LENGTH(cases) AS STRING) || '
-Recent activities: ' || CAST(ARRAY_LENGTH(activities) AS STRING);
+Revenue from this account: $' || TO_STRING(total_revenue) || '
+Open pipeline: $' || TO_STRING(open_pipeline) || '
+Won deals: ' || TO_STRING(win_count) || '
+Lost deals: ' || TO_STRING(loss_count) || '
+Open support cases: ' || TO_STRING(ARRAY_LENGTH(cases)) || '
+Recent activities: ' || TO_STRING(ARRAY_LENGTH(activities));
   
   -- Generate AI summary
   DECLARE prompt STRING;

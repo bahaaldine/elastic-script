@@ -19,6 +19,7 @@ import org.elasticsearch.xpack.escript.functions.builtin.datatypes.DateBuiltInFu
 import org.elasticsearch.xpack.escript.functions.builtin.datatypes.DocumentBuiltInFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.datatypes.MapBuiltInFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.datatypes.NumberBuiltInFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.datatypes.ConversionFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.datatypes.StringBuiltInFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.inference.InferenceFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.introspection.IntrospectionFunctions;
@@ -143,6 +144,7 @@ public class BuiltInFunctionRegistry {
             DateBuiltInFunctions.registerAll(tempContext);
             DocumentBuiltInFunctions.registerAll(tempContext);
             MapBuiltInFunctions.registerAll(tempContext);
+            ConversionFunctions.registerAll(tempContext);
             
             // Third-party integrations (stateless HTTP-based, no captured state)
             OpenAIFunctions.registerAll(tempContext);

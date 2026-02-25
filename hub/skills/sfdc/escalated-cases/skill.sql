@@ -23,7 +23,7 @@ BEGIN
     SET closed_escalated = ESQL_QUERY('FROM sfdc-cases-* 
       | WHERE IsEscalated == true 
         AND IsClosed == true 
-        AND ClosedDate >= NOW() - INTERVAL ' || CAST(days_back AS STRING) || ' DAYS
+        AND ClosedDate >= NOW() - INTERVAL ' || TO_STRING(days_back) || ' DAYS
       | SORT ClosedDate DESC
       | LIMIT 20');
   ELSE

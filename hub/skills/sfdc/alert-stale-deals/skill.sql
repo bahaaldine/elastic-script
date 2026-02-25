@@ -14,8 +14,8 @@ BEGIN
   DECLARE stale_opps ARRAY;
   SET stale_opps = ESQL_QUERY('FROM sfdc-opportunities-* 
     | WHERE IsClosed == false 
-      AND Amount >= ' || CAST(min_amount AS STRING) || '
-      AND LastActivityDate < NOW() - INTERVAL ' || CAST(stale_days AS STRING) || ' DAYS
+      AND Amount >= ' || TO_STRING(min_amount) || '
+      AND LastActivityDate < NOW() - INTERVAL ' || TO_STRING(stale_days) || ' DAYS
     | SORT Amount DESC
     | LIMIT 20');
   
@@ -41,7 +41,7 @@ BEGIN
       'type': 'section',
       'text': {
         'type': 'mrkdwn',
-        'text': '*' || CAST(ARRAY_LENGTH(stale_opps) AS STRING) || ' deals* have had no activity in ' || CAST(stale_days AS STRING) || '+ days'
+        'text': '*' || TO_STRING(ARRAY_LENGTH(stale_opps)) || ' deals* have had no activity in ' || TO_STRING(stale_days) || '+ days'
       }
     }
   ];
@@ -55,9 +55,9 @@ BEGIN
       'type': 'section',
       'text': {
         'type': 'mrkdwn',
-        'text': '*' || opp.Name || '* - $' || CAST(opp.Amount AS STRING) || '\n' ||
+        'text': '*' || opp.Name || '* - $' || TO_STRING(opp.Amount) || '\n' ||
                 'Owner: ' || opp.Owner.Name || ' | Stage: ' || opp.StageName || '\n' ||
-                '🔴 ' || CAST(days_stale AS STRING) || ' days since last activity'
+                '🔴 ' || TO_STRING(days_stale) || ' days since last activity'
       }
     });
   END LOOP;
@@ -79,8 +79,8 @@ steps:
   - name: find_stale_deals
     skill: sfdc_stale_opportunities
     params:
-      stale_days: ' || CAST(stale_days AS STRING) || '
-      min_amount: ' || CAST(min_amount AS STRING) || '
+      stale_days: ' || TO_STRING(stale_days) || '
+      min_amount: ' || TO_STRING(min_amount) || '
   - name: alert_if_found
     condition: "{{ steps.find_stale_deals.result | length > 0 }}"
     action: slack_send

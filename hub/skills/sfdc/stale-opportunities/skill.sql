@@ -14,11 +14,11 @@ BEGIN
   DECLARE search_query STRING;
   DECLARE stale_date STRING;
   
-  SET stale_date = 'NOW() - INTERVAL ' || CAST(stale_days AS STRING) || ' DAYS';
+  SET stale_date = 'NOW() - INTERVAL ' || TO_STRING(stale_days) || ' DAYS';
   
   SET search_query = 'FROM sfdc-opportunities-* 
     | WHERE IsClosed == false 
-      AND Amount >= ' || CAST(min_amount AS STRING) || '
+      AND Amount >= ' || TO_STRING(min_amount) || '
       AND LastActivityDate < ' || stale_date;
   
   IF owner IS NOT NULL THEN
