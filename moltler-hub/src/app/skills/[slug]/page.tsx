@@ -1,10 +1,44 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
 import { SAMPLE_SKILLS, CATEGORIES } from '@/lib/skills';
 import validatedSkills from '@/data/validated_skills.json';
 
 interface Props {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const skill = SAMPLE_SKILLS.find((s) => s.name === slug);
+  
+  if (!skill) {
+    return {
+      title: 'Skill Not Found - MoltlerHub',
+    };
+  }
+  
+  const category = CATEGORIES[skill.category];
+  const title = `${skill.displayName} - MoltlerHub`;
+  const description = skill.description || `${skill.displayName} skill for Elasticsearch. ${category?.name || skill.category} category.`;
+  
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `https://hub.moltler.dev/skills/${slug}`,
+      siteName: 'MoltlerHub',
+      type: 'article',
+      locale: 'en_US',
+    },
+    twitter: {
+      card: 'summary',
+      title,
+      description,
+    },
+  };
 }
 
 export default async function SkillDetailPage({ params }: Props) {
