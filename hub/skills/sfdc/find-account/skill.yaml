@@ -1,0 +1,11 @@
+name: sfdc_find_account
+version: 1.0.0
+description: Find Salesforce accounts by name, domain, or ID
+author: moltler
+category: sfdc
+tags:
+  - sfdc
+  - salesforce
+  - account
+  - lookup
+  - crm

@@ -1,0 +1,12 @@
+name: sfdc_find_opportunity
+version: 1.0.0
+description: Find Salesforce opportunities by name, account, stage, or ID
+author: moltler
+category: sfdc
+tags:
+  - sfdc
+  - salesforce
+  - opportunity
+  - lookup
+  - sales
+  - pipeline

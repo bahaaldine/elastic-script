@@ -1,0 +1,12 @@
+name: sfdc_escalated_cases
+version: 1.0.0
+description: Get all currently escalated support cases
+author: moltler
+category: sfdc
+tags:
+  - sfdc
+  - salesforce
+  - case
+  - support
+  - escalation
+  - critical

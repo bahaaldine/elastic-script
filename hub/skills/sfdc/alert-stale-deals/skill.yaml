@@ -1,0 +1,12 @@
+name: sfdc_alert_stale_deals
+version: 1.0.0
+description: Create a workflow that monitors for stale opportunities and sends alerts
+author: moltler
+category: sfdc
+tags:
+  - sfdc
+  - salesforce
+  - workflow
+  - alert
+  - slack
+  - automation

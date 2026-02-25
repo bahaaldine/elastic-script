@@ -1,0 +1,12 @@
+name: sfdc_pipeline_summary
+version: 1.0.0
+description: Get current sales pipeline summary grouped by stage
+author: moltler
+category: sfdc
+tags:
+  - sfdc
+  - salesforce
+  - pipeline
+  - analytics
+  - sales
+  - forecast

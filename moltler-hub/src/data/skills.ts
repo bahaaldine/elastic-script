@@ -1337,7 +1337,7 @@ export const SKILLS: Skill[] = [
     "displayName": "Alerting",
     "description": "Alerting skill for kibana",
     "version": "1.0.0",
-    "author": "elastic",
+    "author": "moltler",
     "category": "kibana",
     "tags": [
       "kibana"
@@ -1351,7 +1351,7 @@ export const SKILLS: Skill[] = [
     "displayName": "Apm",
     "description": "Apm skill for kibana",
     "version": "1.0.0",
-    "author": "elastic",
+    "author": "moltler",
     "category": "kibana",
     "tags": [
       "kibana"
@@ -1365,7 +1365,7 @@ export const SKILLS: Skill[] = [
     "displayName": "Cases",
     "description": "Cases skill for kibana",
     "version": "1.0.0",
-    "author": "elastic",
+    "author": "moltler",
     "category": "kibana",
     "tags": [
       "kibana"
@@ -1379,7 +1379,7 @@ export const SKILLS: Skill[] = [
     "displayName": "Connectors",
     "description": "Connectors skill for kibana",
     "version": "1.0.0",
-    "author": "elastic",
+    "author": "moltler",
     "category": "kibana",
     "tags": [
       "kibana"
@@ -1393,7 +1393,7 @@ export const SKILLS: Skill[] = [
     "displayName": "Dashboards",
     "description": "Dashboards skill for kibana",
     "version": "1.0.0",
-    "author": "elastic",
+    "author": "moltler",
     "category": "kibana",
     "tags": [
       "kibana"
@@ -1407,7 +1407,7 @@ export const SKILLS: Skill[] = [
     "displayName": "Data Views",
     "description": "Data Views skill for kibana",
     "version": "1.0.0",
-    "author": "elastic",
+    "author": "moltler",
     "category": "kibana",
     "tags": [
       "kibana"
@@ -1421,7 +1421,7 @@ export const SKILLS: Skill[] = [
     "displayName": "Detections",
     "description": "Detections skill for kibana",
     "version": "1.0.0",
-    "author": "elastic",
+    "author": "moltler",
     "category": "kibana",
     "tags": [
       "kibana"
@@ -1435,7 +1435,7 @@ export const SKILLS: Skill[] = [
     "displayName": "Entity Store",
     "description": "Entity Store skill for kibana",
     "version": "1.0.0",
-    "author": "elastic",
+    "author": "moltler",
     "category": "kibana",
     "tags": [
       "kibana"
@@ -1449,7 +1449,7 @@ export const SKILLS: Skill[] = [
     "displayName": "Fleet",
     "description": "Fleet skill for kibana",
     "version": "1.0.0",
-    "author": "elastic",
+    "author": "moltler",
     "category": "kibana",
     "tags": [
       "kibana"
@@ -1463,7 +1463,7 @@ export const SKILLS: Skill[] = [
     "displayName": "Ml",
     "description": "Ml skill for kibana",
     "version": "1.0.0",
-    "author": "elastic",
+    "author": "moltler",
     "category": "kibana",
     "tags": [
       "kibana"
@@ -1477,7 +1477,7 @@ export const SKILLS: Skill[] = [
     "displayName": "Saved Objects",
     "description": "Saved Objects skill for kibana",
     "version": "1.0.0",
-    "author": "elastic",
+    "author": "moltler",
     "category": "kibana",
     "tags": [
       "kibana"
@@ -1491,7 +1491,7 @@ export const SKILLS: Skill[] = [
     "displayName": "Slo",
     "description": "Slo skill for kibana",
     "version": "1.0.0",
-    "author": "elastic",
+    "author": "moltler",
     "category": "kibana",
     "tags": [
       "kibana"
@@ -1505,7 +1505,7 @@ export const SKILLS: Skill[] = [
     "displayName": "Spaces",
     "description": "Spaces skill for kibana",
     "version": "1.0.0",
-    "author": "elastic",
+    "author": "moltler",
     "category": "kibana",
     "tags": [
       "kibana"
@@ -1519,7 +1519,7 @@ export const SKILLS: Skill[] = [
     "displayName": "Synthetics",
     "description": "Synthetics skill for kibana",
     "version": "1.0.0",
-    "author": "elastic",
+    "author": "moltler",
     "category": "kibana",
     "tags": [
       "kibana"
@@ -3907,7 +3907,394 @@ export const SKILLS: Skill[] = [
     ],
     "returns": "step",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/workflows/workflow-status"
+  },
+  {
+    "name": "sfdc_alert_stale_deals",
+    "displayName": "Alert Stale Deals",
+    "description": "Create a workflow that monitors for stale opportunities and sends alerts",
+    "version": "1.0.0",
+    "author": "moltler",
+    "category": "sfdc",
+    "tags": [
+      "sfdc"
+    ],
+    "parameters": [
+      {
+        "name": "stale_days",
+        "type": "INT",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "slack_channel",
+        "type": "STRING",
+        "description": "Slack channel for alerts",
+        "required": true
+      },
+      {
+        "name": "min_amount",
+        "type": "INT",
+        "description": "",
+        "required": true
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/alert-stale-deals"
+  },
+  {
+    "name": "sfdc_case_volume_trends",
+    "displayName": "Case Volume Trends",
+    "description": "Analyze support case volume trends over time",
+    "version": "1.0.0",
+    "author": "moltler",
+    "category": "sfdc",
+    "tags": [
+      "sfdc"
+    ],
+    "parameters": [
+      {
+        "name": "time_period",
+        "type": "STRING",
+        "description": "Time period: last_7_days, last_30_days, last_90_days",
+        "required": true
+      },
+      {
+        "name": "group_by",
+        "type": "STRING",
+        "description": "Time grouping: day, week, month",
+        "required": true
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/case-volume-trends"
+  },
+  {
+    "name": "sfdc_closing_this_month",
+    "displayName": "Closing This Month",
+    "description": "Get all opportunities expected to close this month",
+    "version": "1.0.0",
+    "author": "moltler",
+    "category": "sfdc",
+    "tags": [
+      "sfdc"
+    ],
+    "parameters": [
+      {
+        "name": "owner",
+        "type": "STRING",
+        "description": "Filter by opportunity owner name",
+        "required": true
+      },
+      {
+        "name": "min_probability",
+        "type": "INT",
+        "description": "",
+        "required": true
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/closing-this-month"
+  },
+  {
+    "name": "sfdc_escalated_cases",
+    "displayName": "Escalated Cases",
+    "description": "Get all currently escalated support cases",
+    "version": "1.0.0",
+    "author": "moltler",
+    "category": "sfdc",
+    "tags": [
+      "sfdc"
+    ],
+    "parameters": [
+      {
+        "name": "include_closed",
+        "type": "BOOLEAN",
+        "description": "Include recently closed escalated cases",
+        "required": true
+      },
+      {
+        "name": "days_back",
+        "type": "INT",
+        "description": "",
+        "required": true
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/escalated-cases"
+  },
+  {
+    "name": "sfdc_find_account",
+    "displayName": "Find Account",
+    "description": "Find Salesforce accounts by name, domain, or ID",
+    "version": "1.0.0",
+    "author": "moltler",
+    "category": "sfdc",
+    "tags": [
+      "sfdc"
+    ],
+    "parameters": [
+      {
+        "name": "query",
+        "type": "STRING",
+        "description": "Search query - account name, domain, or Salesforce ID",
+        "required": true
+      },
+      {
+        "name": "limit",
+        "type": "INT",
+        "description": "",
+        "required": true
+      }
+    ],
+    "returns": "matching",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/find-account"
+  },
+  {
+    "name": "sfdc_find_case",
+    "displayName": "Find Case",
+    "description": "Find Salesforce cases by case number, subject, account, or ID",
+    "version": "1.0.0",
+    "author": "moltler",
+    "category": "sfdc",
+    "tags": [
+      "sfdc"
+    ],
+    "parameters": [
+      {
+        "name": "query",
+        "type": "STRING",
+        "description": "Search query - case number, subject keywords, account name, or Salesforce ID",
+        "required": true
+      },
+      {
+        "name": "status",
+        "type": "STRING",
+        "description": "Filter by status (e.g., ",
+        "required": true
+      },
+      {
+        "name": "priority",
+        "type": "STRING",
+        "description": "Filter by priority (e.g., ",
+        "required": true
+      },
+      {
+        "name": "limit",
+        "type": "INT",
+        "description": "",
+        "required": true
+      }
+    ],
+    "returns": "matching",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/find-case"
+  },
+  {
+    "name": "sfdc_find_opportunity",
+    "displayName": "Find Opportunity",
+    "description": "Find Salesforce opportunities by name, account, stage, or ID",
+    "version": "1.0.0",
+    "author": "moltler",
+    "category": "sfdc",
+    "tags": [
+      "sfdc"
+    ],
+    "parameters": [
+      {
+        "name": "query",
+        "type": "STRING",
+        "description": "Search query - opportunity name, account name, or Salesforce ID",
+        "required": true
+      },
+      {
+        "name": "stage",
+        "type": "STRING",
+        "description": "Filter by stage (e.g., ",
+        "required": true
+      },
+      {
+        "name": "limit",
+        "type": "INT",
+        "description": "",
+        "required": true
+      }
+    ],
+    "returns": "matching",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/find-opportunity"
+  },
+  {
+    "name": "sfdc_notify_deal_closed",
+    "displayName": "Notify Deal Closed",
+    "description": "Send celebratory Slack notification when a deal is marked as Closed Won",
+    "version": "1.0.0",
+    "author": "moltler",
+    "category": "sfdc",
+    "tags": [
+      "sfdc"
+    ],
+    "parameters": [
+      {
+        "name": "opportunity_id",
+        "type": "STRING",
+        "description": "Salesforce Opportunity ID that was just closed",
+        "required": true
+      },
+      {
+        "name": "slack_channel",
+        "type": "STRING",
+        "description": "Slack channel for celebration",
+        "required": true
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/notify-deal-closed"
+  },
+  {
+    "name": "sfdc_pipeline_summary",
+    "displayName": "Pipeline Summary",
+    "description": "Get current sales pipeline summary grouped by stage",
+    "version": "1.0.0",
+    "author": "moltler",
+    "category": "sfdc",
+    "tags": [
+      "sfdc"
+    ],
+    "parameters": [
+      {
+        "name": "owner",
+        "type": "STRING",
+        "description": "Filter by opportunity owner name",
+        "required": true
+      },
+      {
+        "name": "min_amount",
+        "type": "INT",
+        "description": "",
+        "required": true
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/pipeline-summary"
+  },
+  {
+    "name": "sfdc_similar_accounts",
+    "displayName": "Similar Accounts",
+    "description": "Find accounts similar to a reference account using vector similarity",
+    "version": "1.0.0",
+    "author": "moltler",
+    "category": "sfdc",
+    "tags": [
+      "sfdc"
+    ],
+    "parameters": [
+      {
+        "name": "account_id",
+        "type": "STRING",
+        "description": "Reference Salesforce Account ID to find similar accounts",
+        "required": true
+      },
+      {
+        "name": "limit",
+        "type": "INT",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "exclude_customers",
+        "type": "BOOLEAN",
+        "description": "Exclude existing customers (Type = Customer)",
+        "required": true
+      }
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/similar-accounts"
+  },
+  {
+    "name": "sfdc_stale_opportunities",
+    "displayName": "Stale Opportunities",
+    "description": "Find opportunities with no activity in N days",
+    "version": "1.0.0",
+    "author": "moltler",
+    "category": "sfdc",
+    "tags": [
+      "sfdc"
+    ],
+    "parameters": [
+      {
+        "name": "stale_days",
+        "type": "INT",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "min_amount",
+        "type": "INT",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "owner",
+        "type": "STRING",
+        "description": "Filter by opportunity owner name",
+        "required": true
+      }
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/stale-opportunities"
+  },
+  {
+    "name": "sfdc_summarize_account",
+    "displayName": "Summarize Account",
+    "description": "Generate an AI-powered summary of an account relationship",
+    "version": "1.0.0",
+    "author": "moltler",
+    "category": "sfdc",
+    "tags": [
+      "sfdc"
+    ],
+    "parameters": [
+      {
+        "name": "account_id",
+        "type": "STRING",
+        "description": "Salesforce Account ID",
+        "required": true
+      },
+      {
+        "name": "model_id",
+        "type": "STRING",
+        "description": "Inference endpoint for summarization",
+        "required": true
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/summarize-account"
+  },
+  {
+    "name": "sfdc_win_rate_analysis",
+    "displayName": "Win Rate Analysis",
+    "description": "Analyze win/loss rates by owner, lead source, or industry",
+    "version": "1.0.0",
+    "author": "moltler",
+    "category": "sfdc",
+    "tags": [
+      "sfdc"
+    ],
+    "parameters": [
+      {
+        "name": "group_by",
+        "type": "STRING",
+        "description": "Group results by: owner, lead_source, industry, type",
+        "required": true
+      },
+      {
+        "name": "time_period",
+        "type": "STRING",
+        "description": "Time period: this_month, this_quarter, this_year, last_90_days",
+        "required": true
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/win-rate-analysis"
   }
 ];
 
-export const SKILL_COUNT = 180;
+export const SKILL_COUNT = 193;

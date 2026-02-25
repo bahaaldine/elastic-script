@@ -1,0 +1,13 @@
+name: sfdc_notify_deal_closed
+version: 1.0.0
+description: Send celebratory Slack notification when a deal is marked as Closed Won
+author: moltler
+category: sfdc
+tags:
+  - sfdc
+  - salesforce
+  - workflow
+  - notification
+  - slack
+  - closed-won
+  - celebration

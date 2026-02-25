@@ -28,8 +28,16 @@ interface Parameter {
   required: boolean;
 }
 
-const HUB_PATH = path.join(__dirname, '../../hub/skills/elastic');
+const HUB_BASE_PATH = path.join(__dirname, '../../hub/skills');
 const OUTPUT_PATH = path.join(__dirname, '../src/data/skills.json');
+
+// Skill sources with their base URLs
+// Multi-category sources contain category subdirectories (elastic/observability/skill/)
+// Single-category sources have skills directly under them (sfdc/skill/)
+const SKILL_SOURCES = [
+  { path: 'elastic', baseUrl: 'https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic', isSingleCategory: false },
+  { path: 'sfdc', baseUrl: 'https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc', isSingleCategory: true, category: 'sfdc' },
+];
 
 function parseSkillSql(content: string): Partial<Skill> {
   const skill: Partial<Skill> = {};
@@ -142,59 +150,93 @@ function toDisplayName(name: string): string {
     .replace(/\b\w/g, l => l.toUpperCase());
 }
 
+function scanSkillDirectory(skillPath: string, baseUrl: string): Skill | null {
+  if (!fs.statSync(skillPath).isDirectory()) return null;
+  
+  const skillDir = path.basename(skillPath);
+  const category = path.basename(path.dirname(skillPath));
+  
+  let skill: Skill = {
+    name: skillDir,
+    displayName: toDisplayName(skillDir),
+    description: `${toDisplayName(skillDir)} skill for ${category}`,
+    version: '1.0.0',
+    author: 'moltler',
+    category: category,
+    tags: [category],
+    parameters: [],
+    returns: 'ARRAY',
+    sourceUrl: `${baseUrl}/${category}/${skillDir}`,
+  };
+  
+  // Try to parse skill.sql
+  const skillSqlPath = path.join(skillPath, 'skill.sql');
+  if (fs.existsSync(skillSqlPath)) {
+    const content = fs.readFileSync(skillSqlPath, 'utf-8');
+    const parsed = parseSkillSql(content);
+    skill = { ...skill, ...parsed };
+  }
+  
+  // Try to parse skill.yaml
+  const skillYamlPath = path.join(skillPath, 'skill.yaml');
+  if (fs.existsSync(skillYamlPath)) {
+    const content = fs.readFileSync(skillYamlPath, 'utf-8');
+    const parsed = parseSkillYaml(content);
+    skill = { ...skill, ...parsed };
+  }
+  
+  // Ensure category is set
+  skill.category = category;
+  
+  return skill;
+}
+
 function generateSkillsData(): Skill[] {
   const skills: Skill[] = [];
   
-  if (!fs.existsSync(HUB_PATH)) {
-    console.error(`Hub path not found: ${HUB_PATH}`);
-    return skills;
-  }
-  
-  const categories = fs.readdirSync(HUB_PATH);
-  
-  for (const category of categories) {
-    const categoryPath = path.join(HUB_PATH, category);
-    if (!fs.statSync(categoryPath).isDirectory()) continue;
+  for (const source of SKILL_SOURCES) {
+    const sourcePath = path.join(HUB_BASE_PATH, source.path);
     
-    const skillDirs = fs.readdirSync(categoryPath);
+    if (!fs.existsSync(sourcePath)) {
+      console.log(`Source path not found: ${sourcePath}, skipping...`);
+      continue;
+    }
     
-    for (const skillDir of skillDirs) {
-      const skillPath = path.join(categoryPath, skillDir);
-      if (!fs.statSync(skillPath).isDirectory()) continue;
+    console.log(`Scanning ${source.path}...`);
+    
+    if (source.isSingleCategory) {
+      // Single-category source: skills are directly under the source path
+      const skillDirs = fs.readdirSync(sourcePath);
       
-      let skill: Skill = {
-        name: skillDir,
-        displayName: toDisplayName(skillDir),
-        description: `${toDisplayName(skillDir)} skill for ${category}`,
-        version: '1.0.0',
-        author: 'elastic',
-        category: category,
-        tags: [category],
-        parameters: [],
-        returns: 'ARRAY',
-        sourceUrl: `https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/${category}/${skillDir}`,
-      };
-      
-      // Try to parse skill.sql
-      const skillSqlPath = path.join(skillPath, 'skill.sql');
-      if (fs.existsSync(skillSqlPath)) {
-        const content = fs.readFileSync(skillSqlPath, 'utf-8');
-        const parsed = parseSkillSql(content);
-        skill = { ...skill, ...parsed };
+      for (const skillDir of skillDirs) {
+        const skillPath = path.join(sourcePath, skillDir);
+        if (!fs.statSync(skillPath).isDirectory()) continue;
+        
+        const skill = scanSkillDirectory(skillPath, source.baseUrl);
+        if (skill) {
+          skill.category = source.category || source.path;
+          skill.sourceUrl = `${source.baseUrl}/${skillDir}`;
+          skills.push(skill);
+        }
       }
+    } else {
+      // Multi-category source: categories are subdirectories
+      const categories = fs.readdirSync(sourcePath);
       
-      // Try to parse skill.yaml
-      const skillYamlPath = path.join(skillPath, 'skill.yaml');
-      if (fs.existsSync(skillYamlPath)) {
-        const content = fs.readFileSync(skillYamlPath, 'utf-8');
-        const parsed = parseSkillYaml(content);
-        skill = { ...skill, ...parsed };
+      for (const category of categories) {
+        const categoryPath = path.join(sourcePath, category);
+        if (!fs.statSync(categoryPath).isDirectory()) continue;
+        
+        const skillDirs = fs.readdirSync(categoryPath);
+        
+        for (const skillDir of skillDirs) {
+          const skillPath = path.join(categoryPath, skillDir);
+          const skill = scanSkillDirectory(skillPath, source.baseUrl);
+          if (skill) {
+            skills.push(skill);
+          }
+        }
       }
-      
-      // Ensure category is set
-      skill.category = category;
-      
-      skills.push(skill);
     }
   }
   

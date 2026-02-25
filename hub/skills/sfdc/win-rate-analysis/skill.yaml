@@ -1,0 +1,12 @@
+name: sfdc_win_rate_analysis
+version: 1.0.0
+description: Analyze win/loss rates by owner, lead source, or industry
+author: moltler
+category: sfdc
+tags:
+  - sfdc
+  - salesforce
+  - win-rate
+  - analytics
+  - sales
+  - performance

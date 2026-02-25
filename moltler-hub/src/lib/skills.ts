@@ -107,6 +107,11 @@ export const CATEGORIES: Record<string, { name: string; description: string; ico
     description: 'Kibana API management - alerting, cases, dashboards, Fleet, ML, and more',
     icon: '🎯',
   },
+  sfdc: {
+    name: 'Salesforce',
+    description: 'Salesforce CRM - accounts, opportunities, cases, analytics, and AI',
+    icon: '☁️',
+  },
 };
 
 // Parse skill.yaml content

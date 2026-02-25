@@ -1,0 +1,12 @@
+name: sfdc_summarize_account
+version: 1.0.0
+description: Generate an AI-powered summary of an account relationship
+author: moltler
+category: sfdc
+tags:
+  - sfdc
+  - salesforce
+  - account
+  - ai
+  - summary
+  - llm

@@ -1,0 +1,12 @@
+name: sfdc_case_volume_trends
+version: 1.0.0
+description: Analyze support case volume trends over time
+author: moltler
+category: sfdc
+tags:
+  - sfdc
+  - salesforce
+  - case
+  - support
+  - analytics
+  - trends

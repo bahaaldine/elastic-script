@@ -1,0 +1,12 @@
+name: sfdc_closing_this_month
+version: 1.0.0
+description: Get all opportunities expected to close this month
+author: moltler
+category: sfdc
+tags:
+  - sfdc
+  - salesforce
+  - opportunity
+  - sales-ops
+  - forecast
+  - commit

@@ -1,0 +1,12 @@
+name: sfdc_stale_opportunities
+version: 1.0.0
+description: Find opportunities with no activity in N days
+author: moltler
+category: sfdc
+tags:
+  - sfdc
+  - salesforce
+  - opportunity
+  - sales-ops
+  - pipeline-hygiene
+  - stale

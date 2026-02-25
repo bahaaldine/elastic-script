@@ -1,0 +1,13 @@
+name: sfdc_similar_accounts
+version: 1.0.0
+description: Find accounts similar to a reference account using vector similarity
+author: moltler
+category: sfdc
+tags:
+  - sfdc
+  - salesforce
+  - account
+  - ai
+  - similar
+  - vector-search
+  - prospecting
