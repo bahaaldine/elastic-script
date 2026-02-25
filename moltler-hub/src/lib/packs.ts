@@ -4,7 +4,7 @@ export interface SkillPack {
   version: string;
   description: string;
   author: string;
-  category: 'observability' | 'security' | 'search' | 'automation' | 'starter';
+  category: 'observability' | 'security' | 'search' | 'automation' | 'starter' | 'integrations';
   skills: string[];
   installCount?: number;
   icon: string;
@@ -242,6 +242,32 @@ export const SKILL_PACKS: SkillPack[] = [
     ],
     installCount: 678,
     icon: '🔔'
+  },
+  // === INTEGRATION PACKS ===
+  {
+    id: 'salesforce',
+    name: 'Salesforce (SFDC)',
+    version: '1.0.0',
+    description: 'Complete Salesforce CRM skills - account lookup, pipeline analytics, AI summaries, and workflow automation. Works with Elasticsearch Salesforce Connector.',
+    author: 'moltler',
+    category: 'integrations',
+    skills: [
+      'sfdc_find_account@1.0.0',
+      'sfdc_find_opportunity@1.0.0',
+      'sfdc_find_case@1.0.0',
+      'sfdc_pipeline_summary@1.0.0',
+      'sfdc_win_rate_analysis@1.0.0',
+      'sfdc_case_volume_trends@1.0.0',
+      'sfdc_stale_opportunities@1.0.0',
+      'sfdc_closing_this_month@1.0.0',
+      'sfdc_escalated_cases@1.0.0',
+      'sfdc_summarize_account@1.0.0',
+      'sfdc_similar_accounts@1.0.0',
+      'sfdc_alert_stale_deals@1.0.0',
+      'sfdc_notify_deal_closed@1.0.0'
+    ],
+    installCount: 0,
+    icon: '☁️'
   }
 ];
 
@@ -250,5 +276,6 @@ export const PACK_CATEGORIES = [
   { id: 'observability', name: 'Observability', icon: '📊', color: 'purple' },
   { id: 'security', name: 'Security', icon: '🛡️', color: 'red' },
   { id: 'search', name: 'Search', icon: '🔍', color: 'blue' },
-  { id: 'automation', name: 'Automation', icon: '⚙️', color: 'green' }
+  { id: 'automation', name: 'Automation', icon: '⚙️', color: 'green' },
+  { id: 'integrations', name: 'Integrations', icon: '🔗', color: 'cyan' }
 ];
