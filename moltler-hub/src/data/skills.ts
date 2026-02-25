@@ -3831,6 +3831,252 @@ export const SKILLS: Skill[] = [
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/user-activity"
   },
   {
+    "name": "create_elasticsearch_project",
+    "displayName": "Create Es Project",
+    "description": "Creates a new Elasticsearch serverless project and returns credentials",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "serverless",
+    "tags": [
+      "serverless"
+    ],
+    "parameters": [
+      {
+        "name": "api_key",
+        "type": "STRING",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "project_name",
+        "type": "STRING",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "region_id",
+        "type": "STRING",
+        "default": "aws-us-east-1",
+        "description": "",
+        "required": false
+      },
+      {
+        "name": "alias",
+        "type": "STRING",
+        "default": "",
+        "description": "",
+        "required": false
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/create-es-project"
+  },
+  {
+    "name": "create_security_project",
+    "displayName": "Create Security Project",
+    "description": "Creates a new Elastic Security serverless project for SIEM/threat detection",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "serverless",
+    "tags": [
+      "serverless"
+    ],
+    "parameters": [
+      {
+        "name": "api_key",
+        "type": "STRING",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "project_name",
+        "type": "STRING",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "region_id",
+        "type": "STRING",
+        "default": "aws-us-east-1",
+        "description": "",
+        "required": false
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/create-security-project"
+  },
+  {
+    "name": "create_ip_traffic_filter",
+    "displayName": "Create Traffic Filter",
+    "description": "Creates an IP-based traffic filter to restrict access to serverless projects",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "serverless",
+    "tags": [
+      "serverless"
+    ],
+    "parameters": [
+      {
+        "name": "api_key",
+        "type": "STRING",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "filter_name",
+        "type": "STRING",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "allowed_ips",
+        "type": "ARRAY",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "region_id",
+        "type": "STRING",
+        "default": "aws-us-east-1",
+        "description": "",
+        "required": false
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/create-traffic-filter"
+  },
+  {
+    "name": "get_serverless_project_status",
+    "displayName": "Get Project Status",
+    "description": "Gets the current status of a serverless project",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "serverless",
+    "tags": [
+      "serverless"
+    ],
+    "parameters": [
+      {
+        "name": "api_key",
+        "type": "STRING",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "project_id",
+        "type": "STRING",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "project_type",
+        "type": "STRING",
+        "default": "elasticsearch",
+        "description": "",
+        "required": false
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/get-project-status"
+  },
+  {
+    "name": "list_serverless_projects",
+    "displayName": "List Projects",
+    "description": "Lists all serverless projects across Elasticsearch, Observability, and Security types",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "serverless",
+    "tags": [
+      "serverless"
+    ],
+    "parameters": [
+      {
+        "name": "api_key",
+        "type": "STRING",
+        "description": "",
+        "required": true
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/list-projects"
+  },
+  {
+    "name": "list_serverless_regions",
+    "displayName": "List Regions",
+    "description": "Lists all available regions for serverless projects with cloud provider details",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "serverless",
+    "tags": [
+      "serverless"
+    ],
+    "parameters": [
+      {
+        "name": "api_key",
+        "type": "STRING",
+        "description": "",
+        "required": true
+      }
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/list-regions"
+  },
+  {
+    "name": "serverless_health_check",
+    "displayName": "Project Health Check",
+    "description": "Performs a health check on all serverless projects and returns status summary",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "serverless",
+    "tags": [
+      "serverless"
+    ],
+    "parameters": [
+      {
+        "name": "api_key",
+        "type": "STRING",
+        "description": "",
+        "required": true
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/project-health-check"
+  },
+  {
+    "name": "reset_project_credentials",
+    "displayName": "Reset Credentials",
+    "description": "Resets and returns new credentials for a serverless project",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "serverless",
+    "tags": [
+      "serverless"
+    ],
+    "parameters": [
+      {
+        "name": "api_key",
+        "type": "STRING",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "project_id",
+        "type": "STRING",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "project_type",
+        "type": "STRING",
+        "default": "elasticsearch",
+        "description": "",
+        "required": false
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/reset-credentials"
+  },
+  {
     "name": "install-esql-report-workflow",
     "displayName": "Install Esql Report Workflow",
     "description": "Install a scheduled ES|QL reporting workflow",
@@ -4426,4 +4672,4 @@ export const SKILLS: Skill[] = [
   }
 ];
 
-export const SKILL_COUNT = 198;
+export const SKILL_COUNT = 206;

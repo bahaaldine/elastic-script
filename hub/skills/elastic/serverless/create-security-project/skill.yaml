@@ -1,0 +1,27 @@
+name: create_security_project
+display_name: Create Security Project
+description: Creates a new Elastic Security serverless project for SIEM/threat detection
+version: 1.0.0
+author: elastic
+category: serverless
+tags:
+  - serverless
+  - cloud
+  - security
+  - siem
+  - threat-detection
+parameters:
+  - name: api_key
+    type: STRING
+    required: true
+    description: Elastic Cloud API key
+  - name: project_name
+    type: STRING
+    required: true
+    description: Name for the new project
+  - name: region_id
+    type: STRING
+    required: false
+    default: aws-us-east-1
+    description: Region ID
+returns: DOCUMENT

@@ -1,0 +1,31 @@
+name: create_ip_traffic_filter
+display_name: Create IP Traffic Filter
+description: Creates an IP-based traffic filter to restrict access to serverless projects
+version: 1.0.0
+author: elastic
+category: serverless
+tags:
+  - serverless
+  - cloud
+  - traffic-filter
+  - security
+  - ip-restriction
+parameters:
+  - name: api_key
+    type: STRING
+    required: true
+    description: Elastic Cloud API key
+  - name: filter_name
+    type: STRING
+    required: true
+    description: Name for the traffic filter
+  - name: allowed_ips
+    type: ARRAY
+    required: true
+    description: Array of allowed IP ranges (CIDR notation)
+  - name: region_id
+    type: STRING
+    required: false
+    default: aws-us-east-1
+    description: Region for the filter
+returns: DOCUMENT

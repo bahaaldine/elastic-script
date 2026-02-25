@@ -1,0 +1,19 @@
+name: list_serverless_projects
+display_name: List Serverless Projects
+description: Lists all serverless projects across Elasticsearch, Observability, and Security types
+version: 1.0.0
+author: elastic
+category: serverless
+tags:
+  - serverless
+  - cloud
+  - projects
+  - elasticsearch
+  - observability
+  - security
+parameters:
+  - name: api_key
+    type: STRING
+    required: true
+    description: Elastic Cloud API key
+returns: DOCUMENT

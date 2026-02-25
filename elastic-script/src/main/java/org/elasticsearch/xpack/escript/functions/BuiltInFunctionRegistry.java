@@ -48,6 +48,7 @@ import org.elasticsearch.xpack.escript.functions.builtin.kibana.SavedObjectFunct
 import org.elasticsearch.xpack.escript.functions.builtin.kibana.SloFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.kibana.SpaceFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.kibana.SyntheticsFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.cloud.ServerlessFunctions;
 import org.elasticsearch.xpack.escript.functions.community.FunctionLoader;
 
 import java.util.HashMap;
@@ -176,6 +177,9 @@ public class BuiltInFunctionRegistry {
             SloFunctions.registerAll(tempContext);
             SpaceFunctions.registerAll(tempContext);
             SyntheticsFunctions.registerAll(tempContext);
+            
+            // Cloud API functions (stateless HTTP-based)
+            ServerlessFunctions.registerAll(tempContext);
             
             // Copy registered functions to cache
             statelessFunctions.putAll(tempContext.getAllFunctions());

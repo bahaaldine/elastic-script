@@ -1,0 +1,19 @@
+name: list_serverless_regions
+display_name: List Serverless Regions
+description: Lists all available regions for serverless projects with cloud provider details
+version: 1.0.0
+author: elastic
+category: serverless
+tags:
+  - serverless
+  - cloud
+  - regions
+  - aws
+  - gcp
+  - azure
+parameters:
+  - name: api_key
+    type: STRING
+    required: true
+    description: Elastic Cloud API key
+returns: ARRAY

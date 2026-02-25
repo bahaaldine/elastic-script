@@ -1,0 +1,27 @@
+name: reset_project_credentials
+display_name: Reset Project Credentials
+description: Resets and returns new credentials for a serverless project
+version: 1.0.0
+author: elastic
+category: serverless
+tags:
+  - serverless
+  - cloud
+  - credentials
+  - security
+  - reset
+parameters:
+  - name: api_key
+    type: STRING
+    required: true
+    description: Elastic Cloud API key
+  - name: project_id
+    type: STRING
+    required: true
+    description: Project ID
+  - name: project_type
+    type: STRING
+    required: false
+    default: elasticsearch
+    description: 'Project type: elasticsearch, observability, or security'
+returns: DOCUMENT

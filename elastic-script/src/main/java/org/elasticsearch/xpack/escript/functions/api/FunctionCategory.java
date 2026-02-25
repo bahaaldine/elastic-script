@@ -21,5 +21,6 @@ public enum FunctionCategory {
     STATS,
     UTILITY,
     RUNBOOK,
-    CONVERSION
+    CONVERSION,
+    CLOUD
 }

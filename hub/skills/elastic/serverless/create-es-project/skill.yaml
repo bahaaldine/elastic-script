@@ -1,0 +1,32 @@
+name: create_elasticsearch_project
+display_name: Create Elasticsearch Project
+description: Creates a new Elasticsearch serverless project and returns credentials
+version: 1.0.0
+author: elastic
+category: serverless
+tags:
+  - serverless
+  - cloud
+  - elasticsearch
+  - create
+  - project
+parameters:
+  - name: api_key
+    type: STRING
+    required: true
+    description: Elastic Cloud API key
+  - name: project_name
+    type: STRING
+    required: true
+    description: Name for the new project
+  - name: region_id
+    type: STRING
+    required: false
+    default: aws-us-east-1
+    description: Region ID (e.g., aws-us-east-1, gcp-us-central1)
+  - name: alias
+    type: STRING
+    required: false
+    default: ''
+    description: Optional project alias
+returns: DOCUMENT

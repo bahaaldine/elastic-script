@@ -1,0 +1,18 @@
+name: serverless_health_check
+display_name: Serverless Health Check
+description: Performs a health check on all serverless projects and returns status summary
+version: 1.0.0
+author: elastic
+category: serverless
+tags:
+  - serverless
+  - cloud
+  - health
+  - monitoring
+  - status
+parameters:
+  - name: api_key
+    type: STRING
+    required: true
+    description: Elastic Cloud API key
+returns: DOCUMENT

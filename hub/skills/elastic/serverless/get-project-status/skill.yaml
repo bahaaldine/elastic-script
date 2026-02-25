@@ -1,0 +1,26 @@
+name: get_serverless_project_status
+display_name: Get Project Status
+description: Gets the current status of a serverless project
+version: 1.0.0
+author: elastic
+category: serverless
+tags:
+  - serverless
+  - cloud
+  - status
+  - health
+parameters:
+  - name: api_key
+    type: STRING
+    required: true
+    description: Elastic Cloud API key
+  - name: project_id
+    type: STRING
+    required: true
+    description: Project ID
+  - name: project_type
+    type: STRING
+    required: false
+    default: elasticsearch
+    description: 'Project type: elasticsearch, observability, or security'
+returns: DOCUMENT

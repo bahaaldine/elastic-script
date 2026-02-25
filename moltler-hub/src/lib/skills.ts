@@ -117,6 +117,11 @@ export const CATEGORIES: Record<string, { name: string; description: string; ico
     description: 'Native Elasticsearch commands - INDEX, SEARCH, REFRESH, DELETE, CREATE INDEX',
     icon: '⚡',
   },
+  serverless: {
+    name: 'Serverless',
+    description: 'Elastic Cloud Serverless - project management, regions, traffic filters',
+    icon: '☁️',
+  },
 };
 
 // Parse skill.yaml content
