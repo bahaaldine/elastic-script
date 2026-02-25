@@ -1,0 +1,20 @@
+name: statistical-outlier-detection
+version: 1.0.0
+description: Detect statistical outliers using z-scores computed via INLINE STATS. Standard ESQL pattern for anomaly detection.
+author: ml-team
+category: ml
+tags:
+  - ml
+  - anomaly-detection
+  - outlier
+  - z-score
+  - inlinestats
+  - advanced
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=9.2.0"
+main: skill.sql
+related_skills:
+  - name: detect_anomalies
+    relationship: simple_version
+    note: "Use for basic two-query anomaly detection on older ES versions"

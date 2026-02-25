@@ -1,0 +1,11 @@
+skill: multi_aggregation_fork
+category: search
+tests:
+- name: default_execution
+  description: Run multiple aggregations via FORK
+  parameters:
+    index_pattern: logs-test
+    group_field: service.name
+  fixtures_required:
+  - logs-test
+  expected_result_type: array

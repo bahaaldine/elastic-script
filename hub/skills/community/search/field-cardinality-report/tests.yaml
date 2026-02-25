@@ -1,0 +1,13 @@
+skill: field_cardinality_report
+category: search
+tests:
+- name: default_execution
+  description: Report cardinality of messages per service
+  parameters:
+    index_pattern: logs-test
+    group_field: service.name
+    sample_field: message
+    limit: 10
+  fixtures_required:
+  - logs-test
+  expected_result_type: array

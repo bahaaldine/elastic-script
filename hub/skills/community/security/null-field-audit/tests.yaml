@@ -1,0 +1,12 @@
+skill: null_field_audit
+category: security
+tests:
+- name: default_execution
+  description: Audit null rates in security events
+  parameters:
+    index_pattern: security-test
+    field_to_audit: user.name
+    group_field: event.category
+  fixtures_required:
+  - security-test
+  expected_result_type: array

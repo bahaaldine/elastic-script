@@ -1,0 +1,16 @@
+name: field-cardinality-report
+version: 1.0.0
+description: Report field cardinality, sample values, and document counts per group. Useful for data exploration and quality assessment.
+author: search-team
+category: search
+tags:
+  - search
+  - analytics
+  - cardinality
+  - data-quality
+  - exploration
+  - advanced
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.14.0"
+main: skill.sql

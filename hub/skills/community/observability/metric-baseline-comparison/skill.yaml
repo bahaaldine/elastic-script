@@ -1,0 +1,22 @@
+name: metric-baseline-comparison
+version: 1.0.0
+description: Compare metric values to a computed baseline using INLINE STATS. Single-query alternative to multi-query period comparisons.
+author: observability-team
+category: observability
+tags:
+  - observability
+  - baseline
+  - comparison
+  - inlinestats
+  - advanced
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=9.2.0"
+main: skill.sql
+related_skills:
+  - name: compare_time_periods
+    relationship: simple_version
+    note: "Use for basic two-query period comparison on older ES versions"
+  - name: detect_performance_regression
+    relationship: simple_version
+    note: "Use for two-query APM regression detection on older ES versions"

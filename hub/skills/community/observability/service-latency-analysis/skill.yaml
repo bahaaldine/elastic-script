@@ -1,0 +1,16 @@
+name: service-latency-analysis
+version: 1.0.0
+description: Comprehensive latency profiling with p50/p95/p99, STD_DEV, MAD, and error rates per service.
+author: observability-team
+category: observability
+tags:
+  - observability
+  - apm
+  - latency
+  - percentile
+  - statistics
+  - advanced
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=9.1.0"
+main: skill.sql

@@ -1,0 +1,15 @@
+name: null-field-audit
+version: 1.0.0
+description: Audit fields for high null rates that could cause silent data loss in negative filters. Critical for security queries.
+author: security-team
+category: security
+tags:
+  - security
+  - data-quality
+  - null-handling
+  - audit
+  - advanced
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.11.0"
+main: skill.sql
