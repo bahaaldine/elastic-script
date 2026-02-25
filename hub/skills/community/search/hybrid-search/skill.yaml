@@ -1,11 +1,17 @@
 name: hybrid-search
-version: 1.0.0
-description: Perform hybrid search combining BM25 text search with vector similarity.
+version: 1.1.0
+description: Full-text search using MATCH() for BM25 relevance ranking. For true hybrid (BM25 + vector), see multi-aggregation-fork skill on ES 9.1+.
 author: search-team
 category: search
 tags:
   - search
+  - fulltext
+  - match
 license: Elastic-2.0
 requirements:
-  elasticsearch: ">=8.0.0"
+  elasticsearch: ">=8.17.0"
 main: skill.sql
+related_skills:
+  - name: multi_aggregation_fork
+    relationship: advanced_version
+    note: "Use FORK/FUSE for true hybrid search combining BM25 + vector on ES 9.1+"
