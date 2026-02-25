@@ -1,0 +1,11 @@
+name: refresh_index_cmd
+version: 1.0.0
+description: Refresh an index using the first-class REFRESH command
+author: moltler
+category: first-class-commands
+tags:
+  - elasticsearch
+  - refresh
+  - first-class
+  - command
+  - index

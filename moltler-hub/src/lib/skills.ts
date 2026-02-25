@@ -112,6 +112,11 @@ export const CATEGORIES: Record<string, { name: string; description: string; ico
     description: 'Salesforce CRM - accounts, opportunities, cases, analytics, and AI',
     icon: '☁️',
   },
+  'first-class-commands': {
+    name: 'First-Class Commands',
+    description: 'Native Elasticsearch commands - INDEX, SEARCH, REFRESH, DELETE, CREATE INDEX',
+    icon: '⚡',
+  },
 };
 
 // Parse skill.yaml content

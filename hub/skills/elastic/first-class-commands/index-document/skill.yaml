@@ -1,0 +1,11 @@
+name: index_document_cmd
+version: 1.0.0
+description: Index a document using the first-class INDEX command
+author: moltler
+category: first-class-commands
+tags:
+  - elasticsearch
+  - index
+  - first-class
+  - command
+  - document

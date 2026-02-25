@@ -1,0 +1,11 @@
+name: search_documents_cmd
+version: 1.0.0
+description: Search documents using the first-class SEARCH command
+author: moltler
+category: first-class-commands
+tags:
+  - elasticsearch
+  - search
+  - first-class
+  - command
+  - query

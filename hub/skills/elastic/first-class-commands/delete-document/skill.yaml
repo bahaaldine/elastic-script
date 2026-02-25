@@ -1,0 +1,11 @@
+name: delete_document_cmd
+version: 1.0.0
+description: Delete a document by ID using the first-class DELETE command
+author: moltler
+category: first-class-commands
+tags:
+  - elasticsearch
+  - delete
+  - first-class
+  - command
+  - document

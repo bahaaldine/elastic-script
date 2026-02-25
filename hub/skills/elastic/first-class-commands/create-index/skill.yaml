@@ -1,0 +1,12 @@
+name: create_index_cmd
+version: 1.0.0
+description: Create an index with mappings using the first-class CREATE INDEX command
+author: moltler
+category: first-class-commands
+tags:
+  - elasticsearch
+  - create
+  - index
+  - first-class
+  - command
+  - mappings

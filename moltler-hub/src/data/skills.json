@@ -1008,6 +1008,135 @@
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/enterprise-search/list-search-apps"
   },
   {
+    "name": "create_index_cmd",
+    "displayName": "Create Index",
+    "description": "Create an index with mappings using the first-class CREATE INDEX command",
+    "version": "1.0.0",
+    "author": "moltler",
+    "category": "first-class-commands",
+    "tags": [
+      "elasticsearch"
+    ],
+    "parameters": [
+      {
+        "name": "index_name",
+        "type": "STRING",
+        "description": "Name for the new index",
+        "required": true
+      },
+      {
+        "name": "mappings",
+        "type": "DOCUMENT",
+        "description": "Index mappings definition",
+        "required": true
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/first-class-commands/create-index"
+  },
+  {
+    "name": "delete_document_cmd",
+    "displayName": "Delete Document",
+    "description": "Delete a document by ID using the first-class DELETE command",
+    "version": "1.0.0",
+    "author": "moltler",
+    "category": "first-class-commands",
+    "tags": [
+      "elasticsearch"
+    ],
+    "parameters": [
+      {
+        "name": "index_name",
+        "type": "STRING",
+        "description": "Index containing the document",
+        "required": true
+      },
+      {
+        "name": "doc_id",
+        "type": "STRING",
+        "description": "Document ID to delete",
+        "required": true
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/first-class-commands/delete-document"
+  },
+  {
+    "name": "index_document_cmd",
+    "displayName": "Index Document",
+    "description": "Index a document using the first-class INDEX command",
+    "version": "1.0.0",
+    "author": "moltler",
+    "category": "first-class-commands",
+    "tags": [
+      "elasticsearch"
+    ],
+    "parameters": [
+      {
+        "name": "index_name",
+        "type": "STRING",
+        "description": "Target index name",
+        "required": true
+      },
+      {
+        "name": "document",
+        "type": "DOCUMENT",
+        "description": "Document to index",
+        "required": true
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/first-class-commands/index-document"
+  },
+  {
+    "name": "refresh_index_cmd",
+    "displayName": "Refresh Index",
+    "description": "Refresh an index using the first-class REFRESH command",
+    "version": "1.0.0",
+    "author": "moltler",
+    "category": "first-class-commands",
+    "tags": [
+      "elasticsearch"
+    ],
+    "parameters": [
+      {
+        "name": "index_name",
+        "type": "STRING",
+        "description": "Index name or pattern to refresh",
+        "required": true
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/first-class-commands/refresh-index"
+  },
+  {
+    "name": "search_documents_cmd",
+    "displayName": "Search Documents",
+    "description": "Search documents using the first-class SEARCH command",
+    "version": "1.0.0",
+    "author": "moltler",
+    "category": "first-class-commands",
+    "tags": [
+      "elasticsearch"
+    ],
+    "parameters": [
+      {
+        "name": "index_name",
+        "type": "STRING",
+        "description": "Index pattern to search",
+        "required": true
+      },
+      {
+        "name": "query",
+        "type": "DOCUMENT",
+        "description": "Elasticsearch Query DSL document",
+        "required": true
+      }
+    ],
+    "returns": "ARRAY",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/first-class-commands/search-documents"
+  },
+  {
     "name": "get-agent-logs",
     "displayName": "Get Agent Logs",
     "description": "Get logs from a specific agent",
