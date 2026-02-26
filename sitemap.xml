@@ -2,422 +2,426 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://bahaaldine.github.io/moltler/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
+    </url>
+    <url>
+         <loc>https://bahaaldine.github.io/moltler/SKILLS_ARCHITECTURE/</loc>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/VISION/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/api/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/functions/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/getting-started/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/language-reference/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/mcp/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/roadmap/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/triggers-and-scheduling/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/ui/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/agents/creating-agents/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/agents/execution-model/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/agents/human-in-the-loop/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/agents/monitoring/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/agents/overview/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/ai/generate-skills/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/ai/improve-skills/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/ai/recommendations/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/connectors/building-connectors/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/connectors/datadog/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/connectors/github/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/connectors/jira/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/connectors/overview/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/connectors/pagerduty/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/connectors/salesforce/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/connectors/slack/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/connectors/zendesk/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/development/architecture/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/development/contributing/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/development/testing/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/examples/data-pipeline/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/examples/devops-automation/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/examples/incident-response/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/examples/log-analysis/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/examples/observability-skills/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/functions/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/functions/ai-llm/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/functions/array/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/functions/datasource/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/functions/date/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/functions/document/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/functions/elasticsearch/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/functions/integrations/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/functions/map/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/functions/network/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/functions/nlp/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/functions/number/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/functions/overview/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/functions/string/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/getting-started/connect-agent/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/getting-started/first-skill/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/getting-started/installation/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/getting-started/jupyter-setup/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/getting-started/quick-start/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/getting-started/what-is-moltler/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/language/async-execution/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/language/bulk-operations/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/language/control-flow/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/language/cursors/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/language/error-handling/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/language/execute-immediate/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/language/functions/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/language/intents/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/language/overview/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/language/packages/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/language/procedures/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/language/profiler/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/language/security-permissions/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/language/skills/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/language/user-defined-types/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/language/variables-types/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/moltlerhub/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/moltlerhub/contributing/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/notebooks/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/notebooks/ai-observability/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/notebooks/async-execution/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/notebooks/bulk-operations/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/notebooks/complete-reference/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/notebooks/cursors/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/notebooks/esql-integration/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/notebooks/event-triggers/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/notebooks/first-class-commands/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/notebooks/getting-started/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/notebooks/intents/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/notebooks/namespaced-functions/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/notebooks/runbook-integrations/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/notebooks/scheduled-jobs/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/notebooks/standalone-skills/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/observability/opentelemetry/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/skills/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/skills/creating-skills/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/skills/overview/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/skills/parameters/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/skills/publishing/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/skills/skill-packs/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/skills/skills-roadmap/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/skills/testing/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/solutions/observability/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/solutions/search/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/solutions/security/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/tools/cli/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/tools/jupyter/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/tools/mcp-bridge/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/tools/python-sdk/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
     <url>
          <loc>https://bahaaldine.github.io/moltler/tools/vscode/</loc>
-         <lastmod>2026-02-25</lastmod>
+         <lastmod>2026-02-26</lastmod>
     </url>
 </urlset>
