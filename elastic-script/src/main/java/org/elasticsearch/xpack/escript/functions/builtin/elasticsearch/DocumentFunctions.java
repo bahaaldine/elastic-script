@@ -100,9 +100,9 @@ public class DocumentFunctions {
                     request.id(id);
                 }
                 
-                client.index(request, new ActionListener<IndexResponse>() {
+                client.index(request, new ActionListener<org.elasticsearch.action.DocWriteResponse>() {
                     @Override
-                    public void onResponse(IndexResponse response) {
+                    public void onResponse(org.elasticsearch.action.DocWriteResponse response) {
                         Map<String, Object> result = new HashMap<>();
                         result.put("_index", response.getIndex());
                         result.put("_id", response.getId());
@@ -605,9 +605,9 @@ public class DocumentFunctions {
                     .source(doc, XContentType.JSON)
                     .create(true);
                 
-                client.index(request, new ActionListener<IndexResponse>() {
+                client.index(request, new ActionListener<org.elasticsearch.action.DocWriteResponse>() {
                     @Override
-                    public void onResponse(IndexResponse response) {
+                    public void onResponse(org.elasticsearch.action.DocWriteResponse response) {
                         Map<String, Object> result = new HashMap<>();
                         result.put("_index", response.getIndex());
                         result.put("_id", response.getId());

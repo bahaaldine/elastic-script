@@ -187,7 +187,7 @@
 - [x] Unit tests for async syntax parsing
 - [x] Unit tests for continuation bindings
 
-### 3. Built-in Functions (295+ functions across 27 categories)
+### 3. Built-in Functions (180+ functions across 20 categories)
 
 #### Conversion Functions (6) - NEW
 - `CAST(value, type)` - Convert value to specified type (STRING, NUMBER, INT, FLOAT, BOOLEAN)
@@ -233,78 +233,25 @@
 - `INDEX_DOCUMENT`, `INDEX_BULK`, `UPDATE_DOCUMENT`
 - `GET_DOCUMENT`, `REFRESH_INDEX`
 
-#### Elasticsearch Document API (12) - NEW
+#### Elasticsearch Document API (12)
 - `ES_INDEX`, `ES_GET`, `ES_EXISTS`, `ES_DELETE`, `ES_UPDATE`
 - `ES_BULK`, `ES_MGET`, `ES_REINDEX`
 - `ES_UPDATE_BY_QUERY`, `ES_DELETE_BY_QUERY`
 - `ES_GET_SOURCE`, `ES_CREATE`
 
-#### Elasticsearch Search API (15) - NEW
-- `ES_SEARCH`, `ES_SEARCH_QUERY`, `ES_MSEARCH`
-- `ES_SCROLL`, `ES_CLEAR_SCROLL`, `ES_COUNT`
-- `ES_TERMS_AGG`, `ES_STATS_AGG`, `ES_DATE_HISTOGRAM`
-- `ES_SEARCH_AFTER`, `ES_SEARCH_TEMPLATE`
-- `ES_OPEN_PIT`, `ES_FIELD_CAPS`, `ES_KNN_SEARCH`, `ES_RANK_EVAL`
-
-#### Elasticsearch Index Management API (22) - NEW
-- `ES_CREATE_INDEX`, `ES_DELETE_INDEX`, `ES_INDEX_EXISTS`
-- `ES_GET_MAPPING`, `ES_PUT_MAPPING`, `ES_GET_SETTINGS`, `ES_PUT_SETTINGS`
-- `ES_REFRESH_INDEX`, `ES_FLUSH_INDEX`, `ES_FORCE_MERGE`, `ES_CLEAR_CACHE`
-- `ES_OPEN_INDEX`, `ES_CLOSE_INDEX`
-- `ES_GET_ALIAS`, `ES_PUT_ALIAS`, `ES_DELETE_ALIAS`
-- `ES_INDEX_STATS`, `ES_CLONE_INDEX`, `ES_SHRINK_INDEX`, `ES_SPLIT_INDEX`
-- `ES_ROLLOVER_INDEX`, `ES_RESOLVE_INDEX`
-
-#### Elasticsearch Cluster API (15) - NEW
-- `ES_CLUSTER_HEALTH`, `ES_CLUSTER_STATE`, `ES_CLUSTER_STATS`
-- `ES_CLUSTER_SETTINGS`, `ES_UPDATE_CLUSTER_SETTINGS`
-- `ES_NODES_INFO`, `ES_NODES_STATS`, `ES_NODE_HOT_THREADS`
-- `ES_PENDING_TASKS`, `ES_LIST_TASKS`, `ES_CANCEL_TASK`
-- `ES_ALLOCATION_EXPLAIN`, `ES_CLUSTER_REROUTE`
-- `ES_REMOTE_INFO`, `ES_CLUSTER_INFO`
-
-#### Elasticsearch ILM API (10) - NEW
-- `ES_ILM_GET_POLICY`, `ES_ILM_PUT_POLICY`, `ES_ILM_DELETE_POLICY`
-- `ES_ILM_EXPLAIN`, `ES_ILM_MOVE_TO_STEP`, `ES_ILM_RETRY`
-- `ES_ILM_REMOVE_POLICY`, `ES_ILM_STATUS`
-- `ES_ILM_START`, `ES_ILM_STOP`
-
-#### Elasticsearch Data Stream API (6) - NEW
-- `ES_CREATE_DATA_STREAM`, `ES_DELETE_DATA_STREAM`
-- `ES_GET_DATA_STREAM`, `ES_DATA_STREAM_STATS`
-- `ES_MIGRATE_TO_DATA_STREAM`, `ES_PROMOTE_DATA_STREAM`
-
-#### Elasticsearch Security API (12) - NEW
-- `ES_GET_USERS`, `ES_CREATE_USER`, `ES_DELETE_USER`
-- `ES_GET_ROLES`, `ES_DELETE_ROLE`
-- `ES_CREATE_API_KEY`, `ES_GET_API_KEY`, `ES_INVALIDATE_API_KEY`
-- `ES_GET_PRIVILEGES`, `ES_AUTHENTICATE`, `ES_HAS_PRIVILEGES`
-- `ES_CLEAR_SECURITY_CACHE`
-
-#### Elasticsearch ML API (14) - NEW
-- `ES_ML_GET_JOBS`, `ES_ML_GET_JOB_STATS`, `ES_ML_OPEN_JOB`, `ES_ML_CLOSE_JOB`, `ES_ML_DELETE_JOB`
-- `ES_ML_GET_DATAFEEDS`, `ES_ML_GET_DATAFEED_STATS`, `ES_ML_START_DATAFEED`, `ES_ML_STOP_DATAFEED`
-- `ES_ML_GET_RECORDS`, `ES_ML_GET_BUCKETS`
-- `ES_ML_GET_TRAINED_MODELS`, `ES_ML_GET_TRAINED_MODEL_STATS`, `ES_ML_INFER`
-
-#### Elasticsearch Transform API (6) - NEW
-- `ES_GET_TRANSFORM`, `ES_GET_TRANSFORM_STATS`
-- `ES_START_TRANSFORM`, `ES_STOP_TRANSFORM`
-- `ES_DELETE_TRANSFORM`, `ES_PREVIEW_TRANSFORM`
-
-#### Elasticsearch Snapshot API (8) - NEW
-- `ES_GET_REPOSITORIES`, `ES_CREATE_REPOSITORY`, `ES_DELETE_REPOSITORY`
-- `ES_GET_SNAPSHOTS`, `ES_CREATE_SNAPSHOT`, `ES_DELETE_SNAPSHOT`
-- `ES_RESTORE_SNAPSHOT`, `ES_SNAPSHOT_STATUS`
-
-#### Elasticsearch Watcher API (9) - NEW
-- `ES_GET_WATCH`, `ES_DELETE_WATCH`, `ES_EXECUTE_WATCH`
-- `ES_ACTIVATE_WATCH`, `ES_DEACTIVATE_WATCH`, `ES_ACK_WATCH`
-- `ES_WATCHER_STATS`, `ES_START_WATCHER`, `ES_STOP_WATCHER`
-
-#### Elasticsearch Ingest API (5) - NEW
-- `ES_GET_PIPELINE`, `ES_PUT_PIPELINE`, `ES_DELETE_PIPELINE`
-- `ES_SIMULATE_PIPELINE`, `ES_GROK_PATTERNS`
+#### Elasticsearch API Functions - PLANNED
+**Note:** The following function categories were designed but removed due to Elasticsearch internal Java API changes. They will be re-implemented using stable APIs:
+- Search API (15 functions) - ES_SEARCH, ES_COUNT, aggregations, etc.
+- Index Management API (22 functions) - ES_CREATE_INDEX, mappings, settings, etc.
+- Cluster API (15 functions) - ES_CLUSTER_HEALTH, nodes, tasks, etc.
+- ILM API (10 functions) - ES_ILM_EXPLAIN, policy management
+- Data Stream API (6 functions) - Data stream lifecycle
+- Security API (12 functions) - Users, roles, API keys
+- ML API (14 functions) - ML jobs, datafeeds, inference
+- Transform API (6 functions) - Transform management
+- Snapshot API (8 functions) - Backup and restore
+- Watcher API (9 functions) - Watch management
+- Ingest API (5 functions) - Pipeline management
 
 #### OpenAI Functions (6)
 - `LLM_COMPLETE`, `LLM_CHAT`, `LLM_EMBED`
