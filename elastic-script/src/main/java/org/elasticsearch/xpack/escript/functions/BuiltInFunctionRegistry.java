@@ -49,6 +49,18 @@ import org.elasticsearch.xpack.escript.functions.builtin.kibana.SloFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.kibana.SpaceFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.kibana.SyntheticsFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.cloud.ServerlessFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.DocumentFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.SearchFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.IndexFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.ClusterFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.ILMFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.DataStreamFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.SecurityFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.MLFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.TransformFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.SnapshotFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.WatcherFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.IngestFunctions;
 import org.elasticsearch.xpack.escript.functions.community.FunctionLoader;
 
 import java.util.HashMap;
@@ -211,6 +223,20 @@ public class BuiltInFunctionRegistry {
             
             // Introspection functions (only need client for stored procedures lookup)
             IntrospectionFunctions.registerAll(tempContext, client);
+            
+            // Elasticsearch API functions (comprehensive coverage)
+            DocumentFunctions.registerAll(tempContext, client);
+            SearchFunctions.registerAll(tempContext, client);
+            IndexFunctions.registerAll(tempContext, client);
+            ClusterFunctions.registerAll(tempContext, client);
+            ILMFunctions.registerAll(tempContext, client);
+            DataStreamFunctions.registerAll(tempContext, client);
+            SecurityFunctions.registerAll(tempContext, client);
+            MLFunctions.registerAll(tempContext, client);
+            TransformFunctions.registerAll(tempContext, client);
+            SnapshotFunctions.registerAll(tempContext, client);
+            WatcherFunctions.registerAll(tempContext, client);
+            IngestFunctions.registerAll(tempContext, client);
             
             // Copy registered functions to cache
             clientFunctions.putAll(tempContext.getAllFunctions());

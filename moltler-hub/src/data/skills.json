@@ -931,6 +931,146 @@
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/list-snapshots"
   },
   {
+    "name": "cluster_health_check",
+    "displayName": "Cluster Health Check",
+    "description": "Perform a comprehensive cluster health check with node and shard statistics",
+    "version": "1.0.0",
+    "author": "Moltler",
+    "category": "elasticsearch-api",
+    "tags": [
+      "cluster"
+    ],
+    "parameters": [
+      {
+        "name": "IN",
+        "type": "STRING",
+        "default": "NULL",
+        "description": "",
+        "required": false
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/elasticsearch-api/cluster-health-check"
+  },
+  {
+    "name": "create_snapshot_backup",
+    "displayName": "Create Snapshot Backup",
+    "description": "Create a snapshot backup of specified indices for disaster recovery",
+    "version": "1.0.0",
+    "author": "Moltler",
+    "category": "elasticsearch-api",
+    "tags": [
+      "snapshot"
+    ],
+    "parameters": [
+      {
+        "name": "IN",
+        "type": "STRING",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "IN",
+        "type": "STRING",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "IN",
+        "type": "STRING",
+        "default": "*",
+        "description": "",
+        "required": false
+      },
+      {
+        "name": "IN",
+        "type": "BOOLEAN",
+        "default": "true",
+        "description": "",
+        "required": false
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/elasticsearch-api/create-snapshot-backup"
+  },
+  {
+    "name": "ilm_explain_status",
+    "displayName": "Ilm Explain Status",
+    "description": "Explain Index Lifecycle Management status for indices",
+    "version": "1.0.0",
+    "author": "Moltler",
+    "category": "elasticsearch-api",
+    "tags": [
+      "ilm"
+    ],
+    "parameters": [
+      {
+        "name": "IN",
+        "type": "STRING",
+        "description": "",
+        "required": true
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/elasticsearch-api/ilm-explain-status"
+  },
+  {
+    "name": "ml_job_status",
+    "displayName": "Ml Job Status",
+    "description": "Get ML anomaly detection job status and statistics",
+    "version": "1.0.0",
+    "author": "Moltler",
+    "category": "elasticsearch-api",
+    "tags": [
+      "ml"
+    ],
+    "parameters": [
+      {
+        "name": "IN",
+        "type": "STRING",
+        "default": "*",
+        "description": "",
+        "required": false
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/elasticsearch-api/ml-job-status"
+  },
+  {
+    "name": "reindex_with_transform",
+    "displayName": "Reindex With Transform",
+    "description": "Reindex data from source to destination index with optional filtering",
+    "version": "1.0.0",
+    "author": "Moltler",
+    "category": "elasticsearch-api",
+    "tags": [
+      "reindex"
+    ],
+    "parameters": [
+      {
+        "name": "IN",
+        "type": "STRING",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "IN",
+        "type": "STRING",
+        "description": "",
+        "required": true
+      },
+      {
+        "name": "IN",
+        "type": "STRING",
+        "default": "*",
+        "description": "",
+        "required": false
+      }
+    ],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/elasticsearch-api/reindex-with-transform"
+  },
+  {
     "name": "get-no-results-queries",
     "displayName": "Get No Results Queries",
     "description": "Get queries that returned no results",

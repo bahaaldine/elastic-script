@@ -122,6 +122,11 @@ export const CATEGORIES: Record<string, { name: string; description: string; ico
     description: 'Elastic Cloud Serverless - project management, regions, traffic filters',
     icon: '☁️',
   },
+  'elasticsearch-api': {
+    name: 'Elasticsearch API',
+    description: 'Direct Elasticsearch API functions - document, search, index, cluster, ILM, ML, security',
+    icon: '📦',
+  },
 };
 
 // Parse skill.yaml content

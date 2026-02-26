@@ -1,0 +1,21 @@
+name: ilm_explain_status
+displayName: ILM Explain Status
+description: Explain Index Lifecycle Management status for indices
+version: 1.0.0
+author: Moltler
+category: elasticsearch-api
+tags:
+  - ilm
+  - lifecycle
+  - monitoring
+parameters:
+  - name: index_pattern
+    type: STRING
+    description: Index pattern to check ILM status
+    required: true
+returns:
+  type: DOCUMENT
+  description: ILM status for matched indices
+examples:
+  - description: Check ILM status for logs
+    code: RUN SKILL ilm_explain_status('logs-*')

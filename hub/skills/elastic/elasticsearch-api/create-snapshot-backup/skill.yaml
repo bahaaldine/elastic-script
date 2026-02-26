@@ -1,0 +1,35 @@
+name: create_snapshot_backup
+displayName: Create Snapshot Backup
+description: Create a snapshot backup of specified indices for disaster recovery
+version: 1.0.0
+author: Moltler
+category: elasticsearch-api
+tags:
+  - snapshot
+  - backup
+  - disaster-recovery
+parameters:
+  - name: repository
+    type: STRING
+    description: Snapshot repository name
+    required: true
+  - name: snapshot_name
+    type: STRING
+    description: Name for the snapshot
+    required: true
+  - name: indices
+    type: STRING
+    description: Indices to backup
+    default: "*"
+  - name: wait_for_completion
+    type: BOOLEAN
+    description: Wait for snapshot to complete
+    default: true
+returns:
+  type: DOCUMENT
+  description: Snapshot creation result
+examples:
+  - description: Backup all indices
+    code: RUN SKILL create_snapshot_backup('my-repo', 'daily-backup-2024')
+  - description: Backup specific indices
+    code: RUN SKILL create_snapshot_backup('my-repo', 'logs-backup', 'logs-*')

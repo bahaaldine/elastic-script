@@ -1,0 +1,24 @@
+name: cluster_health_check
+displayName: Cluster Health Check
+description: Perform a comprehensive cluster health check with node and shard statistics
+version: 1.0.0
+author: Moltler
+category: elasticsearch-api
+tags:
+  - cluster
+  - health
+  - monitoring
+  - ops
+parameters:
+  - name: index_pattern
+    type: STRING
+    description: Optional index pattern to check
+    default: null
+returns:
+  type: DOCUMENT
+  description: Comprehensive cluster health report
+examples:
+  - description: Check overall cluster health
+    code: RUN SKILL cluster_health_check()
+  - description: Check health for logs indices
+    code: RUN SKILL cluster_health_check('logs-*')

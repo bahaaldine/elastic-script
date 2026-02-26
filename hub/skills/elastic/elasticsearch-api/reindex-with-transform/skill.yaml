@@ -1,0 +1,29 @@
+name: reindex_with_transform
+displayName: Reindex with Transform
+description: Reindex data from source to destination index with optional filtering
+version: 1.0.0
+author: Moltler
+category: elasticsearch-api
+tags:
+  - reindex
+  - migration
+  - data-management
+parameters:
+  - name: source_index
+    type: STRING
+    description: Source index name
+    required: true
+  - name: dest_index
+    type: STRING
+    description: Destination index name
+    required: true
+  - name: query_filter
+    type: STRING
+    description: Query filter for documents
+    default: "*"
+returns:
+  type: DOCUMENT
+  description: Reindex operation results
+examples:
+  - description: Reindex all documents
+    code: RUN SKILL reindex_with_transform('old-logs', 'new-logs')

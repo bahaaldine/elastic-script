@@ -1,0 +1,23 @@
+name: ml_job_status
+displayName: ML Job Status
+description: Get ML anomaly detection job status and statistics
+version: 1.0.0
+author: Moltler
+category: elasticsearch-api
+tags:
+  - ml
+  - anomaly-detection
+  - monitoring
+parameters:
+  - name: job_id
+    type: STRING
+    description: Job ID or pattern
+    default: "*"
+returns:
+  type: DOCUMENT
+  description: ML job configurations and stats
+examples:
+  - description: Get all ML jobs
+    code: RUN SKILL ml_job_status()
+  - description: Get specific job
+    code: RUN SKILL ml_job_status('my-anomaly-job')
