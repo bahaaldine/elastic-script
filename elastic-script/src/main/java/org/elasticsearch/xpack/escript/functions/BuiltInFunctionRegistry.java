@@ -49,7 +49,18 @@ import org.elasticsearch.xpack.escript.functions.builtin.kibana.SloFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.kibana.SpaceFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.kibana.SyntheticsFunctions;
 import org.elasticsearch.xpack.escript.functions.builtin.cloud.ServerlessFunctions;
-import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.DocumentFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.DocumentApiFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.SearchApiFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.IndexApiFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.ClusterApiFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.ILMApiFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.DataStreamApiFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.SnapshotApiFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.IngestApiFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.MLApiFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.TransformApiFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.WatcherApiFunctions;
+import org.elasticsearch.xpack.escript.functions.builtin.elasticsearch.SecurityApiFunctions;
 import org.elasticsearch.xpack.escript.functions.community.FunctionLoader;
 
 import java.util.HashMap;
@@ -182,6 +193,20 @@ public class BuiltInFunctionRegistry {
             // Cloud API functions (stateless HTTP-based)
             ServerlessFunctions.registerAll(tempContext);
             
+            // Elasticsearch REST API functions (stateless HTTP-based)
+            DocumentApiFunctions.registerAll(tempContext);
+            SearchApiFunctions.registerAll(tempContext);
+            IndexApiFunctions.registerAll(tempContext);
+            ClusterApiFunctions.registerAll(tempContext);
+            ILMApiFunctions.registerAll(tempContext);
+            DataStreamApiFunctions.registerAll(tempContext);
+            SnapshotApiFunctions.registerAll(tempContext);
+            IngestApiFunctions.registerAll(tempContext);
+            MLApiFunctions.registerAll(tempContext);
+            TransformApiFunctions.registerAll(tempContext);
+            WatcherApiFunctions.registerAll(tempContext);
+            SecurityApiFunctions.registerAll(tempContext);
+            
             // Copy registered functions to cache
             statelessFunctions.putAll(tempContext.getAllFunctions());
             
@@ -212,11 +237,6 @@ public class BuiltInFunctionRegistry {
             
             // Introspection functions (only need client for stored procedures lookup)
             IntrospectionFunctions.registerAll(tempContext, client);
-            
-            // Elasticsearch API functions
-            // Note: Most ES API function classes were removed due to Elasticsearch internal API changes.
-            // Only DocumentFunctions remains. Others can be re-added after API verification.
-            DocumentFunctions.registerAll(tempContext, client);
             
             // Copy registered functions to cache
             clientFunctions.putAll(tempContext.getAllFunctions());
