@@ -1,0 +1,73 @@
+# Moltler - elastic-script Development Rules
+
+## Project Overview
+
+This is the Moltler project - a procedural scripting language (elastic-script) that runs inside Elasticsearch for runbook automation, AI/LLM integration, and data processing.
+
+## Key Conventions
+
+### Code Style
+- Java code follows Elasticsearch coding standards
+- Use 4-space indentation for Java
+- elastic-script syntax is case-insensitive for keywords but preserves case for identifiers
+
+### File Locations
+- Java source: `elastic-script/src/main/java/org/elasticsearch/xpack/escript/`
+- Tests: `elastic-script/src/test/java/`
+- Grammar: `elastic-script/src/main/antlr/ElasticScript.g4`
+- Moltler Skills: `hub/skills/`
+- Agent Skills: `.agents/skills/`
+- Documentation: `docs/` and `CLAUDE.md`
+
+### Function Naming
+- Built-in functions use UPPER_SNAKE_CASE: `ES_INDEX`, `ES_SEARCH`
+- Elasticsearch API functions start with `ES_`: `ES_CLUSTER_HEALTH`
+- Kibana API functions start with `KIBANA_`: `KIBANA_LIST_SPACES`
+- LLM functions use `LLM_` or `INFERENCE_`: `LLM_CHAT`, `INFERENCE_EMBED`
+
+### Testing
+- Unit tests extend `ESTestCase`
+- E2E tests use Jupyter notebooks in `tests/e2e/`
+- Run tests: `./gradlew :x-pack:plugin:elastic-script:test`
+
+### Adding New Functions
+1. Create function class in appropriate `functions/builtin/` subdirectory
+2. Use `@FunctionSpec`, `@FunctionParam`, `@FunctionReturn` annotations
+3. Register in `BuiltInFunctionRegistry.java`
+4. Add tests
+
+### Adding New Skills
+1. Moltler Skills: Create in `hub/skills/{vendor}/{category}/{skill-name}/`
+2. Agent Skills: Create/update `SKILL.md` in `.agents/skills/{category}/`
+3. Run `scripts/sync-skills.sh` to update MoltlerHub
+
+## Available Agent Skills
+
+The project includes Agent Skills in `.agents/skills/` that teach AI agents how to use Moltler capabilities:
+
+- `moltler-index`: Master index of all skills (use this first)
+- `elasticsearch-ops`: Document and index operations
+- `search-query`: Search and aggregations
+- `cluster-management`: Cluster health and nodes
+- `observability`: Logs, metrics, traces
+- `security-ops`: Users, roles, API keys
+- `ml-inference`: ML and AI/LLM capabilities
+- `data-management`: ILM, snapshots, pipelines
+- `alerting-response`: Alerts and notifications
+- `integrations`: AWS, K8s, CI/CD
+
+## Quick Commands
+
+```bash
+# Start Elasticsearch with plugin
+./scripts/quick-start.sh
+
+# Run tests
+./gradlew :x-pack:plugin:elastic-script:test
+
+# Regenerate ANTLR parser
+./gradlew :elastic-script:regen
+
+# Sync skills to MoltlerHub
+./scripts/sync-skills.sh
+```

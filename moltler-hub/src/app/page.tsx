@@ -38,6 +38,7 @@ export default function Home() {
           </Link>
           <nav className="flex items-center gap-6">
             <Link href="/skills" className="hover:text-purple-400 transition">Skills</Link>
+            <Link href="/agent-skills" className="hover:text-purple-400 transition">Agent Skills</Link>
             <Link href="/packs" className="hover:text-purple-400 transition">Packs</Link>
             <Link href="/connect" className="hover:text-purple-400 transition">Connect</Link>
             <Link href="/builder" className="hover:text-purple-400 transition">Builder</Link>
@@ -249,6 +250,7 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-6 text-sm text-gray-400">
               <Link href="/skills" className="hover:text-white transition">Skills</Link>
+              <Link href="/agent-skills" className="hover:text-white transition">Agent Skills</Link>
               <Link href="/packs" className="hover:text-white transition">Packs</Link>
               <Link href="/connect" className="hover:text-white transition">Connect</Link>
               <Link href="/builder" className="hover:text-white transition">Builder</Link>

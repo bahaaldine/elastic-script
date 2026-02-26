@@ -7,28 +7,12 @@
     "author": "elastic",
     "category": "agent-builder",
     "tags": [
-      "agent-builder"
+      "agent-builder",
+      "chat",
+      "ai",
+      "converse"
     ],
-    "parameters": [
-      {
-        "name": "agent_id",
-        "type": "STRING",
-        "description": "Agent ID to chat with",
-        "required": true
-      },
-      {
-        "name": "message",
-        "type": "STRING",
-        "description": "Message to send to the agent",
-        "required": true
-      },
-      {
-        "name": "conversation_id",
-        "type": "STRING",
-        "description": "Existing conversation ID to continue (optional)",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/chat"
   },
@@ -40,40 +24,12 @@
     "author": "elastic",
     "category": "agent-builder",
     "tags": [
-      "agent-builder"
+      "agent-builder",
+      "agents",
+      "ai",
+      "create"
     ],
-    "parameters": [
-      {
-        "name": "name",
-        "type": "STRING",
-        "description": "Agent name",
-        "required": true
-      },
-      {
-        "name": "description",
-        "type": "STRING",
-        "description": "Agent description",
-        "required": true
-      },
-      {
-        "name": "instructions",
-        "type": "STRING",
-        "description": "System instructions for the agent",
-        "required": true
-      },
-      {
-        "name": "model",
-        "type": "STRING",
-        "description": "LLM model to use",
-        "required": true
-      },
-      {
-        "name": "tools",
-        "type": "ARRAY",
-        "description": "Array of tool IDs to enable",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/create-agent"
   },
@@ -85,34 +41,11 @@
     "author": "elastic",
     "category": "agent-builder",
     "tags": [
-      "agent-builder"
+      "agent-builder",
+      "tools",
+      "create"
     ],
-    "parameters": [
-      {
-        "name": "name",
-        "type": "STRING",
-        "description": "Tool name",
-        "required": true
-      },
-      {
-        "name": "description",
-        "type": "STRING",
-        "description": "Tool description for AI understanding",
-        "required": true
-      },
-      {
-        "name": "type",
-        "type": "STRING",
-        "description": "Tool type: elasticsearch, http, mcp",
-        "required": true
-      },
-      {
-        "name": "configuration",
-        "type": "STRING",
-        "description": "JSON configuration for the tool",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/create-tool"
   },
@@ -124,16 +57,11 @@
     "author": "elastic",
     "category": "agent-builder",
     "tags": [
-      "agent-builder"
+      "agent-builder",
+      "agents",
+      "delete"
     ],
-    "parameters": [
-      {
-        "name": "agent_id",
-        "type": "STRING",
-        "description": "Agent ID to delete",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/delete-agent"
   },
@@ -145,22 +73,11 @@
     "author": "elastic",
     "category": "agent-builder",
     "tags": [
-      "agent-builder"
+      "agent-builder",
+      "tools",
+      "execute"
     ],
-    "parameters": [
-      {
-        "name": "tool_id",
-        "type": "STRING",
-        "description": "Tool ID to execute",
-        "required": true
-      },
-      {
-        "name": "arguments",
-        "type": "STRING",
-        "description": "JSON arguments to pass to the tool",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/execute-tool"
   },
@@ -172,17 +89,12 @@
     "author": "elastic",
     "category": "agent-builder",
     "tags": [
-      "agent-builder"
+      "agent-builder",
+      "agents",
+      "ai"
     ],
-    "parameters": [
-      {
-        "name": "agent_id",
-        "type": "STRING",
-        "description": "Agent ID to retrieve",
-        "required": true
-      }
-    ],
-    "returns": "full",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/get-agent"
   },
   {
@@ -193,22 +105,11 @@
     "author": "elastic",
     "category": "agent-builder",
     "tags": [
-      "agent-builder"
+      "agent-builder",
+      "a2a",
+      "interop"
     ],
-    "parameters": [
-      {
-        "name": "LD",
-        "type": "DOCUMENT",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "agent_id",
-        "type": "STRING",
-        "description": "Agent ID to get A2A card for",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/get-agent-card"
   },
@@ -220,17 +121,12 @@
     "author": "elastic",
     "category": "agent-builder",
     "tags": [
-      "agent-builder"
+      "agent-builder",
+      "conversations",
+      "history"
     ],
-    "parameters": [
-      {
-        "name": "conversation_id",
-        "type": "STRING",
-        "description": "Conversation ID to retrieve",
-        "required": true
-      }
-    ],
-    "returns": "all",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/get-conversation"
   },
   {
@@ -241,17 +137,12 @@
     "author": "elastic",
     "category": "agent-builder",
     "tags": [
-      "agent-builder"
+      "agent-builder",
+      "agents",
+      "ai"
     ],
-    "parameters": [
-      {
-        "name": "space_id",
-        "type": "STRING",
-        "description": "Kibana space ID",
-        "required": true
-      }
-    ],
-    "returns": "agent",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/list-agents"
   },
   {
@@ -262,10 +153,12 @@
     "author": "elastic",
     "category": "agent-builder",
     "tags": [
-      "agent-builder"
+      "agent-builder",
+      "conversations",
+      "ai"
     ],
     "parameters": [],
-    "returns": "conversation",
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/list-conversations"
   },
   {
@@ -276,10 +169,12 @@
     "author": "elastic",
     "category": "agent-builder",
     "tags": [
-      "agent-builder"
+      "agent-builder",
+      "tools",
+      "ai"
     ],
     "parameters": [],
-    "returns": "ARRAY",
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/list-tools"
   },
   {
@@ -290,55 +185,27 @@
     "author": "elastic",
     "category": "agent-builder",
     "tags": [
-      "agent-builder"
+      "agent-builder",
+      "mcp",
+      "tools"
     ],
-    "parameters": [
-      {
-        "name": "method",
-        "type": "STRING",
-        "description": "MCP method: tools/list, tools/call, etc.",
-        "required": true
-      },
-      {
-        "name": "params",
-        "type": "STRING",
-        "description": "JSON parameters for the MCP call",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/mcp-call"
   },
   {
     "name": "ab-send-a2a-task",
-    "displayName": "Send A2a Task",
+    "displayName": "Send A2A Task",
     "description": "Send A2A task to an Agent Builder agent",
     "version": "1.0.0",
     "author": "elastic",
     "category": "agent-builder",
     "tags": [
-      "agent-builder"
+      "agent-builder",
+      "a2a",
+      "task"
     ],
-    "parameters": [
-      {
-        "name": "agent_id",
-        "type": "STRING",
-        "description": "Target agent ID",
-        "required": true
-      },
-      {
-        "name": "task",
-        "type": "STRING",
-        "description": "Task description to send",
-        "required": true
-      },
-      {
-        "name": "context",
-        "type": "STRING",
-        "description": "Additional context as JSON",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/agent-builder/send-a2a-task"
   },
@@ -350,18 +217,27 @@
     "author": "elastic",
     "category": "alerting",
     "tags": [
-      "alerting"
+      "alerting",
+      "acknowledge",
+      "response"
     ],
-    "parameters": [
-      {
-        "name": "alert_id",
-        "type": "STRING",
-        "description": "Alert ID to acknowledge",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/alerting/acknowledge-alert"
+  },
+  {
+    "name": "auto-acknowledge",
+    "displayName": "Auto Acknowledge",
+    "description": "Automatically acknowledge alerts matching specified criteria.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "alerting",
+    "tags": [
+      "alerting"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/alerting/auto-acknowledge"
   },
   {
     "name": "create-threshold-rule",
@@ -371,18 +247,41 @@
     "author": "elastic",
     "category": "alerting",
     "tags": [
-      "alerting"
+      "alerting",
+      "rules",
+      "threshold"
     ],
-    "parameters": [
-      {
-        "name": "name",
-        "type": "STRING",
-        "description": "Rule name",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/alerting/create-threshold-rule"
+  },
+  {
+    "name": "dedupe-alerts",
+    "displayName": "Dedupe Alerts",
+    "description": "Deduplicate similar alerts to reduce noise and alert fatigue.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "alerting",
+    "tags": [
+      "alerting"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/alerting/dedupe-alerts"
+  },
+  {
+    "name": "escalate-alert",
+    "displayName": "Escalate Alert",
+    "description": "Escalate an alert to the next tier based on escalation policies.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "alerting",
+    "tags": [
+      "alerting"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/alerting/escalate-alert"
   },
   {
     "name": "get-active-alerts",
@@ -392,17 +291,12 @@
     "author": "elastic",
     "category": "alerting",
     "tags": [
-      "alerting"
+      "alerting",
+      "active",
+      "incidents"
     ],
-    "parameters": [
-      {
-        "name": "severity",
-        "type": "STRING",
-        "description": "Filter by severity: critical, high, medium, low",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/alerting/get-active-alerts"
   },
   {
@@ -413,17 +307,12 @@
     "author": "elastic",
     "category": "alerting",
     "tags": [
-      "alerting"
+      "alerting",
+      "history",
+      "analysis"
     ],
-    "parameters": [
-      {
-        "name": "rule_id",
-        "type": "STRING",
-        "description": "Filter by rule ID",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/alerting/get-alert-history"
   },
   {
@@ -434,17 +323,12 @@
     "author": "elastic",
     "category": "alerting",
     "tags": [
-      "alerting"
+      "alerting",
+      "rules",
+      "monitoring"
     ],
-    "parameters": [
-      {
-        "name": "enabled",
-        "type": "STRING",
-        "description": "Filter: true, false, or null for all",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/alerting/list-alert-rules"
   },
   {
@@ -455,17 +339,12 @@
     "author": "elastic",
     "category": "alerting",
     "tags": [
-      "alerting"
+      "alerting",
+      "connectors",
+      "integrations"
     ],
-    "parameters": [
-      {
-        "name": "type",
-        "type": "STRING",
-        "description": "Filter by connector type",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/alerting/list-connectors"
   },
   {
@@ -476,18 +355,41 @@
     "author": "elastic",
     "category": "alerting",
     "tags": [
-      "alerting"
+      "alerting",
+      "mute",
+      "management"
     ],
-    "parameters": [
-      {
-        "name": "alert_id",
-        "type": "STRING",
-        "description": "Alert ID to mute",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/alerting/mute-alert"
+  },
+  {
+    "name": "notify-oncall",
+    "displayName": "Notify Oncall",
+    "description": "Send notifications to on-call engineers via PagerDuty, Slack, or other configured channels.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "alerting",
+    "tags": [
+      "alerting"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/alerting/notify-oncall"
+  },
+  {
+    "name": "route-to-team",
+    "displayName": "Route To Team",
+    "description": "Route alerts to the appropriate team based on service ownership.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "alerting",
+    "tags": [
+      "alerting"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/alerting/route-to-team"
   },
   {
     "name": "test-connector",
@@ -497,18 +399,27 @@
     "author": "elastic",
     "category": "alerting",
     "tags": [
-      "alerting"
+      "alerting",
+      "connectors",
+      "testing"
     ],
-    "parameters": [
-      {
-        "name": "connector_id",
-        "type": "STRING",
-        "description": "Connector ID to test",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/alerting/test-connector"
+  },
+  {
+    "name": "trigger-runbook",
+    "displayName": "Trigger Runbook",
+    "description": "Automatically trigger a runbook in response to an alert.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "alerting",
+    "tags": [
+      "alerting"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/alerting/trigger-runbook"
   },
   {
     "name": "analyze-database-queries",
@@ -518,18 +429,41 @@
     "author": "elastic",
     "category": "apm",
     "tags": [
+      "apm",
+      "database",
+      "performance"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/analyze-database-queries"
+  },
+  {
+    "name": "compare-deployments",
+    "displayName": "Compare Deployments",
+    "description": "Compare performance metrics between two deployments or versions.",
+    "version": "1.0.0",
+    "author": "apm-team",
+    "category": "apm",
+    "tags": [
       "apm"
     ],
-    "parameters": [
-      {
-        "name": "threshold_ms",
-        "type": "INT",
-        "description": "Minimum query duration in ms",
-        "required": true
-      }
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/apm/compare-deployments"
+  },
+  {
+    "name": "detect-performance-regression",
+    "displayName": "Detect Performance Regression",
+    "description": "Detect performance regressions by comparing current metrics to baseline.",
+    "version": "1.0.0",
+    "author": "apm-team",
+    "category": "apm",
+    "tags": [
+      "apm"
     ],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/analyze-database-queries"
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/apm/detect-performance-regression"
   },
   {
     "name": "get-error-groups",
@@ -539,17 +473,12 @@
     "author": "elastic",
     "category": "apm",
     "tags": [
-      "apm"
+      "apm",
+      "errors",
+      "analysis"
     ],
-    "parameters": [
-      {
-        "name": "service",
-        "type": "STRING",
-        "description": "Service name to analyze",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-error-groups"
   },
   {
@@ -560,17 +489,12 @@
     "author": "elastic",
     "category": "apm",
     "tags": [
-      "apm"
+      "apm",
+      "errors",
+      "transactions"
     ],
-    "parameters": [
-      {
-        "name": "service",
-        "type": "STRING",
-        "description": "Service name",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-failed-transactions"
   },
   {
@@ -581,17 +505,12 @@
     "author": "elastic",
     "category": "apm",
     "tags": [
-      "apm"
+      "apm",
+      "latency",
+      "percentiles"
     ],
-    "parameters": [
-      {
-        "name": "service",
-        "type": "STRING",
-        "description": "Service name to analyze",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-latency-percentiles"
   },
   {
@@ -602,16 +521,11 @@
     "author": "elastic",
     "category": "apm",
     "tags": [
-      "apm"
+      "apm",
+      "dependencies",
+      "topology"
     ],
-    "parameters": [
-      {
-        "name": "service",
-        "type": "STRING",
-        "description": "Service name to analyze",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-service-dependencies"
   },
@@ -623,18 +537,27 @@
     "author": "elastic",
     "category": "apm",
     "tags": [
-      "apm"
+      "apm",
+      "health",
+      "services"
     ],
-    "parameters": [
-      {
-        "name": "service",
-        "type": "STRING",
-        "description": "Service name to check",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-service-health"
+  },
+  {
+    "name": "get-service-latency",
+    "displayName": "Get Service Latency",
+    "description": "Get service latency metrics including p50, p95, and p99 percentiles.",
+    "version": "1.0.0",
+    "author": "apm-team",
+    "category": "apm",
+    "tags": [
+      "apm"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/apm/get-service-latency"
   },
   {
     "name": "get-service-map",
@@ -644,10 +567,12 @@
     "author": "elastic",
     "category": "apm",
     "tags": [
-      "apm"
+      "apm",
+      "servicemap",
+      "topology"
     ],
     "parameters": [],
-    "returns": "ARRAY",
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-service-map"
   },
   {
@@ -658,17 +583,12 @@
     "author": "elastic",
     "category": "apm",
     "tags": [
-      "apm"
+      "apm",
+      "latency",
+      "performance"
     ],
-    "parameters": [
-      {
-        "name": "service",
-        "type": "STRING",
-        "description": "Service name (optional)",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-slow-transactions"
   },
   {
@@ -679,18 +599,27 @@
     "author": "elastic",
     "category": "apm",
     "tags": [
+      "apm",
+      "throughput",
+      "metrics"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-throughput"
+  },
+  {
+    "name": "get-throughput-stats",
+    "displayName": "Get Throughput Stats",
+    "description": "Get service throughput statistics including requests per minute.",
+    "version": "1.0.0",
+    "author": "apm-team",
+    "category": "apm",
+    "tags": [
       "apm"
     ],
-    "parameters": [
-      {
-        "name": "service",
-        "type": "STRING",
-        "description": "Service name",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-throughput"
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/apm/get-throughput-stats"
   },
   {
     "name": "get-trace",
@@ -700,17 +629,12 @@
     "author": "elastic",
     "category": "apm",
     "tags": [
-      "apm"
+      "apm",
+      "traces",
+      "distributed"
     ],
-    "parameters": [
-      {
-        "name": "trace_id",
-        "type": "STRING",
-        "description": "Trace ID to retrieve",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/get-trace"
   },
   {
@@ -721,17 +645,12 @@
     "author": "elastic",
     "category": "apm",
     "tags": [
-      "apm"
+      "apm",
+      "services",
+      "observability"
     ],
-    "parameters": [
-      {
-        "name": "environment",
-        "type": "STRING",
-        "description": "Filter by environment",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/apm/list-services"
   },
   {
@@ -742,7 +661,11 @@
     "author": "elastic",
     "category": "cluster",
     "tags": [
-      "cluster"
+      "cluster",
+      "analysis",
+      "health",
+      "getting-started",
+      "recommendations"
     ],
     "parameters": [],
     "returns": "DOCUMENT",
@@ -756,16 +679,11 @@
     "author": "elastic",
     "category": "cluster",
     "tags": [
-      "cluster"
+      "cluster",
+      "allocation",
+      "debugging"
     ],
-    "parameters": [
-      {
-        "name": "index",
-        "type": "STRING",
-        "description": "Index name",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/explain-allocation"
   },
@@ -777,7 +695,9 @@
     "author": "elastic",
     "category": "cluster",
     "tags": [
-      "cluster"
+      "cluster",
+      "health",
+      "status"
     ],
     "parameters": [],
     "returns": "DOCUMENT",
@@ -791,16 +711,11 @@
     "author": "elastic",
     "category": "cluster",
     "tags": [
-      "cluster"
+      "cluster",
+      "debugging",
+      "performance"
     ],
-    "parameters": [
-      {
-        "name": "node",
-        "type": "STRING",
-        "description": "Node name or _all",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/get-hot-threads"
   },
@@ -812,16 +727,11 @@
     "author": "elastic",
     "category": "cluster",
     "tags": [
-      "cluster"
+      "cluster",
+      "nodes",
+      "stats"
     ],
-    "parameters": [
-      {
-        "name": "node_name",
-        "type": "STRING",
-        "description": "Node name to get stats for",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/get-node-stats"
   },
@@ -833,10 +743,12 @@
     "author": "elastic",
     "category": "cluster",
     "tags": [
-      "cluster"
+      "cluster",
+      "tasks",
+      "operations"
     ],
     "parameters": [],
-    "returns": "ARRAY",
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/get-pending-tasks"
   },
   {
@@ -847,17 +759,12 @@
     "author": "elastic",
     "category": "cluster",
     "tags": [
-      "cluster"
+      "cluster",
+      "shards",
+      "allocation"
     ],
-    "parameters": [
-      {
-        "name": "index",
-        "type": "STRING",
-        "description": "Index to check allocation for",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/get-shard-allocation"
   },
   {
@@ -868,10 +775,12 @@
     "author": "elastic",
     "category": "cluster",
     "tags": [
-      "cluster"
+      "cluster",
+      "shards",
+      "troubleshooting"
     ],
     "parameters": [],
-    "returns": "ARRAY",
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/get-unassigned-shards"
   },
   {
@@ -882,17 +791,12 @@
     "author": "elastic",
     "category": "cluster",
     "tags": [
-      "cluster"
+      "cluster",
+      "nodes",
+      "infrastructure"
     ],
-    "parameters": [
-      {
-        "name": "role",
-        "type": "STRING",
-        "description": "Filter by role: master, data, ingest",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/list-nodes"
   },
   {
@@ -903,10 +807,12 @@
     "author": "elastic",
     "category": "cluster",
     "tags": [
-      "cluster"
+      "cluster",
+      "tasks",
+      "operations"
     ],
     "parameters": [],
-    "returns": "ARRAY",
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/list-running-tasks"
   },
   {
@@ -917,18 +823,27 @@
     "author": "elastic",
     "category": "cluster",
     "tags": [
+      "cluster",
+      "snapshots",
+      "backup"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/list-snapshots"
+  },
+  {
+    "name": "validate-schema",
+    "displayName": "Validate Schema",
+    "description": "Validate document schema against expected mappings.",
+    "version": "1.0.0",
+    "author": "data-team",
+    "category": "cluster",
+    "tags": [
       "cluster"
     ],
-    "parameters": [
-      {
-        "name": "repository",
-        "type": "STRING",
-        "description": "Repository name",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/cluster/list-snapshots"
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/cluster/validate-schema"
   },
   {
     "name": "cluster_health_check",
@@ -938,17 +853,12 @@
     "author": "Moltler",
     "category": "elasticsearch-api",
     "tags": [
-      "cluster"
+      "cluster",
+      "health",
+      "monitoring",
+      "ops"
     ],
-    "parameters": [
-      {
-        "name": "IN",
-        "type": "STRING",
-        "default": "NULL",
-        "description": "",
-        "required": false
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/elasticsearch-api/cluster-health-check"
   },
@@ -960,113 +870,59 @@
     "author": "Moltler",
     "category": "elasticsearch-api",
     "tags": [
-      "snapshot"
+      "snapshot",
+      "backup",
+      "disaster-recovery"
     ],
-    "parameters": [
-      {
-        "name": "IN",
-        "type": "STRING",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "IN",
-        "type": "STRING",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "IN",
-        "type": "STRING",
-        "default": "*",
-        "description": "",
-        "required": false
-      },
-      {
-        "name": "IN",
-        "type": "BOOLEAN",
-        "default": "true",
-        "description": "",
-        "required": false
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/elasticsearch-api/create-snapshot-backup"
   },
   {
     "name": "ilm_explain_status",
-    "displayName": "Ilm Explain Status",
+    "displayName": "ILM Explain Status",
     "description": "Explain Index Lifecycle Management status for indices",
     "version": "1.0.0",
     "author": "Moltler",
     "category": "elasticsearch-api",
     "tags": [
-      "ilm"
+      "ilm",
+      "lifecycle",
+      "monitoring"
     ],
-    "parameters": [
-      {
-        "name": "IN",
-        "type": "STRING",
-        "description": "",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/elasticsearch-api/ilm-explain-status"
   },
   {
     "name": "ml_job_status",
-    "displayName": "Ml Job Status",
+    "displayName": "ML Job Status",
     "description": "Get ML anomaly detection job status and statistics",
     "version": "1.0.0",
     "author": "Moltler",
     "category": "elasticsearch-api",
     "tags": [
-      "ml"
+      "ml",
+      "anomaly-detection",
+      "monitoring"
     ],
-    "parameters": [
-      {
-        "name": "IN",
-        "type": "STRING",
-        "default": "*",
-        "description": "",
-        "required": false
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/elasticsearch-api/ml-job-status"
   },
   {
     "name": "reindex_with_transform",
-    "displayName": "Reindex With Transform",
+    "displayName": "Reindex with Transform",
     "description": "Reindex data from source to destination index with optional filtering",
     "version": "1.0.0",
     "author": "Moltler",
     "category": "elasticsearch-api",
     "tags": [
-      "reindex"
+      "reindex",
+      "migration",
+      "data-management"
     ],
-    "parameters": [
-      {
-        "name": "IN",
-        "type": "STRING",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "IN",
-        "type": "STRING",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "IN",
-        "type": "STRING",
-        "default": "*",
-        "description": "",
-        "required": false
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/elasticsearch-api/reindex-with-transform"
   },
@@ -1078,17 +934,12 @@
     "author": "elastic",
     "category": "enterprise-search",
     "tags": [
-      "enterprise-search"
+      "enterprise-search",
+      "queries",
+      "improvements"
     ],
-    "parameters": [
-      {
-        "name": "app_name",
-        "type": "STRING",
-        "description": "Application name",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/enterprise-search/get-no-results-queries"
   },
   {
@@ -1099,16 +950,11 @@
     "author": "elastic",
     "category": "enterprise-search",
     "tags": [
-      "enterprise-search"
+      "enterprise-search",
+      "analytics",
+      "metrics"
     ],
-    "parameters": [
-      {
-        "name": "app_name",
-        "type": "STRING",
-        "description": "Application name",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/enterprise-search/get-search-analytics"
   },
@@ -1120,17 +966,12 @@
     "author": "elastic",
     "category": "enterprise-search",
     "tags": [
-      "enterprise-search"
+      "enterprise-search",
+      "queries",
+      "analytics"
     ],
-    "parameters": [
-      {
-        "name": "app_name",
-        "type": "STRING",
-        "description": "Application name",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/enterprise-search/get-top-queries"
   },
   {
@@ -1141,10 +982,12 @@
     "author": "elastic",
     "category": "enterprise-search",
     "tags": [
-      "enterprise-search"
+      "enterprise-search",
+      "apps",
+      "search"
     ],
     "parameters": [],
-    "returns": "ARRAY",
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/enterprise-search/list-search-apps"
   },
   {
@@ -1155,22 +998,14 @@
     "author": "moltler",
     "category": "first-class-commands",
     "tags": [
-      "elasticsearch"
+      "elasticsearch",
+      "create",
+      "index",
+      "first-class",
+      "command",
+      "mappings"
     ],
-    "parameters": [
-      {
-        "name": "index_name",
-        "type": "STRING",
-        "description": "Name for the new index",
-        "required": true
-      },
-      {
-        "name": "mappings",
-        "type": "DOCUMENT",
-        "description": "Index mappings definition",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/first-class-commands/create-index"
   },
@@ -1182,22 +1017,13 @@
     "author": "moltler",
     "category": "first-class-commands",
     "tags": [
-      "elasticsearch"
+      "elasticsearch",
+      "delete",
+      "first-class",
+      "command",
+      "document"
     ],
-    "parameters": [
-      {
-        "name": "index_name",
-        "type": "STRING",
-        "description": "Index containing the document",
-        "required": true
-      },
-      {
-        "name": "doc_id",
-        "type": "STRING",
-        "description": "Document ID to delete",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/first-class-commands/delete-document"
   },
@@ -1209,22 +1035,13 @@
     "author": "moltler",
     "category": "first-class-commands",
     "tags": [
-      "elasticsearch"
+      "elasticsearch",
+      "index",
+      "first-class",
+      "command",
+      "document"
     ],
-    "parameters": [
-      {
-        "name": "index_name",
-        "type": "STRING",
-        "description": "Target index name",
-        "required": true
-      },
-      {
-        "name": "document",
-        "type": "DOCUMENT",
-        "description": "Document to index",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/first-class-commands/index-document"
   },
@@ -1236,16 +1053,13 @@
     "author": "moltler",
     "category": "first-class-commands",
     "tags": [
-      "elasticsearch"
+      "elasticsearch",
+      "refresh",
+      "first-class",
+      "command",
+      "index"
     ],
-    "parameters": [
-      {
-        "name": "index_name",
-        "type": "STRING",
-        "description": "Index name or pattern to refresh",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/first-class-commands/refresh-index"
   },
@@ -1257,23 +1071,14 @@
     "author": "moltler",
     "category": "first-class-commands",
     "tags": [
-      "elasticsearch"
+      "elasticsearch",
+      "search",
+      "first-class",
+      "command",
+      "query"
     ],
-    "parameters": [
-      {
-        "name": "index_name",
-        "type": "STRING",
-        "description": "Index pattern to search",
-        "required": true
-      },
-      {
-        "name": "query",
-        "type": "DOCUMENT",
-        "description": "Elasticsearch Query DSL document",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/first-class-commands/search-documents"
   },
   {
@@ -1284,17 +1089,12 @@
     "author": "elastic",
     "category": "fleet",
     "tags": [
-      "fleet"
+      "fleet",
+      "agents",
+      "logs"
     ],
-    "parameters": [
-      {
-        "name": "agent_id",
-        "type": "STRING",
-        "description": "Agent ID",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/fleet/get-agent-logs"
   },
   {
@@ -1305,16 +1105,11 @@
     "author": "elastic",
     "category": "fleet",
     "tags": [
-      "fleet"
+      "fleet",
+      "agents",
+      "health"
     ],
-    "parameters": [
-      {
-        "name": "agent_id",
-        "type": "STRING",
-        "description": "Agent ID to check",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/fleet/get-agent-status"
   },
@@ -1326,10 +1121,12 @@
     "author": "elastic",
     "category": "fleet",
     "tags": [
-      "fleet"
+      "fleet",
+      "enrollment",
+      "onboarding"
     ],
     "parameters": [],
-    "returns": "ARRAY",
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/fleet/get-enrollment-tokens"
   },
   {
@@ -1340,10 +1137,12 @@
     "author": "elastic",
     "category": "fleet",
     "tags": [
-      "fleet"
+      "fleet",
+      "policies",
+      "management"
     ],
     "parameters": [],
-    "returns": "ARRAY",
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/fleet/list-agent-policies"
   },
   {
@@ -1354,17 +1153,12 @@
     "author": "elastic",
     "category": "fleet",
     "tags": [
-      "fleet"
+      "fleet",
+      "agents",
+      "management"
     ],
-    "parameters": [
-      {
-        "name": "status",
-        "type": "STRING",
-        "description": "Filter by status: online, offline, updating",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/fleet/list-agents"
   },
   {
@@ -1375,17 +1169,12 @@
     "author": "elastic",
     "category": "fleet",
     "tags": [
-      "fleet"
+      "fleet",
+      "integrations",
+      "packages"
     ],
-    "parameters": [
-      {
-        "name": "category",
-        "type": "STRING",
-        "description": "Filter by category",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/fleet/list-integrations"
   },
   {
@@ -1396,16 +1185,11 @@
     "author": "elastic",
     "category": "integrations",
     "tags": [
-      "integrations"
+      "integrations",
+      "jira",
+      "ticketing"
     ],
-    "parameters": [
-      {
-        "name": "project",
-        "type": "STRING",
-        "description": "Jira project key",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/create-jira-issue"
   },
@@ -1417,16 +1201,11 @@
     "author": "elastic",
     "category": "integrations",
     "tags": [
-      "integrations"
+      "integrations",
+      "servicenow",
+      "incidents"
     ],
-    "parameters": [
-      {
-        "name": "short_description",
-        "type": "STRING",
-        "description": "Incident title",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/create-servicenow-incident"
   },
@@ -1438,16 +1217,11 @@
     "author": "elastic",
     "category": "integrations",
     "tags": [
-      "integrations"
+      "integrations",
+      "aws",
+      "lambda"
     ],
-    "parameters": [
-      {
-        "name": "function_name",
-        "type": "STRING",
-        "description": "Lambda function name",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/invoke-aws-lambda"
   },
@@ -1459,16 +1233,11 @@
     "author": "elastic",
     "category": "integrations",
     "tags": [
-      "integrations"
+      "integrations",
+      "email",
+      "notifications"
     ],
-    "parameters": [
-      {
-        "name": "to",
-        "type": "STRING",
-        "description": "Recipient email address",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/send-email"
   },
@@ -1480,16 +1249,11 @@
     "author": "elastic",
     "category": "integrations",
     "tags": [
-      "integrations"
+      "integrations",
+      "opsgenie",
+      "alerts"
     ],
-    "parameters": [
-      {
-        "name": "message",
-        "type": "STRING",
-        "description": "Alert message",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/send-opsgenie-alert"
   },
@@ -1501,16 +1265,11 @@
     "author": "elastic",
     "category": "integrations",
     "tags": [
-      "integrations"
+      "integrations",
+      "slack",
+      "notifications"
     ],
-    "parameters": [
-      {
-        "name": "channel",
-        "type": "STRING",
-        "description": "Slack channel name or ID",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/send-slack-message"
   },
@@ -1522,16 +1281,11 @@
     "author": "elastic",
     "category": "integrations",
     "tags": [
-      "integrations"
+      "integrations",
+      "teams",
+      "notifications"
     ],
-    "parameters": [
-      {
-        "name": "webhook_url",
-        "type": "STRING",
-        "description": "Teams webhook URL",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/send-teams-message"
   },
@@ -1543,16 +1297,11 @@
     "author": "elastic",
     "category": "integrations",
     "tags": [
-      "integrations"
+      "integrations",
+      "webhook",
+      "automation"
     ],
-    "parameters": [
-      {
-        "name": "url",
-        "type": "STRING",
-        "description": "Webhook URL",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/send-webhook"
   },
@@ -1564,16 +1313,11 @@
     "author": "elastic",
     "category": "integrations",
     "tags": [
-      "integrations"
+      "integrations",
+      "github",
+      "automation"
     ],
-    "parameters": [
-      {
-        "name": "repo",
-        "type": "STRING",
-        "description": "Repository owner/name",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/trigger-github-workflow"
   },
@@ -1585,214 +1329,13 @@
     "author": "elastic",
     "category": "integrations",
     "tags": [
-      "integrations"
+      "integrations",
+      "pagerduty",
+      "incidents"
     ],
-    "parameters": [
-      {
-        "name": "service_key",
-        "type": "STRING",
-        "description": "PagerDuty service key",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/integrations/trigger-pagerduty"
-  },
-  {
-    "name": "alerting",
-    "displayName": "Alerting",
-    "description": "Alerting skill for kibana",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "kibana",
-    "tags": [
-      "kibana"
-    ],
-    "parameters": [],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/alerting"
-  },
-  {
-    "name": "apm",
-    "displayName": "Apm",
-    "description": "Apm skill for kibana",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "kibana",
-    "tags": [
-      "kibana"
-    ],
-    "parameters": [],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/apm"
-  },
-  {
-    "name": "cases",
-    "displayName": "Cases",
-    "description": "Cases skill for kibana",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "kibana",
-    "tags": [
-      "kibana"
-    ],
-    "parameters": [],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/cases"
-  },
-  {
-    "name": "connectors",
-    "displayName": "Connectors",
-    "description": "Connectors skill for kibana",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "kibana",
-    "tags": [
-      "kibana"
-    ],
-    "parameters": [],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/connectors"
-  },
-  {
-    "name": "dashboards",
-    "displayName": "Dashboards",
-    "description": "Dashboards skill for kibana",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "kibana",
-    "tags": [
-      "kibana"
-    ],
-    "parameters": [],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/dashboards"
-  },
-  {
-    "name": "data-views",
-    "displayName": "Data Views",
-    "description": "Data Views skill for kibana",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "kibana",
-    "tags": [
-      "kibana"
-    ],
-    "parameters": [],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/data-views"
-  },
-  {
-    "name": "detections",
-    "displayName": "Detections",
-    "description": "Detections skill for kibana",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "kibana",
-    "tags": [
-      "kibana"
-    ],
-    "parameters": [],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/detections"
-  },
-  {
-    "name": "entity-store",
-    "displayName": "Entity Store",
-    "description": "Entity Store skill for kibana",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "kibana",
-    "tags": [
-      "kibana"
-    ],
-    "parameters": [],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/entity-store"
-  },
-  {
-    "name": "fleet",
-    "displayName": "Fleet",
-    "description": "Fleet skill for kibana",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "kibana",
-    "tags": [
-      "kibana"
-    ],
-    "parameters": [],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/fleet"
-  },
-  {
-    "name": "ml",
-    "displayName": "Ml",
-    "description": "Ml skill for kibana",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "kibana",
-    "tags": [
-      "kibana"
-    ],
-    "parameters": [],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/ml"
-  },
-  {
-    "name": "saved-objects",
-    "displayName": "Saved Objects",
-    "description": "Saved Objects skill for kibana",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "kibana",
-    "tags": [
-      "kibana"
-    ],
-    "parameters": [],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/saved-objects"
-  },
-  {
-    "name": "slo",
-    "displayName": "Slo",
-    "description": "Slo skill for kibana",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "kibana",
-    "tags": [
-      "kibana"
-    ],
-    "parameters": [],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/slo"
-  },
-  {
-    "name": "spaces",
-    "displayName": "Spaces",
-    "description": "Spaces skill for kibana",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "kibana",
-    "tags": [
-      "kibana"
-    ],
-    "parameters": [],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/spaces"
-  },
-  {
-    "name": "synthetics",
-    "displayName": "Synthetics",
-    "description": "Synthetics skill for kibana",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "kibana",
-    "tags": [
-      "kibana"
-    ],
-    "parameters": [],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/kibana/synthetics"
   },
   {
     "name": "explain-skill",
@@ -1802,16 +1345,11 @@
     "author": "elastic",
     "category": "meta",
     "tags": [
-      "discovery"
+      "discovery",
+      "documentation",
+      "help"
     ],
-    "parameters": [
-      {
-        "name": "skill_name",
-        "type": "STRING",
-        "description": "Name of the skill to explain (e.g., count_logs_by_level)",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/meta/explain-skill"
   },
@@ -1823,28 +1361,13 @@
     "author": "elastic",
     "category": "meta",
     "tags": [
-      "meta"
+      "meta",
+      "ai",
+      "generation",
+      "inference",
+      "nlp"
     ],
-    "parameters": [
-      {
-        "name": "description",
-        "type": "STRING",
-        "description": "Natural language description of what you want the skill to do",
-        "required": true
-      },
-      {
-        "name": "skill_name",
-        "type": "STRING",
-        "description": "Name for the generated skill (auto-generated if not provided)",
-        "required": true
-      },
-      {
-        "name": "model_id",
-        "type": "STRING",
-        "description": "Inference endpoint to use",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/meta/generate-skill"
   },
@@ -1856,17 +1379,12 @@
     "author": "elastic",
     "category": "meta",
     "tags": [
-      "discovery"
+      "discovery",
+      "navigation",
+      "help"
     ],
-    "parameters": [
-      {
-        "name": "skill_name",
-        "type": "STRING",
-        "description": "Name of the skill to find related skills for",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/meta/get-related-skills"
   },
   {
@@ -1877,23 +1395,12 @@
     "author": "elastic",
     "category": "meta",
     "tags": [
-      "discovery"
+      "discovery",
+      "navigation",
+      "help"
     ],
-    "parameters": [
-      {
-        "name": "category",
-        "type": "STRING",
-        "description": "Filter by category: meta, observability, search, security, ml, management. Leave empty for all categories.",
-        "required": true
-      },
-      {
-        "name": "include_details",
-        "type": "BOOLEAN",
-        "description": "Include parameter details for each skill",
-        "required": true
-      }
-    ],
-    "returns": "a",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/meta/list-all-skills"
   },
   {
@@ -1904,17 +1411,12 @@
     "author": "elastic",
     "category": "meta",
     "tags": [
-      "discovery"
+      "discovery",
+      "recommendations",
+      "ai"
     ],
-    "parameters": [
-      {
-        "name": "goal",
-        "type": "STRING",
-        "description": "Describe your goal or what you are investigating (e.g., investigate production incident, analyze user behavior)",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/meta/recommend-skills"
   },
   {
@@ -1925,17 +1427,12 @@
     "author": "elastic",
     "category": "meta",
     "tags": [
-      "discovery"
+      "discovery",
+      "search",
+      "help"
     ],
-    "parameters": [
-      {
-        "name": "query",
-        "type": "STRING",
-        "description": "Search query - describe what you want to do (e.g., analyze logs, check security)",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/meta/search-skills"
   },
   {
@@ -1946,17 +1443,12 @@
     "author": "elastic",
     "category": "meta",
     "tags": [
-      "meta"
+      "meta",
+      "validation",
+      "development"
     ],
-    "parameters": [
-      {
-        "name": "skill_code",
-        "type": "STRING",
-        "description": "The complete skill code to validate (CREATE SKILL ... END SKILL)",
-        "required": true
-      }
-    ],
-    "returns": "detailed",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/meta/validate-syntax"
   },
   {
@@ -1967,7 +1459,10 @@
     "author": "elastic",
     "category": "meta",
     "tags": [
-      "meta"
+      "meta",
+      "discovery",
+      "getting-started",
+      "recommendations"
     ],
     "parameters": [],
     "returns": "DOCUMENT",
@@ -1981,17 +1476,12 @@
     "author": "elastic",
     "category": "metrics",
     "tags": [
-      "metrics"
+      "metrics",
+      "containers",
+      "kubernetes"
     ],
-    "parameters": [
-      {
-        "name": "container_id",
-        "type": "STRING",
-        "description": "Container ID or name",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/metrics/get-container-metrics"
   },
   {
@@ -2002,17 +1492,12 @@
     "author": "elastic",
     "category": "metrics",
     "tags": [
-      "metrics"
+      "metrics",
+      "disk",
+      "storage"
     ],
-    "parameters": [
-      {
-        "name": "hostname",
-        "type": "STRING",
-        "description": "Host name (optional)",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/metrics/get-disk-usage"
   },
   {
@@ -2023,17 +1508,12 @@
     "author": "elastic",
     "category": "metrics",
     "tags": [
-      "metrics"
+      "metrics",
+      "hosts",
+      "resources"
     ],
-    "parameters": [
-      {
-        "name": "hostname",
-        "type": "STRING",
-        "description": "Host name to check",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/metrics/get-host-metrics"
   },
   {
@@ -2044,17 +1524,12 @@
     "author": "elastic",
     "category": "metrics",
     "tags": [
-      "metrics"
+      "metrics",
+      "memory",
+      "alerts"
     ],
-    "parameters": [
-      {
-        "name": "threshold",
-        "type": "INT",
-        "description": "Memory usage threshold percent",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/metrics/get-memory-pressure"
   },
   {
@@ -2065,17 +1540,12 @@
     "author": "elastic",
     "category": "metrics",
     "tags": [
-      "metrics"
+      "metrics",
+      "network",
+      "throughput"
     ],
-    "parameters": [
-      {
-        "name": "hostname",
-        "type": "STRING",
-        "description": "Host name (optional)",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/metrics/get-network-metrics"
   },
   {
@@ -2086,17 +1556,12 @@
     "author": "elastic",
     "category": "metrics",
     "tags": [
-      "metrics"
+      "metrics",
+      "hosts",
+      "infrastructure"
     ],
-    "parameters": [
-      {
-        "name": "status",
-        "type": "STRING",
-        "description": "Filter by status",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/metrics/list-hosts"
   },
   {
@@ -2107,18 +1572,27 @@
     "author": "elastic",
     "category": "ml",
     "tags": [
-      "ml"
+      "ml",
+      "classification",
+      "nlp"
     ],
-    "parameters": [
-      {
-        "name": "text",
-        "type": "STRING",
-        "description": "Text to classify",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/classify-text"
+  },
+  {
+    "name": "detect-anomalies",
+    "displayName": "Detect Anomalies",
+    "description": "Detect anomalies in time-series data using statistical methods.",
+    "version": "1.0.0",
+    "author": "ml-team",
+    "category": "ml",
+    "tags": [
+      "ml"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/ml/detect-anomalies"
   },
   {
     "name": "detect-anomalies-realtime",
@@ -2128,17 +1602,12 @@
     "author": "elastic",
     "category": "ml",
     "tags": [
-      "ml"
+      "ml",
+      "anomaly",
+      "realtime"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index to analyze",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/detect-anomalies-realtime"
   },
   {
@@ -2149,16 +1618,11 @@
     "author": "elastic",
     "category": "ml",
     "tags": [
-      "ml"
+      "ml",
+      "embeddings",
+      "semantic"
     ],
-    "parameters": [
-      {
-        "name": "text",
-        "type": "STRING",
-        "description": "Text to generate embeddings for",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/embed-text"
   },
@@ -2170,16 +1634,11 @@
     "author": "elastic",
     "category": "ml",
     "tags": [
-      "ml"
+      "ml",
+      "anomaly",
+      "explanation"
     ],
-    "parameters": [
-      {
-        "name": "job_id",
-        "type": "STRING",
-        "description": "ML job ID",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/explain-anomaly"
   },
@@ -2191,18 +1650,27 @@
     "author": "elastic",
     "category": "ml",
     "tags": [
-      "ml"
+      "ml",
+      "ner",
+      "nlp"
     ],
-    "parameters": [
-      {
-        "name": "text",
-        "type": "STRING",
-        "description": "Text to extract entities from",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/extract-entities"
+  },
+  {
+    "name": "generate-embeddings",
+    "displayName": "Generate Embeddings",
+    "description": "Generate text embeddings using Elasticsearch inference API.",
+    "version": "1.0.0",
+    "author": "ml-team",
+    "category": "ml",
+    "tags": [
+      "ml"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/ml/generate-embeddings"
   },
   {
     "name": "get-anomalies",
@@ -2212,17 +1680,12 @@
     "author": "elastic",
     "category": "ml",
     "tags": [
-      "ml"
+      "ml",
+      "anomaly",
+      "detection"
     ],
-    "parameters": [
-      {
-        "name": "job_id",
-        "type": "STRING",
-        "description": "ML job ID to get anomalies for",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/get-anomalies"
   },
   {
@@ -2233,17 +1696,12 @@
     "author": "elastic",
     "category": "ml",
     "tags": [
-      "ml"
+      "ml",
+      "anomaly",
+      "influencers"
     ],
-    "parameters": [
-      {
-        "name": "job_id",
-        "type": "STRING",
-        "description": "ML job ID",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/get-influencers"
   },
   {
@@ -2254,16 +1712,11 @@
     "author": "elastic",
     "category": "ml",
     "tags": [
-      "ml"
+      "ml",
+      "jobs",
+      "status"
     ],
-    "parameters": [
-      {
-        "name": "job_id",
-        "type": "STRING",
-        "description": "ML job ID",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/get-job-status"
   },
@@ -2275,17 +1728,12 @@
     "author": "elastic",
     "category": "ml",
     "tags": [
-      "ml"
+      "ml",
+      "anomaly",
+      "jobs"
     ],
-    "parameters": [
-      {
-        "name": "status",
-        "type": "STRING",
-        "description": "Filter by status: started, stopped, closed",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/list-ml-jobs"
   },
   {
@@ -2296,17 +1744,12 @@
     "author": "elastic",
     "category": "ml",
     "tags": [
-      "ml"
+      "ml",
+      "models",
+      "inference"
     ],
-    "parameters": [
-      {
-        "name": "type",
-        "type": "STRING",
-        "description": "Filter by model type",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/list-trained-models"
   },
   {
@@ -2317,18 +1760,41 @@
     "author": "elastic",
     "category": "ml",
     "tags": [
-      "ml"
+      "ml",
+      "inference",
+      "nlp"
     ],
-    "parameters": [
-      {
-        "name": "model_id",
-        "type": "STRING",
-        "description": "Model ID to use for inference",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/ml/run-inference"
+  },
+  {
+    "name": "calculate-quality-score",
+    "displayName": "Calculate Quality Score",
+    "description": "Calculate data quality score based on completeness and consistency.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "observability",
+    "tags": [
+      "observability"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/observability/calculate-quality-score"
+  },
+  {
+    "name": "check-data-freshness",
+    "displayName": "Check Data Freshness",
+    "description": "Check data freshness across indices to detect ingestion issues.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "observability",
+    "tags": [
+      "observability"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/observability/check-data-freshness"
   },
   {
     "name": "compare-time-periods",
@@ -2338,16 +1804,11 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
-      "observability"
+      "observability",
+      "comparison",
+      "analysis"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index to compare",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/compare-time-periods"
   },
@@ -2359,18 +1820,27 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
+      "observability",
+      "logs",
+      "correlation"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/correlate-logs"
+  },
+  {
+    "name": "correlate-logs",
+    "displayName": "Correlate Logs",
+    "description": "Correlate logs across multiple services using trace IDs or request IDs.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "observability",
+    "tags": [
       "observability"
     ],
-    "parameters": [
-      {
-        "name": "trace_id",
-        "type": "STRING",
-        "description": "Trace ID to correlate",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/correlate-logs"
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/observability/correlate-logs"
   },
   {
     "name": "count-logs-by-level",
@@ -2380,24 +1850,58 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
-      "logs"
+      "logs",
+      "analysis",
+      "aggregation"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index pattern to search (e.g., logs-*, logs-production-*)",
-        "required": true
-      },
-      {
-        "name": "time_range",
-        "type": "STRING",
-        "description": "Time range to analyze (e.g., 1h, 24h, 7d)",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/count-logs-by-level"
+  },
+  {
+    "name": "create-postmortem",
+    "displayName": "Create Postmortem",
+    "description": "Generate a postmortem document from incident data including timeline, impact analysis, and action items.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "observability",
+    "tags": [
+      "observability"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/observability/create-postmortem"
+  },
+  {
+    "name": "detect-incident",
+    "displayName": "Detect Incident",
+    "description": "Automatically detect incidents from logs, metrics, and alerts",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "incident",
+      "detection",
+      "sre"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/observability/detect-incident"
+  },
+  {
+    "name": "detect-log-patterns",
+    "displayName": "Detect Log Patterns",
+    "description": "Detect common log patterns and categorize log messages.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "observability",
+    "tags": [
+      "observability"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/observability/detect-log-patterns"
   },
   {
     "name": "error-rate",
@@ -2407,22 +1911,12 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
-      "logs"
+      "logs",
+      "errors",
+      "metrics",
+      "health"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index pattern to search",
-        "required": true
-      },
-      {
-        "name": "service",
-        "type": "STRING",
-        "description": "Filter by service name (optional)",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/error-rate"
   },
@@ -2434,16 +1928,11 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
-      "observability"
+      "observability",
+      "uptime",
+      "availability"
     ],
-    "parameters": [
-      {
-        "name": "monitor_id",
-        "type": "STRING",
-        "description": "Monitor ID",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/get-availability"
   },
@@ -2455,18 +1944,27 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
+      "observability",
+      "logs",
+      "debugging"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/get-error-context"
+  },
+  {
+    "name": "get-error-trends",
+    "displayName": "Get Error Trends",
+    "description": "Analyze error trends over time to identify emerging issues.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "observability",
+    "tags": [
       "observability"
     ],
-    "parameters": [
-      {
-        "name": "timestamp",
-        "type": "STRING",
-        "description": "Error timestamp",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/get-error-context"
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/observability/get-error-trends"
   },
   {
     "name": "get-log-patterns",
@@ -2476,17 +1974,12 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
-      "observability"
+      "observability",
+      "logs",
+      "patterns"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index to analyze",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/get-log-patterns"
   },
   {
@@ -2497,23 +1990,12 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
-      "metrics"
+      "metrics",
+      "analysis",
+      "monitoring"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index pattern for metrics data",
-        "required": true
-      },
-      {
-        "name": "metric_name",
-        "type": "STRING",
-        "description": "Specific metric to analyze (cpu, memory, latency) or NULL for all",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/get-metrics-summary"
   },
   {
@@ -2524,16 +2006,11 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
-      "observability"
+      "observability",
+      "uptime",
+      "status"
     ],
-    "parameters": [
-      {
-        "name": "monitor_id",
-        "type": "STRING",
-        "description": "Monitor ID",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/get-monitor-status"
   },
@@ -2545,29 +2022,12 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
-      "logs"
+      "logs",
+      "errors",
+      "debugging"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index pattern to search",
-        "required": true
-      },
-      {
-        "name": "limit",
-        "type": "INT",
-        "description": "Maximum number of errors to return",
-        "required": true
-      },
-      {
-        "name": "service",
-        "type": "STRING",
-        "description": "Filter by service name (optional)",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/get-recent-errors"
   },
   {
@@ -2578,16 +2038,11 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
-      "observability"
+      "observability",
+      "slo",
+      "reliability"
     ],
-    "parameters": [
-      {
-        "name": "service",
-        "type": "STRING",
-        "description": "Service name",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/get-slo-status"
   },
@@ -2599,16 +2054,11 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
-      "observability"
+      "observability",
+      "ssl",
+      "certificates"
     ],
-    "parameters": [
-      {
-        "name": "monitor_id",
-        "type": "STRING",
-        "description": "Monitor ID",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/get-ssl-status"
   },
@@ -2620,23 +2070,12 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
-      "metrics"
+      "metrics",
+      "cpu",
+      "alerts"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index pattern for metrics data",
-        "required": true
-      },
-      {
-        "name": "threshold",
-        "type": "INT",
-        "description": "CPU usage threshold percentage (0-100)",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/high-cpu-hosts"
   },
   {
@@ -2647,17 +2086,12 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
-      "observability"
+      "observability",
+      "uptime",
+      "monitors"
     ],
-    "parameters": [
-      {
-        "name": "status",
-        "type": "STRING",
-        "description": "Filter by status: up, down",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/list-monitors"
   },
   {
@@ -2668,17 +2102,12 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
-      "logs"
+      "logs",
+      "services",
+      "aggregation"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index pattern to search",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/logs-by-service"
   },
   {
@@ -2689,29 +2118,12 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
-      "logs"
+      "logs",
+      "search",
+      "debugging"
     ],
-    "parameters": [
-      {
-        "name": "query",
-        "type": "STRING",
-        "description": "Search query - keyword or phrase to find in logs",
-        "required": true
-      },
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index pattern to search",
-        "required": true
-      },
-      {
-        "name": "limit",
-        "type": "INT",
-        "description": "Maximum results to return",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/search-logs"
   },
   {
@@ -2722,22 +2134,12 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
-      "apm"
+      "apm",
+      "services",
+      "health",
+      "slo"
     ],
-    "parameters": [
-      {
-        "name": "service",
-        "type": "STRING",
-        "description": "Service name to check",
-        "required": true
-      },
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index pattern to search",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/service-health"
   },
@@ -2749,29 +2151,12 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
-      "apm"
+      "apm",
+      "latency",
+      "performance"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index pattern to search",
-        "required": true
-      },
-      {
-        "name": "threshold_ms",
-        "type": "INT",
-        "description": "Duration threshold in milliseconds",
-        "required": true
-      },
-      {
-        "name": "limit",
-        "type": "INT",
-        "description": "Maximum results",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/slow-requests"
   },
   {
@@ -2782,24 +2167,44 @@
     "author": "elastic",
     "category": "observability",
     "tags": [
-      "logs"
+      "logs",
+      "errors",
+      "analysis"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index pattern to search",
-        "required": true
-      },
-      {
-        "name": "limit",
-        "type": "INT",
-        "description": "Number of top errors to return",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/observability/top-error-messages"
+  },
+  {
+    "name": "track-resolution",
+    "displayName": "Track Resolution",
+    "description": "Track incident resolution progress, update status, and record resolution actions.",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "observability",
+    "tags": [
+      "observability"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/observability/track-resolution"
+  },
+  {
+    "name": "triage-incident",
+    "displayName": "Triage Incident",
+    "description": "Automatically triage and prioritize incidents",
+    "version": "1.0.0",
+    "author": "sre-team",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "incident",
+      "triage",
+      "sre"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/observability/triage-incident"
   },
   {
     "name": "aggregate-by-field",
@@ -2809,29 +2214,12 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "aggregation",
+      "analytics"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index pattern to aggregate",
-        "required": true
-      },
-      {
-        "name": "field",
-        "type": "STRING",
-        "description": "Field name to group by",
-        "required": true
-      },
-      {
-        "name": "limit",
-        "type": "INT",
-        "description": "Maximum number of buckets",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/aggregate-by-field"
   },
   {
@@ -2842,16 +2230,11 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "documents",
+      "bulk"
     ],
-    "parameters": [
-      {
-        "name": "index_name",
-        "type": "STRING",
-        "description": "Index name",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/bulk-index"
   },
@@ -2863,16 +2246,11 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "cluster"
+      "cluster",
+      "health",
+      "management"
     ],
-    "parameters": [
-      {
-        "name": "dummy",
-        "type": "STRING",
-        "description": "Unused parameter",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/cluster-health"
   },
@@ -2884,16 +2262,11 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "count",
+      "aggregation"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index pattern to count",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/count-documents"
   },
@@ -2905,16 +2278,11 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "documents",
+      "create"
     ],
-    "parameters": [
-      {
-        "name": "index_name",
-        "type": "STRING",
-        "description": "Index name",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/create-document"
   },
@@ -2926,16 +2294,11 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "indices",
+      "create"
     ],
-    "parameters": [
-      {
-        "name": "index_name",
-        "type": "STRING",
-        "description": "Index name",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/create-index"
   },
@@ -2947,17 +2310,12 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "histogram",
+      "timeseries"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index to aggregate",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/date-histogram"
   },
   {
@@ -2968,16 +2326,11 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "documents",
+      "delete"
     ],
-    "parameters": [
-      {
-        "name": "index_name",
-        "type": "STRING",
-        "description": "Index name",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/delete-document"
   },
@@ -2989,18 +2342,41 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "indices",
+      "delete"
     ],
-    "parameters": [
-      {
-        "name": "index_name",
-        "type": "STRING",
-        "description": "Index name to delete",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/delete-index"
+  },
+  {
+    "name": "detect-duplicates",
+    "displayName": "Detect Duplicates",
+    "description": "Detect duplicate or near-duplicate documents based on content similarity.",
+    "version": "1.0.0",
+    "author": "search-team",
+    "category": "search",
+    "tags": [
+      "search"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/search/detect-duplicates"
+  },
+  {
+    "name": "find-missing-fields",
+    "displayName": "Find Missing Fields",
+    "description": "Find documents with missing required fields for data quality analysis.",
+    "version": "1.0.0",
+    "author": "search-team",
+    "category": "search",
+    "tags": [
+      "search"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/search/find-missing-fields"
   },
   {
     "name": "fuzzy-search",
@@ -3010,17 +2386,12 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "fuzzy",
+      "query"
     ],
-    "parameters": [
-      {
-        "name": "query",
-        "type": "STRING",
-        "description": "Search query",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/fuzzy-search"
   },
   {
@@ -3031,22 +2402,11 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "document",
+      "get"
     ],
-    "parameters": [
-      {
-        "name": "index_name",
-        "type": "STRING",
-        "description": "Name of the index containing the document",
-        "required": true
-      },
-      {
-        "name": "doc_id",
-        "type": "STRING",
-        "description": "Document ID to retrieve",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/get-document"
   },
@@ -3058,22 +2418,11 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "statistics",
+      "analytics"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index pattern to analyze",
-        "required": true
-      },
-      {
-        "name": "field",
-        "type": "STRING",
-        "description": "Numeric field to calculate stats for",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/get-field-stats"
   },
@@ -3085,16 +2434,11 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "indices",
+      "stats"
     ],
-    "parameters": [
-      {
-        "name": "index_name",
-        "type": "STRING",
-        "description": "Index name to get stats for",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/get-index-stats"
   },
@@ -3106,16 +2450,11 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "mappings",
+      "schema"
     ],
-    "parameters": [
-      {
-        "name": "index_name",
-        "type": "STRING",
-        "description": "Index name",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/get-mapping"
   },
@@ -3127,23 +2466,12 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "exploration",
+      "data"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index pattern to sample from",
-        "required": true
-      },
-      {
-        "name": "limit",
-        "type": "INT",
-        "description": "Number of sample documents",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/get-sample-documents"
   },
   {
@@ -3154,16 +2482,11 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "transforms",
+      "status"
     ],
-    "parameters": [
-      {
-        "name": "transform_id",
-        "type": "STRING",
-        "description": "Transform ID",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/get-transform-status"
   },
@@ -3175,30 +2498,27 @@
     "author": "elastic",
     "category": "search",
     "tags": [
+      "search",
+      "cardinality",
+      "exploration"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/get-unique-values"
+  },
+  {
+    "name": "hybrid-search",
+    "displayName": "Hybrid Search",
+    "description": "Perform hybrid search combining BM25 text search with vector similarity.",
+    "version": "1.0.0",
+    "author": "search-team",
+    "category": "search",
+    "tags": [
       "search"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index pattern to analyze",
-        "required": true
-      },
-      {
-        "name": "field",
-        "type": "STRING",
-        "description": "Field to get unique values for",
-        "required": true
-      },
-      {
-        "name": "limit",
-        "type": "INT",
-        "description": "Maximum unique values to return",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/get-unique-values"
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/search/hybrid-search"
   },
   {
     "name": "list-all-indices",
@@ -3208,17 +2528,12 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "indices",
+      "management"
     ],
-    "parameters": [
-      {
-        "name": "pattern",
-        "type": "STRING",
-        "description": "Index pattern to filter",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/list-all-indices"
   },
   {
@@ -3229,10 +2544,12 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "datastreams",
+      "management"
     ],
     "parameters": [],
-    "returns": "ARRAY",
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/list-data-streams"
   },
   {
@@ -3243,10 +2560,12 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "ilm",
+      "lifecycle"
     ],
     "parameters": [],
-    "returns": "ARRAY",
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/list-ilm-policies"
   },
   {
@@ -3257,17 +2576,12 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "indices",
+      "management"
     ],
-    "parameters": [
-      {
-        "name": "pattern",
-        "type": "STRING",
-        "description": "Index name pattern (informational only)",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/list-indices"
   },
   {
@@ -3278,10 +2592,12 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "ingest",
+      "pipelines"
     ],
     "parameters": [],
-    "returns": "ARRAY",
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/list-ingest-pipelines"
   },
   {
@@ -3292,10 +2608,12 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "transforms",
+      "management"
     ],
     "parameters": [],
-    "returns": "ARRAY",
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/list-transforms"
   },
   {
@@ -3306,17 +2624,12 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "multi-field",
+      "query"
     ],
-    "parameters": [
-      {
-        "name": "query",
-        "type": "STRING",
-        "description": "Search query",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/multi-field-search"
   },
   {
@@ -3327,17 +2640,12 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "percentiles",
+      "statistics"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index to analyze",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/percentiles"
   },
   {
@@ -3348,23 +2656,12 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "recent",
+      "real-time"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index pattern to query",
-        "required": true
-      },
-      {
-        "name": "limit",
-        "type": "INT",
-        "description": "Number of documents to return",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/recent-documents"
   },
   {
@@ -3375,18 +2672,27 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "reindex",
+      "management"
     ],
-    "parameters": [
-      {
-        "name": "source_index",
-        "type": "STRING",
-        "description": "Source index",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/reindex"
+  },
+  {
+    "name": "rerank-results",
+    "displayName": "Rerank Results",
+    "description": "Rerank search results using a cross-encoder model for improved relevance.",
+    "version": "1.0.0",
+    "author": "search-team",
+    "category": "search",
+    "tags": [
+      "search"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/search/rerank-results"
   },
   {
     "name": "search-documents",
@@ -3396,30 +2702,27 @@
     "author": "elastic",
     "category": "search",
     "tags": [
+      "search",
+      "query",
+      "full-text"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/search-documents"
+  },
+  {
+    "name": "search-with-filters",
+    "displayName": "Search With Filters",
+    "description": "Perform search with dynamic filtering based on facets.",
+    "version": "1.0.0",
+    "author": "search-team",
+    "category": "search",
+    "tags": [
       "search"
     ],
-    "parameters": [
-      {
-        "name": "query",
-        "type": "STRING",
-        "description": "Search query - keywords or phrase to search for",
-        "required": true
-      },
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index pattern to search (e.g., products-*, users-*)",
-        "required": true
-      },
-      {
-        "name": "limit",
-        "type": "INT",
-        "description": "Maximum results to return",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/search-documents"
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/search/search-with-filters"
   },
   {
     "name": "semantic-search",
@@ -3429,17 +2732,12 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "semantic",
+      "vector"
     ],
-    "parameters": [
-      {
-        "name": "query",
-        "type": "STRING",
-        "description": "Natural language query",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/semantic-search"
   },
   {
@@ -3450,16 +2748,11 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "aliases",
+      "management"
     ],
-    "parameters": [
-      {
-        "name": "alias_name",
-        "type": "STRING",
-        "description": "Alias name",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/set-alias"
   },
@@ -3471,16 +2764,11 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "ingest",
+      "testing"
     ],
-    "parameters": [
-      {
-        "name": "pipeline_id",
-        "type": "STRING",
-        "description": "Pipeline ID",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/test-ingest-pipeline"
   },
@@ -3492,17 +2780,12 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "aggregation",
+      "analytics"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Index to analyze",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/top-values"
   },
   {
@@ -3513,18 +2796,41 @@
     "author": "elastic",
     "category": "search",
     "tags": [
-      "search"
+      "search",
+      "documents",
+      "update"
     ],
-    "parameters": [
-      {
-        "name": "index_name",
-        "type": "STRING",
-        "description": "Index name",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/search/update-document"
+  },
+  {
+    "name": "audit-user-access",
+    "displayName": "Audit User Access",
+    "description": "Audit user access patterns and identify anomalies or policy violations.",
+    "version": "1.0.0",
+    "author": "security-team",
+    "category": "security",
+    "tags": [
+      "security"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/security/audit-user-access"
+  },
+  {
+    "name": "correlate-alerts",
+    "displayName": "Correlate Alerts",
+    "description": "Correlate security alerts across multiple sources to identify attack patterns.",
+    "version": "1.0.0",
+    "author": "security-team",
+    "category": "security",
+    "tags": [
+      "security"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/security/correlate-alerts"
   },
   {
     "name": "create-case",
@@ -3534,18 +2840,41 @@
     "author": "elastic",
     "category": "security",
     "tags": [
-      "security"
+      "security",
+      "cases",
+      "investigation"
     ],
-    "parameters": [
-      {
-        "name": "title",
-        "type": "STRING",
-        "description": "Case title",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/create-case"
+  },
+  {
+    "name": "detect-policy-violations",
+    "displayName": "Detect Policy Violations",
+    "description": "Detect security policy violations based on configured rules.",
+    "version": "1.0.0",
+    "author": "security-team",
+    "category": "security",
+    "tags": [
+      "security"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/security/detect-policy-violations"
+  },
+  {
+    "name": "enrich-threat-intel",
+    "displayName": "Enrich Threat Intel",
+    "description": "Enrich security events with threat intelligence from configured feeds.",
+    "version": "1.0.0",
+    "author": "security-team",
+    "category": "security",
+    "tags": [
+      "security"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/security/enrich-threat-intel"
   },
   {
     "name": "failed-logins",
@@ -3555,30 +2884,27 @@
     "author": "elastic",
     "category": "security",
     "tags": [
+      "security",
+      "authentication",
+      "brute-force"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/failed-logins"
+  },
+  {
+    "name": "generate-compliance-report",
+    "displayName": "Generate Compliance Report",
+    "description": "Generate compliance reports for security standards (SOC2, PCI, HIPAA).",
+    "version": "1.0.0",
+    "author": "security-team",
+    "category": "security",
+    "tags": [
       "security"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Security events index pattern",
-        "required": true
-      },
-      {
-        "name": "group_by",
-        "type": "STRING",
-        "description": "Group by: user, source_ip, or both",
-        "required": true
-      },
-      {
-        "name": "limit",
-        "type": "INT",
-        "description": "Maximum results",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/failed-logins"
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/security/generate-compliance-report"
   },
   {
     "name": "get-authentication-summary",
@@ -3588,16 +2914,11 @@
     "author": "elastic",
     "category": "security",
     "tags": [
-      "security"
+      "security",
+      "authentication",
+      "summary"
     ],
-    "parameters": [
-      {
-        "name": "time_range",
-        "type": "STRING",
-        "description": "Time range to analyze",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-authentication-summary"
   },
@@ -3609,17 +2930,12 @@
     "author": "elastic",
     "category": "security",
     "tags": [
-      "security"
+      "security",
+      "dns",
+      "network"
     ],
-    "parameters": [
-      {
-        "name": "domain",
-        "type": "STRING",
-        "description": "Domain filter",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-dns-queries"
   },
   {
@@ -3630,17 +2946,12 @@
     "author": "elastic",
     "category": "security",
     "tags": [
-      "security"
+      "security",
+      "file",
+      "monitoring"
     ],
-    "parameters": [
-      {
-        "name": "hostname",
-        "type": "STRING",
-        "description": "Host to analyze",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-file-events"
   },
   {
@@ -3651,16 +2962,11 @@
     "author": "elastic",
     "category": "security",
     "tags": [
-      "security"
+      "security",
+      "risk",
+      "hosts"
     ],
-    "parameters": [
-      {
-        "name": "hostname",
-        "type": "STRING",
-        "description": "Hostname to check",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-host-risk-score"
   },
@@ -3672,17 +2978,12 @@
     "author": "elastic",
     "category": "security",
     "tags": [
-      "security"
+      "security",
+      "network",
+      "connections"
     ],
-    "parameters": [
-      {
-        "name": "source_ip",
-        "type": "STRING",
-        "description": "Source IP filter",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-network-events"
   },
   {
@@ -3693,17 +2994,12 @@
     "author": "elastic",
     "category": "security",
     "tags": [
-      "security"
+      "security",
+      "process",
+      "hunting"
     ],
-    "parameters": [
-      {
-        "name": "hostname",
-        "type": "STRING",
-        "description": "Host to analyze",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-process-events"
   },
   {
@@ -3714,17 +3010,12 @@
     "author": "elastic",
     "category": "security",
     "tags": [
-      "security"
+      "security",
+      "risk",
+      "hosts"
     ],
-    "parameters": [
-      {
-        "name": "min_score",
-        "type": "INT",
-        "description": "Minimum risk score",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-risky-hosts"
   },
   {
@@ -3735,17 +3026,12 @@
     "author": "elastic",
     "category": "security",
     "tags": [
-      "security"
+      "security",
+      "risk",
+      "ueba"
     ],
-    "parameters": [
-      {
-        "name": "min_score",
-        "type": "INT",
-        "description": "Minimum risk score",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-risky-users"
   },
   {
@@ -3756,29 +3042,13 @@
     "author": "elastic",
     "category": "security",
     "tags": [
-      "security"
+      "security",
+      "alerts",
+      "siem",
+      "detection"
     ],
-    "parameters": [
-      {
-        "name": "severity",
-        "type": "STRING",
-        "description": "Filter by severity: critical, high, medium, low",
-        "required": true
-      },
-      {
-        "name": "limit",
-        "type": "INT",
-        "description": "Maximum alerts to return",
-        "required": true
-      },
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Security events index pattern",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-security-alerts"
   },
   {
@@ -3789,16 +3059,11 @@
     "author": "elastic",
     "category": "security",
     "tags": [
-      "security"
+      "security",
+      "risk",
+      "ueba"
     ],
-    "parameters": [
-      {
-        "name": "username",
-        "type": "STRING",
-        "description": "Username to check",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/get-user-risk-score"
   },
@@ -3810,17 +3075,12 @@
     "author": "elastic",
     "category": "security",
     "tags": [
-      "security"
+      "security",
+      "threat",
+      "hunting"
     ],
-    "parameters": [
-      {
-        "name": "ioc",
-        "type": "STRING",
-        "description": "IOC value to hunt for (IP, hash, domain)",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/hunt-ioc"
   },
   {
@@ -3831,17 +3091,12 @@
     "author": "elastic",
     "category": "security",
     "tags": [
-      "security"
+      "security",
+      "cases",
+      "investigation"
     ],
-    "parameters": [
-      {
-        "name": "status",
-        "type": "STRING",
-        "description": "Filter by status: open, closed, in-progress",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/list-cases"
   },
   {
@@ -3852,17 +3107,12 @@
     "author": "elastic",
     "category": "security",
     "tags": [
-      "security"
+      "security",
+      "rules",
+      "detection"
     ],
-    "parameters": [
-      {
-        "name": "enabled",
-        "type": "STRING",
-        "description": "Filter: true or false",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/list-detection-rules"
   },
   {
@@ -3873,17 +3123,12 @@
     "author": "elastic",
     "category": "security",
     "tags": [
-      "security"
+      "security",
+      "search",
+      "events"
     ],
-    "parameters": [
-      {
-        "name": "query",
-        "type": "STRING",
-        "description": "Search query",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/search-security-events"
   },
   {
@@ -3894,23 +3139,13 @@
     "author": "elastic",
     "category": "security",
     "tags": [
-      "security"
+      "security",
+      "threats",
+      "anomaly",
+      "hunting"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Security events index pattern",
-        "required": true
-      },
-      {
-        "name": "limit",
-        "type": "INT",
-        "description": "Maximum events to return",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/suspicious-activity"
   },
   {
@@ -3921,18 +3156,28 @@
     "author": "elastic",
     "category": "security",
     "tags": [
-      "security"
+      "security",
+      "dashboard",
+      "summary",
+      "posture"
     ],
-    "parameters": [
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Security events index pattern",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/threat-summary"
+  },
+  {
+    "name": "track-privileged-actions",
+    "displayName": "Track Privileged Actions",
+    "description": "Track privileged user actions for security auditing.",
+    "version": "1.0.0",
+    "author": "security-team",
+    "category": "security",
+    "tags": [
+      "security"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/community/security/track-privileged-actions"
   },
   {
     "name": "user-activity",
@@ -3942,29 +3187,13 @@
     "author": "elastic",
     "category": "security",
     "tags": [
-      "security"
+      "security",
+      "user",
+      "investigation",
+      "audit"
     ],
-    "parameters": [
-      {
-        "name": "username",
-        "type": "STRING",
-        "description": "Username to investigate",
-        "required": true
-      },
-      {
-        "name": "index_pattern",
-        "type": "STRING",
-        "description": "Security events index pattern",
-        "required": true
-      },
-      {
-        "name": "limit",
-        "type": "INT",
-        "description": "Maximum events to return",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/security/user-activity"
   },
   {
@@ -3975,72 +3204,15 @@
     "author": "elastic",
     "category": "serverless",
     "tags": [
-      "serverless"
+      "serverless",
+      "cloud",
+      "elasticsearch",
+      "create",
+      "project"
     ],
-    "parameters": [
-      {
-        "name": "api_key",
-        "type": "STRING",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "project_name",
-        "type": "STRING",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "region_id",
-        "type": "STRING",
-        "default": "aws-us-east-1",
-        "description": "",
-        "required": false
-      },
-      {
-        "name": "alias",
-        "type": "STRING",
-        "default": "",
-        "description": "",
-        "required": false
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/create-es-project"
-  },
-  {
-    "name": "create_security_project",
-    "displayName": "Create Security Project",
-    "description": "Creates a new Elastic Security serverless project for SIEM/threat detection",
-    "version": "1.0.0",
-    "author": "elastic",
-    "category": "serverless",
-    "tags": [
-      "serverless"
-    ],
-    "parameters": [
-      {
-        "name": "api_key",
-        "type": "STRING",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "project_name",
-        "type": "STRING",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "region_id",
-        "type": "STRING",
-        "default": "aws-us-east-1",
-        "description": "",
-        "required": false
-      }
-    ],
-    "returns": "DOCUMENT",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/create-security-project"
   },
   {
     "name": "create_ip_traffic_filter",
@@ -4050,37 +3222,33 @@
     "author": "elastic",
     "category": "serverless",
     "tags": [
-      "serverless"
+      "serverless",
+      "cloud",
+      "traffic-filter",
+      "security",
+      "ip-restriction"
     ],
-    "parameters": [
-      {
-        "name": "api_key",
-        "type": "STRING",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "filter_name",
-        "type": "STRING",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "allowed_ips",
-        "type": "ARRAY",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "region_id",
-        "type": "STRING",
-        "default": "aws-us-east-1",
-        "description": "",
-        "required": false
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/create-traffic-filter"
+  },
+  {
+    "name": "create_security_project",
+    "displayName": "Create Security Project",
+    "description": "Creates a new Elastic Security serverless project for SIEM/threat detection",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "serverless",
+    "tags": [
+      "serverless",
+      "cloud",
+      "security",
+      "siem",
+      "threat-detection"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/create-security-project"
   },
   {
     "name": "get_serverless_project_status",
@@ -4090,29 +3258,12 @@
     "author": "elastic",
     "category": "serverless",
     "tags": [
-      "serverless"
+      "serverless",
+      "cloud",
+      "status",
+      "health"
     ],
-    "parameters": [
-      {
-        "name": "api_key",
-        "type": "STRING",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "project_id",
-        "type": "STRING",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "project_type",
-        "type": "STRING",
-        "default": "elasticsearch",
-        "description": "",
-        "required": false
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/get-project-status"
   },
@@ -4124,16 +3275,14 @@
     "author": "elastic",
     "category": "serverless",
     "tags": [
-      "serverless"
+      "serverless",
+      "cloud",
+      "projects",
+      "elasticsearch",
+      "observability",
+      "security"
     ],
-    "parameters": [
-      {
-        "name": "api_key",
-        "type": "STRING",
-        "description": "",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/list-projects"
   },
@@ -4145,39 +3294,16 @@
     "author": "elastic",
     "category": "serverless",
     "tags": [
-      "serverless"
+      "serverless",
+      "cloud",
+      "regions",
+      "aws",
+      "gcp",
+      "azure"
     ],
-    "parameters": [
-      {
-        "name": "api_key",
-        "type": "STRING",
-        "description": "",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/list-regions"
-  },
-  {
-    "name": "serverless_health_check",
-    "displayName": "Project Health Check",
-    "description": "Performs a health check on all serverless projects and returns status summary",
-    "version": "1.0.0",
-    "author": "elastic",
-    "category": "serverless",
-    "tags": [
-      "serverless"
-    ],
-    "parameters": [
-      {
-        "name": "api_key",
-        "type": "STRING",
-        "description": "",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/project-health-check"
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/list-regions"
   },
   {
     "name": "reset_project_credentials",
@@ -4187,31 +3313,33 @@
     "author": "elastic",
     "category": "serverless",
     "tags": [
-      "serverless"
+      "serverless",
+      "cloud",
+      "credentials",
+      "security",
+      "reset"
     ],
-    "parameters": [
-      {
-        "name": "api_key",
-        "type": "STRING",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "project_id",
-        "type": "STRING",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "project_type",
-        "type": "STRING",
-        "default": "elasticsearch",
-        "description": "",
-        "required": false
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/reset-credentials"
+  },
+  {
+    "name": "serverless_health_check",
+    "displayName": "Project Health Check",
+    "description": "Performs a health check on all serverless projects and returns status summary",
+    "version": "1.0.0",
+    "author": "elastic",
+    "category": "serverless",
+    "tags": [
+      "serverless",
+      "cloud",
+      "health",
+      "monitoring",
+      "status"
+    ],
+    "parameters": [],
+    "returns": "DOCUMENT",
+    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/serverless/project-health-check"
   },
   {
     "name": "install-esql-report-workflow",
@@ -4221,34 +3349,12 @@
     "author": "elastic",
     "category": "workflows",
     "tags": [
-      "workflows"
+      "workflows",
+      "esql",
+      "reporting",
+      "scheduled"
     ],
-    "parameters": [
-      {
-        "name": "workflow_name",
-        "type": "STRING",
-        "description": "Name for this report workflow",
-        "required": true
-      },
-      {
-        "name": "esql_query",
-        "type": "STRING",
-        "description": "ES|QL query to run",
-        "required": true
-      },
-      {
-        "name": "schedule",
-        "type": "STRING",
-        "description": "Schedule interval (e.g., 1d, 6h, 30m)",
-        "required": true
-      },
-      {
-        "name": "kibana_url",
-        "type": "STRING",
-        "description": "Kibana URL",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/workflows/install-esql-report-workflow"
   },
@@ -4260,22 +3366,12 @@
     "author": "elastic",
     "category": "workflows",
     "tags": [
-      "workflows"
+      "workflows",
+      "security",
+      "enrichment",
+      "threat-intel"
     ],
-    "parameters": [
-      {
-        "name": "abuseipdb_api_key",
-        "type": "STRING",
-        "description": "Your AbuseIPDB API key (get from abuseipdb.com)",
-        "required": true
-      },
-      {
-        "name": "kibana_url",
-        "type": "STRING",
-        "description": "Kibana URL",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/workflows/install-ip-reputation-workflow"
   },
@@ -4287,28 +3383,12 @@
     "author": "elastic",
     "category": "workflows",
     "tags": [
-      "workflows"
+      "workflows",
+      "slack",
+      "alerting",
+      "notifications"
     ],
-    "parameters": [
-      {
-        "name": "slack_webhook_url",
-        "type": "STRING",
-        "description": "Slack webhook URL (get from Slack app settings)",
-        "required": true
-      },
-      {
-        "name": "default_channel",
-        "type": "STRING",
-        "description": "Default Slack channel",
-        "required": true
-      },
-      {
-        "name": "kibana_url",
-        "type": "STRING",
-        "description": "Kibana URL",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/workflows/install-slack-alert-workflow"
   },
@@ -4320,22 +3400,12 @@
     "author": "elastic",
     "category": "workflows",
     "tags": [
-      "workflows"
+      "workflows",
+      "automation",
+      "kibana",
+      "installation"
     ],
-    "parameters": [
-      {
-        "name": "yaml",
-        "type": "STRING",
-        "description": "Workflow YAML definition",
-        "required": true
-      },
-      {
-        "name": "kibana_url",
-        "type": "STRING",
-        "description": "Kibana URL (defaults to KIBANA_URL env var or localhost:5601)",
-        "required": true
-      }
-    ],
+    "parameters": [],
     "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/workflows/install-workflow"
   },
@@ -4347,17 +3417,13 @@
     "author": "elastic",
     "category": "workflows",
     "tags": [
-      "workflows"
+      "workflows",
+      "automation",
+      "kibana",
+      "discovery"
     ],
-    "parameters": [
-      {
-        "name": "kibana_url",
-        "type": "STRING",
-        "description": "Kibana URL (defaults to KIBANA_URL env var or localhost:5601)",
-        "required": true
-      }
-    ],
-    "returns": "workflow",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/workflows/list-workflows"
   },
   {
@@ -4368,29 +3434,12 @@
     "author": "elastic",
     "category": "workflows",
     "tags": [
-      "workflows"
+      "workflows",
+      "automation",
+      "kibana"
     ],
-    "parameters": [
-      {
-        "name": "workflow_id",
-        "type": "STRING",
-        "description": "Workflow ID or name to trigger",
-        "required": true
-      },
-      {
-        "name": "inputs",
-        "type": "DOCUMENT",
-        "description": "Input parameters to pass to the workflow",
-        "required": true
-      },
-      {
-        "name": "kibana_url",
-        "type": "STRING",
-        "description": "Kibana URL (defaults to KIBANA_URL env var or localhost:5601)",
-        "required": true
-      }
-    ],
-    "returns": "execution",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/workflows/trigger-workflow"
   },
   {
@@ -4401,410 +3450,13 @@
     "author": "elastic",
     "category": "workflows",
     "tags": [
-      "workflows"
+      "workflows",
+      "automation",
+      "kibana",
+      "monitoring"
     ],
-    "parameters": [
-      {
-        "name": "execution_id",
-        "type": "STRING",
-        "description": "Workflow execution ID returned from trigger_workflow",
-        "required": true
-      },
-      {
-        "name": "kibana_url",
-        "type": "STRING",
-        "description": "Kibana URL (defaults to KIBANA_URL env var or localhost:5601)",
-        "required": true
-      }
-    ],
-    "returns": "step",
+    "parameters": [],
+    "returns": "DOCUMENT",
     "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/elastic/workflows/workflow-status"
-  },
-  {
-    "name": "sfdc_alert_stale_deals",
-    "displayName": "Alert Stale Deals",
-    "description": "Create a workflow that monitors for stale opportunities and sends alerts",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "sfdc",
-    "tags": [
-      "sfdc"
-    ],
-    "parameters": [
-      {
-        "name": "stale_days",
-        "type": "INT",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "slack_channel",
-        "type": "STRING",
-        "description": "Slack channel for alerts",
-        "required": true
-      },
-      {
-        "name": "min_amount",
-        "type": "INT",
-        "description": "",
-        "required": true
-      }
-    ],
-    "returns": "DOCUMENT",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/alert-stale-deals"
-  },
-  {
-    "name": "sfdc_case_volume_trends",
-    "displayName": "Case Volume Trends",
-    "description": "Analyze support case volume trends over time",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "sfdc",
-    "tags": [
-      "sfdc"
-    ],
-    "parameters": [
-      {
-        "name": "time_period",
-        "type": "STRING",
-        "description": "Time period: last_7_days, last_30_days, last_90_days",
-        "required": true
-      },
-      {
-        "name": "group_by",
-        "type": "STRING",
-        "description": "Time grouping: day, week, month",
-        "required": true
-      }
-    ],
-    "returns": "DOCUMENT",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/case-volume-trends"
-  },
-  {
-    "name": "sfdc_closing_this_month",
-    "displayName": "Closing This Month",
-    "description": "Get all opportunities expected to close this month",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "sfdc",
-    "tags": [
-      "sfdc"
-    ],
-    "parameters": [
-      {
-        "name": "owner",
-        "type": "STRING",
-        "description": "Filter by opportunity owner name",
-        "required": true
-      },
-      {
-        "name": "min_probability",
-        "type": "INT",
-        "description": "",
-        "required": true
-      }
-    ],
-    "returns": "DOCUMENT",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/closing-this-month"
-  },
-  {
-    "name": "sfdc_escalated_cases",
-    "displayName": "Escalated Cases",
-    "description": "Get all currently escalated support cases",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "sfdc",
-    "tags": [
-      "sfdc"
-    ],
-    "parameters": [
-      {
-        "name": "include_closed",
-        "type": "BOOLEAN",
-        "description": "Include recently closed escalated cases",
-        "required": true
-      },
-      {
-        "name": "days_back",
-        "type": "INT",
-        "description": "",
-        "required": true
-      }
-    ],
-    "returns": "DOCUMENT",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/escalated-cases"
-  },
-  {
-    "name": "sfdc_find_account",
-    "displayName": "Find Account",
-    "description": "Find Salesforce accounts by name, domain, or ID",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "sfdc",
-    "tags": [
-      "sfdc"
-    ],
-    "parameters": [
-      {
-        "name": "query",
-        "type": "STRING",
-        "description": "Search query - account name, domain, or Salesforce ID",
-        "required": true
-      },
-      {
-        "name": "limit",
-        "type": "INT",
-        "description": "",
-        "required": true
-      }
-    ],
-    "returns": "matching",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/find-account"
-  },
-  {
-    "name": "sfdc_find_case",
-    "displayName": "Find Case",
-    "description": "Find Salesforce cases by case number, subject, account, or ID",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "sfdc",
-    "tags": [
-      "sfdc"
-    ],
-    "parameters": [
-      {
-        "name": "query",
-        "type": "STRING",
-        "description": "Search query - case number, subject keywords, account name, or Salesforce ID",
-        "required": true
-      },
-      {
-        "name": "status",
-        "type": "STRING",
-        "description": "Filter by status (e.g., ",
-        "required": true
-      },
-      {
-        "name": "priority",
-        "type": "STRING",
-        "description": "Filter by priority (e.g., ",
-        "required": true
-      },
-      {
-        "name": "limit",
-        "type": "INT",
-        "description": "",
-        "required": true
-      }
-    ],
-    "returns": "matching",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/find-case"
-  },
-  {
-    "name": "sfdc_find_opportunity",
-    "displayName": "Find Opportunity",
-    "description": "Find Salesforce opportunities by name, account, stage, or ID",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "sfdc",
-    "tags": [
-      "sfdc"
-    ],
-    "parameters": [
-      {
-        "name": "query",
-        "type": "STRING",
-        "description": "Search query - opportunity name, account name, or Salesforce ID",
-        "required": true
-      },
-      {
-        "name": "stage",
-        "type": "STRING",
-        "description": "Filter by stage (e.g., ",
-        "required": true
-      },
-      {
-        "name": "limit",
-        "type": "INT",
-        "description": "",
-        "required": true
-      }
-    ],
-    "returns": "matching",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/find-opportunity"
-  },
-  {
-    "name": "sfdc_notify_deal_closed",
-    "displayName": "Notify Deal Closed",
-    "description": "Send celebratory Slack notification when a deal is marked as Closed Won",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "sfdc",
-    "tags": [
-      "sfdc"
-    ],
-    "parameters": [
-      {
-        "name": "opportunity_id",
-        "type": "STRING",
-        "description": "Salesforce Opportunity ID that was just closed",
-        "required": true
-      },
-      {
-        "name": "slack_channel",
-        "type": "STRING",
-        "description": "Slack channel for celebration",
-        "required": true
-      }
-    ],
-    "returns": "DOCUMENT",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/notify-deal-closed"
-  },
-  {
-    "name": "sfdc_pipeline_summary",
-    "displayName": "Pipeline Summary",
-    "description": "Get current sales pipeline summary grouped by stage",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "sfdc",
-    "tags": [
-      "sfdc"
-    ],
-    "parameters": [
-      {
-        "name": "owner",
-        "type": "STRING",
-        "description": "Filter by opportunity owner name",
-        "required": true
-      },
-      {
-        "name": "min_amount",
-        "type": "INT",
-        "description": "",
-        "required": true
-      }
-    ],
-    "returns": "DOCUMENT",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/pipeline-summary"
-  },
-  {
-    "name": "sfdc_similar_accounts",
-    "displayName": "Similar Accounts",
-    "description": "Find accounts similar to a reference account using vector similarity",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "sfdc",
-    "tags": [
-      "sfdc"
-    ],
-    "parameters": [
-      {
-        "name": "account_id",
-        "type": "STRING",
-        "description": "Reference Salesforce Account ID to find similar accounts",
-        "required": true
-      },
-      {
-        "name": "limit",
-        "type": "INT",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "exclude_customers",
-        "type": "BOOLEAN",
-        "description": "Exclude existing customers (Type = Customer)",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/similar-accounts"
-  },
-  {
-    "name": "sfdc_stale_opportunities",
-    "displayName": "Stale Opportunities",
-    "description": "Find opportunities with no activity in N days",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "sfdc",
-    "tags": [
-      "sfdc"
-    ],
-    "parameters": [
-      {
-        "name": "stale_days",
-        "type": "INT",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "min_amount",
-        "type": "INT",
-        "description": "",
-        "required": true
-      },
-      {
-        "name": "owner",
-        "type": "STRING",
-        "description": "Filter by opportunity owner name",
-        "required": true
-      }
-    ],
-    "returns": "ARRAY",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/stale-opportunities"
-  },
-  {
-    "name": "sfdc_summarize_account",
-    "displayName": "Summarize Account",
-    "description": "Generate an AI-powered summary of an account relationship",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "sfdc",
-    "tags": [
-      "sfdc"
-    ],
-    "parameters": [
-      {
-        "name": "account_id",
-        "type": "STRING",
-        "description": "Salesforce Account ID",
-        "required": true
-      },
-      {
-        "name": "model_id",
-        "type": "STRING",
-        "description": "Inference endpoint for summarization",
-        "required": true
-      }
-    ],
-    "returns": "DOCUMENT",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/summarize-account"
-  },
-  {
-    "name": "sfdc_win_rate_analysis",
-    "displayName": "Win Rate Analysis",
-    "description": "Analyze win/loss rates by owner, lead source, or industry",
-    "version": "1.0.0",
-    "author": "moltler",
-    "category": "sfdc",
-    "tags": [
-      "sfdc"
-    ],
-    "parameters": [
-      {
-        "name": "group_by",
-        "type": "STRING",
-        "description": "Group results by: owner, lead_source, industry, type",
-        "required": true
-      },
-      {
-        "name": "time_period",
-        "type": "STRING",
-        "description": "Time period: this_month, this_quarter, this_year, last_90_days",
-        "required": true
-      }
-    ],
-    "returns": "DOCUMENT",
-    "sourceUrl": "https://github.com/bahaaldine/moltler/tree/main/hub/skills/sfdc/win-rate-analysis"
   }
 ]
