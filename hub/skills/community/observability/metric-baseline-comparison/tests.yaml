@@ -1,0 +1,13 @@
+skill: metric_baseline_comparison
+category: observability
+tests:
+- name: default_execution
+  description: Compare CPU metrics to baseline
+  parameters:
+    index_pattern: metrics-test
+    metric_field: system.cpu.total.pct
+    time_range: 7d
+    bucket_interval: 1h
+  fixtures_required:
+  - metrics-test
+  expected_result_type: array

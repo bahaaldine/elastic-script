@@ -1,0 +1,12 @@
+skill: service_regression_inlinestats
+category: apm
+tests:
+- name: default_execution
+  description: Detect latency regressions for a service
+  parameters:
+    index_pattern: apm-test
+    service_name: api-gateway
+    threshold_pct: 20.0
+  fixtures_required:
+  - apm-test
+  expected_result_type: array

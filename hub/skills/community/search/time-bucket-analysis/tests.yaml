@@ -1,0 +1,11 @@
+skill: time_bucket_analysis
+category: search
+tests:
+- name: default_execution
+  description: Bucket logs by day
+  parameters:
+    index_pattern: logs-test
+    interval: 1d
+  fixtures_required:
+  - logs-test
+  expected_result_type: array

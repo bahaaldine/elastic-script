@@ -1,0 +1,19 @@
+name: time-bucket-analysis
+version: 1.0.0
+description: Aggregate documents into time buckets using BUCKET(), the idiomatic ESQL grouping function.
+author: search-team
+category: search
+tags:
+  - search
+  - histogram
+  - timeseries
+  - bucket
+  - advanced
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=8.11.0"
+main: skill.sql
+related_skills:
+  - name: date_histogram
+    relationship: simple_version
+    note: "Use for basic DATE_TRUNC-based histograms on older ES versions"

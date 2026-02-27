@@ -1,13 +1,14 @@
 name: compare-time-periods
-version: 1.0.0
-description: Compare metrics between two time periods
+version: 1.1.0
+description: Compare a numeric metric between a recent window and a previous baseline, returning averages and percentage change.
 author: elastic
 category: observability
 tags:
   - observability
   - comparison
   - analysis
+  - metrics
 license: Elastic-2.0
 requirements:
-  elasticsearch: ">=8.0.0"
+  elasticsearch: ">=8.11.0"
 main: skill.sql

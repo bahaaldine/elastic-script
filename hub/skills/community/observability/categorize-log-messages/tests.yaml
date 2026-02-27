@@ -1,0 +1,11 @@
+skill: categorize_log_messages
+category: observability
+tests:
+- name: default_execution
+  description: Categorize log messages into patterns
+  parameters:
+    index_pattern: logs-test
+    limit: 10
+  fixtures_required:
+  - logs-test
+  expected_result_type: array

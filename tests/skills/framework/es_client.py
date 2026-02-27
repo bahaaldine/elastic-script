@@ -1,29 +1,89 @@
 """
 Elasticsearch client for skill testing.
+
+Supports two authentication modes:
+  1. Username/password (default, for local dev clusters)
+  2. API key + Cloud ID (for Elastic Cloud, reads from .env)
+
+Set ELASTICSEARCH_API_KEY and ELASTICSEARCH_CLOUD_ID in .env for cloud auth.
 """
 
 import os
 import json
+import re
 import requests
 from typing import Any, Dict, List, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import base64
+
+
+def _load_dotenv(path: str = '.env') -> Dict[str, str]:
+    """Load .env file into a dict without requiring python-dotenv."""
+    env = {}
+    try:
+        with open(path) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                if '=' in line:
+                    key, value = line.split('=', 1)
+                    env[key.strip()] = value.strip()
+    except FileNotFoundError:
+        pass
+    return env
+
+
+def _cloud_id_to_url(cloud_id: str) -> str:
+    """Decode an Elastic Cloud ID to an Elasticsearch URL.
+
+    Cloud ID format: <name>:<base64(host$es_uuid.es$kibana_uuid.kb)>
+    """
+    _, encoded = cloud_id.split(':', 1)
+    decoded = base64.b64decode(encoded).decode()
+    parts = decoded.split('$')
+    host = parts[0]
+    es_uuid = parts[1] if len(parts) > 1 else ''
+    return f"https://{es_uuid}.{host}:443" if es_uuid else f"https://{host}:443"
 
 
 @dataclass
 class ESConfig:
-    """Elasticsearch connection configuration."""
+    """Elasticsearch connection configuration.
+
+    Supports two auth modes:
+      - username/password (local clusters)
+      - api_key (Elastic Cloud via ELASTICSEARCH_API_KEY / ELASTICSEARCH_CLOUD_ID)
+    """
     url: str = "http://localhost:9200"
     username: str = "elastic-admin"
     password: str = "elastic-password"
-    
+    api_key: Optional[str] = None
+    cloud_id: Optional[str] = None
+
+    @property
+    def is_cloud(self) -> bool:
+        return self.api_key is not None
+
     @property
     def auth_header(self) -> str:
+        if self.api_key:
+            return f"ApiKey {self.api_key}"
         credentials = f"{self.username}:{self.password}"
-        return base64.b64encode(credentials.encode()).decode()
-    
+        return f"Basic {base64.b64encode(credentials.encode()).decode()}"
+
     @classmethod
     def from_env(cls) -> 'ESConfig':
+        """Build config from environment variables, falling back to .env file."""
+        dotenv = _load_dotenv()
+
+        api_key = os.getenv('ELASTICSEARCH_API_KEY') or dotenv.get('ELASTICSEARCH_API_KEY')
+        cloud_id = os.getenv('ELASTICSEARCH_CLOUD_ID') or dotenv.get('ELASTICSEARCH_CLOUD_ID')
+
+        if api_key and cloud_id:
+            url = _cloud_id_to_url(cloud_id)
+            return cls(url=url, api_key=api_key, cloud_id=cloud_id)
+
         return cls(
             url=os.getenv('ES_URL', 'http://localhost:9200'),
             username=os.getenv('ES_USERNAME', 'elastic-admin'),
@@ -32,18 +92,30 @@ class ESConfig:
 
 
 class ElasticsearchTestClient:
-    """Client for interacting with Elasticsearch and running skills."""
-    
+    """Client for interacting with Elasticsearch and running skills.
+
+    Automatically detects auth mode from ESConfig:
+      - API key auth for cloud clusters
+      - Basic auth for local clusters
+    """
+
     def __init__(self, config: Optional[ESConfig] = None):
         self.config = config or ESConfig.from_env()
         self.session = requests.Session()
-        self.session.auth = (self.config.username, self.config.password)
+        if self.config.is_cloud:
+            self.session.headers['Authorization'] = f"ApiKey {self.config.api_key}"
+        else:
+            self.session.auth = (self.config.username, self.config.password)
         self.session.headers['Content-Type'] = 'application/json'
     
     def is_available(self) -> bool:
-        """Check if Elasticsearch is available."""
+        """Check if Elasticsearch is available.
+
+        Uses the root endpoint (/) instead of /_cluster/health because
+        /_cluster/health is not available on serverless clusters.
+        """
         try:
-            response = self.session.get(f"{self.config.url}/_cluster/health", timeout=5)
+            response = self.session.get(self.config.url, timeout=5)
             return response.status_code == 200
         except Exception:
             return False
@@ -179,3 +251,46 @@ class ElasticsearchTestClient:
         if response.status_code == 200:
             return response.json().get('count', 0)
         return 0
+
+    def run_esql(self, query: str) -> Dict[str, Any]:
+        """Execute an ES|QL query directly against the /_query endpoint.
+
+        Returns dict with:
+          - success: bool
+          - status_code: int
+          - columns: list of {name, type} dicts
+          - values: list of row arrays
+          - rows: list of dicts (column_name -> value) for convenience
+          - error: error message if failed
+        """
+        response = self.session.post(
+            f"{self.config.url}/_query",
+            json={"query": query},
+            timeout=30
+        )
+        result: Dict[str, Any] = {
+            'success': response.status_code == 200,
+            'status_code': response.status_code,
+            'columns': [],
+            'values': [],
+            'rows': [],
+            'error': None,
+        }
+        try:
+            body = response.json()
+        except Exception:
+            result['error'] = response.text
+            return result
+
+        if response.status_code != 200:
+            result['error'] = body.get('error', {}).get('reason', response.text)
+            return result
+
+        columns = body.get('columns', [])
+        values = body.get('values', [])
+        result['columns'] = columns
+        result['values'] = values
+
+        col_names = [c['name'] for c in columns]
+        result['rows'] = [dict(zip(col_names, row)) for row in values]
+        return result

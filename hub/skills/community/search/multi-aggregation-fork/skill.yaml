@@ -1,0 +1,15 @@
+name: multi-aggregation-fork
+version: 1.0.0
+description: Run multiple aggregations on the same data in one query using FORK. Returns results tagged by branch.
+author: search-team
+category: search
+tags:
+  - search
+  - aggregation
+  - fork
+  - analytics
+  - advanced
+license: Elastic-2.0
+requirements:
+  elasticsearch: ">=9.1.0"
+main: skill.sql

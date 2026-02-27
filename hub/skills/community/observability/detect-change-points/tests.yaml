@@ -1,0 +1,13 @@
+skill: detect_change_points
+category: observability
+tests:
+- name: default_execution
+  description: Detect change points in CPU metrics
+  parameters:
+    index_pattern: metrics-test
+    metric_field: system.cpu.total.pct
+    time_bucket: 1h
+    time_range: 7d
+  fixtures_required:
+  - metrics-test
+  expected_result_type: array

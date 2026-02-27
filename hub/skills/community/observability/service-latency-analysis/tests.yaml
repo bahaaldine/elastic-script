@@ -1,0 +1,11 @@
+skill: service_latency_analysis
+category: observability
+tests:
+- name: default_execution
+  description: Analyze latency across services
+  parameters:
+    index_pattern: apm-test
+    time_range: 7d
+  fixtures_required:
+  - apm-test
+  expected_result_type: array

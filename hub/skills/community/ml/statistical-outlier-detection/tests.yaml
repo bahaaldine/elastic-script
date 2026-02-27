@@ -1,0 +1,13 @@
+skill: statistical_outlier_detection
+category: ml
+tests:
+- name: default_execution
+  description: Find CPU outliers by host
+  parameters:
+    index_pattern: metrics-test
+    metric_field: system.cpu.total.pct
+    group_field: host.name
+    threshold: 2.0
+  fixtures_required:
+  - metrics-test
+  expected_result_type: array

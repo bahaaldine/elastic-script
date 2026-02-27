@@ -1,0 +1,11 @@
+skill: error_rate_detailed
+category: observability
+tests:
+- name: default_execution
+  description: Calculate error rates by service
+  parameters:
+    index_pattern: logs-test
+    time_range: 7d
+  fixtures_required:
+  - logs-test
+  expected_result_type: array
