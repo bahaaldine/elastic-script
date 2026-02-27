@@ -48,6 +48,16 @@ export default function Home() {
         </div>
       </header>
 
+      {/* I Know Kung Fu Banner */}
+      <Link href="/kung-fu" className="block bg-gradient-to-r from-green-900/40 via-green-800/30 to-green-900/40 border-b border-green-800/50 hover:from-green-800/50 hover:via-green-700/40 hover:to-green-800/50 transition">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-center gap-4 text-sm">
+          <span className="text-green-400 font-mono">"I know kung fu."</span>
+          <span className="text-gray-400">—</span>
+          <span className="text-white">320+ Elasticsearch skills in your AI agent in 10 seconds</span>
+          <span className="text-green-400 font-semibold">Try the demo →</span>
+        </div>
+      </Link>
+
       {/* Hero - Skills as Code */}
       <section className="py-16 px-4">
         <div className="container mx-auto text-center max-w-3xl">

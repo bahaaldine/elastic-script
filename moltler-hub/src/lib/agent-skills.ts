@@ -12,6 +12,13 @@ export interface AgentSkill {
 // Agent Skills available in .agents/skills/
 export const AGENT_SKILLS: AgentSkill[] = [
   {
+    name: 'kung-fu',
+    displayName: 'I Know Kung Fu',
+    description: '"I know kung fu." Instant Elasticsearch mastery - 320+ capabilities downloaded to your AI agent.',
+    path: '.agents/skills/kung-fu',
+    hasScripts: false,
+  },
+  {
     name: 'moltler-index',
     displayName: 'Moltler Index',
     description: 'Master index of all Moltler/elastic-script capabilities. Use this skill first to understand what skills are available.',
@@ -88,11 +95,11 @@ export const AGENT_SKILLS: AgentSkill[] = [
 
 // Categories for Agent Skills
 export const AGENT_SKILL_CATEGORIES = {
-  'discovery': {
-    name: 'Discovery',
-    description: 'Find the right skill for your task',
-    icon: '🔍',
-    skills: ['moltler-index'],
+  'getting-started': {
+    name: 'Getting Started',
+    description: 'Instant mastery - start here',
+    icon: '🥋',
+    skills: ['kung-fu', 'moltler-index'],
   },
   'data-operations': {
     name: 'Data Operations',
