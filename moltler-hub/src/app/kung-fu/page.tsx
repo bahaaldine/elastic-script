@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 export default function KungFuPage() {
   const [copied, setCopied] = useState(false);
-  const repoUrl = 'https://github.com/bahaaldine/moltler';
+  const repoUrl = 'https://github.com/bahaaldine/moltler.git';
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(repoUrl);

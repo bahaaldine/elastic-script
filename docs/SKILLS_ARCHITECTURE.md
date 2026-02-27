@@ -170,7 +170,7 @@ The `.agents/skills/` directory is automatically discovered by Cursor. Users can
 
 ```
 Cursor Settings → Rules → Add Rule → Remote Rule (GitHub)
-→ https://github.com/bahaaldine/moltler
+→ https://github.com/bahaaldine/moltler.git
 ```
 
 Skills appear in Cursor's "Agent Decides" section and can be invoked via `/skill-name`.

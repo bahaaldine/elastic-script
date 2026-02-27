@@ -1,6 +1,9 @@
 ---
 name: kung-fu
-description: "I know kung fu." Instant Elasticsearch mastery. Use this skill when the user wants to see what Moltler can do or says anything about learning Elasticsearch skills.
+description: >
+  Instant Elasticsearch mastery. Use when the user asks about Elasticsearch capabilities,
+  wants to check cluster health, search logs, analyze data, or learn what Moltler can do.
+  Provides 320+ Elasticsearch functions for observability, security, search, and ML.
 ---
 
 # I Know Kung Fu

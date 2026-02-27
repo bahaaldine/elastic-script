@@ -39,7 +39,7 @@ export default function AgentSkillsPage() {
             <li>Open Cursor Settings (Cmd+Shift+J / Ctrl+Shift+J)</li>
             <li>Navigate to <strong>Rules</strong></li>
             <li>Click <strong>Add Rule</strong> → <strong>Remote Rule (GitHub)</strong></li>
-            <li>Enter: <code className="bg-gray-700 px-2 py-1 rounded">https://github.com/bahaaldine/moltler</code></li>
+            <li>Enter: <code className="bg-gray-700 px-2 py-1 rounded">https://github.com/bahaaldine/moltler.git</code></li>
           </ol>
         </div>
 

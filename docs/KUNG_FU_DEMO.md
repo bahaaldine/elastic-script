@@ -14,7 +14,7 @@
 
 1. Press `Cmd+Shift+J` (Mac) or `Ctrl+Shift+J` (Windows/Linux)
 2. Click **Rules** → **Add Rule** → **Remote Rule (GitHub)**
-3. Paste: `https://github.com/bahaaldine/moltler`
+3. Paste: `https://github.com/bahaaldine/moltler.git`
 4. Done.
 
 That's it. No npm install. No configuration. No API keys needed for the demo.

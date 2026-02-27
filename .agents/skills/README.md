@@ -13,7 +13,7 @@ To install from GitHub into any project:
 1. Open Cursor Settings (`Cmd+Shift+J` / `Ctrl+Shift+J`)
 2. Navigate to **Rules**
 3. Click **Add Rule** → **Remote Rule (GitHub)**
-4. Enter: `https://github.com/bahaaldine/moltler`
+4. Enter: `https://github.com/bahaaldine/moltler.git`
 
 ### In Other AI Agents
 
