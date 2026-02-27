@@ -126,10 +126,19 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
-                <div className="pt-2 border-t border-gray-700">
-                  <p className="text-sm text-gray-400">
-                    3. Try it: <code className="text-purple-400">RUN SKILL what_can_i_do()</code>
-                  </p>
+                <div>
+                  <label className="text-sm text-gray-400 block mb-2">3. Try it</label>
+                  <div className="bg-gray-900 rounded p-4 relative">
+                    <pre className="text-green-400 text-sm overflow-x-auto pr-16">{`curl -u elastic:changeme ${esUrl}/_escript \\
+  -H "Content-Type: application/json" \\
+  -d '{"query": "RUN SKILL what_can_i_do()"}'`}</pre>
+                    <button
+                      onClick={() => copyToClipboard(`curl -u elastic:changeme ${esUrl}/_escript -H "Content-Type: application/json" -d '{"query": "RUN SKILL what_can_i_do()"}'`)}
+                      className="absolute top-3 right-3 px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+                    >
+                      {copied ? '✓ Copied' : 'Copy'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
