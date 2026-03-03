@@ -32,15 +32,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * OpenAI integration functions for elastic-script.
+ * LLM integration functions for elastic-script.
  * Provides LLM capabilities including text completion, chat, and embeddings.
  * 
- * These functions require an OpenAI API key to be set via the OPENAI_API_KEY
- * environment variable or passed as a parameter.
+ * <p>Supports both OpenAI and Azure OpenAI via environment variables:</p>
+ * <ul>
+ *   <li><b>OpenAI:</b> Set OPENAI_API_KEY</li>
+ *   <li><b>Azure OpenAI:</b> Set AZURE_OPENAI_RESOURCE, AZURE_OPENAI_DEPLOYMENT, AZURE_OPENAI_API_KEY</li>
+ *   <li><b>For embeddings on Azure:</b> Optionally set AZURE_OPENAI_EMBEDDING_DEPLOYMENT</li>
+ * </ul>
  */
 @FunctionCollectionSpec(
     category = FunctionCategory.NLP,
-    description = "OpenAI integration functions for LLM completions, chat, and embeddings."
+    description = "LLM functions supporting OpenAI and Azure OpenAI for completions, chat, and embeddings."
 )
 public class OpenAIFunctions {
 
@@ -48,6 +52,153 @@ public class OpenAIFunctions {
     private static final String OPENAI_API_BASE = "https://api.openai.com/v1";
     private static final String DEFAULT_COMPLETION_MODEL = "gpt-4o-mini";
     private static final String DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small";
+    private static final String DEFAULT_AZURE_API_VERSION = "2024-02-15-preview";
+
+    /**
+     * LLM provider configuration - supports OpenAI and Azure OpenAI
+     */
+    private static class LlmConfig {
+        final String provider;      // "openai" or "azure"
+        final String apiKey;
+        final String endpoint;
+        final String model;
+        final boolean isAzure;
+
+        LlmConfig(String provider, String apiKey, String endpoint, String model) {
+            this.provider = provider;
+            this.apiKey = apiKey;
+            this.endpoint = endpoint;
+            this.model = model;
+            this.isAzure = "azure".equalsIgnoreCase(provider);
+        }
+
+        Map<String, String> createHeaders() {
+            Map<String, String> headers = new HashMap<>();
+            if (isAzure) {
+                headers.put("api-key", apiKey);
+            } else {
+                headers.put("Authorization", "Bearer " + apiKey);
+            }
+            return headers;
+        }
+
+        String getChatEndpoint() {
+            if (isAzure) {
+                return endpoint + "/chat/completions";
+            }
+            return OPENAI_API_BASE + "/chat/completions";
+        }
+
+        String getEmbeddingsEndpoint() {
+            if (isAzure) {
+                return endpoint + "/embeddings";
+            }
+            return OPENAI_API_BASE + "/embeddings";
+        }
+    }
+
+    /**
+     * Gets the LLM configuration from environment variables or arguments.
+     * Supports both OpenAI and Azure OpenAI.
+     */
+    private static LlmConfig getLlmConfig(List<Object> args, int apiKeyArgIndex, String defaultModel) {
+        // Check for explicit API key argument
+        String apiKey = null;
+        if (args.size() > apiKeyArgIndex && args.get(apiKeyArgIndex) != null) {
+            String key = args.get(apiKeyArgIndex).toString();
+            if (!key.isEmpty()) {
+                apiKey = key;
+            }
+        }
+
+        // Check for Azure OpenAI configuration
+        String azureResource = System.getenv("AZURE_OPENAI_RESOURCE");
+        String azureDeployment = System.getenv("AZURE_OPENAI_DEPLOYMENT");
+        String azureKey = System.getenv("AZURE_OPENAI_API_KEY");
+        String azureVersion = System.getenv("AZURE_OPENAI_API_VERSION");
+        String llmProvider = System.getenv("LLM_PROVIDER");
+
+        // If Azure is configured and no explicit OpenAI key provided
+        if ((apiKey == null || "azure".equalsIgnoreCase(llmProvider)) 
+            && azureResource != null && azureDeployment != null && azureKey != null) {
+            String version = azureVersion != null ? azureVersion : DEFAULT_AZURE_API_VERSION;
+            String endpoint = String.format(
+                "https://%s.openai.azure.com/openai/deployments/%s?api-version=%s",
+                azureResource, azureDeployment, version
+            );
+            LOGGER.debug("Using Azure OpenAI: resource={}, deployment={}", azureResource, azureDeployment);
+            return new LlmConfig("azure", azureKey, endpoint, azureDeployment);
+        }
+
+        // Fall back to OpenAI
+        if (apiKey == null) {
+            apiKey = System.getenv("OPENAI_API_KEY");
+        }
+        
+        if (apiKey == null || apiKey.isEmpty()) {
+            throw new RuntimeException(
+                "LLM provider not configured. Set either:\n" +
+                "  - OPENAI_API_KEY for OpenAI, or\n" +
+                "  - AZURE_OPENAI_RESOURCE, AZURE_OPENAI_DEPLOYMENT, AZURE_OPENAI_API_KEY for Azure OpenAI"
+            );
+        }
+
+        return new LlmConfig("openai", apiKey, OPENAI_API_BASE, defaultModel);
+    }
+
+    /**
+     * Gets the LLM configuration specifically for embeddings.
+     * Azure OpenAI may use a different deployment for embeddings.
+     */
+    private static LlmConfig getEmbeddingConfig(List<Object> args, int apiKeyArgIndex) {
+        // Check for explicit API key argument
+        String apiKey = null;
+        if (args.size() > apiKeyArgIndex && args.get(apiKeyArgIndex) != null) {
+            String key = args.get(apiKeyArgIndex).toString();
+            if (!key.isEmpty()) {
+                apiKey = key;
+            }
+        }
+
+        // Check for Azure OpenAI configuration
+        String azureResource = System.getenv("AZURE_OPENAI_RESOURCE");
+        String azureKey = System.getenv("AZURE_OPENAI_API_KEY");
+        String azureVersion = System.getenv("AZURE_OPENAI_API_VERSION");
+        String llmProvider = System.getenv("LLM_PROVIDER");
+        
+        // For embeddings, prefer the embedding-specific deployment if configured
+        String azureDeployment = System.getenv("AZURE_OPENAI_EMBEDDING_DEPLOYMENT");
+        if (azureDeployment == null) {
+            azureDeployment = System.getenv("AZURE_OPENAI_DEPLOYMENT");
+        }
+
+        // If Azure is configured and no explicit OpenAI key provided
+        if ((apiKey == null || "azure".equalsIgnoreCase(llmProvider)) 
+            && azureResource != null && azureDeployment != null && azureKey != null) {
+            String version = azureVersion != null ? azureVersion : DEFAULT_AZURE_API_VERSION;
+            String endpoint = String.format(
+                "https://%s.openai.azure.com/openai/deployments/%s?api-version=%s",
+                azureResource, azureDeployment, version
+            );
+            LOGGER.debug("Using Azure OpenAI for embeddings: resource={}, deployment={}", azureResource, azureDeployment);
+            return new LlmConfig("azure", azureKey, endpoint, azureDeployment);
+        }
+
+        // Fall back to OpenAI
+        if (apiKey == null) {
+            apiKey = System.getenv("OPENAI_API_KEY");
+        }
+        
+        if (apiKey == null || apiKey.isEmpty()) {
+            throw new RuntimeException(
+                "LLM provider not configured for embeddings. Set either:\n" +
+                "  - OPENAI_API_KEY for OpenAI, or\n" +
+                "  - AZURE_OPENAI_RESOURCE, AZURE_OPENAI_EMBEDDING_DEPLOYMENT (or AZURE_OPENAI_DEPLOYMENT), AZURE_OPENAI_API_KEY for Azure OpenAI"
+            );
+        }
+
+        return new LlmConfig("openai", apiKey, OPENAI_API_BASE, DEFAULT_EMBEDDING_MODEL);
+    }
 
     public static void registerAll(ExecutionContext context) {
         registerLlmComplete(context);
@@ -60,25 +211,11 @@ public class OpenAIFunctions {
 
     /**
      * Gets the OpenAI API key from environment or throws an error.
+     * @deprecated Use getLlmConfig() instead for Azure OpenAI support
      */
     private static String getApiKey(List<Object> args, int apiKeyArgIndex) {
-        // Check if API key was passed as argument
-        if (args.size() > apiKeyArgIndex && args.get(apiKeyArgIndex) != null) {
-            String key = args.get(apiKeyArgIndex).toString();
-            if (!key.isEmpty()) {
-                return key;
-            }
-        }
-        
-        // Fall back to environment variable
-        String envKey = System.getenv("OPENAI_API_KEY");
-        if (envKey != null && !envKey.isEmpty()) {
-            return envKey;
-        }
-        
-        throw new RuntimeException(
-            "OpenAI API key not found. Set OPENAI_API_KEY environment variable or pass api_key parameter."
-        );
+        LlmConfig config = getLlmConfig(args, apiKeyArgIndex, DEFAULT_COMPLETION_MODEL);
+        return config.apiKey;
     }
 
     private static Map<String, String> createHeaders(String apiKey) {
@@ -115,13 +252,16 @@ public class OpenAIFunctions {
                     }
 
                     String prompt = args.get(0).toString();
-                    String model = args.size() > 1 && args.get(1) != null ? args.get(1).toString() : DEFAULT_COMPLETION_MODEL;
-                    String apiKey = getApiKey(args, 2);
+                    String modelArg = args.size() > 1 && args.get(1) != null ? args.get(1).toString() : null;
+                    LlmConfig config = getLlmConfig(args, 2, DEFAULT_COMPLETION_MODEL);
+                    String model = modelArg != null ? modelArg : config.model;
 
                     // Build request body
                     XContentBuilder builder = XContentFactory.jsonBuilder();
                     builder.startObject();
-                    builder.field("model", model);
+                    if (!config.isAzure) {
+                        builder.field("model", model);
+                    }
                     builder.startArray("messages");
                     builder.startObject();
                     builder.field("role", "user");
@@ -131,9 +271,9 @@ public class OpenAIFunctions {
                     builder.endObject();
 
                     String requestBody = Strings.toString(builder);
-                    String url = OPENAI_API_BASE + "/chat/completions";
+                    String url = config.getChatEndpoint();
 
-                    HttpClientUtil.postJson(url, createHeaders(apiKey), requestBody, ActionListener.wrap(
+                    HttpClientUtil.postJson(url, config.createHeaders(), requestBody, ActionListener.wrap(
                         response -> {
                             try {
                                 String content = extractChatContent(response);
@@ -180,13 +320,16 @@ public class OpenAIFunctions {
 
                     @SuppressWarnings("unchecked")
                     List<Map<String, Object>> messages = (List<Map<String, Object>>) args.get(0);
-                    String model = args.size() > 1 && args.get(1) != null ? args.get(1).toString() : DEFAULT_COMPLETION_MODEL;
-                    String apiKey = getApiKey(args, 2);
+                    String modelArg = args.size() > 1 && args.get(1) != null ? args.get(1).toString() : null;
+                    LlmConfig config = getLlmConfig(args, 2, DEFAULT_COMPLETION_MODEL);
+                    String model = modelArg != null ? modelArg : config.model;
 
                     // Build request body
                     XContentBuilder builder = XContentFactory.jsonBuilder();
                     builder.startObject();
-                    builder.field("model", model);
+                    if (!config.isAzure) {
+                        builder.field("model", model);
+                    }
                     builder.startArray("messages");
                     for (Map<String, Object> message : messages) {
                         builder.startObject();
@@ -198,9 +341,9 @@ public class OpenAIFunctions {
                     builder.endObject();
 
                     String requestBody = Strings.toString(builder);
-                    String url = OPENAI_API_BASE + "/chat/completions";
+                    String url = config.getChatEndpoint();
 
-                    HttpClientUtil.postJson(url, createHeaders(apiKey), requestBody, ActionListener.wrap(
+                    HttpClientUtil.postJson(url, config.createHeaders(), requestBody, ActionListener.wrap(
                         response -> {
                             try {
                                 String content = extractChatContent(response);
@@ -247,20 +390,25 @@ public class OpenAIFunctions {
                     }
 
                     String text = args.get(0).toString();
-                    String model = args.size() > 1 && args.get(1) != null ? args.get(1).toString() : DEFAULT_EMBEDDING_MODEL;
-                    String apiKey = getApiKey(args, 2);
+                    String modelArg = args.size() > 1 && args.get(1) != null ? args.get(1).toString() : null;
+                    
+                    // For embeddings, check for a separate embedding deployment
+                    LlmConfig config = getEmbeddingConfig(args, 2);
+                    String model = modelArg != null ? modelArg : config.model;
 
                     // Build request body
                     XContentBuilder builder = XContentFactory.jsonBuilder();
                     builder.startObject();
-                    builder.field("model", model);
+                    if (!config.isAzure) {
+                        builder.field("model", model);
+                    }
                     builder.field("input", text);
                     builder.endObject();
 
                     String requestBody = Strings.toString(builder);
-                    String url = OPENAI_API_BASE + "/embeddings";
+                    String url = config.getEmbeddingsEndpoint();
 
-                    HttpClientUtil.postJson(url, createHeaders(apiKey), requestBody, ActionListener.wrap(
+                    HttpClientUtil.postJson(url, config.createHeaders(), requestBody, ActionListener.wrap(
                         response -> {
                             try {
                                 List<Double> embedding = extractEmbedding(response);

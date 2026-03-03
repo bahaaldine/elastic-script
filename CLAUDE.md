@@ -303,9 +303,10 @@
 - `ES_CREATE_API_KEY`, `ES_GET_API_KEY`, `ES_INVALIDATE_API_KEY`
 - `ES_AUTHENTICATE`, `ES_HAS_PRIVILEGES`, `ES_GET_PRIVILEGES`
 
-#### OpenAI Functions (6)
+#### OpenAI / Azure OpenAI Functions (6)
 - `LLM_COMPLETE`, `LLM_CHAT`, `LLM_EMBED`
 - `LLM_SUMMARIZE`, `LLM_CLASSIFY`, `LLM_EXTRACT`
+- **Supports both OpenAI and Azure OpenAI** - configure via environment variables
 
 #### Elasticsearch Inference API (8)
 - `INFERENCE_CREATE_ENDPOINT`, `INFERENCE_DELETE_ENDPOINT`
@@ -463,6 +464,25 @@ Traffic Filters:
 - Default credentials: `elastic-admin` / `elastic-password`
 - Notebooks at `http://localhost:8888`
 - Elasticsearch at `http://localhost:9200`
+
+### LLM Provider Configuration
+The LLM functions (`LLM_COMPLETE`, `LLM_CHAT`, etc.) support both OpenAI and Azure OpenAI.
+
+**For OpenAI:**
+```bash
+export OPENAI_API_KEY=sk-...
+```
+
+**For Azure OpenAI:**
+```bash
+export AZURE_OPENAI_RESOURCE=my-resource                # Your Azure resource name
+export AZURE_OPENAI_DEPLOYMENT=gpt-4o                   # Chat deployment (for LLM_COMPLETE, LLM_CHAT)
+export AZURE_OPENAI_API_KEY=...                         # Your Azure API key
+export AZURE_OPENAI_API_VERSION=2024-02-15-preview      # Optional, this is the default
+export AZURE_OPENAI_EMBEDDING_DEPLOYMENT=text-embed-3   # Optional, for LLM_EMBED
+```
+
+The quick-start script prompts for this configuration interactively.
 
 ---
 

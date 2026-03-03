@@ -77,27 +77,87 @@ print_success() {
     echo -e "${GREEN}✔${NC} $1"
 }
 
-# Prompt for OpenAI API key (optional)
+# Prompt for LLM provider configuration (optional)
 prompt_openai_key() {
-    print_header "OpenAI API Key (Optional)"
+    print_header "LLM Provider Configuration (Optional)"
     
     # Check if already set
-    if [ -n "$OPENAI_API_KEY" ]; then
-        print_success "OPENAI_API_KEY already set in environment"
+    if [ -n "$OPENAI_API_KEY" ] || [ -n "$AZURE_OPENAI_API_KEY" ]; then
+        if [ -n "$AZURE_OPENAI_API_KEY" ]; then
+            print_success "Azure OpenAI already configured"
+        else
+            print_success "OpenAI already configured"
+        fi
         return 0
     fi
     
-    echo "The AI features (LLM_COMPLETE, etc.) require an OpenAI API key."
-    echo "You can skip this if you don't need AI features."
+    echo "The AI features (LLM_COMPLETE, LLM_CHAT, etc.) require an LLM provider."
     echo ""
-    read -p "Enter OpenAI API key (or press Enter to skip): " -r OPENAI_KEY
+    echo "Choose your LLM provider:"
+    echo "  1) OpenAI (api.openai.com)"
+    echo "  2) Azure OpenAI"
+    echo "  3) Skip (configure later)"
+    echo ""
+    read -p "Enter choice [1-3]: " -r LLM_CHOICE
     
-    if [ -n "$OPENAI_KEY" ]; then
-        export OPENAI_API_KEY="$OPENAI_KEY"
-        print_success "OpenAI API key configured"
-    else
-        print_warning "Skipped. AI features won't work without OPENAI_API_KEY."
-    fi
+    case "$LLM_CHOICE" in
+        1)
+            echo ""
+            read -p "Enter OpenAI API key: " -r OPENAI_KEY
+            if [ -n "$OPENAI_KEY" ]; then
+                export OPENAI_API_KEY="$OPENAI_KEY"
+                export LLM_PROVIDER="openai"
+                print_success "OpenAI configured"
+            else
+                print_warning "No API key provided. AI features won't work."
+            fi
+            ;;
+        2)
+            echo ""
+            echo "Azure OpenAI requires the following:"
+            echo "  - Resource name (e.g., my-openai-resource)"
+            echo "  - Chat deployment name (e.g., gpt-4o)"
+            echo "  - API key"
+            echo "  - Optional: Embedding deployment name (for LLM_EMBED)"
+            echo ""
+            read -p "Enter Azure OpenAI resource name: " -r AZURE_RESOURCE
+            read -p "Enter chat deployment name (for LLM_COMPLETE, LLM_CHAT): " -r AZURE_DEPLOYMENT
+            read -p "Enter Azure OpenAI API key: " -r AZURE_KEY
+            read -p "Enter embedding deployment name (optional, press Enter to skip): " -r AZURE_EMBEDDING_DEPLOYMENT
+            
+            if [ -n "$AZURE_RESOURCE" ] && [ -n "$AZURE_DEPLOYMENT" ] && [ -n "$AZURE_KEY" ]; then
+                export AZURE_OPENAI_RESOURCE="$AZURE_RESOURCE"
+                export AZURE_OPENAI_DEPLOYMENT="$AZURE_DEPLOYMENT"
+                export AZURE_OPENAI_API_KEY="$AZURE_KEY"
+                export AZURE_OPENAI_API_VERSION="${AZURE_OPENAI_API_VERSION:-2024-02-15-preview}"
+                export LLM_PROVIDER="azure"
+                if [ -n "$AZURE_EMBEDDING_DEPLOYMENT" ]; then
+                    export AZURE_OPENAI_EMBEDDING_DEPLOYMENT="$AZURE_EMBEDDING_DEPLOYMENT"
+                fi
+                print_success "Azure OpenAI configured"
+                echo "  Resource: $AZURE_RESOURCE"
+                echo "  Chat deployment: $AZURE_DEPLOYMENT"
+                if [ -n "$AZURE_EMBEDDING_DEPLOYMENT" ]; then
+                    echo "  Embedding deployment: $AZURE_EMBEDDING_DEPLOYMENT"
+                fi
+            else
+                print_warning "Incomplete Azure configuration. AI features won't work."
+            fi
+            ;;
+        3|"")
+            print_warning "Skipped. AI features won't work without LLM configuration."
+            print_step "Set environment variables later:"
+            echo "  For OpenAI:       export OPENAI_API_KEY=sk-..."
+            echo ""
+            echo "  For Azure OpenAI: export AZURE_OPENAI_RESOURCE=my-resource"
+            echo "                    export AZURE_OPENAI_DEPLOYMENT=gpt-4o"
+            echo "                    export AZURE_OPENAI_API_KEY=..."
+            echo "                    export AZURE_OPENAI_EMBEDDING_DEPLOYMENT=text-embedding-3  # optional"
+            ;;
+        *)
+            print_warning "Invalid choice. Skipping LLM configuration."
+            ;;
+    esac
     echo ""
 }
 
@@ -197,26 +257,40 @@ apply_elasticsearch_patches() {
         print_success "ML disable patch applied"
     fi
     
-    # Check if OpenAI key passthrough is already applied
+    # Check if LLM key passthrough is already applied
     if ! grep -q "OPENAI_API_KEY" "$RUN_GRADLE" 2>/dev/null; then
-        print_step "Applying OpenAI key passthrough patch..."
+        print_step "Applying LLM provider passthrough patch..."
         
-        # Insert OpenAI key passthrough after numberOfNodes line
+        # Insert LLM key passthrough after numberOfNodes line
         if [[ "$OSTYPE" == "darwin"* ]]; then
             # macOS sed
             sed -i '' "/numberOfNodes = 1/a\\
       \\
-      // Pass OpenAI API key from environment to the cluster\\
+      // Pass LLM provider keys from environment to the cluster\\
+      // OpenAI\\
       String openaiKey = System.getenv(\"OPENAI_API_KEY\")\\
       if (openaiKey != null \&\& !openaiKey.isEmpty()) {\\
         environment 'OPENAI_API_KEY', openaiKey\\
-      }" "$RUN_GRADLE"
+      }\\
+      // Azure OpenAI\\
+      String azureResource = System.getenv(\"AZURE_OPENAI_RESOURCE\")\\
+      String azureDeployment = System.getenv(\"AZURE_OPENAI_DEPLOYMENT\")\\
+      String azureEmbeddingDeployment = System.getenv(\"AZURE_OPENAI_EMBEDDING_DEPLOYMENT\")\\
+      String azureKey = System.getenv(\"AZURE_OPENAI_API_KEY\")\\
+      String azureVersion = System.getenv(\"AZURE_OPENAI_API_VERSION\")\\
+      if (azureResource != null) { environment 'AZURE_OPENAI_RESOURCE', azureResource }\\
+      if (azureDeployment != null) { environment 'AZURE_OPENAI_DEPLOYMENT', azureDeployment }\\
+      if (azureEmbeddingDeployment != null) { environment 'AZURE_OPENAI_EMBEDDING_DEPLOYMENT', azureEmbeddingDeployment }\\
+      if (azureKey != null) { environment 'AZURE_OPENAI_API_KEY', azureKey }\\
+      if (azureVersion != null) { environment 'AZURE_OPENAI_API_VERSION', azureVersion }\\
+      String llmProvider = System.getenv(\"LLM_PROVIDER\")\\
+      if (llmProvider != null) { environment 'LLM_PROVIDER', llmProvider }" "$RUN_GRADLE"
         else
             # Linux sed
-            sed -i "/numberOfNodes = 1/a\\      \n      // Pass OpenAI API key from environment to the cluster\n      String openaiKey = System.getenv(\"OPENAI_API_KEY\")\n      if (openaiKey != null \&\& !openaiKey.isEmpty()) {\n        environment 'OPENAI_API_KEY', openaiKey\n      }" "$RUN_GRADLE"
+            sed -i "/numberOfNodes = 1/a\\      \n      // Pass LLM provider keys from environment to the cluster\n      // OpenAI\n      String openaiKey = System.getenv(\"OPENAI_API_KEY\")\n      if (openaiKey != null \&\& !openaiKey.isEmpty()) {\n        environment 'OPENAI_API_KEY', openaiKey\n      }\n      // Azure OpenAI\n      String azureResource = System.getenv(\"AZURE_OPENAI_RESOURCE\")\n      String azureDeployment = System.getenv(\"AZURE_OPENAI_DEPLOYMENT\")\n      String azureEmbeddingDeployment = System.getenv(\"AZURE_OPENAI_EMBEDDING_DEPLOYMENT\")\n      String azureKey = System.getenv(\"AZURE_OPENAI_API_KEY\")\n      String azureVersion = System.getenv(\"AZURE_OPENAI_API_VERSION\")\n      if (azureResource != null) { environment 'AZURE_OPENAI_RESOURCE', azureResource }\n      if (azureDeployment != null) { environment 'AZURE_OPENAI_DEPLOYMENT', azureDeployment }\n      if (azureEmbeddingDeployment != null) { environment 'AZURE_OPENAI_EMBEDDING_DEPLOYMENT', azureEmbeddingDeployment }\n      if (azureKey != null) { environment 'AZURE_OPENAI_API_KEY', azureKey }\n      if (azureVersion != null) { environment 'AZURE_OPENAI_API_VERSION', azureVersion }\n      String llmProvider = System.getenv(\"LLM_PROVIDER\")\n      if (llmProvider != null) { environment 'LLM_PROVIDER', llmProvider }" "$RUN_GRADLE"
         fi
         
-        print_success "OpenAI key passthrough patch applied"
+        print_success "LLM provider passthrough patch applied"
     fi
 }
 

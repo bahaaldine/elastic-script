@@ -1,6 +1,34 @@
 # AI & LLM Functions
 
-Integration with OpenAI and Elasticsearch Inference APIs for AI-powered automation.
+Integration with OpenAI, Azure OpenAI, and Elasticsearch Inference APIs for AI-powered automation.
+
+## Configuration
+
+The LLM functions support both **OpenAI** and **Azure OpenAI**. Configure via environment variables before starting Elasticsearch.
+
+### OpenAI Configuration
+
+```bash
+export OPENAI_API_KEY=sk-...
+```
+
+### Azure OpenAI Configuration
+
+```bash
+export AZURE_OPENAI_RESOURCE=my-resource                # Your Azure resource name
+export AZURE_OPENAI_DEPLOYMENT=gpt-4o                   # Chat deployment name
+export AZURE_OPENAI_API_KEY=...                         # Your Azure API key
+export AZURE_OPENAI_API_VERSION=2024-02-15-preview      # Optional (default)
+export AZURE_OPENAI_EMBEDDING_DEPLOYMENT=text-embed-3   # Optional, for LLM_EMBED
+```
+
+!!! tip "Quick Start"
+    The `quick-start.sh` script prompts for LLM provider configuration interactively:
+    ```bash
+    ./scripts/quick-start.sh
+    ```
+
+---
 
 ## OpenAI Functions
 
@@ -25,14 +53,15 @@ PRINT response;
 
 **Returns:** STRING - The model's response
 
-!!! note "API Key Required"
-    Set the `OPENAI_API_KEY` environment variable before starting Elasticsearch.
+!!! note "LLM Provider Required"
+    Configure either OpenAI or Azure OpenAI environment variables before starting Elasticsearch. 
+    See [Configuration](#configuration) above.
 
 ---
 
 ### LLM_COMPLETE with Model Selection
 
-Specify a particular OpenAI model:
+Specify a particular model:
 
 ```sql
 DECLARE response STRING = LLM_COMPLETE(prompt, 'gpt-4');
@@ -40,13 +69,18 @@ DECLARE response STRING = LLM_COMPLETE(prompt, 'gpt-4');
 
 **Syntax:** `LLM_COMPLETE(prompt, model)`
 
-**Available Models:**
+**Available Models (OpenAI):**
 
 | Model | Description |
 |-------|-------------|
+| `gpt-4o` | Latest multimodal model |
+| `gpt-4o-mini` | Fast and cost-effective (default) |
 | `gpt-4` | Most capable model |
 | `gpt-4-turbo` | Faster GPT-4 variant |
-| `gpt-3.5-turbo` | Fast and cost-effective |
+
+!!! note "Azure OpenAI"
+    When using Azure OpenAI, the deployment name is configured via environment variables.
+    The model parameter is ignored since the model is determined by your deployment.
 
 ---
 
