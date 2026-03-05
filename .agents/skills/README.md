@@ -1,105 +1,64 @@
 # Moltler Agent Skills
 
-This directory contains Agent Skills following the [Cursor Agent Skills standard](https://cursor.com/docs/context/skills). These skills teach AI agents (Cursor, Claude, etc.) how to use Moltler/elastic-script capabilities.
+Agent Skills for AI assistants (Claude, Cursor, etc.) to interact with Elasticsearch via Moltler/elastic-script.
 
 ## Installation
 
-### In Cursor
+Add to your AI agent:
 
-Agent Skills are automatically discovered from the `.agents/skills/` directory when you open this project in Cursor.
+```
+https://github.com/bahaaldine/moltler.git
+```
 
-To install from GitHub into any project:
-
-1. Open Cursor Settings (`Cmd+Shift+J` / `Ctrl+Shift+J`)
-2. Navigate to **Rules**
-3. Click **Add Rule** → **Remote Rule (GitHub)**
-4. Enter: `https://github.com/bahaaldine/moltler.git`
-
-### In Other AI Agents
-
-Skills follow the open Agent Skills standard. Check your agent's documentation for installation instructions.
+Path: `.agents/skills/`
 
 ## Available Skills
 
-| Skill | Description | Invoke |
-|-------|-------------|--------|
-| `moltler-index` | Master index of all skills - use this first | `/moltler-index` |
-| `elasticsearch-ops` | Document CRUD, index management | `/elasticsearch-ops` |
-| `search-query` | Search, ES\|QL, aggregations | `/search-query` |
-| `cluster-management` | Cluster health, nodes, tasks | `/cluster-management` |
-| `observability` | Logs, metrics, traces, APM | `/observability` |
-| `security-ops` | Users, roles, API keys | `/security-ops` |
-| `ml-inference` | ML jobs, embeddings, LLMs | `/ml-inference` |
-| `data-management` | ILM, snapshots, pipelines | `/data-management` |
-| `alerting-response` | Alerts, notifications | `/alerting-response` |
-| `integrations` | AWS, K8s, CI/CD | `/integrations` |
+| Skill | Description |
+|-------|-------------|
+| `discovering-skills` | Master index - use first when uncertain |
+| `getting-started` | Quick start with examples |
+| `managing-documents` | Document CRUD, index management |
+| `searching-data` | Search, aggregations, ES\|QL |
+| `managing-clusters` | Cluster health, nodes, tasks |
+| `analyzing-observability` | Logs, metrics, traces, APM |
+| `managing-security` | Users, roles, API keys |
+| `using-ml-inference` | ML, embeddings, LLMs |
+| `managing-data-lifecycle` | ILM, snapshots, pipelines |
+| `alerting-and-responding` | Alerts, Slack, PagerDuty |
+| `integrating-services` | AWS, K8s, CI/CD, webhooks |
 
-## Usage
+## Quick Start
 
-### Automatic Invocation
+After installation, try:
 
-Skills are automatically invoked by the agent when relevant. For example, if you ask "check my cluster health", the agent will automatically use the `cluster-management` skill.
+- "Check my cluster health"
+- "Find errors in the last hour"
+- "What services are throwing exceptions?"
+- "Create an alert for high error rate"
 
-### Manual Invocation
+## Requirements
 
-Type `/skill-name` in chat to explicitly invoke a skill:
+Environment variables:
 
+```bash
+ES_URL=http://localhost:9200
+ES_USERNAME=elastic
+ES_PASSWORD=changeme
 ```
-/moltler-index
-/elasticsearch-ops
-/observability
-```
 
-## Structure
+## Skill Structure
 
-Each skill directory contains:
+Each skill follows the [Claude Skills format](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices):
 
 ```
 skill-name/
-├── SKILL.md          # Main skill definition (required)
-├── scripts/          # Optional executable scripts
-│   └── example.sql
-├── references/       # Optional additional documentation
-└── assets/           # Optional static resources
+└── SKILL.md      # Frontmatter (name, description) + instructions
 ```
-
-## Creating New Skills
-
-1. Create a new directory under `.agents/skills/`
-2. Create a `SKILL.md` file with YAML frontmatter:
-
-```markdown
----
-name: my-skill
-description: Short description for agent context matching
----
-
-# My Skill
-
-Instructions for the agent...
-
-## When to Use
-- Use when...
-
-## Available Functions
-- `ES_FUNCTION()` - Does something
-```
-
-3. Optionally add `scripts/`, `references/`, or `assets/` directories
 
 ## Relationship to Moltler Skills
 
-| Layer | Location | Format | Purpose |
-|-------|----------|--------|---------|
-| Agent Skills | `.agents/skills/` | SKILL.md | Instructions for AI agents |
-| Moltler Skills | `hub/skills/` | skill.yaml + .sql | Runnable procedures |
-| Tools | Java code | .java | Atomic functions |
-
-Agent Skills reference both Moltler Skills (pre-built procedures) and Tools (built-in functions).
-
-## Learn More
-
-- [Agent Skills Standard](https://agentskills.io/)
-- [Cursor Documentation](https://cursor.com/docs/context/skills)
-- [Moltler Documentation](https://bahaaldine.github.io/moltler/)
-- [Architecture Guide](../../docs/SKILLS_ARCHITECTURE.md)
+These Agent Skills guide AI assistants to use:
+- **elastic-script functions** (`ES_CLUSTER_HEALTH()`, `ES_SEARCH()`, etc.)
+- **Moltler Skills** (`RUN SKILL cluster_health_check()`, etc.)
+- **ES|QL queries** for data analysis
