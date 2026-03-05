@@ -21,6 +21,7 @@ Path: `.agents/skills/`
 | `managing-documents` | Document CRUD, index management |
 | `searching-data` | Search, aggregations, ES\|QL |
 | `querying-metrics-promql` | PromQL syntax for metrics (rate, histograms) |
+| `managing-streams` | Data streams, routing, field extraction, retention |
 | `managing-clusters` | Cluster health, nodes, tasks |
 | `analyzing-observability` | Logs, metrics, traces, APM |
 | `managing-security` | Users, roles, API keys |

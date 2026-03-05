@@ -15,6 +15,7 @@ Quick reference for selecting the right skill.
 | Index/Get/Update/Delete documents | `managing-documents` |
 | Search, query, aggregate data | `searching-data` |
 | PromQL metrics (rate, histograms, percentiles) | `querying-metrics-promql` |
+| Data streams, routing, field extraction | `managing-streams` |
 | Cluster health, nodes, tasks | `managing-clusters` |
 | Logs, metrics, traces, APM | `analyzing-observability` |
 | Users, roles, API keys, security events | `managing-security` |
